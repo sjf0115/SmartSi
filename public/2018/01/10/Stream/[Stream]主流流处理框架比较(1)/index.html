@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Stream," />
+
+
+<meta name="description" content="分布式流处理是对无边界数据集进行连续不断的处理、聚合和分析。它跟MapReduce一样是一种通用计算，但我们期望延迟在毫秒或者秒级别。这类系统一般采用有向无环图（DAG）。 DAG是任务链的图形化表示，我们用它来描述流处理作业的拓扑。如下图，数据从sources流经处理任务链到sinks。单机可以运行DAG，但本篇文章主要聚焦在多台机器上运行DAG的情况。  1. 关注点当选择不同的流处理系统时，">
+<meta name="keywords" content="Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stream 主流流处理框架比较(1)">
+<meta property="og:url" content="http://sjf0115.github.io/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/index.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="分布式流处理是对无边界数据集进行连续不断的处理、聚合和分析。它跟MapReduce一样是一种通用计算，但我们期望延迟在毫秒或者秒级别。这类系统一般采用有向无环图（DAG）。 DAG是任务链的图形化表示，我们用它来描述流处理作业的拓扑。如下图，数据从sources流经处理任务链到sinks。单机可以运行DAG，但本篇文章主要聚焦在多台机器上运行DAG的情况。  1. 关注点当选择不同的流处理系统时，">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-2.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-3.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-4.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-5.jpg?raw=true">
+<meta property="og:updated_time" content="2018-01-22T06:12:36.607Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Stream 主流流处理框架比较(1)">
+<meta name="twitter:description" content="分布式流处理是对无边界数据集进行连续不断的处理、聚合和分析。它跟MapReduce一样是一种通用计算，但我们期望延迟在毫秒或者秒级别。这类系统一般采用有向无环图（DAG）。 DAG是任务链的图形化表示，我们用它来描述流处理作业的拓扑。如下图，数据从sources流经处理任务链到sinks。单机可以运行DAG，但本篇文章主要聚焦在多台机器上运行DAG的情况。  1. 关注点当选择不同的流处理系统时，">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-1.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://sjf0115.github.io/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/"/>
+
+
+  <title>Stream 主流流处理框架比较(1) | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Stream 主流流处理框架比较(1)</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-10T15:34:01+08:00">2018-01-10</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Stream/" itemprop="url" rel="index"><span itemprop="name">Stream</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/" class="leancloud_visitors" data-flag-title="Stream 主流流处理框架比较(1)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>分布式流处理是对无边界数据集进行连续不断的处理、聚合和分析。它跟<code>MapReduce</code>一样是一种通用计算，但我们期望延迟在毫秒或者秒级别。这类系统一般采用有向无环图（<code>DAG</code>）。</p>
+<p><code>DAG</code>是任务链的图形化表示，我们用它来描述流处理作业的拓扑。如下图，数据从<code>sources</code>流经处理任务链到<code>sinks</code>。单机可以运行<code>DAG</code>，但本篇文章主要聚焦在多台机器上运行<code>DAG</code>的情况。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-1.jpg?raw=true" alt=""></p>
+<h3 id="1-关注点"><a href="#1-关注点" class="headerlink" title="1. 关注点"></a>1. 关注点</h3><p>当选择不同的流处理系统时，有以下几点需要注意的：</p>
+<ul>
+<li>运行时和编程模型：平台框架提供的编程模型决定了许多特色功能，编程模型要足够处理各种应用场景。这是一个相当重要的点，后续会继续。</li>
+<li>函数式原语：流处理平台应该能提供丰富的功能函数，比如，<code>map</code>或者<code>filter</code>这类易扩展、处理单条信息的函数；处理多条信息的函数<code>aggregation</code>；跨数据流、不易扩展的操作<code>join</code>。</li>
+<li>状态管理：大部分应用都需要保持状态处理的逻辑。流处理平台应该提供存储、访问和更新状态信息。</li>
+<li>消息传输保障：消息传输保障一般有三种：<code>at most once</code>，<code>at least once</code>和<code>exactly once</code>。<code>At most once</code>的消息传输机制是每条消息传输零次或者一次，即消息可能会丢失；<code>At least once</code>意味着每条消息会进行多次传输尝试，至少一次成功，即消息传输可能重复但不会丢失；<code>Exactly once</code>的消息传输机制是每条消息有且只有一次，即消息传输既不会丢失也不会重复。</li>
+<li>容错：流处理框架中的失败会发生在各个层次，比如，网络部分，磁盘崩溃或者节点宕机等。流处理框架应该具备从所有这种失败中恢复，并从上一个成功的状态（无脏数据）重新消费。</li>
+<li>性能：延迟时间（<code>Latency</code>），吞吐量（<code>Throughput</code>）和扩展性（<code>Scalability</code>）是流处理应用中极其重要的指标。</li>
+<li>平台的成熟度和接受度：成熟的流处理框架可以提供潜在的支持，可用的库，甚至开发问答帮助。选择正确的平台会在这方面提供很大的帮助。</li>
+</ul>
+<h3 id="2-运行时和编程模型"><a href="#2-运行时和编程模型" class="headerlink" title="2. 运行时和编程模型"></a>2. 运行时和编程模型</h3><p>运行时和编程模型是一个系统最重要的特质，因为它们定义了表达方式、可能的操作和将来的局限性。因此，运行时和编程模型决定了系统的能力和适用场景。</p>
+<p>实现流处理系统有两种完全不同的方式：</p>
+<p>(1) 一种是称作<code>原生流处理</code>，意味着所有输入的记录一旦到达即会一个接着一个进行处理。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-2.jpg?raw=true" alt=""></p>
+<p>(2) 第二种称为<code>微批处理</code>。把输入的数据按照某种预先定义的时间间隔(典型的是几秒钟)分成短小的批量数据，流经流处理系统。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-3.jpg?raw=true" alt=""></p>
+<p>两种方法都有其先天的优势和不足。首先以<code>原生流处理</code>开始，原生流处理的优势在于它的表达方式。数据一旦到达立即处理，这些系统的延迟性远比其它微批处理要好。除了延迟性外，原生流处理的状态操作也容易实现，后续将详细讲解。一般原生流处理系统为了达到低延迟和容错性会花费比较大的成本，因为它需要考虑每条记录。原生流处理的负载均衡也是个问题。比如，我们处理的数据按key分区，如果分区的某个key是资源密集型，那这个分区很容易成为作业的瓶颈。</p>
+<p>接下来看下<code>微批处理</code>。将流式计算分解成一系列短小的批处理作业，也不可避免的减弱系统的表达力。像状态管理或者<code>join</code>等操作的实现会变的困难，因为微批处理系统必须操作整个批量数据。并且，<code>batch interval</code>会连接两个不易连接的事情：基础属性和业务逻辑。相反地，微批处理系统的容错性和负载均衡实现起来非常简单，因为微批处理系统仅发送每批数据到一个<code>worker</code>节点上，如果一些数据出错那就使用其它副本。微批处理系统很容易建立在原生流处理系统之上。</p>
+<p>编程模型一般分为<code>组合式</code>和<code>声明式</code>。组合式编程提供基本的构建模块，它们必须紧密结合来创建拓扑。新的组件经常以接口的方式完成。相对应地，声明式API操作是定义的高阶函数。它允许我们用抽象类型和方法来写函数代码，并且系统创建拓扑和优化拓扑。声明式API经常也提供更多高级的操作（比如，窗口函数或者状态管理）。后面很快会给出样例代码。</p>
+<h3 id="3-主流流处理系统"><a href="#3-主流流处理系统" class="headerlink" title="3. 主流流处理系统"></a>3. 主流流处理系统</h3><p>有一系列各种实现的流处理框架，不能一一列举，这里仅选出主流的流处理解决方案，并且支持<code>Scala API</code>。因此，我们将详细介绍<code>Apache Storm</code>，<code>Trident</code>，<code>Spark Streaming</code>，<code>Samza</code>和<code>Apache Flink</code>。前面选择讲述的虽然都是流处理系统，但它们实现的方法包含了各种不同的挑战。这里暂时不讲商业的系统，比如<code>Google MillWheel</code>或者<code>Amazon Kinesis</code>，也不会涉及很少使用的<code>Intel GearPump</code>或者<code>Apache Apex</code>。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-4.jpg?raw=true" alt=""></p>
+<p><code>Apache Storm</code>最开始是由<code>Nathan Marz</code>和他的团队于2010年在数据分析公司<code>BackType</code>开发的，后来<code>BackType</code>公司被<code>Twitter</code>收购，接着<code>Twitter</code>开源<code>Storm</code>并在2014年成为<code>Apache</code>顶级项目。毋庸置疑，<code>Storm</code>成为大规模流数据处理的先锋，并逐渐成为工业标准。<code>Storm</code>是原生的流处理系统，提供<code>low-level</code>的API。<code>Storm</code>使用<code>Thrift</code>来定义<code>topology</code>和支持多语言协议，使得我们可以使用大部分编程语言开发，<code>Scala</code>自然包括在内。</p>
+<p><code>Trident</code>是对<code>Storm</code>的一个更高层次的抽象，<code>Trident</code>最大的特点以<code>batch</code>的形式进行流处理。<code>Trident</code>简化<code>topology</code>构建过程，增加了窗口操作、聚合操作或者状态管理等高级操作，这些在<code>Storm</code>中并不支持。相对应于<code>Storm</code>的<code>At most once</code>流传输机制，<code>Trident</code>提供了<code>Exactly once</code>传输机制。<code>Trident</code>支持<code>Java</code>，<code>Clojure</code>和<code>Scala</code>。</p>
+<p>当前<code>Spark</code>是非常受欢迎的批处理框架，包含<code>Spark SQL</code>，<code>MLlib</code>和<code>Spark Streaming</code>。<code>Spark</code>的运行时是建立在批处理之上，因此后续加入的<code>Spark Streaming</code>也依赖于批处理，实现了微批处理。接收器把输入数据流分成短小批处理，并以类似<code>Spark</code>作业的方式处理微批处理。<code>Spark Streaming</code>提供高级声明式API（支持<code>Scala</code>，<code>Java</code>和<code>Python</code>）。</p>
+<p><code>Samza</code>最开始是专为<code>LinkedIn</code>公司开发的流处理解决方案，并和<code>LinkedIn</code>的<code>Kafka</code>一起贡献给社区，现已成为基础设施的关键部分。<code>Samza</code>的构建严重依赖于基于<code>log</code>的<code>Kafka</code>，两者紧密耦合。<code>Samza</code>提供组合式API，当然也支持<code>Scala</code>。</p>
+<p>最后来介绍<code>Apache Flink</code>。<code>Flink</code>是个相当早的项目，开始于2008年，但只在最近才得到注意。<code>Flink</code>是原生的流处理系统，提供<code>high level</code>的API。<code>Flink</code>也提供<code>API</code>来像<code>Spark</code>一样进行批处理，但两者处理的基础是完全不同的。<code>Flink</code>把批处理当作流处理中的一种特殊情况。在<code>Flink</code>中，所有的数据都看作流，是一种很好的抽象，因为这更接近于现实世界。</p>
+<p>快速的介绍流处理系统之后，让我们以下面的表格来更好清晰的展示它们之间的不同：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E4%B8%BB%E6%B5%81%E6%B5%81%E5%A4%84%E7%90%86%E6%A1%86%E6%9E%B6%E6%AF%94%E8%BE%83-5.jpg?raw=true" alt=""></p>
+<h3 id="4-Word-Count"><a href="#4-Word-Count" class="headerlink" title="4. Word Count"></a>4. Word Count</h3><p><code>Wordcount</code>之于流处理框架学习，就好比<code>hello world</code>之于编程语言学习。它能很好的展示各流处理框架的不同之处，让我们从<code>Storm</code>开始看看如何实现<code>Wordcount</code>：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">TopologyBuilder builder = <span class="keyword">new</span> TopologyBuilder();</span><br><span class="line">builder.setSpout(<span class="string">"spout"</span>, <span class="keyword">new</span> RandomSentenceSpout(), <span class="number">5</span>);</span><br><span class="line">builder.setBolt(<span class="string">"split"</span>, <span class="keyword">new</span> Split(), <span class="number">8</span>).shuffleGrouping(<span class="string">"spout"</span>);</span><br><span class="line">builder.setBolt(<span class="string">"count"</span>, <span class="keyword">new</span> WordCount(), <span class="number">12</span>).fieldsGrouping(<span class="string">"split"</span>, <span class="keyword">new</span> Fields(<span class="string">"word"</span>));</span><br><span class="line"></span><br><span class="line"> ...</span><br><span class="line"></span><br><span class="line">Map&lt;String, Integer&gt; counts = <span class="keyword">new</span> HashMap&lt;String, Integer&gt;();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Tuple tuple, BasicOutputCollector collector)</span> </span>&#123;</span><br><span class="line">   String word = tuple.getString(<span class="number">0</span>);</span><br><span class="line">   Integer count = counts.containsKey(word) ? counts.get(word) + <span class="number">1</span> : <span class="number">1</span>;</span><br><span class="line">   counts.put(word, count);</span><br><span class="line">   collector.emit(<span class="keyword">new</span> Values(word, count));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>首先，定义<code>topology</code>。第二行代码定义一个<code>spout</code>，作为数据源。然后是一个处理组件<code>bolt</code>，分割文本为单词。接着，定义另一个<code>bolt</code>来计算单词数（第四行代码）。也可以看到魔数5，8和12，这些是并行度，定义集群每个组件执行的独立线程数。第八行到十五行是实际的<code>WordCount bolt</code>实现。因为<code>Storm</code>不支持内建的状态管理，所有这里定义了一个局部状态。</p>
+<p>按之前描述，<code>Trident</code>是对<code>Storm</code>的一个更高层次的抽象，<code>Trident</code>最大的特点以<code>batch</code>的形式进行流处理。除了其它优势，<code>Trident</code>提供了状态管理，这对<code>wordcount</code>实现非常有用:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> StormTopology <span class="title">buildTopology</span><span class="params">(LocalDRPC drpc)</span> </span>&#123;</span><br><span class="line"> FixedBatchSpout spout = ...</span><br><span class="line"></span><br><span class="line"> TridentTopology topology = <span class="keyword">new</span> TridentTopology();</span><br><span class="line"> TridentState wordCounts = topology.newStream(<span class="string">"spout1"</span>, spout)</span><br><span class="line"> .each(<span class="keyword">new</span> Fields(<span class="string">"sentence"</span>),<span class="keyword">new</span> Split(), <span class="keyword">new</span> Fields(<span class="string">"word"</span>))</span><br><span class="line"> .groupBy(<span class="keyword">new</span> Fields(<span class="string">"word"</span>))</span><br><span class="line"> .persistentAggregate(<span class="keyword">new</span> MemoryMapState.Factory(),</span><br><span class="line"> <span class="keyword">new</span> Count(), <span class="keyword">new</span> Fields(<span class="string">"count"</span>));</span><br><span class="line"></span><br><span class="line"> ...</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>如你所见，上面代码使用<code>higher level</code>操作，比如<code>each</code>（第七行代码）和<code>groupby</code>（第八行代码）。并且使用<code>Trident</code>管理状态来存储单词数（第九行代码）。</p>
+<p>下面是时候祭出提供声明式API的<code>Apache Spark</code>。记住，相对于前面的例子，这些代码相当简单，几乎没有冗余代码。下面是简单的流式计算单词数：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> conf = <span class="keyword">new</span> <span class="type">SparkConf</span>().setAppName(<span class="string">"wordcount"</span>)</span><br><span class="line"><span class="keyword">val</span> ssc = <span class="keyword">new</span> <span class="type">StreamingContext</span>(conf, <span class="type">Seconds</span>(<span class="number">1</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> text = ...</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> counts = text.flatMap(line =&gt; line.split(<span class="string">" "</span>))</span><br><span class="line"> .map(word =&gt; (word, <span class="number">1</span>))</span><br><span class="line"> .reduceByKey(_ + _)</span><br><span class="line"></span><br><span class="line">counts.print()</span><br><span class="line"></span><br><span class="line">ssc.start()</span><br><span class="line">ssc.awaitTermination()</span><br></pre></td></tr></table></figure></p>
+<p>每个<code>Spark Streaming</code>的作业都要有<code>StreamingContext</code>，它是流式函数的入口。<code>StreamingContext</code>加载第一行代码定义的配置<code>conf</code>，但更重要地，第二行代码定义<code>batch interval</code>（这里设置为1秒）。第六行到八行代码是整个单词数计算。这些是标准的函数式代码，<code>Spark</code>定义<code>topology</code>并且分布式执行。第十二行代码是每个<code>Spark Streaming</code>作业最后的部分：启动计算。记住，<code>Spark Streaming</code>作业一旦启动即不可修改。</p>
+<p>接下来看下<code>Apache Samza</code>，另外一个组合式API例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class WordCountTask extends StreamTask &#123;</span><br><span class="line"></span><br><span class="line">  override def process(envelope: IncomingMessageEnvelope, collector: MessageCollector,</span><br><span class="line">    coordinator: TaskCoordinator) &#123;</span><br><span class="line"></span><br><span class="line">    val text = envelope.getMessage.asInstanceOf[String]</span><br><span class="line"></span><br><span class="line">    val counts = text.split(&quot; &quot;).foldLeft(Map.empty[String, Int]) &#123;</span><br><span class="line">      (count, word) =&gt; count + (word -&gt; (count.getOrElse(word, 0) + 1))</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    collector.send(new OutgoingMessageEnvelope(new SystemStream(&quot;kafka&quot;, &quot;wordcount&quot;), counts))</span><br><span class="line"></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>Samza</code>的属性配置文件定义<code>topology</code>，为了简明这里并没把配置文件放上来。定义任务的输入和输出，并通过<code>Kafka topic</code>通信。在单词数计算整个<code>topology</code>是<code>WordCountTask</code>。在<code>Samza</code>中，实现特殊接口定义组件<code>StreamTask</code>，在第三行代码重写方法<code>process</code>。它的参数列表包含所有连接其它系统的需要。第八行到十行简单的<code>Scala</code>代码是计算本身。</p>
+<p><code>Flink</code>的API跟<code>Spark Streaming</code>是惊人的相似，但注意到代码里并未设置<code>batch interval</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment</span><br><span class="line"></span><br><span class="line"> val text = env.fromElements(...)</span><br><span class="line"> val counts = text.flatMap ( _.split(&quot; &quot;) )</span><br><span class="line">   .map ( (_, 1) )</span><br><span class="line">   .groupBy(0)</span><br><span class="line">   .sum(1)</span><br><span class="line"></span><br><span class="line"> counts.print()</span><br><span class="line"></span><br><span class="line"> env.execute(&quot;wordcount&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>上面的代码是相当的直白，仅仅只是几个函数式调用，Flink支持分布式计算。</p>
+<h3 id="5-结论"><a href="#5-结论" class="headerlink" title="5. 结论"></a>5. 结论</h3><p>上面给出了基本的理论和主流流处理框架介绍，下篇文章将会更深入的探讨其它关注点。希望你能对前面的文章感兴趣，如果有任何问题，请联系我讨论这些主题。</p>
+<p>原文:<a href="http://www.infoq.com/cn/articles/comparison-of-main-stream-processing-framework" target="_blank" rel="noopener">http://www.infoq.com/cn/articles/comparison-of-main-stream-processing-framework</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将是我继续写作的动力！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Stream/" rel="tag"># Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/04/Flink/[Flink]Flink1.4 事件时间与Watermarks/" rel="next" title="Flink1.4 事件时间与Watermarks">
+                <i class="fa fa-chevron-left"></i> Flink1.4 事件时间与Watermarks
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/10/Stream/[Stream]主流流处理框架比较(2)/" rel="prev" title="Stream 主流流处理框架比较(2)">
+                Stream 主流流处理框架比较(2) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-关注点"><span class="nav-number">1.</span> <span class="nav-text">1. 关注点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-运行时和编程模型"><span class="nav-number">2.</span> <span class="nav-text">2. 运行时和编程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-主流流处理系统"><span class="nav-number">3.</span> <span class="nav-text">3. 主流流处理系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Word-Count"><span class="nav-number">4.</span> <span class="nav-text">4. Word Count</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-结论"><span class="nav-number">5.</span> <span class="nav-text">5. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

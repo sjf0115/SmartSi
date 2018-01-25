@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Stream," />
+
+
+<meta name="description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
+<meta name="keywords" content="Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stream 对于流处理技术的谬见">
+<meta property="og:url" content="http://sjf0115.github.io/2018/01/11/Stream/[Stream]对于流处理技术的谬见/index.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-4.png?raw=true">
+<meta property="og:updated_time" content="2018-01-22T06:12:36.607Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Stream 对于流处理技术的谬见">
+<meta name="twitter:description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://sjf0115.github.io/2018/01/11/Stream/[Stream]对于流处理技术的谬见/"/>
+
+
+  <title>Stream 对于流处理技术的谬见 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/11/Stream/[Stream]对于流处理技术的谬见/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Stream 对于流处理技术的谬见</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T10:25:01+08:00">2018-01-11</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Stream/" itemprop="url" rel="index"><span itemprop="name">Stream</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/11/Stream/[Stream]对于流处理技术的谬见/" class="leancloud_visitors" data-flag-title="Stream 对于流处理技术的谬见">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。</p>
+<p>我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。</p>
+<p>在这篇文章里，我们选出了其中的六个作为例子。因为我们对<code>Apache Flink</code>比较熟悉，所以我们会基于<code>Flink</code>来讲解这些例子。</p>
+<ul>
+<li>谬见1：没有不使用批处理的流（Lambda架构）</li>
+<li>谬见2：延迟和吞吐量：只能选择一个</li>
+<li>谬见3：微批次意味着更好的吞吐量</li>
+<li>谬见4：<code>Exactly once</code>？完全不可能</li>
+<li>谬见5：流只能被应用在“实时”场景里</li>
+<li>谬见6：不管怎么样，流仍然很复杂</li>
+</ul>
+<h3 id="1-谬见1：没有不使用批处理的流（Lambda架构）"><a href="#1-谬见1：没有不使用批处理的流（Lambda架构）" class="headerlink" title="1. 谬见1：没有不使用批处理的流（Lambda架构）"></a>1. 谬见1：没有不使用批处理的流（Lambda架构）</h3><p><code>Lambda架构</code>在<code>Apache Storm</code>的早期阶段和其它流处理项目里是一个很有用的设计模式。这个架构包含了一个<code>快速流层</code>和一个<code>批次层</code>。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true" alt=""></p>
+<p>之所以使用两个单独的层，是因为Lambda架构里的流处理只能计算出大致的结果（也就是说，如果中间出现了错误，那么计算结果就不可信），而且只能处理相对少量的事件。</p>
+<p>就算<code>Storm</code>的早期版本存在这样的问题，但现今的很多开源流处理框架都具有容错能力，它们可以在出现故障的前提下生成准确的计算结果，而且具有高吞吐的计算能力。所以没有必要再为了分别得到“快”和“准确”的结果而维护多层架构。现今的流处理器（比如<code>Flink</code>）可以同时帮你得到两种结果。</p>
+<p>好在人们不再更多地讨论Lambda架构，说明流处理正在走向成熟。</p>
+<h3 id="2-谬见2：延迟和吞吐量：只能选择一个"><a href="#2-谬见2：延迟和吞吐量：只能选择一个" class="headerlink" title="2. 谬见2：延迟和吞吐量：只能选择一个"></a>2. 谬见2：延迟和吞吐量：只能选择一个</h3><p>早期的开源流处理框架要么是<code>高吞吐</code>的，要么是<code>低延迟</code>的，而<code>海量且快速</code>一直未能成为开源流处理框架的代名词。</p>
+<p>不过<code>Flink</code>（可能还有其它的框架）就同时提供了高吞吐和低延迟。这里有一个基准测试结果的<a href="https://data-artisans.com/blog/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink" target="_blank" rel="noopener">样例</a>。</p>
+<p>让我们从底层来剖析这个例子，特别是从硬件层，并结合具有网络瓶颈的流处理管道（很多使用<code>Flink</code>的管道都有这个瓶颈）。在硬件层不应该存在需要作出权衡的条件，所以网络才是影响吞吐量和延迟的主要因素。</p>
+<p>一个设计良好的软件系统应该会充分利用网络的上限而不会引入瓶颈问题。不过对<code>Flink</code>来说，总是有可优化的空间，可以让它更接近硬件所能提供的效能。使用一个包含10个节点的集群，<code>Flink</code>现在每秒可以处理千万级别的事件量，如果扩展到1000个节点，它的延迟可以降低到几十毫秒。在我们看来，这种水平已经比很多现有的方案高出很多。</p>
+<h3 id="谬见3：微批次意味着更好的吞吐量"><a href="#谬见3：微批次意味着更好的吞吐量" class="headerlink" title="谬见3：微批次意味着更好的吞吐量"></a>谬见3：微批次意味着更好的吞吐量</h3><p>我们可以从另一个角度来讨论性能，不过先让我们来澄清两个容易混淆的概念：</p>
+<ul>
+<li>微批次:微批次建立在传统批次之上，是处理数据的一个执行或编程模型。通过这项技术，进程或任务可以把一个流当作一系列小型的批次或数据块(参阅:<a href="https://hortonworks.com/blog/apache-storm-design-pattern-micro-batching/" target="_blank" rel="noopener">Apache Storm 微批次设计模式</a>)。</li>
+<li>缓冲:缓冲技术用于对网络、磁盘、缓存的访问进行优化。Wikipedia完美地把它定义为<code>物理内存里的一块用于临时储存移动数据的区域</code>。</li>
+</ul>
+<p>那么第3个缪见就是说，使用微批次的数据处理框架能够比每次处理一个事件的框架达到更高的吞吐量，因为微批次在网络上传输的效率更高。这个缪见忽略了一个事实，流框架不会依赖任何编程模型层面的批次，它们只会在物理层面使用缓冲。<code>Flink</code>确实也会对数据进行缓冲，也就是说它会通过网络发送一组处理过的记录，而不是每次发送一条记录。从性能方面说，不对数据进行缓冲是不可取的，因为通过网络逐个发送记录不会带来任何性能上的好处。所以我们得承认在物理层面根本不存在类似一次一条记录这样的情况。</p>
+<p>不过缓冲只能作为对性能的优化，所以缓冲：</p>
+<ul>
+<li>对用户是不可见的</li>
+<li>不应该对系统造成任何影响</li>
+<li>不应该出现人为的边界</li>
+<li>不应该限制系统功能</li>
+</ul>
+<p>所以对<code>Flink</code>的用户来说，他们开发的程序能够单独地处理每个记录，那是因为<code>Flink</code>为了提升性能隐藏了使用缓冲的细节。</p>
+<p>事实上，在任务调度里使用微批次会带来额外的开销，而如果这样做是为了降低延迟，那么这种开销会只增不减！流处理器知道该如何利用缓冲的优势而不会带来任务调度方面的开销。</p>
+<h3 id="4-谬见4：Exactly-once？完全不可能"><a href="#4-谬见4：Exactly-once？完全不可能" class="headerlink" title="4. 谬见4：Exactly once？完全不可能"></a>4. 谬见4：Exactly once？完全不可能</h3><p>这个缪见包含了几个方面的内容：</p>
+<ul>
+<li>从根本上说，<code>Exactly once</code>是不可能的</li>
+<li>从端到端的<code>Exactly once</code>是不可能的</li>
+<li><code>Exactly once</code>从来都不是真实世界的需求</li>
+<li><code>Exactly once</code>以牺牲性能为代价</li>
+</ul>
+<p>我们退一步讲，我们并不介意<code>Exactly once</code>这种观点的存在。<code>Exactly once</code>原先指的是<code>一次性传递</code>，而现在这个词被随意用在流处理里，让这个词变得令人困惑，失去了它原本的意义。不过相关的概念还是很重要的，我们不打算跳过去。</p>
+<p>为了尽量准确，我们把<code>一次性状态</code>和<code>一次性传递</code>视为两种不同的概念。因为之前人们对这两个词的使用方式导致了它们的混淆。<code>Apache Storm</code>使用<code>at least once</code>来描述传递(<code>Storm</code>不支持状态)，而<code>Apache Samza</code>使用<code>at least once</code>来描述应用状态。</p>
+<p>(1) <code>一次性状态</code>是指应用程序在经历了故障以后恍如没有发生过故障一样。例如，假设我们在维护一个计数器应用程序，在发生了一次故障之后，它既不能多计数也不能少计数。在这里使用<code>Exactly once</code>这个词是因为应用程序状态认为每个消息只被处理了一次。</p>
+<p>(2) <code>一次性传递</code>是指接收端(应用程序之外的系统)在故障发生后会收到处理过的事件，恍如没有发生过故障一样。</p>
+<p>流处理框架在任何情况下都不保证一次性传递，但可以做到一次性状态。<code>Flink</code>可以做到一次性状态，而且不会对性能造成显著影响。<code>Flink</code>还能在与<code>Flink</code>检查点相关的数据槽上做到一次性传递。</p>
+<p><code>Flink</code>检查点就是应用程序状态的快照，<code>Flink</code>会为应用程序定时异步地生成快照。这就是<code>Flink</code>在发生故障时仍然能保证一次性状态的原因：<code>Flink</code>定时记录（快照）输入流的读取位置和每个操作数的相关状态。如果发生故障，<code>Flink</code>会回滚到之前的状态，并重新开始计算。所以说，尽管记录被重新处理，但从结果来看，记录好像只被处理过一次。</p>
+<p>那么端到端的一次性处理呢？通过恰当的方式让检查点兼具事务协调机制是可能的，换句话说，就是让源操作和目标操作参与到检查点里来。在框架内部，结果是一次性的，从端到端来看，也是一次性的，或者说<code>接近一次性</code>。例如，在使用<code>Flink</code>和<code>Kafka</code>作为数据源并发生数据槽（HDFS）滚动时，从<code>Kafka</code>到<code>HDFS</code>就是端到端的一次性处理。类似地，在把<code>Kafka</code>作为<code>Flink</code>的源并且把<code>Cassandra</code>作为<code>Flink</code>的槽时，如果针对<code>Cassandra</code>的更新是幂等时，那么就可以实现端到端的一次性处理。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-2.png?raw=true" alt=""></p>
+<p>值得一提的是，利用<code>Flink</code>的保存点，检查点可以兼具状态版本机制。使用保存点，在保持状态一致性的同时还可以“随着时间移动”。这样可以让代码的更新、维护、迁移、调试和各种模拟测试变得简单。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-3.png?raw=true" alt=""></p>
+<h3 id="5-谬见5：流只能被应用在“实时”场景里"><a href="#5-谬见5：流只能被应用在“实时”场景里" class="headerlink" title="5. 谬见5：流只能被应用在“实时”场景里"></a>5. 谬见5：流只能被应用在“实时”场景里</h3><p>这个谬见包括几点内容：</p>
+<ul>
+<li>我没有低延迟的应用，所以我不需要流处理器</li>
+<li>流处理只跟那些持久化之前的过渡数据有关系</li>
+<li>我们需要批处理器来完成笨重的离线计算</li>
+</ul>
+<p>现在是时候思考一下数据集的类型和处理模型之间的关系了。</p>
+<p>(1) 首先，有两种数据集：</p>
+<ul>
+<li>没有边界的：从非预定义的端点持续产生的数据</li>
+<li>有边界的：有限且完整的数据</li>
+</ul>
+<p>很多真实的数据集是没有边界的，不管这些数据时存储在文件里，还是在HDFS的目录里，还是在像Kafka这样的系统里。举一些例子：</p>
+<ul>
+<li>移动设备或网站用户的交互信息</li>
+<li>物理传感器提供的度量指标</li>
+<li>金融市场数据</li>
+<li>机器日志数据</li>
+</ul>
+<p>实际上，在现实世界中很难找到有边界的数据集，不过一个公司所有大楼的位置信息倒是有边界的（不过它也会随着公司业务的增长而变化）。</p>
+<p>(2) 其次，有两种处理模型：</p>
+<ul>
+<li>流：只要有数据生成就会一直处理</li>
+<li>批次：在有限的时间内结束处理，并释放资源</li>
+</ul>
+<p>让我们再深入一点，来区分两种没有边界的数据集：连续性流和间歇性流。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-4.png?raw=true" alt=""></p>
+<p>使用任意一种模型来处理任意一种数据集是完全可能的，虽然这不是最优的做法。例如，批次处理模型被长时间地应用在无边界的数据集上，特别是间歇性的无边界数据集。现实情况是，大多数<code>批处理</code>任务是通过调度来执行的，每次只处理无边界数据集的一小部分。这意味着流的无边界特质会给某些人带来麻烦（那些工作在流入管道上的人）。</p>
+<p>批处理是无状态的，输出只取决于输入。现实情况是，批处理任务会在内部保留状态（比如reducer经常会保留状态），但这些状态只限在批次的边界内，而且它们不会在批次间流窜。当有人尝试实现类似带有”事件时间戳”的时间窗，那么”批次的边界内状态”就会变得很有用，这在处理无边界数据集时是个很常用的手段。处理无边界数据集的批处理器将不可避免地遇到延迟事件(因为上游的延迟)，批次内的数据有可能因此变得不完整。要注意，这里假设我们是基于事件时间戳来移动时间窗的，因为事件时间戳是现实当中最为准确的模型。在执行批处理的时候，迟到的数据会成为问题，即使通过简单的时间窗修复(比如翻转或滑动时间窗)也解决不了这个问题，特别是如果使用会话时间窗，就更难以处理了。因为完成一个计算所需要的数据不会都在一个批次里，所以在使用批次处理无边界数据集时，很难保证结果的正确性。最起码，它需要额外的开销来处理迟到的数据，还要维护批次之间的状态(要等到所有数据达到后才开始处理，或者重新处理批次)。</p>
+<p><code>Flink</code>内建了处理迟到数据的机制，迟到数据被视为真实世界无边界数据的正常现象，所以<code>Flink</code>设计了一个流处理器专门处理迟到数据。有状态的流处理器更适合用来处理无边界数据集，不管数据集是持续生成的还是间歇生成的。使用流处理器只是个锦上添花的事情。</p>
+<h3 id="6-缪见6：不管怎么样，流仍然很复杂"><a href="#6-缪见6：不管怎么样，流仍然很复杂" class="headerlink" title="6. 缪见6：不管怎么样，流仍然很复杂"></a>6. 缪见6：不管怎么样，流仍然很复杂</h3><p>这是最后一个缪见。你也许会想：”理论虽好，但我仍然不会采用流技术，因为……”：</p>
+<ul>
+<li>流框架难以掌握</li>
+<li>流难以解决时间窗、事件时间戳、触发器的问题</li>
+<li>流需要结合批次，而我已经知道如何使用批次，那为什么还要使用流？</li>
+</ul>
+<p>我们从来没有打算怂恿你使用流，虽然我们觉得流是个很酷的东西。我们相信，是否使用流完全取决于数据和代码的特点。在做决定之前问问自己：”我正在跟什么样类型的数据集打交道？”</p>
+<ul>
+<li>无边界的（用户活动数据、日志、传感器数据）</li>
+<li>有边界的</li>
+</ul>
+<p>然后再问另一个问题：”哪部分变化最频繁？”</p>
+<ul>
+<li>代码比数据变化更频繁</li>
+<li>数据比代码变化更频繁</li>
+</ul>
+<p>对于数据比代码变化更频繁的情况，例如在经常变化的数据集上执行一个相对固定的查询操作，这样会出现流方面的问题。所以，在认定流是一个”复杂”的东西之前，你可能在不知不觉中已经解决过流方面的问题！你可能使用过基于小时的批次任务调度，团队里的其他人可以创建和管理这些批次（在这种情况下，你得到的结果可能是不准确的，而你意识不到这样的结果是批次的时间问题和之前提过的状态问题造成的）。</p>
+<p>为了能够提供一组封装了这些时间和状态复杂性的API，<code>Flink</code>社区为此工作了很长时间。在<code>Flink</code>里可以很简单地处理事件时间戳，只要定义一个时间窗口和一个能够抽取时间戳和水印的函数(只在每个流上调用一次)。处理状态也很简单，类似于定义<code>Java</code>变量，再把这些变量注册到<code>Flink</code>。使用<code>Flink</code>的<code>StreamSQL</code>可以在源源不断的流上面运行<code>SQL</code>查询。</p>
+<p>最后一点：对代码比数据变化更频繁的情况该怎么办？对于这种情况，我们认为你遇到了探索性问题。使用笔记本或其它类似的工具进行迭代可能适合用来解决探索性问题。在代码稳定了之后，你仍然会碰到流方面的问题。我们建议从一开始就使用长远的方案来解决流方面的问题。</p>
+<h3 id="7-流处理的未来"><a href="#7-流处理的未来" class="headerlink" title="7. 流处理的未来"></a>7. 流处理的未来</h3><p>随着流处理的日渐成熟和这些缪见的逐步淡去，我们发现流正朝着除分析应用之外的领域发展。正如我们所讨论的那样，真实世界正连续不断地生成数据。</p>
+<p>原文:<a href="http://www.infoq.com/cn/news/2016/12/error-stream-proce-eliminate" target="_blank" rel="noopener">http://www.infoq.com/cn/news/2016/12/error-stream-proce-eliminate</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将是我继续写作的动力！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Stream/" rel="tag"># Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/10/Stream/[Stream]主流流处理框架比较(2)/" rel="next" title="Stream 主流流处理框架比较(2)">
+                <i class="fa fa-chevron-left"></i> Stream 主流流处理框架比较(2)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/11/Stream/Exactly once未必严格一次/" rel="prev" title="Stream Exactly once 未必严格一次">
+                Stream Exactly once 未必严格一次 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-谬见1：没有不使用批处理的流（Lambda架构）"><span class="nav-number">1.</span> <span class="nav-text">1. 谬见1：没有不使用批处理的流（Lambda架构）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-谬见2：延迟和吞吐量：只能选择一个"><span class="nav-number">2.</span> <span class="nav-text">2. 谬见2：延迟和吞吐量：只能选择一个</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#谬见3：微批次意味着更好的吞吐量"><span class="nav-number">3.</span> <span class="nav-text">谬见3：微批次意味着更好的吞吐量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-谬见4：Exactly-once？完全不可能"><span class="nav-number">4.</span> <span class="nav-text">4. 谬见4：Exactly once？完全不可能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-谬见5：流只能被应用在“实时”场景里"><span class="nav-number">5.</span> <span class="nav-text">5. 谬见5：流只能被应用在“实时”场景里</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-缪见6：不管怎么样，流仍然很复杂"><span class="nav-number">6.</span> <span class="nav-text">6. 缪见6：不管怎么样，流仍然很复杂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-流处理的未来"><span class="nav-number">7.</span> <span class="nav-text">7. 流处理的未来</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
