@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: draft
 author: sjf0115
 title: Hadoop Shell中判断HDFS文件是否存在
 date: 2018-01-25 15:49:01
