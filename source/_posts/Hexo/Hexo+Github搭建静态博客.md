@@ -1,10 +1,12 @@
 ---
-title: Hexo+Github搭建静态博客
+title: Hexo 搭建静态博客
 date: 2017-12-01 18:17:23
+sticky: 100
 tags:
 - Hexo
 
 archives: Hexo
+permalink: hexo_generate_blog
 ---
 
 ### 1.简介
