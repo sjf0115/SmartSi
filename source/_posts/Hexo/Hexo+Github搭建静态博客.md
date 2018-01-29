@@ -1,7 +1,6 @@
 ---
 title: Hexo 搭建静态博客
 date: 2017-12-01 18:17:23
-sticky: Sticky
 tags:
 - Hexo
 
