@@ -97,42 +97,31 @@
 
 
   
-  <meta name="keywords" content="Hexo," />
+  <meta name="keywords" content="Flink,Flink 容错," />
 
 
-<meta name="description" content="在注册完成 LeanCloud 帐号并验证邮箱之后，我们就可以登录我们的 LeanCloud 帐号，进行一番配置之后拿到 AppID 以及 AppKey 这两个参数即可正常使用文章阅读量统计的功能了。 1. 创建应用(1) 我们新建一个应用来专门进行博客的访问统计的数据操作。首先，打开控制台，如下图所示：  (2) 在出现的界面点击创建应用：  (3) 在接下来的页面，新建的应用名称我们可以随意输">
-<meta name="keywords" content="Hexo">
+<meta name="description" content="1. 概述检查点通过恢复状态和对应流位置来实现 Flink 状态容错，从而为应用程序提供与无故障执行相同的语义。 请参阅检查点以了解如何为你的应用程序启用和配置检查点。 2. 外部检查点 Externalized Checkpoints默认情况下检查点不会持久化存储在外部系统中，只是用来从故障中恢复作业。当一个程序被取消时它们会被删除。但是，你可以配置检查点定期持久化存储在外部系统中，类似于保存点">
+<meta name="keywords" content="Flink,Flink 容错">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo+Github为NexT主题添加文章阅读量统计功能">
-<meta property="og:url" content="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能/index.html">
+<meta property="og:title" content="Flink1.4 外部检查点">
+<meta property="og:url" content="http://sjf0115.github.io/2018/01/30/flink_stream_deployment_externalized_checkpoints/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="在注册完成 LeanCloud 帐号并验证邮箱之后，我们就可以登录我们的 LeanCloud 帐号，进行一番配置之后拿到 AppID 以及 AppKey 这两个参数即可正常使用文章阅读量统计的功能了。 1. 创建应用(1) 我们新建一个应用来专门进行博客的访问统计的数据操作。首先，打开控制台，如下图所示：  (2) 在出现的界面点击创建应用：  (3) 在接下来的页面，新建的应用名称我们可以随意输">
+<meta property="og:description" content="1. 概述检查点通过恢复状态和对应流位置来实现 Flink 状态容错，从而为应用程序提供与无故障执行相同的语义。 请参阅检查点以了解如何为你的应用程序启用和配置检查点。 2. 外部检查点 Externalized Checkpoints默认情况下检查点不会持久化存储在外部系统中，只是用来从故障中恢复作业。当一个程序被取消时它们会被删除。但是，你可以配置检查点定期持久化存储在外部系统中，类似于保存点">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-5.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-6.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-7.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-8.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-9.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-10.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.628Z">
+<meta property="og:updated_time" content="2018-01-30T07:26:25.425Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo+Github为NexT主题添加文章阅读量统计功能">
-<meta name="twitter:description" content="在注册完成 LeanCloud 帐号并验证邮箱之后，我们就可以登录我们的 LeanCloud 帐号，进行一番配置之后拿到 AppID 以及 AppKey 这两个参数即可正常使用文章阅读量统计的功能了。 1. 创建应用(1) 我们新建一个应用来专门进行博客的访问统计的数据操作。首先，打开控制台，如下图所示：  (2) 在出现的界面点击创建应用：  (3) 在接下来的页面，新建的应用名称我们可以随意输">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-1.png?raw=true">
+<meta name="twitter:title" content="Flink1.4 外部检查点">
+<meta name="twitter:description" content="1. 概述检查点通过恢复状态和对应流位置来实现 Flink 状态容错，从而为应用程序提供与无故障执行相同的语义。 请参阅检查点以了解如何为你的应用程序启用和配置检查点。 2. 外部检查点 Externalized Checkpoints默认情况下检查点不会持久化存储在外部系统中，只是用来从故障中恢复作业。当一个程序被取消时它们会被删除。但是，你可以配置检查点定期持久化存储在外部系统中，类似于保存点">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/01/30/flink_stream_deployment_externalized_checkpoints/"/>
 
 
-  <title>Hexo+Github为NexT主题添加文章阅读量统计功能 | SmartSi</title>
+  <title>Flink1.4 外部检查点 | SmartSi</title>
   
 
 
@@ -313,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/30/flink_stream_deployment_externalized_checkpoints/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -330,7 +319,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Hexo+Github为NexT主题添加文章阅读量统计功能</h2>
+          <h2 class="post-title" itemprop="name headline">Flink1.4 外部检查点</h2>
         
 
         <div class="post-meta">
@@ -342,7 +331,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-01T20:17:23+08:00">2017-12-01</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-30T14:22:17+08:00">2018-01-30</time>
             
 
             
@@ -351,6 +340,24 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -358,7 +365,7 @@
 
           
           
-             <span id="/2017/12/01/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能/" class="leancloud_visitors" data-flag-title="Hexo+Github为NexT主题添加文章阅读量统计功能">
+             <span id="/2018/01/30/flink_stream_deployment_externalized_checkpoints/" class="leancloud_visitors" data-flag-title="Flink1.4 外部检查点">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -389,39 +396,51 @@
       
 
       
-        <p>在注册完成 <code>LeanCloud</code> 帐号并验证邮箱之后，我们就可以登录我们的 <code>LeanCloud</code> 帐号，进行一番配置之后拿到 <code>AppID</code> 以及 <code>AppKey</code> 这两个参数即可正常使用文章阅读量统计的功能了。</p>
-<h3 id="1-创建应用"><a href="#1-创建应用" class="headerlink" title="1. 创建应用"></a>1. 创建应用</h3><p>(1) 我们新建一个应用来专门进行博客的访问统计的数据操作。首先，打开控制台，如下图所示：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-1.png?raw=true" alt=""></p>
-<p>(2) 在出现的界面点击创建应用：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-2.png?raw=true" alt=""></p>
-<p>(3) 在接下来的页面，新建的应用名称我们可以随意输入，即便是输入的不满意我们后续也是可以更改的:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-3.png?raw=true" alt=""></p>
-<p>(4) 创建完成之后我们点击新创建的应用的名字来进行该应用的参数配置：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-4.png?raw=true" alt=""></p>
-<p>(5) 在应用的数据配置界面，左侧下划线开头的都是系统预定义好的表，为了便于区分我们新建一张表来保存我们的数据。点击左侧右上角的齿轮图标，新建 <code>Class</code>。在弹出的选项中选择创建 <code>Class</code> 来新建 <code>Class</code> 用来专门保存我们博客的文章访问量等数据。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">点击创建Class之后，理论上来说名字可以随意取名，只要你交互代码做相应的更改即可，但是为了保证我们前面对NexT主题的修改兼容，此处的新建Class名字必须为Counter。</span><br></pre></td></tr></table></figure></p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-5.png?raw=true" alt=""></p>
-<p>由于 <code>LeanCloud</code> 升级了默认的ACL权限，如果你想避免后续因为权限的问题导致次数统计显示不正常，建议在此处选择无限制。</p>
-<p>(6) 创建完成之后，左侧数据栏应该会多出一栏名为 <code>Counter</code> 的栏目，这个时候我们点击左侧的设置，切换到我们创建的应用 <code>smartsi</code> 应用的操作界面。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-6.png?raw=true" alt=""></p>
-<p>在弹出的界面中，选择左侧的 <code>应用Key</code> 选项，即可发现我们创建应用的 <code>AppID</code> 以及 <code>AppKey</code>，有了它，我们就有权限能够通过主题中配置好的 <code>Javascript</code> 代码与这个应用的 <code>Counter</code>表进行数据存取操作了:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-7.png?raw=true" alt=""></p>
-<p>复制 <code>AppID</code> 以及 <code>AppKey</code> 并在 <code>NexT</code> 主题的 <code>_config.yml</code> 文件中我们相应的位置填入即可，正确配置之后文件内容像这个样子:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">leancloud_visitors:</span><br><span class="line">  enable: true</span><br><span class="line">  app_id: 你的app_id</span><br><span class="line">  app_key: 你的app_key</span><br></pre></td></tr></table></figure></p>
-<h3 id="2-后台管理"><a href="#2-后台管理" class="headerlink" title="2. 后台管理"></a>2. 后台管理</h3><p>当你配置部分完成之后，初始的文章统计量显示为0，但是这个时候我们 <code>LeanCloud</code> 对应的应用的 <code>Counter</code> 表中并没有相应的记录，只是单纯的显示为0而已，当博客文章在配置好阅读量统计服务之后第一次打开时，便会自动向服务器发送数据来创建一条数据，该数据会被记录在对应的应用的 <code>Counter</code> 表中：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-8.png?raw=true" alt=""></p>
-<p>我们可以修改其中的 <code>time</code> 字段的数值来达到修改某一篇文章的访问量的目的（博客文章访问量快递提升人气的装逼利器）。双击具体的数值，修改之后回车即可保存。</p>
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>检查点通过恢复状态和对应流位置来实现 <code>Flink</code> 状态容错，从而为应用程序提供与无故障执行相同的语义。</p>
+<p>请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html" target="_blank" rel="noopener">检查点</a>以了解如何为你的应用程序启用和配置检查点。</p>
+<h3 id="2-外部检查点-Externalized-Checkpoints"><a href="#2-外部检查点-Externalized-Checkpoints" class="headerlink" title="2. 外部检查点 Externalized Checkpoints"></a>2. 外部检查点 Externalized Checkpoints</h3><p>默认情况下检查点不会持久化存储在外部系统中，只是用来从故障中恢复作业。当一个程序被取消时它们会被删除。但是，你可以配置检查点定期持久化存储在外部系统中，类似于保存点(<code>savepoints</code>)。这些外部持久化的检查点将其元数据写入持久性存储中，即使在作业失败时也不会自动清除。这样，如果你的作业失败时，你会有一个检查点用于恢复作业。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">CheckpointConfig config = env.getCheckpointConfig();</span><br><span class="line">config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);</span><br></pre></td></tr></table></figure>
+<p><code>ExternalizedCheckpointCleanup</code>模式配置当你取消作业时外部检查点如何操作：</p>
+<p>(1) <code>ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION</code>：作业取消时保留外部检查点。请注意，在这种情况下，你必须手动清除取消后的检查点状态。</p>
+<p>(2) <code>ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION</code>: 作业取消时删除外部检查点。检查点状态只有在作业失败时才可用。</p>
+<h4 id="2-1-目录结构"><a href="#2-1-目录结构" class="headerlink" title="2.1 目录结构"></a>2.1 目录结构</h4><p>与保存点类似，外部检查点由元数据文件组成，一些其他数据文件（取决于状态后端）。外部检查点元数据的目标目录是由配置属性<code>state.checkpoints.dir</code>确定的，目前它只能通过配置文件来设置。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">state.checkpoints.dir: hdfs:///checkpoints/</span><br></pre></td></tr></table></figure>
+<p>该目录包含恢复检查点所需的检查点元数据。对于<code>MemoryStateBackend</code>，这个元数据文件是独立的(<code>self-contained</code>)，不需要其他文件。</p>
+<p><code>FsStateBackend</code> 和 <code>RocksDBStateBackend</code> 需要写到不同的数据文件中，只需将这些文件的路径写入元数据文件。这些数据文件存储在状态后端指定的路径上。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">env.setStateBackend(new RocksDBStateBackend(&quot;hdfs:///checkpoints-data/&quot;);</span><br></pre></td></tr></table></figure>
+<h4 id="2-2-与保存点的区别"><a href="#2-2-与保存点的区别" class="headerlink" title="2.2 与保存点的区别"></a>2.2 与保存点的区别</h4><p>外部检查点与保存点有一些差异。他们</p>
 <ul>
-<li><code>url</code> 字段被当作唯一ID来使用，因此如果你不知道带来的后果的话请不要修改。</li>
-<li><code>title</code> 字段显示的是博客文章的标题，用于后台管理的时候区分文章之用，没有什么实际作用。</li>
-<li>其他字段皆为自动生成，具体作用请查阅 <code>LeanCloud</code> 官方文档，如果你不知道有什么作用请不要随意修改。</li>
+<li>使用状态后端指定的（低层次）数据格式</li>
+<li>可能是增量存储的</li>
+<li>不支持 <code>Flink</code> 部分功能（如重新调整）。</li>
 </ul>
-<h3 id="3-Web安全"><a href="#3-Web安全" class="headerlink" title="3. Web安全"></a>3. Web安全</h3><p>因为<code>AppID</code>以及<code>AppKey</code>是暴露在外的，因此如果一些别用用心之人知道了之后用于其它目的是得不偿失的，为了确保只用于我们自己的博客，建议开启Web安全选项，这样就只能通过我们自己的域名才有权访问后台的数据了，可以进一步提升安全性。</p>
-<p>选择应用的设置的安全中心选项卡,在Web 安全域名中填入我们自己的博客域名，来确保数据调用的安全:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-9.png?raw=true" alt=""></p>
-<p>如果你不知道怎么填写安全域名而或者填写完成之后发现博客文章访问量显示不正常，打开浏览器调试模式，发现如下图的输出:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD-10.png?raw=true" alt=""></p>
-<p>这说明你的安全域名填写错误，导致服务器拒绝了数据交互的请求，你可以更改为正确的安全域名或者你不知道如何修改请在本博文中留言或者放弃设置Web安全域名。</p>
-<p>原文:<a href="https://notes.wanghao.work/2015-10-21-%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html#%E9%85%8D%E7%BD%AELeanCloud" target="_blank" rel="noopener">https://notes.wanghao.work/2015-10-21-%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html#%E9%85%8D%E7%BD%AELeanCloud</a></p>
+<h4 id="2-3-从外部检查点恢复"><a href="#2-3-从外部检查点恢复" class="headerlink" title="2.3 从外部检查点恢复"></a>2.3 从外部检查点恢复</h4><p>作业可以通过使用检查点的元数据文件从外部检查点中恢复，就像从保存点恢复一样（请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/cli.html#restore-a-savepoint" target="_blank" rel="noopener">保存点恢复</a>）。请注意，如果元数据文件不是独立的，<code>jobmanager</code> 需要访问它所引用的数据文件（参见上面的目录结构）。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ bin/flink run -s :checkpointMetaDataPath [:runArgs]</span><br></pre></td></tr></table></figure>
+<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
+<p>术语翻译:</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>翻译</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Checkpoints</td>
+<td>检查点</td>
+</tr>
+<tr>
+<td>Externalized Checkpoints</td>
+<td>外部检查点</td>
+</tr>
+<tr>
+<td>savepoints</td>
+<td>保存点</td>
+</tr>
+</tbody>
+</table>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/state/checkpoints.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/state/checkpoints.html</a></p>
 
       
     </div>
@@ -468,7 +487,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-容错/" rel="tag"># Flink 容错</a>
           
         </div>
       
@@ -481,8 +502,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/" rel="next" title="Hexo+Github配置与主题">
-                <i class="fa fa-chevron-left"></i> Hexo+Github配置与主题
+              <a href="/2018/01/29/flink_internals_job_scheduling/" rel="next" title="Flink1.4 内部原理之作业与调度">
+                <i class="fa fa-chevron-left"></i> Flink1.4 内部原理之作业与调度
               </a>
             
           </div>
@@ -490,10 +511,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/02/Hexo/Hexo+Github搭建博客更换皮肤/" rel="prev" title="Hexo+Github搭建博客更换皮肤">
-                Hexo+Github搭建博客更换皮肤 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -709,7 +726,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建应用"><span class="nav-number">1.</span> <span class="nav-text">1. 创建应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-后台管理"><span class="nav-number">2.</span> <span class="nav-text">2. 后台管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Web安全"><span class="nav-number">3.</span> <span class="nav-text">3. Web安全</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-外部检查点-Externalized-Checkpoints"><span class="nav-number">2.</span> <span class="nav-text">2. 外部检查点 Externalized Checkpoints</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-目录结构"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 目录结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-与保存点的区别"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 与保存点的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-从外部检查点恢复"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 从外部检查点恢复</span></a></li></ol></li></ol></div>
             
 
           </div>
