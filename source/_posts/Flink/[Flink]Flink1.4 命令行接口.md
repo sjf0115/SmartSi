@@ -92,11 +92,11 @@ $FLINK_HOME/bin/start-cluster.sh
 - 调用取消作业时，作业中的算子立即收到一个调用`cancel()`方法的指令以尽快取消它们。如果算子在调用取消操作后没有停止，`Flink` 将定期开启中断线程来取消作业直到作业停止。
 - 停止作业是一种停止正在运行的流作业的更加优雅的方法。停止仅适用于使用实现`StoppableFunction`接口的数据源的那些作业。当用户请求停止作业时，所有数据源将收到调用`stop()`方法指令。但是作业还是会继续运行，直到所有数据源正确关闭。这允许作业处理完所有正在传输的数据(inflight data)。
 
-### 2. 保存点
+### 3. 保存点
 
 保存点通过命令行客户端进行控制：
 
-#### 2.1 触发保存点
+#### 3.1 触发保存点
 
 ```
 ./bin/flink savepoint <jobID> [savepointDirectory]
@@ -107,7 +107,7 @@ $FLINK_HOME/bin/start-cluster.sh
 
 如果你不指定目标目录，则需要配置默认目录（请参阅[保存点](https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/state/savepoints.html#configuration)）。 否则，触发保存点将失败。
 
-#### 2.2 使用YARN触发保存点
+#### 3.2 使用YARN触发保存点
 
 ```
 ./bin/flink savepoint <jobId> [savepointDirectory] -yid <yarnAppId>
@@ -117,7 +117,7 @@ $FLINK_HOME/bin/start-cluster.sh
 
 其他一切与上面的触发保存点中描述的相同。
 
-#### 2.3 根据保存点取消Job
+#### 3.3 根据保存点取消Job
 
 你可以自动触发一个保存点并取消作业:
 ```
@@ -127,7 +127,7 @@ $FLINK_HOME/bin/start-cluster.sh
 
 只有保存点触发成功，作业才被取消
 
-#### 2.4 恢复保存点
+#### 3.4 恢复保存点
 
 ```
 ./bin/flink run -s <savepointPath> ...
@@ -141,7 +141,7 @@ $FLINK_HOME/bin/start-cluster.sh
 ```
 如果想从程序中删除算子(作为保存点一部分的)，这时会非常有用。
 
-#### 2.4 销毁保存点
+#### 3.5 销毁保存点
 
 ```
 ./bin/flink savepoint -d <savepointPath>
@@ -154,7 +154,7 @@ $FLINK_HOME/bin/start-cluster.sh
 ```
 否则，你将遇到 `ClassNotFoundException`。
 
-### 3. 用法
+### 4. 用法
 
 下面是Flink命令行接口的用法:
 ```
