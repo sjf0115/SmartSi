@@ -108,10 +108,12 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="这篇文章是系列文章的第一篇，数据工匠团队会在这里为大家展示一些Apache Flink的核心功能。 流处理通常被大家与动态数据关联起来，相应的系统差不多会在数据被创造出来的那一刻就立刻对其进行处理或响应。像延迟、吞吐量、水印和处理迟到的数据等等都是大家讨论得最多的流处理话题，通常是关注现在，而不是过去。 可在实际项目中，却有许多种场景需要你的流处理程序把以前处理过的数据再重新处理一遍。这里有些例子">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-31T09:11:58.709Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_stream_turning_back_time_savepoints-1.png?raw=true">
+<meta property="og:updated_time" content="2018-01-31T09:24:32.826Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink1.4 保存点之回溯时间">
 <meta name="twitter:description" content="这篇文章是系列文章的第一篇，数据工匠团队会在这里为大家展示一些Apache Flink的核心功能。 流处理通常被大家与动态数据关联起来，相应的系统差不多会在数据被创造出来的那一刻就立刻对其进行处理或响应。像延迟、吞吐量、水印和处理迟到的数据等等都是大家讨论得最多的流处理话题，通常是关注现在，而不是过去。 可在实际项目中，却有许多种场景需要你的流处理程序把以前处理过的数据再重新处理一遍。这里有些例子">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_stream_turning_back_time_savepoints-1.png?raw=true">
 
 
 
@@ -419,7 +421,7 @@
 <p>“全局一致” 意味着所有并行算子的状态都在所有输入的相同的明确定义的位置处被记录下来了。</p>
 <p>如果在过去的某个时刻，你为某个应用程序记下了保存点，那你就可以从那个保存点的位置开始启动一个新程序。新的程序将使用那个保存点位置保存下来的算子的状态进行初始化，并且会从记录的保存点里各个数据源的相应位置开始，重新处理全部数据。</p>
 <p>因为 <code>Flink</code> 的保存点之间是相互完全独立的，所以对每个程序你都可以有多个保存点，这样你就可以根据这些不同的保存点的信息，回到不同的位置，启动多次、甚至不同的程序（如下图所示）。这个功能对于派生你的流处理程序，或者为它们打不同的版本，是非常有用的。</p>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_stream_turning_back_time_savepoints-1.png?raw=true" alt=""></p>
 <p>我们应该注意，在从某个保存点开始重新处理数据时，对事件的时间处理是非常重要的。重新处理基本上就意味着从过去到现在进行快速回放，也就是说，是全速地从某些存储系统中读出数据，直到赶上了当前的状态，然后再继续实时地处理新到达的数据。</p>
 <p>因为程序对于时间的处理或者插入时间都是要依赖当前的本地时间的，那么如果在根据保存点启动程序时不使用事件的时间，而使用别的时间，对程序的逻辑而言就很可能导致错误的结果。</p>
 <h3 id="3-听起来不错，那我该做什么？"><a href="#3-听起来不错，那我该做什么？" class="headerlink" title="3. 听起来不错，那我该做什么？"></a>3. 听起来不错，那我该做什么？</h3><p>不用做很多！事实上，所有支持故障恢复的程序都是自动支持保存点的。因此，大多数进行有状态计算的程序已经满足了需要的条件。如果没有，可以对它们进行快速更新，让它们具备：</p>

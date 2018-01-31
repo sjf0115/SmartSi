@@ -48,7 +48,7 @@ permalink: flink_stream_turning_back_time_savepoints
 
 因为 `Flink` 的保存点之间是相互完全独立的，所以对每个程序你都可以有多个保存点，这样你就可以根据这些不同的保存点的信息，回到不同的位置，启动多次、甚至不同的程序（如下图所示）。这个功能对于派生你的流处理程序，或者为它们打不同的版本，是非常有用的。
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_stream_turning_back_time_savepoints-1.png?raw=true)
 
 我们应该注意，在从某个保存点开始重新处理数据时，对事件的时间处理是非常重要的。重新处理基本上就意味着从过去到现在进行快速回放，也就是说，是全速地从某些存储系统中读出数据，直到赶上了当前的状态，然后再继续实时地处理新到达的数据。
 
