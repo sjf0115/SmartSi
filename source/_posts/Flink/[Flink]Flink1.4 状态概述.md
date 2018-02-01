@@ -5,8 +5,10 @@ title: Flink1.4 状态概述
 date: 2018-01-16 19:30:17
 tags:
   - Flink
+  - Flink 容错
 
 categories: Flink
+permalink: flink_stream_state_overview
 ---
 
 有状态的函数和算子在处理单个元素/事件时存储数据，使得状态`state`成为任何精细操作的关键构件。

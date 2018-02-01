@@ -5,8 +5,10 @@ title: Flink1.4 使用状态
 date: 2018-01-16 20:32:17
 tags:
   - Flink
+  - Flink 容错
 
 categories: Flink
+permalink: flink_stream_working_with_state
 ---
 
 ### 1. Keyed State 与 Operator State
