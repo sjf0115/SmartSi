@@ -1,18 +1,20 @@
 ---
 layout: post
 author: sjf0115
-title: Hadoop 脱离JVM？Hadoop生态圈的挣扎与演化
-date: 2018-01-05 09:50:01
+title: Hadoop 脱离JVM？ Hadoop生态圈的挣扎与演化
+date: 2018-02-02 09:50:01
 tags:
   - Hadoop
 
 categories: Hadoop
-permalink: hadoop-ecosystem-break-away-jvm?
+permalink: hadoop-ecosystem-break-away-jvm
 ---
 
 新世纪以来，互联网及个人终端的普及，传统行业的信息化及物联网的发展等产业变化产生了大量的数据，远远超出了单台机器能够处理的范围，分布式存储与处理成为唯一的选项。从2005年开始，Hadoop从最初Nutch项目的一部分，逐步发展成为目前最流行的大数据处理平台。Hadoop生态圈的各个项目，围绕着大数据的存储，计算，分析，展示，安全等各个方面，构建了一个完整的大数据生态系统，并有Cloudera，HortonWorks，MapR等数十家公司基于开源的Hadoop平台构建自己的商业模式，可以认为是最近十年来最成功的开源社区。
 
 Hadoop 的成功固然是由于其顺应了新世纪以来互联网技术的发展趋势，同时其基于JVM的平台开发也为Hadoop的快速发展起到了促进作用。Hadoop生态圈的项目大都基于Java，Scala，Clojure等JVM语言开发，这些语言良好的语法规范，丰富的第三方类库以及完善的工具支持，为Hadoop这样的超大型项目提供了基础支撑。同时，作为在程序员中普及率最高的语言之一，它也降低了更多程序员使用，或是参与开发Hadoop项目的门槛。同时，基于Scala开发的Spark，甚至因为项目的火热反过来极大的促进了Scala语言的推广。但是随着Hadoop平台的逐步发展，Hadoop生态圈的项目之间的竞争加剧，越来越多的Hadoop项目注意到了这些JVM语言的一些不足之处，希望通过更有效率的处理方式，提升分布式系统的执行效率与健壮性。本文主要以Spark和Flink项目为例，介绍Hadoop社区观察到的一些因为JVM语言的不足导致的问题，以及相应的解决方案与未来可能的发展方向。
+
+--more--
 
 注：
 ```
