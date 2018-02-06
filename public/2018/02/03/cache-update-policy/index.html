@@ -97,37 +97,35 @@
 
 
   
-  <meta name="keywords" content="Flink," />
+  <meta name="keywords" content="CaChe," />
 
 
-<meta name="description" content="如果你正在构建实时流处理应用程序，那么事件时间处理是你迟早必须使用的功能之一。因为在现实世界的大多数用例中，消息到达都是无序的，应该有一些方法，通过你建立的系统知道消息可能延迟到达，并且有相应的处理方案。在这篇博文中，我们将看到为什么我们需要事件时间处理，以及我们如何在ApacheFlink中使用它。 EventTime是事件在现实世界中发生的时间，ProcessingTime是Flink系统处理">
-<meta name="keywords" content="Flink">
+<meta name="description" content="看到好些人在写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。然而，这个是逻辑是 错误 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。 我不知道为什么这么多人用的都是这个">
+<meta name="keywords" content="CaChe">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 图解Watermark">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/15/Flink/[Flink]Flink1.4 图解Watermark/index.html">
+<meta property="og:title" content="Cache 缓存更新策略">
+<meta property="og:url" content="http://sjf0115.github.io/2018/02/03/cache-update-policy/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="如果你正在构建实时流处理应用程序，那么事件时间处理是你迟早必须使用的功能之一。因为在现实世界的大多数用例中，消息到达都是无序的，应该有一些方法，通过你建立的系统知道消息可能延迟到达，并且有相应的处理方案。在这篇博文中，我们将看到为什么我们需要事件时间处理，以及我们如何在ApacheFlink中使用它。 EventTime是事件在现实世界中发生的时间，ProcessingTime是Flink系统处理">
+<meta property="og:description" content="看到好些人在写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。然而，这个是逻辑是 错误 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。 我不知道为什么这么多人用的都是这个">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-0.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-5.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.655Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-3.png?raw=true">
+<meta property="og:updated_time" content="2018-02-06T02:06:47.337Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 图解Watermark">
-<meta name="twitter:description" content="如果你正在构建实时流处理应用程序，那么事件时间处理是你迟早必须使用的功能之一。因为在现实世界的大多数用例中，消息到达都是无序的，应该有一些方法，通过你建立的系统知道消息可能延迟到达，并且有相应的处理方案。在这篇博文中，我们将看到为什么我们需要事件时间处理，以及我们如何在ApacheFlink中使用它。 EventTime是事件在现实世界中发生的时间，ProcessingTime是Flink系统处理">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-0.png?raw=true">
+<meta name="twitter:title" content="Cache 缓存更新策略">
+<meta name="twitter:description" content="看到好些人在写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。然而，这个是逻辑是 错误 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。 我不知道为什么这么多人用的都是这个">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-1.png?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/15/Flink/[Flink]Flink1.4 图解Watermark/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/02/03/cache-update-policy/"/>
 
 
-  <title>Flink1.4 图解Watermark | SmartSi</title>
+  <title>Cache 缓存更新策略 | SmartSi</title>
   
 
 
@@ -308,7 +306,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/15/Flink/[Flink]Flink1.4 图解Watermark/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/03/cache-update-policy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -325,7 +323,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 图解Watermark</h2>
+          <h2 class="post-title" itemprop="name headline">Cache 缓存更新策略</h2>
         
 
         <div class="post-meta">
@@ -337,7 +335,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-15T14:47:01+08:00">2018-01-15</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-03T10:40:01+08:00">2018-02-03</time>
             
 
             
@@ -357,7 +355,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/other/" itemprop="url" rel="index"><span itemprop="name">other</span></a></span>
 
                 
                 
@@ -371,7 +369,7 @@
 
           
           
-             <span id="/2018/01/15/Flink/[Flink]Flink1.4 图解Watermark/" class="leancloud_visitors" data-flag-title="Flink1.4 图解Watermark">
+             <span id="/2018/02/03/cache-update-policy/" class="leancloud_visitors" data-flag-title="Cache 缓存更新策略">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -402,38 +400,42 @@
       
 
       
-        <p>如果你正在构建实时流处理应用程序，那么事件时间处理是你迟早必须使用的功能之一。因为在现实世界的大多数用例中，消息到达都是无序的，应该有一些方法，通过你建立的系统知道消息可能延迟到达，并且有相应的处理方案。在这篇博文中，我们将看到为什么我们需要事件时间处理，以及我们如何在ApacheFlink中使用它。</p>
-<p><code>EventTime</code>是事件在现实世界中发生的时间，<code>ProcessingTime</code>是Flink系统处理该事件的时间。要了解事件时间处理的重要性，我们首先要建立一个基于处理时间的系统，看看它的缺点。</p>
-<p>我们创建一个大小为10秒的滑动窗口，每5秒滑动一次，在窗口结束时，系统将发送在此期间收到的消息数。 一旦了解了<code>EventTime</code>处理在滑动窗口如何工作，那么了解其在滚动窗口中如何工作也就不是难事。所以让我们开始吧。</p>
-<h3 id="1-基于处理时间的系统"><a href="#1-基于处理时间的系统" class="headerlink" title="1. 基于处理时间的系统"></a>1. 基于处理时间的系统</h3><p>在这个例子中，我们期望消息具有一定格式的值，时间戳就是消息的那个值，同时时间戳是在源产生此消息的时间。由于我们正在构建基于处理时间的系统，因此以下代码忽略了时间戳部分。</p>
-<p>我们需要知道消息中应包含消息产生时间是很重要的。Flink或任何其他系统不是一个魔术盒，可以以某种方式自己生成这个产生时间。稍后我们将看到，事件时间处理提取此时间戳信息来处理延迟消息。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val text = senv.socketTextStream(&quot;localhost&quot;, 9999)</span><br><span class="line">val counts = text.map &#123;(m: String) =&gt; (m.split(&quot;,&quot;)(0), 1) &#125;</span><br><span class="line">    .keyBy(0)</span><br><span class="line">    .timeWindow(Time.seconds(10), Time.seconds(5))</span><br><span class="line">    .sum(1)</span><br><span class="line">counts.print</span><br><span class="line">senv.execute(&quot;ProcessingTime processing example&quot;)</span><br></pre></td></tr></table></figure>
-<h4 id="1-1-消息无延迟到达"><a href="#1-1-消息无延迟到达" class="headerlink" title="1.1 消息无延迟到达"></a>1.1 消息无延迟到达</h4><p>假设源分别在第13秒产生两个类型a的消息以及在第16秒产生一个消息。(小时和分钟不重要，因为窗口大小只有10秒)。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-0.png?raw=true" alt=""></p>
-<p>这些消息将落入如下所示窗口中。前两个在第13秒产生的消息将落入窗口1<code>[5s-15s]</code>和窗口2<code>[10s-20s]</code>中，第三个在第16秒产生的消息将落入窗口2<code>[10s-20s]</code>和窗口3<code>[15s-25s]</code>中。每个窗口得到的最终计数分别为(a，2)，(a，3)和(a，1)。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true" alt=""></p>
-<p>该输出跟预期的输出是一样的。现在我们看看当一个消息延迟到达系统时会发生什么。</p>
-<h4 id="1-2-消息延迟到达"><a href="#1-2-消息延迟到达" class="headerlink" title="1.2 消息延迟到达"></a>1.2 消息延迟到达</h4><p>现在假设其中一条消息(在第13秒产生)可能由于网络拥塞延迟6秒(第19秒到达)。你能猜测出这个消息会落入哪个窗口？</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true" alt=""></p>
-<p>延迟的消息落入窗口2和窗口3中，因为19在10-20和15-25之间。窗口2的计算没有任何问题(因为消息本应该落入这个窗口)，但是它影响了窗口1和窗口3的计算结果。现在我们将尝试使用基于<code>EventTime</code>处理来解决这个问题。</p>
-<h3 id="2-基于EventTime的系统"><a href="#2-基于EventTime的系统" class="headerlink" title="2. 基于EventTime的系统"></a>2. 基于EventTime的系统</h3><p>要使用基于<code>EventTime</code>处理，我们需要一个时间戳提取器，从消息中提取事件时间信息。请记住，消息是有格式值，时间戳。 <code>extractTimestamp</code>方法获取时间戳并将其作为Long类型返回。现在忽略<code>getCurrentWatermark</code>方法，我们稍后会介绍：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class TimestampExtractor extends AssignerWithPeriodicWatermarks[String] with Serializable &#123;</span><br><span class="line">  override def extractTimestamp(e: String, prevElementTimestamp: Long) = &#123;</span><br><span class="line">    e.split(&quot;,&quot;)(1).toLong</span><br><span class="line">  &#125;</span><br><span class="line">  override def getCurrentWatermark(): Watermark = &#123;</span><br><span class="line">      new Watermark(System.currentTimeMillis)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>现在我们需要设置这个时间戳提取器，并将<code>TimeCharactersistic</code>设置为<code>EventTime</code>。其余的代码与<code>ProcessingTime</code>的情况保持一致：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">senv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)</span><br><span class="line">val text = senv.socketTextStream(&quot;localhost&quot;, 9999)</span><br><span class="line">                .assignTimestampsAndWatermarks(new TimestampExtractor)</span><br><span class="line">val counts = text.map &#123;(m: String) =&gt; (m.split(&quot;,&quot;)(0), 1) &#125;</span><br><span class="line">      .keyBy(0)</span><br><span class="line">      .timeWindow(Time.seconds(10), Time.seconds(5))</span><br><span class="line">      .sum(1)</span><br><span class="line">counts.print</span><br><span class="line">senv.execute(&quot;EventTime processing example&quot;)</span><br></pre></td></tr></table></figure>
-<p>运行上述代码的结果如下图所示：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-4.png?raw=true" alt=""></p>
-<p>结果看起来更好一些，窗口2和3现在是正确的结果，但是窗口1仍然是有问题的。Flink没有将延迟的消息分配给窗口3，是因为在当前检查消息的事件时间，知道它不应该出现在窗口3中。但是为什么没有将消息分配给窗口1？原因是当延迟的信息到达系统时(第19秒)，窗口1的评估(<br>evaluation)已经完成了(第15秒)。现在让我们尝试通过使用<code>Watermark</code>来解决这个问题。</p>
-<h3 id="3-Watermark"><a href="#3-Watermark" class="headerlink" title="3. Watermark"></a>3. Watermark</h3><p><code>Watermark</code>是一个非常重要概念，我将尽力给你一个简短的概述。如果你有兴趣了解更多信息，你可以从<code>Google</code>中观看这个<a href="https://www.youtube.com/watch?v=3UfZN59Nsk8" target="_blank" rel="noopener">演讲</a>，还可以从<code>dataArtisans</code>那里阅读此<a href="https://data-artisans.com/blog/how-apache-flink-enables-new-streaming-applications-part-1" target="_blank" rel="noopener">博客</a>。 <code>Watermark</code>本质上是一个时间戳。当<code>Flink</code>中的算子(operator)接收到<code>Watermark</code>时，它明白它不会再看到比该时间戳更早的消息。因此<code>Watermark</code>也可以被认为是告诉<code>Flink</code>在<code>EventTime</code>中多远的一种方式。</p>
-<p>在这个例子的目的，就是把<code>Watermark</code>看作是告诉<code>Flink</code>一个消息可能延迟多少的方式。在上一次尝试中，我们将<code>Watermark</code>设置为当前系统时间。因此，期望消息没有任何的延迟。现在我们将<code>Watermark</code>设置为当前时间减去5秒，这就告诉<code>Flink</code>我们期望消息最多延迟5秒钟，这是因为每个窗口仅在<code>Watermark</code>通过时被评估。由于我们的<code>Watermark</code>是当前时间减去5秒，所以第一个窗口<code>[5s-15s]</code>将会在第20秒被评估。类似地，窗口<code>[10s-20s]</code>将会在第25秒进行评估，依此类推(译者注:窗口延迟评估)。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">override def getCurrentWatermark(): Watermark = &#123;</span><br><span class="line">      new Watermark(System.currentTimeMillis - 5000)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里我们假定事件时间比当前系统时间晚5秒，但事实并非总是如此(有可能6秒，7秒等等)。在许多情况下，最好保留迄今为止收到的最大时间戳(从消息中提取)。使用迄今为止收到的最大时间戳减去预期的延迟时间来代替用当前系统时间减去预期的延迟时间。</p>
-<p>进行上述更改后运行代码的结果是：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%9B%BE%E8%A7%A3%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-5.png?raw=true" alt=""></p>
-<p>最后我们得到了正确的结果，所有窗口都按照预期输出计数，(a，2)，(a，3)和(a，1)。</p>
-<h3 id="4-Allowed-Lateness"><a href="#4-Allowed-Lateness" class="headerlink" title="4. Allowed Lateness"></a>4. Allowed Lateness</h3><p>我们也可以使用<code>AllowedLateness</code>功能设置消息的最大允许延迟时间来解决这个问题。</p>
-<p>在我们之前使用<code>Watermark - delay</code>的方法中，只有当<code>Watermark</code>超过<code>window_length + delay</code>时，窗口才会被触发计算。如果你想要适应延迟事件，并希望窗口按时触发，则可以使用<code>Allowed Lateness</code>。 如果设置了允许延迟，<code>Flink</code>不会丢弃消息，除非它超过了<code>window_end_time + delay</code>的延迟时间。一旦收到一个延迟消息，<code>Flink</code>会提取它的时间戳并检查是否在允许的延迟时间内，然后检查是否触发窗口(按照触发器设置)。 因此，请注意，在这种方法中可能会多次触发窗口，如果你仅需要一次处理，你需要使你的<code>sink</code>具有幂等性。</p>
-<h3 id="5-结论"><a href="#5-结论" class="headerlink" title="5. 结论"></a>5. 结论</h3><p>实时流处理系统的重要性日益增长，延迟消息的处理是你构建任何此类系统的一部分。在这篇博文中，我们看到延迟到达的消息会影响系统的结果，以及如何使用ApacheFlink的事件时间功能来解决它们。</p>
-<p>原文:<a href="http://vishnuviswanath.com/flink_eventtime.html" target="_blank" rel="noopener">http://vishnuviswanath.com/flink_eventtime.html</a></p>
+        <p>看到好些人在写更新缓存数据代码时，<code>先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中</code>。然而，这个是逻辑是 <code>错误</code> 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。</p>
+<p>我不知道为什么这么多人用的都是这个逻辑，当我在微博上发了这个贴以后，我发现好些人给了好多非常复杂和诡异的方案，所以，我想写这篇文章说一下几个缓存更新策略。</p>
+<p>这里，我们先不讨论更新缓存和更新数据这两个事是一个事务的事，或是会有失败的可能，我们先假设更新数据库和更新缓存都可以成功的情况（我们先把成功的代码逻辑先写对）。</p>
+<p>更新缓存的的策略有四种：</p>
+<ul>
+<li><code>Cache aside</code></li>
+<li><code>Read through</code></li>
+<li><code>Write through</code></li>
+<li><code>Write behind caching</code></li>
+</ul>
+<p>我们下面一一来看一下这四种策略。</p>
+<h3 id="1-Cache-aside"><a href="#1-Cache-aside" class="headerlink" title="1. Cache aside"></a>1. Cache aside</h3><p>这是最常用最常用的策略了。其具体逻辑如下：</p>
+<ul>
+<li>失效：应用程序先从 <code>cache</code> 取数据，没有得到，则从数据库中取数据，成功后，放到缓存中。</li>
+<li>命中：应用程序从 <code>cache</code> 中取数据，取到后返回。</li>
+<li>更新：先把数据存到数据库中，成功后，再让缓存失效。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-1.png?raw=true" alt=""></p>
+<p>注意，我们的更新是先更新数据库，成功后，让缓存失效。那么，这种方式是否可以没有文章前面提到过的那个问题呢？我们可以脑补一下。</p>
+<p>一个是查询操作，一个是更新操作的并发，首先，没有了删除cache数据的操作了，而是先更新了数据库中的数据，此时，缓存依然有效，所以，并发的查询操作拿的是没有更新的数据，但是，更新操作马上让缓存的失效了，后续的查询操作再把数据从数据库中拉出来。而不会像文章开头的那个逻辑产生的问题，后续的查询操作一直都在取老的数据。</p>
+<p>这是标准的策略，包括Facebook的论文<a href="https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf" target="_blank" rel="noopener">《Scaling Memcache at Facebook》</a>也使用了这个策略。为什么不是写完数据库后更新缓存？你可以看一下Quora上的这个问答<a href="https://www.quora.com/Why-does-Facebook-use-delete-to-remove-the-key-value-pair-in-Memcached-instead-of-updating-the-Memcached-during-write-request-to-the-backend" target="_blank" rel="noopener">《Why does Facebook use delete to remove the key-value pair in Memcached instead of updating the Memcached during write request to the backend?》</a>，主要是怕两个并发的写操作导致脏数据。</p>
+<p>那么，是不是 <code>Cache Aside</code> 这个就不会有并发问题了？不是的，比如，一个是读操作，但是没有命中缓存，然后就到数据库中取数据，此时来了一个写操作，写完数据库后，让缓存失效，然后，之前的那个读操作再把老的数据放进去，所以，会造成脏数据。</p>
+<p>但，这个case理论上会出现，不过，实际上出现的概率可能非常低，因为这个条件需要发生在读缓存时缓存失效，而且并发着有一个写操作。而实际上数据库的写操作会比读操作慢得多，而且还要锁表，而读操作必需在写操作前进入数据库操作，而又要晚于写操作更新缓存，所有的这些条件都具备的概率基本并不大。</p>
+<p>所以，这也就是Quora上的那个答案里说的，要么通过2PC或是Paxos协议保证一致性，要么就是拼命的降低并发时脏数据的概率，而Facebook使用了这个降低概率的玩法，因为2PC太慢，而Paxos太复杂。当然，最好还是为缓存设置上过期时间。</p>
+<h3 id="2-Read-Write-Through"><a href="#2-Read-Write-Through" class="headerlink" title="2. Read/Write Through"></a>2. Read/Write Through</h3><p>我们可以看到，在上面的 <code>Cache Aside</code> 套路中，我们的应用代码需要维护两个数据存储，一个是缓存（<code>Cache</code>），一个是数据库（<code>Repository</code>）。所以，应用程序比较啰嗦。而 <code>Read/Write Through</code> 套路是把更新数据库（<code>Repository</code>）的操作由缓存自己代理了，所以，对于应用层来说，就简单很多了。可以理解为，应用认为后端就是一个单一的存储，而存储自己维护自己的 <code>Cache</code>。</p>
+<h4 id="2-1-Read-Through"><a href="#2-1-Read-Through" class="headerlink" title="2.1 Read Through"></a>2.1 Read Through</h4><p><code>Read Through</code> 套路就是在查询操作中更新缓存，也就是说，当缓存失效的时候（过期或LRU换出），<code>Cache Aside</code> 是由调用方负责把数据加载入缓存，而 <code>Read Through</code> 则用缓存服务自己来加载，从而对应用方是透明的。</p>
+<h4 id="2。2-Write-Through"><a href="#2。2-Write-Through" class="headerlink" title="2。2 Write Through"></a>2。2 Write Through</h4><p><code>Write Through</code> 套路和 <code>Read Through</code> 相仿，不过是在更新数据时发生。当有数据更新的时候，如果没有命中缓存，直接更新数据库，然后返回。如果命中了缓存，则更新缓存，然后再由 <code>Cache</code> 自己更新数据库（这是一个同步操作）</p>
+<p>下图自来 Wikipedia 的 <a href="https://en.wikipedia.org/wiki/Cache_(computing" target="_blank" rel="noopener">Cache</a>) 词条。其中的 <code>Memory</code> 你可以理解为就是我们例子里的数据库。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-2.png?raw=true" alt=""></p>
+<h3 id="3-Write-Behind-Caching"><a href="#3-Write-Behind-Caching" class="headerlink" title="3. Write Behind Caching"></a>3. Write Behind Caching</h3><p><code>Write Behind</code> 又叫 <code>Write Back</code>。一些了解 <code>Linux</code> 操作系统内核的同学对 <code>write back</code> 应该非常熟悉，这不就是 <code>Linux</code> 文件系统的 <code>Page Cache</code> 的算法吗？ 是的，你看基础这玩意全都是相通的。所以，基础很重要，我已经不是一次说过基础很重要这事了。</p>
+<p><code>Write Back</code> 套路，一句说就是，在更新数据的时候，只更新缓存，不更新数据库，而我们的缓存会异步地批量更新数据库。这个设计的好处就是让数据的I/O操作飞快无比（因为直接操作内存嘛 ），因为异步，<code>write back</code> 还可以合并对同一个数据的多次操作，所以性能的提高是相当可观的。</p>
+<p>但是，其带来的问题是，数据不是强一致性的，而且可能会丢失（我们知道 <code>Unix/Linux</code> 非正常关机会导致数据丢失，就是因为这个事）。在软件设计上，我们基本上不可能做出一个没有缺陷的设计，就像算法设计中的时间换空间，空间换时间一个道理，有时候，强一致性和高性能，高可用和高性性是有冲突的。软件设计从来都是取舍 <code>Trade-Off</code>。</p>
+<p>另外，<code>Write Back</code> 实现逻辑比较复杂，因为他需要track有哪数据是被更新了的，需要刷到持久层上。操作系统的 <code>write back</code> 会在仅当这个 <code>cache</code> 需要失效的时候，才会被真正持久起来，比如，内存不够了，或是进程退出了等情况，这又叫 <code>lazy write</code>。</p>
+<p>在 wikipedia 上有一张 <code>write back</code> 的流程图，基本逻辑如下：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-3.png?raw=true" alt=""></p>
+<p>转载于： <a href="https://coolshell.cn/articles/17416.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17416.html</a></p>
 
       
     </div>
@@ -480,7 +482,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Flink/" rel="tag"># Flink</a>
+            <a href="/tags/CaChe/" rel="tag"># CaChe</a>
           
         </div>
       
@@ -493,8 +495,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/15/Flink/[Flink]Flink1.4 生成时间戳与Watermarks/" rel="next" title="Flink1.4 生成时间戳与Watermarks">
-                <i class="fa fa-chevron-left"></i> Flink1.4 生成时间戳与Watermarks
+              <a href="/2018/02/02/flink-sql-persistent-query-of-dynamic-table/" rel="next" title="Flink 动态表的持续查询">
+                <i class="fa fa-chevron-left"></i> Flink 动态表的持续查询
               </a>
             
           </div>
@@ -502,10 +504,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/16/Flink/[Flink]Flink1.4 内置时间戳提取器和Watermark生成器/" rel="prev" title="Flink1.4 内置的时间戳提取器和Watermark生成器">
-                Flink1.4 内置的时间戳提取器和Watermark生成器 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -721,7 +719,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-基于处理时间的系统"><span class="nav-number">1.</span> <span class="nav-text">1. 基于处理时间的系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-消息无延迟到达"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 消息无延迟到达</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-消息延迟到达"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 消息延迟到达</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基于EventTime的系统"><span class="nav-number">2.</span> <span class="nav-text">2. 基于EventTime的系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Watermark"><span class="nav-number">3.</span> <span class="nav-text">3. Watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Allowed-Lateness"><span class="nav-number">4.</span> <span class="nav-text">4. Allowed Lateness</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-结论"><span class="nav-number">5.</span> <span class="nav-text">5. 结论</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Cache-aside"><span class="nav-number">1.</span> <span class="nav-text">1. Cache aside</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Read-Write-Through"><span class="nav-number">2.</span> <span class="nav-text">2. Read/Write Through</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Read-Through"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Read Through</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2。2-Write-Through"><span class="nav-number">2.2.</span> <span class="nav-text">2。2 Write Through</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Write-Behind-Caching"><span class="nav-number">3.</span> <span class="nav-text">3. Write Behind Caching</span></a></li></ol></div>
             
 
           </div>
