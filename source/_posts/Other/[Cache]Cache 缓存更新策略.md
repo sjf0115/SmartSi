@@ -53,7 +53,7 @@ permalink: cache-update-policy
 
 `Read Through` 套路就是在查询操作中更新缓存，也就是说，当缓存失效的时候（过期或LRU换出），`Cache Aside` 是由调用方负责把数据加载入缓存，而 `Read Through` 则用缓存服务自己来加载，从而对应用方是透明的。
 
-#### 2。2 Write Through
+#### 2.2 Write Through
 
 `Write Through` 套路和 `Read Through` 相仿，不过是在更新数据时发生。当有数据更新的时候，如果没有命中缓存，直接更新数据库，然后返回。如果命中了缓存，则更新缓存，然后再由 `Cache` 自己更新数据库（这是一个同步操作）
 
