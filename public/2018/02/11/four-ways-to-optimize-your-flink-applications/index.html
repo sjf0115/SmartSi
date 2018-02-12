@@ -97,37 +97,31 @@
 
 
   
-  <meta name="keywords" content="Stream," />
+  <meta name="keywords" content="Flink,Flink 优化," />
 
 
-<meta name="description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
-<meta name="keywords" content="Stream">
+<meta name="description" content="Flink 是一个复杂的框架，并提供了许多方法来调整其执行。在本文中，我将展示四种不同的方法来提高 Flink 应用程序的性能。如果你不熟悉 Flink，你可以阅读其他介绍性的文章，比如这个，这个和这个。如果你已经熟悉 Apache Flink，本文将帮助你更快地创建应用程序。 1. 使用 Flink tuples当你使用像 groupBy，join 或 keyBy 这样的操作时， Flink 提">
+<meta name="keywords" content="Flink,Flink 优化">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Stream Exactly once 未必严格一次">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/11/Stream/Exactly once未必严格一次/index.html">
+<meta property="og:title" content="Flink 四种优化Flink应用程序的方法">
+<meta property="og:url" content="http://sjf0115.github.io/2018/02/11/four-ways-to-optimize-your-flink-applications/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta property="og:description" content="Flink 是一个复杂的框架，并提供了许多方法来调整其执行。在本文中，我将展示四种不同的方法来提高 Flink 应用程序的性能。如果你不熟悉 Flink，你可以阅读其他介绍性的文章，比如这个，这个和这个。如果你已经熟悉 Apache Flink，本文将帮助你更快地创建应用程序。 1. 使用 Flink tuples当你使用像 groupBy，join 或 keyBy 这样的操作时， Flink 提">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.616Z">
+<meta property="og:updated_time" content="2018-02-12T08:19:39.132Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Stream Exactly once 未必严格一次">
-<meta name="twitter:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
+<meta name="twitter:title" content="Flink 四种优化Flink应用程序的方法">
+<meta name="twitter:description" content="Flink 是一个复杂的框架，并提供了许多方法来调整其执行。在本文中，我将展示四种不同的方法来提高 Flink 应用程序的性能。如果你不熟悉 Flink，你可以阅读其他介绍性的文章，比如这个，这个和这个。如果你已经熟悉 Apache Flink，本文将帮助你更快地创建应用程序。 1. 使用 Flink tuples当你使用像 groupBy，join 或 keyBy 这样的操作时， Flink 提">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/11/Stream/Exactly once未必严格一次/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/02/11/four-ways-to-optimize-your-flink-applications/"/>
 
 
-  <title>Stream Exactly once 未必严格一次 | SmartSi</title>
+  <title>Flink 四种优化Flink应用程序的方法 | SmartSi</title>
   
 
 
@@ -308,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/11/Stream/Exactly once未必严格一次/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/11/four-ways-to-optimize-your-flink-applications/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -325,7 +319,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Stream Exactly once 未必严格一次</h2>
+          <h2 class="post-title" itemprop="name headline">Flink 四种优化Flink应用程序的方法</h2>
         
 
         <div class="post-meta">
@@ -337,7 +331,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T11:18:01+08:00">2018-01-11</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-11T10:39:01+08:00">2018-02-11</time>
             
 
             
@@ -357,7 +351,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Stream/" itemprop="url" rel="index"><span itemprop="name">Stream</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
 
                 
                 
@@ -371,7 +365,7 @@
 
           
           
-             <span id="/2018/01/11/Stream/Exactly once未必严格一次/" class="leancloud_visitors" data-flag-title="Stream Exactly once 未必严格一次">
+             <span id="/2018/02/11/four-ways-to-optimize-your-flink-applications/" class="leancloud_visitors" data-flag-title="Flink 四种优化Flink应用程序的方法">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -402,77 +396,45 @@
       
 
       
-        <p>分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很多 SPE 均宣称可提供”严格一次”的处理语义。</p>
-<p>然而<code>exactly-once</code>具体指什么，需要具备哪些能力，当 SPE 宣称可支持时这实际上意味着什么，对于这些问题还有很多误解和歧义。使用<code>exactly-once</code>来描述处理语义，这本身也容易造成误导。本文将探讨各大主要 SPE 在<code>exactly-once</code>处理语义方面的差异，以及为什么<code>exactly-once</code>更适合称之为<code>有效一次</code>(Effectively-once)。同时本文还将探讨在实现所谓<code>exactly-once</code>的语义过程中，各类常用技术之间需要进行的取舍。</p>
-<h3 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h3><p>流处理通常也被称之为事件处理，简单来说是指持续不断地处理一系列无穷无尽地数据或事件地过程。流处理或事件处理应用程序大致可以看作一种有向图，大部分情况（但也并非总是如此）下也可以看作有向无环图（Directed acyclic graph，DAG）。在这种图中，每个边（Edge）可代表一个数据或事件流，每个顶点（Vertex）代表使用应用程序定义的逻辑处理来自相邻边的数据或事件的算子（Operator）。有两种特殊类型的顶点，通常称之为 <code>Source</code> 和 <code>Sink</code>，<code>Source</code> 会消耗外部数据/事件并将其注入应用程序，而<code>Sink</code>通常负责收集应用程序生成的结果。图1展示了这样的一个流应用程序范例。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true" alt=""></p>
-<p>执行流/事件处理应用程序的 SPE 通常可供用户指定可靠性模式或处理语义，这代表了在跨越整个应用程序图处理数据时所能提供的保证。这些保证是有一定意义的，因为我们始终可以假设由于网络、计算机等原因遇到失败进而导致数据丢失的概率。在描述 SPE 能为应用程序提供的数据处理语义时，通常会使用三种模式 / 标签：<code>最多一次</code>（At-most-once）、<code>最少一次</code>（At-least-once），以及<code>严格一次</code>（Exactly-once）。<br>这些不同处理语义可粗略理解如下：</p>
-<h3 id="2-最多一次"><a href="#2-最多一次" class="headerlink" title="2. 最多一次"></a>2. 最多一次</h3><p>这其实是一种”尽力而为”的方法。数据或事件可以保证被应用程序中的所有算子最多处理一次。这意味着如果在流应用程序最终成功处理之前就已丢失，则不会额外试图重试或重新传输事件。图2列举了一个范例。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true" alt=""></p>
-<h3 id="3-最少一次"><a href="#3-最少一次" class="headerlink" title="3. 最少一次"></a>3. 最少一次</h3><p>数据或事件可保证被应用程序图中的所有算子最少处理一次。这通常意味着如果在流应用程序最终成功处理之前就已丢失，那么事件将从来源重播（Replayed）或重新传输。然而因为可以重新传输，有时候一个事件可能被多次处理，因此这种方式被称之为”最少一次”。图3展示了一个范例。在本例中，第一个算子最初处理事件时失败了，随后重试并成功，然后第二次重试并再次成功，然而第二次重试实际上是不必要的。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true" alt=""></p>
-<h3 id="3-严格一次"><a href="#3-严格一次" class="headerlink" title="3. 严格一次"></a>3. 严格一次</h3><p>事件可保证被流应用程序中的所有算子“严格一次”处理，哪怕遇到各种失败。<br>为了实现<code>exactly-once</code>处理语义，通常主要会使用下列两种机制：</p>
+        <p><code>Flink</code> 是一个复杂的框架，并提供了许多方法来调整其执行。在本文中，我将展示四种不同的方法来提高 <code>Flink</code> 应用程序的性能。如果你不熟悉 <code>Flink</code>，你可以阅读其他介绍性的文章，比如<a href="https://brewing.codes/2017/09/25/flink-vs-spark/" target="_blank" rel="noopener">这个</a>，<a href="https://brewing.codes/2017/10/01/start-flink-batch/" target="_blank" rel="noopener">这个</a>和<a href="https://brewing.codes/2017/10/09/start-flink-streaming/" target="_blank" rel="noopener">这个</a>。如果你已经熟悉 <code>Apache Flink</code>，本文将帮助你更快地创建应用程序。</p>
+<h3 id="1-使用-Flink-tuples"><a href="#1-使用-Flink-tuples" class="headerlink" title="1. 使用 Flink tuples"></a>1. 使用 Flink tuples</h3><p>当你使用像 <code>groupBy</code>，<code>join</code> 或 <code>keyBy</code> 这样的操作时， <code>Flink</code> 提供了多种方式在数据集中选择<code>key</code>。你可以使用 <code>key</code> 选择器函数：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Join movies and ratings datasets</span></span><br><span class="line">movies.join(ratings)</span><br><span class="line">      <span class="comment">// Use movie id as a key in both cases</span></span><br><span class="line">      .where(<span class="keyword">new</span> KeySelector&lt;Movie, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Movie m)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> m.getId();</span><br><span class="line">            &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">      .equalTo(<span class="keyword">new</span> KeySelector&lt;Rating, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Rating r)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> r.getMovieId();</span><br><span class="line">            &#125;</span><br><span class="line">      &#125;)</span><br></pre></td></tr></table></figure></p>
+<p>或者你可以在 <code>POJO</code> 类型中指定一个字段名称：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">movies.join(ratings)</span><br><span class="line">    <span class="comment">// Use same fields as in the previous example</span></span><br><span class="line">    .where(<span class="string">"id"</span>)</span><br><span class="line">    .equalTo(<span class="string">"movieId"</span>)</span><br></pre></td></tr></table></figure></p>
+<p>但是，如果你正在使用 <code>Flink</code> <code>tuple</code> 类型，你可以简单地指定将要作为 <code>key</code> 的字段在元组中的位置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String, String&gt;&gt; movies ...</span><br><span class="line">DataSet&lt;Tuple3&lt;String, String, Double&gt;&gt; ratings ...</span><br><span class="line"></span><br><span class="line">movies.join(ratings)</span><br><span class="line">    <span class="comment">// Specify fields positions in tuples</span></span><br><span class="line">    .where(<span class="number">0</span>)</span><br><span class="line">    .equalTo(<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<p>最后一种方式会给你最好的性能，但可读性呢？ 这是否意味着你的代码现在看起来像这样：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; result = movies.join(ratings)</span><br><span class="line">    .where(<span class="number">0</span>)</span><br><span class="line">    .equalTo(<span class="number">0</span>)</span><br><span class="line">    .with(<span class="keyword">new</span> JoinFunction&lt;Tuple2&lt;Integer,String&gt;, Tuple2&lt;Integer,Double&gt;, Tuple3&lt;Integer, String, Double&gt;&gt;() &#123;</span><br><span class="line">        <span class="comment">// What is happening here?</span></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Tuple3&lt;Integer, String, Double&gt; <span class="title">join</span><span class="params">(Tuple2&lt;Integer, String&gt; first, Tuple2&lt;Integer, Double&gt; second)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// Some tuples are joined with some other tuples and some fields are returned???</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(first.f0, first.f1, second.f1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>在这种情况下，提高可读性的常见方法是创建一个继承自 <code>TupleX</code> 类的类，并为这些字段实现 <code>getter</code> 和 <code>setter</code> 方法。在这里，下面是 <code>Flink</code> <code>Gelly</code> 库的 <code>Edge</code> 类的大体实现，具有三个字段并继承了 <code>Tuple3</code> 类：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Edge</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">Tuple3</span>&lt;<span class="title">K</span>, <span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Edge</span><span class="params">(K source, K target, V value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.f0 = source;</span><br><span class="line">        <span class="keyword">this</span>.f1 = target;</span><br><span class="line">        <span class="keyword">this</span>.f2 = value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Getters and setters for readability</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSource</span><span class="params">(K source)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.f0 = source;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> K <span class="title">getSource</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.f0;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Also has getters and setters for other fields</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-重用-Flink对象"><a href="#2-重用-Flink对象" class="headerlink" title="2. 重用 Flink对象"></a>2. 重用 Flink对象</h3><p>另一个可以用来提高 <code>Flink</code> 应用程序性能的方法是当你从自定义函数中返回数据时使用可变对象。看看这个例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">    .apply(new WindowFunction&lt;WikipediaEditEvent, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        @Override</span><br><span class="line">        public void apply(String userName, TimeWindow timeWindow, Iterable&lt;WikipediaEditEvent&gt; iterable, Collector&lt;Tuple2&lt;String, Long&gt;&gt; collector) throws Exception &#123;</span><br><span class="line">            long changesCount</span><br><span class="line">            // A new Tuple instance is created on every execution</span><br><span class="line">            collector.collect(new Tuple2&lt;&gt;(userName, changesCount));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>正如你所看到的，在 <code>apply</code> 函数的每次执行中，我们都创建一个 <code>Tuple2</code> 类型的实例，这会给垃圾收集器造成很大压力。解决这个问题的一种方法是重复使用同一个实例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">    .apply(new WindowFunction&lt;WikipediaEditEvent, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        // Create an instance that we will reuse on every call</span><br><span class="line">        private Tuple2&lt;String, Long&gt; result = new Tuple&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        public void apply(String userName, TimeWindow timeWindow, Iterable&lt;WikipediaEditEvent&gt; iterable, Collector&lt;Tuple2&lt;String, Long&gt;&gt; collector) throws Exception &#123;</span><br><span class="line">            long changesCount = ...</span><br><span class="line"></span><br><span class="line">            // Set fields on an existing object instead of creating a new one</span><br><span class="line">            result.f0 = userName;</span><br><span class="line">            // Auto-boxing!! A new Long value may be created</span><br><span class="line">            result.f1 = changesCount;</span><br><span class="line"></span><br><span class="line">            // Reuse the same Tuple2 object</span><br><span class="line">            collector.collect(result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述代码会更好些。虽然我们在每次调用的时候只创建了一个 <code>Tuple2</code> 实例，但是我们还是间接地创建了 <code>Long</code> 类型的实例。为了解决这个问题， <code>Flink</code> 提供了很多的值类（value classes），<code>IntValue</code>, <code>LongValue</code>, <code>StringValue</code>, <code>FloatValue</code> 等。这些类的目的是为内置类型提供可变版本，所以我们可以在用户自定义函数中重用这些类型，下面就是如何使用的例子：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">    .apply(new WindowFunction&lt;WikipediaEditEvent, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        // Create a mutable count instance</span><br><span class="line">        private LongValue count = new IntValue();</span><br><span class="line">        // Assign mutable count to the tuple</span><br><span class="line">        private Tuple2&lt;String, LongValue&gt; result = new Tuple&lt;&gt;(&quot;&quot;, count);</span><br><span class="line"></span><br><span class="line">        @Override</span><br><span class="line">        // Notice that now we have a different return type</span><br><span class="line">        public void apply(String userName, TimeWindow timeWindow, Iterable&lt;WikipediaEditEvent&gt; iterable, Collector&lt;Tuple2&lt;String, LongValue&gt;&gt; collector) throws Exception &#123;</span><br><span class="line">            long changesCount = ...</span><br><span class="line"></span><br><span class="line">            // Set fields on an existing object instead of creating a new one</span><br><span class="line">            result.f0 = userName;</span><br><span class="line">            // Update mutable count value</span><br><span class="line">            count.setValue(changesCount);</span><br><span class="line"></span><br><span class="line">            // Reuse the same tuple and the same LongValue instance</span><br><span class="line">            collector.collect(result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面这些使用习惯在 <code>Flink</code> 类库中被普遍使用，比如 <code>Flink</code> <code>Gelly</code>。</p>
+<h3 id="3-使用函数注解"><a href="#3-使用函数注解" class="headerlink" title="3. 使用函数注解"></a>3. 使用函数注解</h3><p>优化 <code>Flink</code> 应用程序的另一种方法是提供关于用户自定义函数对输入数据做什么的一些信息。由于 <code>Flink</code> 无法解析和理解代码，因此你可以提供关键信息，这将有助于构建更高效的执行计划。有三个注解我们可以使用：</p>
 <ul>
-<li>分布式快照/状态检查点</li>
-<li>最少一次事件交付，外加消息去重</li>
+<li><code>@ForwardedFields</code> - 指定输入值中的哪些字段保持不变并在输出值中使用。</li>
+<li><code>@NotForwardedFields</code> - 指定在输出中同一位置不保留的字段。</li>
+<li><code>@ReadFields</code> - 指定用于计算结果值的字段。你只能指定那些在计算中使用的字段，而不是仅仅将数据拷贝到输出中的字段。</li>
 </ul>
-<p>通过分布式快照/状态检查点方法实现的<code>exactly-once</code>是由 <a href="http://lamport.azurewebsites.net/pubs/chandy.pdf" target="_blank" rel="noopener">Chandy-Lamport 分布式快照算法</a>启发而来的。在这种机制中，会定期为流应用程序中每个算子的所有状态创建检查点，一旦系统中任何位置出现失败，每个算子的所有状态会回滚至最新的全局一致检查点。回滚过程中所有处理工作会暂停。随后源也会重置为与最新检查点相符的偏移量。整个流应用程序基本上会被回退到最新一致状态，并从该状态开始重新处理。图4展示了这种机制的一些基本概念。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true" alt=""></p>
-<p>在图4中，流应用程序在 T1 时正在正常运行，并创建了状态检查点。然而在 T2 时，算子在处理传入的数据时失败了。此时 <code>S = 4</code> 这个状态值已经被保存到持久存储中，而 <code>S = 12</code> 状态值正位于算子的内存中。为了解决这种差异，在 T3 时处理图将状态回退至 <code>S = 4</code>，并”重播”流中每个连续状态直到最新状态，并处理每个数据。最终结果是有些数据被处理了多次，但这也没问题，因为无论回滚多少次，结果状态都是相同的。</p>
-<p>实现<code>exactly-once</code>的另一种方法是在实现至少一次事件交付的同时在每个算子一端进行事件去重。使用这种方法的 SPE 会重播失败的事件并再次尝试处理，并从每个算子中移除重复的事件，随后才将结果事件发送给用户在算子中定义的逻辑。这种机制要求为每个算子保存事务日志，借此才能追踪哪些事件已经处理过了。为此 SPE 通常会使用诸如 Google 的 MillWheel 以及 Apache Kafka Streams 等机制。图 5 展示了这种机制的概况。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true" alt=""></p>
-<h3 id="4-严格一次真的就一次吗？"><a href="#4-严格一次真的就一次吗？" class="headerlink" title="4. 严格一次真的就一次吗？"></a>4. 严格一次真的就一次吗？</h3><p>接着重新考虑一下<code>exactly-once</code>处理语义实际上能为最终用户提供怎样的保证。<code>exactly-once</code>这样的标签对于描述严格一次起到了一定的误导效果。</p>
-<p>有些人可能认为<code>exactly-once</code>描述了一种保证：在事件处理过程中，流中的每个事件只被处理一次。但实际上没有一个 SPE 能完全保证只处理一次。面对各种可能的失败，根本不可能保证每个算子中由用户自定义的逻辑针对每个事件只执行一次，因为用户代码的不完整执行（Partial execution）这种可能性始终会出现。</p>
-<p>假设这样一个场景：有个流处理算子需要执行 <code>Map</code> 操作输出传入事件的 <code>ID</code>，随后原样返回事件。例如这个操作可能使用了如下的虚构代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Map (Event event) &#123;</span><br><span class="line">    Print &quot;Event ID: &quot; + event.getId()</span><br><span class="line">    Return event</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>每个事件有自己的 GUID（全局唯一 ID）。如果用户逻辑严格一次执行可以得到保证，那么事件 ID 只输出一次。然而这一点永远无法保证，因为用户自定义的逻辑执行过程中可能随时随地面临失败。SPE 无法自行判断用户自定义的逻辑到底执行到哪一步了。因此任何用户自定义逻辑都无法保证只执行一次。这也意味着用户自定义逻辑中实现的外部操作，例如数据库写入也无法严格保证只执行一次。此类操作依然需要通过幂等的方式实现。</p>
-<p>那么当 SPE 宣称提供<code>exactly-once</code>的处理语义保证时，它们指的到底是什么？如果用户逻辑无法严格保证只执行一次，那么到底是什么东西只执行了一次？当 SPE 宣称<code>exactly-once</code>处理语义时，它们真正的含义在于可以保证在对 SPE 管理的状态进行更新时，可以只向后端的持久存储提交一次。</p>
-<p>上文提到的两种机制均使用持久的后端存储作为事实来源（Source of truth），用于保存每个算子的状态，并自动提交状态更新。对于机制1（分布式快照/状态检查点），这个持久的后端存储可用于保存流应用程序中全局一致的状态检查点（每个算子的状态检查点）；对于机制2（至少一次事件交付，外加去重），这个持久的后端存储可用于保存每个算子的状态以及每个算子追踪已经被成功处理过事件的事务日志。</p>
-<p>状态提交或对事实来源的持久后端进行的更新可描述为事件（Occurring）的严格一次(The committing of state or applying updates to the durable backend that is the source of truth can be described as occurring exactly-once)。然而在计算状态的更新/改动，例如处理在事件上执行用户自定义逻辑的事件，但是如果出现失败则可能进行多次，这一点正如上文所述。换句话说，事件的处理可能会进行多次，但处理的效果只会在持久后端状态存储中体现一次。因此在这里我们认为”有效一次（Effectively-once）”术语可以更精确地描述这样的处理语义。</p>
-<h3 id="5-分布式快照与至少一次事件交付外加去重机制的对比"><a href="#5-分布式快照与至少一次事件交付外加去重机制的对比" class="headerlink" title="5. 分布式快照与至少一次事件交付外加去重机制的对比"></a>5. 分布式快照与至少一次事件交付外加去重机制的对比</h3><p>从语义的角度来看，分布式快照以及至少一次事件交付外加去重，这两种机制可以提供相同的保证。然而由于两种机制在实现方面的差异，有可能会产生明显的性能差异。</p>
-<p>基于机制1（分布式快照 / 状态检查点）的 SPE 在性能方面的开销可能是最低的，因为基本上，SPE 只需要在流应用程序正常处理事件的过程之外发送少量特殊事件，而状态检查点操作可以在后台以异步的方式进行。但是对于大型流应用程序，失败的概率会更高一点，这会导致 SPE 需要暂停应用程序并回滚所有算子的状态，这会对性能产生较大影响。流应用程序规模越大，遇到失败的频率就会越高，因此性能方面受到的影响也会越大。然而需要再次提醒的是，这种机制是非侵入式的，只会对资源的使用造成最少量的影响。</p>
-<p>机制2（至少一次事件交付外加去重）可能需要更多资源，尤其是存储资源。在这种机制中，SPE 需要能追踪已经被算子的每个实例成功处理的每个元组（Tuple），借此才能执行去重并实现自身在每个事件中的去重。这可能需要追踪非常大量的数据，尤其是当流应用程序规模非常大，或运行了很多应用程序的时候。每个算子中的每个事件执行去重操作，这本身也会产生巨大的性能开销。然而对于这种机制，流应用程序的性能不太可能受到应用程序规模的影响。对于机制 1，如果任何算子遇到任何失败，均需要全局暂停并状态回滚；对于机制 2，失败只能影响到局部。如果某个算子遇到失败，只需要从上游来源重播 / 重新传输尚未成功处理的事件，对性能的影响可隔离在流应用程序中实际发生失败的地方，只会对流应用程序中其他算子的性能产生最少量的影响。从性能的角度来看，两种机制各有利弊，具体情况可参阅下文表格:</p>
-<p>分布式快照/状态检查点</p>
-<table>
-<thead>
-<tr>
-<th>利</th>
-<th>弊</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>性能和资源开销小</td>
-<td>从失败中恢复时的性能影响大</td>
-</tr>
-<tr>
-<td></td>
-<td>随着拓扑规模的增大，对性能的潜在影响增高</td>
-</tr>
-</tbody>
-</table>
-<p>至少一次交付外加去重</p>
-<table>
-<thead>
-<tr>
-<th>利</th>
-<th>弊</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>失败对性能的影响更为局部</td>
-<td>可能需要大量的存储与基础设施的支持</td>
-</tr>
-<tr>
-<td>失败的影响未必会随着拓扑规模一起增加</td>
-<td>每个算子处理每个事件均会产生性能开销</td>
-</tr>
-</tbody>
-</table>
-<p>虽然从理论上看，分布式快照，和至少一次事件交付外加去重，这两种机制之间存在差异，但两者均可理解为至少一次处理外加幂等。对于这两种机制，如果遇到失败事件将会重播/重新传输（为了实现至少一次），而在状态回滚或事件去重时，如果从内部更新所管理的状态，算子实际上将具备幂等的特性。</p>
-<h3 id="6-结论"><a href="#6-结论" class="headerlink" title="6. 结论"></a>6. 结论</h3><p>希望本文可以帮助大家意识到<code>exactly-once</code>这个术语极具误导性。提供<code>exactly-once</code>的处理语义实际上意味着在对流处理引擎所管理的算子的状态进行不同更新只会影响一次。<code>exactly-once</code>完全无法保证事件的处理（例如执行各类用户定义的逻辑）只需要进行一次。因此这里我们更愿意使用有效一次这个术语来描述这种保证，因为没必要确保处理工作只进行一次，只要保证由 SPE 管理的状态的最终结果只影响一次就够了。分布式快照和消息去重，这两种主流机制就是为了实现严格/有效一次的处理语义。在消息处理和状态更新方面，这两种机制均可提供相同的语义保证，但在性能方面可能有所差异。本文并不是为了探讨哪种机制更胜一筹，因为每种机制都各有利弊。</p>
-<p>原文:<a href="https://streaml.io/blog/exactly-once/" target="_blank" rel="noopener">https://streaml.io/blog/exactly-once/</a></p>
-<p>译文:<a href="https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw</a></p>
+<p>我们来看看如何使用 <code>ForwardedFields</code> 注解：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Specify that the first element is copied without any changes</span></span><br><span class="line"><span class="meta">@ForwardedFields</span>(<span class="string">"0"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyFunction</span> <span class="keyword">implements</span> <span class="title">MapFunction</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">Long</span>, <span class="title">Double</span>&gt;, <span class="title">Tuple2</span>&lt;<span class="title">Long</span>, <span class="title">Double</span>&gt;&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple2&lt;Long, Double&gt; <span class="title">map</span><span class="params">(Tuple2&lt;Long, Double&gt; value)</span> </span>&#123;</span><br><span class="line">       <span class="comment">// Copy first field without change</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple2&lt;&gt;(value.f0, value.f1 + <span class="number">123</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述代码意味着输入元组的第一个元素将不会改变，并且在返回时也处于同一个位置（译者注：第一个位置）。</p>
+<p>如果你不改变字段，只是简单地将它移到不同的位置上，你同样可以使用 <code>ForwardedFields</code> 注解来实现。下面例子中，我们简单地将输入元组的字段进行交换（译者注：第一个字段移到第二个位置，第二个字段移到第一个位置）：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 1st element goes into the 2nd position, and 2nd element goes into the 1st position</span></span><br><span class="line"><span class="meta">@ForwardedFields</span>(<span class="string">"0-&gt;1; 1-&gt;0"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SwapArguments</span> <span class="keyword">implements</span> <span class="title">MapFunction</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">Long</span>, <span class="title">Double</span>&gt;, <span class="title">Tuple2</span>&lt;<span class="title">Double</span>, <span class="title">Long</span>&gt;&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple2&lt;Double, Long&gt; <span class="title">map</span><span class="params">(Tuple2&lt;Long, Double&gt; value)</span> </span>&#123;</span><br><span class="line">       <span class="comment">// Swap elements in a tuple</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple2&lt;&gt;(value.f1, value.f0);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面例子中提到的注解只能应用到只有一个输入参数的函数中，比如 <code>map</code> 或者 <code>flatMap</code>。如果你有两个输入参数的函数，你可以使用 <code>ForwardedFieldsFirst</code> 和 <code>ForwardedFieldsSecond</code> 注解分别为第一和第二个参数提供信息。</p>
+<p>下面我们看一下如何在 <code>JoinFunction</code> 接口的实现中使用这些注解（译者注：第一个输入元组的两个字段拷贝到输出元组的第一个和第二个位置，第二个输入元组的第二个字段拷贝到输出元组的第三个位置）：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Two fields from the input tuple are copied to the first and second positions of the output tuple</span></span><br><span class="line"><span class="meta">@ForwardedFieldsFirst</span>(<span class="string">"0; 1"</span>)</span><br><span class="line"><span class="comment">// The third field from the input tuple is copied to the third position of the output tuple</span></span><br><span class="line"><span class="meta">@ForwardedFieldsSecond</span>(<span class="string">"2"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyJoin</span> <span class="keyword">implements</span> <span class="title">JoinFunction</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">Integer</span>,<span class="title">String</span>&gt;, <span class="title">Tuple2</span>&lt;<span class="title">Integer</span>,<span class="title">Double</span>&gt;, <span class="title">Tuple3</span>&lt;<span class="title">Integer</span>, <span class="title">String</span>, <span class="title">Double</span>&gt;&gt;() </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple3&lt;Integer, String, Double&gt; <span class="title">join</span><span class="params">(Tuple2&lt;Integer, String&gt; first, Tuple2&lt;Integer, Double&gt; second)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(first.f0, first.f1, second.f1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p><code>Flink</code> 同样提供了 <code>NotForwardedFieldsFirst</code>, <code>NotForwardedFieldsSecond</code>, <code>ReadFieldsFirst</code>, 和 <code>ReadFirldsSecond</code> 注解来实现同样的功能。</p>
+<h3 id="4-选择-join-类型"><a href="#4-选择-join-类型" class="headerlink" title="4. 选择 join 类型"></a>4. 选择 join 类型</h3><p>如果你告诉 <code>Flink</code> 一些信息，可以加快 <code>join</code> 的速度，但在讨论它为什么会起作用之前，让我们先来谈谈 <code>Flink</code> 是如何执行 <code>join</code>的。</p>
+<p>当 <code>Flink</code> 处理批量数据时，集群中的每台机器都存储了部分数据。要执行 <code>join</code> 操作，<code>Flink</code> 需要找到两个两个数据集中满足 <code>join</code> 条件的所有记录对（译者注：<code>key</code> 相同的数据）。 要做到这一点，<code>Flink</code> 首先必须将两个数据集中具有相同 <code>key</code> 的数据放在集群中的同一台机器上。有两种策略：</p>
+<ul>
+<li><code>Repartition-Repartition</code> 策略：在这种场景下，根据它们的 <code>key</code> 对两个数据集进行重新分区，通过网络发送数据。这就意味着如果数据集非常大，这将花费大量的时间将数据在网络之间进行复制。</li>
+<li><code>Broadcast-Forward</code> 策略：在这种场景下，一个数据集保持不变，将第二个数据集拷贝到集群上第二个数据集拥有第一个数据集部分数据的所有机器上（译者注：将达尔戈数据集进行分发到对应机器上）。</li>
+</ul>
+<p>如果用一个较大的数据集与一个小数据集进行 <code>join</code>，你可以使用 <code>Broadcast-Forward</code> 策略并避免对第一个数据集进行重分区的昂贵代价。这很容易做到：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ds1.join(ds2, JoinHint.BROADCAST_HASH_FIRST)</span><br></pre></td></tr></table></figure></p>
+<p>这表示第一个数据集比第二个数据集小得多。</p>
+<p><code>Flink</code> 支持的其他 <code>join</code> 提示有以下几种：</p>
+<ul>
+<li><code>BROADCAST_HASH_SECOND</code> – 表示第二个数据集比较小</li>
+<li><code>REPARTITION_HASH_FIRST</code> – 表示第一个数据集比较小</li>
+<li><code>REPARTITION_HASH_SECOND</code> – 表示第二个数据集有点小</li>
+<li><code>REPARTITION_SORT_MERGE</code> – 表示对两个数据集重新分区并使用排序和合并策略</li>
+<li><code>OPTIMIZER_CHOOSES</code> – <code>Flink</code> 优化器将决定如何连接数据集</li>
+</ul>
+<p>原文： <a href="https://brewing.codes/2017/10/17/flink-optimize/" target="_blank" rel="noopener">https://brewing.codes/2017/10/17/flink-optimize/</a></p>
 
       
     </div>
@@ -519,7 +481,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Stream/" rel="tag"># Stream</a>
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-优化/" rel="tag"># Flink 优化</a>
           
         </div>
       
@@ -532,8 +496,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/11/Stream/[Stream]对于流处理技术的谬见/" rel="next" title="Stream 对于流处理技术的谬见">
-                <i class="fa fa-chevron-left"></i> Stream 对于流处理技术的谬见
+              <a href="/2018/02/10/jvm-common-garbage-collector/" rel="next" title="JVM 垃圾收集器">
+                <i class="fa fa-chevron-left"></i> JVM 垃圾收集器
               </a>
             
           </div>
@@ -542,8 +506,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/15/Flink/[Flink]Flink1.4 生成时间戳与Watermarks/" rel="prev" title="Flink1.4 生成时间戳与Watermarks">
-                Flink1.4 生成时间戳与Watermarks <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/11/how-flink-handles-backpressure/" rel="prev" title="Flink1.4 处理背压">
+                Flink1.4 处理背压 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -760,7 +724,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-背景"><span class="nav-number">1.</span> <span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-最多一次"><span class="nav-number">2.</span> <span class="nav-text">2. 最多一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-最少一次"><span class="nav-number">3.</span> <span class="nav-text">3. 最少一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-严格一次"><span class="nav-number">4.</span> <span class="nav-text">3. 严格一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-严格一次真的就一次吗？"><span class="nav-number">5.</span> <span class="nav-text">4. 严格一次真的就一次吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-分布式快照与至少一次事件交付外加去重机制的对比"><span class="nav-number">6.</span> <span class="nav-text">5. 分布式快照与至少一次事件交付外加去重机制的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-结论"><span class="nav-number">7.</span> <span class="nav-text">6. 结论</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-Flink-tuples"><span class="nav-number">1.</span> <span class="nav-text">1. 使用 Flink tuples</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-重用-Flink对象"><span class="nav-number">2.</span> <span class="nav-text">2. 重用 Flink对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用函数注解"><span class="nav-number">3.</span> <span class="nav-text">3. 使用函数注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-选择-join-类型"><span class="nav-number">4.</span> <span class="nav-text">4. 选择 join 类型</span></a></li></ol></div>
             
 
           </div>
