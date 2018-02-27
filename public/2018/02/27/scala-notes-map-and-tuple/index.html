@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Scala," />
+
+
+<meta name="description" content="1. 构造映射可以使用如下命令构造一个映射:scala&amp;gt; val scores = Map(&quot;Alice&quot; -&amp;gt; 90, &quot;Kim&quot; -&amp;gt; 89, &quot;Bob&quot;-&amp;gt; 98)scores: scala.collection.immutable.Map[String,Int] = Map(Alice -&amp;gt; 90, Kim -&amp;gt; 89, Bob -&amp;gt; 98) 上面">
+<meta name="keywords" content="Scala">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scala 学习笔记之Map与Tuple">
+<meta property="og:url" content="http://sjf0115.github.io/2018/02/27/scala-notes-map-and-tuple/index.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 构造映射可以使用如下命令构造一个映射:scala&amp;gt; val scores = Map(&quot;Alice&quot; -&amp;gt; 90, &quot;Kim&quot; -&amp;gt; 89, &quot;Bob&quot;-&amp;gt; 98)scores: scala.collection.immutable.Map[String,Int] = Map(Alice -&amp;gt; 90, Kim -&amp;gt; 89, Bob -&amp;gt; 98) 上面">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-02-27T02:48:24.167Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Scala 学习笔记之Map与Tuple">
+<meta name="twitter:description" content="1. 构造映射可以使用如下命令构造一个映射:scala&amp;gt; val scores = Map(&quot;Alice&quot; -&amp;gt; 90, &quot;Kim&quot; -&amp;gt; 89, &quot;Bob&quot;-&amp;gt; 98)scores: scala.collection.immutable.Map[String,Int] = Map(Alice -&amp;gt; 90, Kim -&amp;gt; 89, Bob -&amp;gt; 98) 上面">
+
+
+
+
+
+
+  <link rel="canonical" href="http://sjf0115.github.io/2018/02/27/scala-notes-map-and-tuple/"/>
+
+
+  <title>Scala 学习笔记之Map与Tuple | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/27/scala-notes-map-and-tuple/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Scala 学习笔记之Map与Tuple</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-27T09:40:01+08:00">2018-02-27</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Scala/" itemprop="url" rel="index"><span itemprop="name">Scala</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/02/27/scala-notes-map-and-tuple/" class="leancloud_visitors" data-flag-title="Scala 学习笔记之Map与Tuple">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-构造映射"><a href="#1-构造映射" class="headerlink" title="1. 构造映射"></a>1. 构造映射</h3><p>可以使用如下命令构造一个映射:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = <span class="type">Map</span>(<span class="string">"Alice"</span> -&gt; <span class="number">90</span>, <span class="string">"Kim"</span> -&gt; <span class="number">89</span>, <span class="string">"Bob"</span>-&gt; <span class="number">98</span>)</span><br><span class="line">scores: scala.collection.immutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>, <span class="type">Bob</span> -&gt; <span class="number">98</span>)</span><br></pre></td></tr></table></figure></p>
+<p>上面构造了一个不可变的Map[String, Int]，其值也不能被改变．如果想要一个可变映射，使用如下命令创建:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = scala.collection.mutable.<span class="type">Map</span>(<span class="string">"Alice"</span> -&gt; <span class="number">90</span>, <span class="string">"Kim"</span> -&gt; <span class="number">89</span>, <span class="string">"Bob"</span>-&gt; <span class="number">98</span>)</span><br><span class="line">scores: scala.collection.mutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Bob</span> -&gt; <span class="number">98</span>, <span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br></pre></td></tr></table></figure></p>
+<p>如果只想创建一个空的映射:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = <span class="keyword">new</span> scala.collection.mutable.<span class="type">HashMap</span>[<span class="type">String</span>, <span class="type">Int</span>]</span><br><span class="line">scores: scala.collection.mutable.<span class="type">HashMap</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>()</span><br></pre></td></tr></table></figure></p>
+<p>从上面我们可以知道使用<code>-&gt;</code>操作符来创建映射的键值对元素<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;Alice&quot; -&gt; 90</span><br></pre></td></tr></table></figure></p>
+<p>我们也可以使用下面的方式定义映射:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = <span class="type">Map</span>((<span class="string">"Alice"</span>,<span class="number">90</span>), (<span class="string">"Kim"</span>,<span class="number">89</span>), (<span class="string">"Bob"</span>,<span class="number">98</span>))</span><br><span class="line">scores: scala.collection.immutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>, <span class="type">Bob</span> -&gt; <span class="number">98</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-获取映射中的值"><a href="#2-获取映射中的值" class="headerlink" title="2. 获取映射中的值"></a>2. 获取映射中的值</h3><p>可以使用<code>()</code>来查找某个键对应的值:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> bobscores = scores(<span class="string">"Bob"</span>)</span><br><span class="line">bobscores: <span class="type">Int</span> = <span class="number">98</span></span><br></pre></td></tr></table></figure></p>
+<p>如果映射中并不包含对应键的值，则会抛出异常，这与Java返回<code>null</code>不同:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> tomScores = scores(<span class="string">"Tom"</span>)</span><br><span class="line">java.util.<span class="type">NoSuchElementException</span>: key not found: <span class="type">Tom</span></span><br><span class="line">  at scala.collection.<span class="type">MapLike</span>$<span class="class"><span class="keyword">class</span>.<span class="title">default</span>(<span class="params"><span class="type">MapLike</span>.scala:228</span>)</span></span><br><span class="line"><span class="class">  <span class="title">at</span> <span class="title">scala</span>.<span class="title">collection</span>.<span class="title">AbstractMap</span>.<span class="title">default</span>(<span class="params"><span class="type">Map</span>.scala:59</span>)</span></span><br><span class="line"><span class="class">  <span class="title">at</span> <span class="title">scala</span>.<span class="title">collection</span>.<span class="title">MapLike$class</span>.<span class="title">apply</span>(<span class="params"><span class="type">MapLike</span>.scala:141</span>)</span></span><br><span class="line"><span class="class">  <span class="title">at</span> <span class="title">scala</span>.<span class="title">collection</span>.<span class="title">AbstractMap</span>.<span class="title">apply</span>(<span class="params"><span class="type">Map</span>.scala:59</span>)</span></span><br><span class="line"><span class="class">  ... 32 <span class="title">elided</span></span></span><br></pre></td></tr></table></figure></p>
+<p>所以在获取某个键对应的值之前，要先检查映射中是否存在指定的键:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> tomScores = <span class="keyword">if</span>(scores.contains(<span class="string">"Tom"</span>)) scores(<span class="string">"Tom"</span>) <span class="keyword">else</span> <span class="number">0</span></span><br><span class="line">tomScores: <span class="type">Int</span> = <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>以下是一个快捷写法:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> tomScores = scores.getOrElse(<span class="string">"Tom"</span>, <span class="number">0</span>)</span><br><span class="line">tomScores: <span class="type">Int</span> = <span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="3-更新映射中的值"><a href="#3-更新映射中的值" class="headerlink" title="3. 更新映射中的值"></a>3. 更新映射中的值</h3><p>在可变映射中，可以更新某个映射的值，也可以添加一个新的键值对:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = scala.collection.mutable.<span class="type">Map</span>(<span class="string">"Alice"</span> -&gt; <span class="number">90</span>, <span class="string">"Kim"</span> -&gt; <span class="number">89</span>, <span class="string">"Bob"</span>-&gt; <span class="number">98</span>)</span><br><span class="line">scores: scala.collection.mutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Bob</span> -&gt; <span class="number">98</span>, <span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br><span class="line">scala&gt; scores(<span class="string">"Alice"</span>)=<span class="number">100</span> <span class="comment">// 更新键值对</span></span><br><span class="line">scala&gt; scores(<span class="string">"Tom"</span>)=<span class="number">67</span> <span class="comment">// 添加键值对</span></span><br><span class="line">scala&gt; println(scores)</span><br><span class="line"><span class="type">Map</span>(<span class="type">Bob</span> -&gt; <span class="number">98</span>, <span class="type">Tom</span> -&gt; <span class="number">67</span>, <span class="type">Alice</span> -&gt; <span class="number">100</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br></pre></td></tr></table></figure></p>
+<p>还可以使用<code>+=</code>操作符来添加多个关系:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; scores += (<span class="string">"Bob"</span> -&gt; <span class="number">78</span>, <span class="string">"Fred"</span> -&gt; <span class="number">89</span>)</span><br><span class="line">res3: scores.<span class="keyword">type</span> = <span class="type">Map</span>(<span class="type">Bob</span> -&gt; <span class="number">78</span>, <span class="type">Fred</span> -&gt; <span class="number">89</span>, <span class="type">Tom</span> -&gt; <span class="number">67</span>, <span class="type">Alice</span> -&gt; <span class="number">100</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br></pre></td></tr></table></figure></p>
+<p>还可以使用<code>-=</code>操作符移除某个键对应的值:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; scores -= <span class="string">"Tom"</span></span><br><span class="line">res4: scores.<span class="keyword">type</span> = <span class="type">Map</span>(<span class="type">Bob</span> -&gt; <span class="number">78</span>, <span class="type">Fred</span> -&gt; <span class="number">89</span>, <span class="type">Alice</span> -&gt; <span class="number">100</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br></pre></td></tr></table></figure></p>
+<p>虽然不可以更新一个不可变的映射，但是我们利用一些操作产生一个新的映射，并可以对原映射中的键值对进行修改或者添加新的键值对:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = <span class="type">Map</span>(<span class="string">"Alice"</span> -&gt; <span class="number">90</span>, <span class="string">"Kim"</span> -&gt; <span class="number">89</span>, <span class="string">"Bob"</span>-&gt; <span class="number">98</span>)</span><br><span class="line">scores: scala.collection.immutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>, <span class="type">Bob</span> -&gt; <span class="number">98</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> newScores = scores + (<span class="string">"Kim"</span> -&gt; <span class="number">78</span>, <span class="string">"Tom"</span> -&gt; <span class="number">54</span>)</span><br><span class="line">newScores: scala.collection.immutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Kim</span> -&gt; <span class="number">78</span>, <span class="type">Bob</span> -&gt; <span class="number">98</span>, <span class="type">Tom</span> -&gt; <span class="number">54</span>)</span><br></pre></td></tr></table></figure></p>
+<p>上例中scores是不可变映射，我们在它基础上对”Kim”进行了修改，添加了”Tom”，产生了一个新的映射newScores</p>
+<h3 id="4-迭代映射"><a href="#4-迭代映射" class="headerlink" title="4. 迭代映射"></a>4. 迭代映射</h3><p>可以使用如下命令迭代映射:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">for</span>( key &lt;- scores.keySet ) println(key + <span class="string">"---"</span> + scores(key))</span><br><span class="line"><span class="type">Alice</span>--<span class="number">-90</span></span><br><span class="line"><span class="type">Kim</span>--<span class="number">-89</span></span><br><span class="line"><span class="type">Bob</span>--<span class="number">-98</span></span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">for</span>( value &lt;- scores.values ) println(value)</span><br><span class="line"><span class="number">90</span></span><br><span class="line"><span class="number">89</span></span><br><span class="line"><span class="number">98</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="5-排序映射"><a href="#5-排序映射" class="headerlink" title="5. 排序映射"></a>5. 排序映射</h3><p>在操作映射时，我们需要选定一个映射(哈希表还是平衡树)．默认情况下，scala给的是哈希表．有时候我们想对键进行一个排序，顺序访问键，这就需要一个树形映射:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores = scala.collection.immutable.<span class="type">SortedMap</span>(<span class="string">"Alice"</span> -&gt; <span class="number">90</span>, <span class="string">"Kim"</span> -&gt; <span class="number">89</span>, <span class="string">"Bob"</span>-&gt; <span class="number">98</span>)</span><br><span class="line">scores: scala.collection.immutable.<span class="type">SortedMap</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>(<span class="type">Alice</span> -&gt; <span class="number">90</span>, <span class="type">Bob</span> -&gt; <span class="number">98</span>, <span class="type">Kim</span> -&gt; <span class="number">89</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="6-与Java互操作"><a href="#6-与Java互操作" class="headerlink" title="6. 与Java互操作"></a>6. 与Java互操作</h3><p>如果你有一个Java映射，想要转换为Scala映射，以便便捷的使用Scala映射的方法，只需要增加如下语句:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scala.collection.<span class="type">JavaConversions</span>.mapAsScalaMap</span><br></pre></td></tr></table></figure></p>
+<p>然后指定Scala映射类型来触发转换:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> scores : scala.collection.mutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="keyword">new</span> java.util.<span class="type">TreeMap</span>[<span class="type">String</span>, <span class="type">Int</span>]</span><br><span class="line">scores: scala.collection.mutable.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">Int</span>] = <span class="type">Map</span>()</span><br></pre></td></tr></table></figure></p>
+<p>还可以将java.util.Properties到Map[String, String]的转换:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">import</span> scala.collection.<span class="type">JavaConversions</span>.propertiesAsScalaMap</span><br><span class="line"><span class="keyword">import</span> scala.collection.<span class="type">JavaConversions</span>.propertiesAsScalaMap</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> props : scala.collection.<span class="type">Map</span>[<span class="type">String</span>, <span class="type">String</span>] = <span class="type">System</span>.getProperties()</span><br><span class="line">props: scala.collection.<span class="type">Map</span>[<span class="type">String</span>,<span class="type">String</span>] =</span><br><span class="line"><span class="type">Map</span>(env.emacs -&gt; <span class="string">""</span>, java.runtime.name -&gt; <span class="type">Java</span>(<span class="type">TM</span>) <span class="type">SE</span> <span class="type">Runtime</span> <span class="type">Environment</span>, sun.boot.library.path -&gt; /home/xiaosi/opt/jdk<span class="number">-1.8</span><span class="number">.0</span>/jre/lib/amd64, java.vm.version -&gt; <span class="number">25.91</span>-b14, java.vm.vendor -&gt; <span class="type">Oracle</span> <span class="type">Corporation</span>, ...</span><br></pre></td></tr></table></figure></p>
+<p>相反，如果想要把Scal映射转换为Java映射，只需要提供相反的隐式转换即可:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">import</span> scala.collection.<span class="type">JavaConversions</span>.mapAsJavaMap</span><br><span class="line"><span class="keyword">import</span> scala.collection.<span class="type">JavaConversions</span>.mapAsJavaMap</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">import</span> java.awt.font.<span class="type">TextAttribute</span>._ <span class="comment">// 引入下面的映射会用到的键</span></span><br><span class="line"><span class="keyword">import</span> java.awt.font.<span class="type">TextAttribute</span>._</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> attrs = <span class="type">Map</span>(<span class="type">FAMILY</span> -&gt; <span class="string">"Serif"</span>, <span class="type">SIZE</span> -&gt; <span class="number">12</span>) <span class="comment">// Scala映射</span></span><br><span class="line">attrs: scala.collection.immutable.<span class="type">Map</span>[java.awt.font.<span class="type">TextAttribute</span>,<span class="type">Any</span>] = <span class="type">Map</span>(java.awt.font.<span class="type">TextAttribute</span>(family) -&gt; <span class="type">Serif</span>, java.awt.font.<span class="type">TextAttribute</span>(size) -&gt; <span class="number">12</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> font = <span class="keyword">new</span> java.awt.<span class="type">Font</span>(attrs) <span class="comment">// Java映射</span></span><br><span class="line">font: java.awt.<span class="type">Font</span> = java.awt.<span class="type">Font</span>[family=<span class="type">Serif</span>,name=<span class="type">Serif</span>,style=plain,size=<span class="number">12</span>]</span><br></pre></td></tr></table></figure></p>
+<h3 id="7-元组Tuple"><a href="#7-元组Tuple" class="headerlink" title="7. 元组Tuple"></a>7. 元组Tuple</h3><p>元组是不同类型的值的聚合，元组的值通过将单个的值包含在圆括号中构成的：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> bobScore = (<span class="number">1</span>, <span class="number">98.5</span>, <span class="string">"Bob"</span>)</span><br><span class="line">bobScore: (<span class="type">Int</span>, <span class="type">Double</span>, <span class="type">String</span>) = (<span class="number">1</span>,<span class="number">98.5</span>,<span class="type">Bob</span>)</span><br></pre></td></tr></table></figure></p>
+<p>可以使用方法<code>_1</code>，<code>_2</code>，<code>_3</code>访问其组员:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> bobScore = (<span class="number">1</span>, <span class="number">98.5</span>, <span class="string">"Bob"</span>)</span><br><span class="line">bobScore: (<span class="type">Int</span>, <span class="type">Double</span>, <span class="type">String</span>) = (<span class="number">1</span>,<span class="number">98.5</span>,<span class="type">Bob</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; bobScore._1</span><br><span class="line">res10: <span class="type">Int</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">scala&gt; bobScore._3</span><br><span class="line">res11: <span class="type">String</span> = <span class="type">Bob</span></span><br></pre></td></tr></table></figure></p>
+<p>通常，使用模式匹配的方式来获取元组的组元:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> (id, score, name) = bobScore <span class="comment">// 将变量id赋值为1，变量score赋值为98.5，变量name赋值为Bob</span></span><br><span class="line">   <span class="keyword">val</span> bobScore: (<span class="type">Int</span>, <span class="type">Double</span>, <span class="type">String</span>)</span><br><span class="line"></span><br><span class="line">scala&gt; <span class="keyword">val</span> (id, score, name) = bobScore</span><br><span class="line">id: <span class="type">Int</span> = <span class="number">1</span></span><br><span class="line">score: <span class="type">Double</span> = <span class="number">98.5</span></span><br><span class="line">name: <span class="type">String</span> = <span class="type">Bob</span></span><br><span class="line"></span><br><span class="line">scala&gt; println(<span class="string">"name = "</span> + name + <span class="string">", score = "</span> + score + <span class="string">", name = "</span> + name)</span><br><span class="line">name = <span class="type">Bob</span>, score = <span class="number">98.5</span>, name = <span class="type">Bob</span></span><br></pre></td></tr></table></figure></p>
+<p>来源于： 快学Scala</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>您的支持将是我继续写作的动力！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Scala/" rel="tag"># Scala</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/27/scala-notes-array/" rel="next" title="Scala 学习笔记之数组">
+                <i class="fa fa-chevron-left"></i> Scala 学习笔记之数组
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/27/scala-notes-class/" rel="prev" title="Scala 学习笔记之类">
+                Scala 学习笔记之类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">69</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-构造映射"><span class="nav-number">1.</span> <span class="nav-text">1. 构造映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-获取映射中的值"><span class="nav-number">2.</span> <span class="nav-text">2. 获取映射中的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-更新映射中的值"><span class="nav-number">3.</span> <span class="nav-text">3. 更新映射中的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-迭代映射"><span class="nav-number">4.</span> <span class="nav-text">4. 迭代映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-排序映射"><span class="nav-number">5.</span> <span class="nav-text">5. 排序映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-与Java互操作"><span class="nav-number">6.</span> <span class="nav-text">6. 与Java互操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-元组Tuple"><span class="nav-number">7.</span> <span class="nav-text">7. 元组Tuple</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
