@@ -6,7 +6,7 @@ date: 2018-02-27 09:35:01
 tags:
   - Scala
 
-categories: scala
+categories: Scala
 permalink: scala-notes-basis
 ---
 

@@ -97,37 +97,31 @@
 
 
   
-  <meta name="keywords" content="Flink," />
+  <meta name="keywords" content="Scala," />
 
 
-<meta name="description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
-<meta name="keywords" content="Flink">
+<meta name="description" content="1. 定长数组如果你需要一个长度不变的数组，可以使用Scala中的 Array．val nums = new Array[Int](10) // 10个整数的数组　所有元素初始化为0val strs = new Array[String](10) // 10个字符串的数组　所有元素初始化为nullval s = Array(&quot;Hello&quot;, &quot;World&quot;) // 长度为2的Array[Strin">
+<meta name="keywords" content="Scala">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 数据流类型与转换关系">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/index.html">
+<meta property="og:title" content="Scala 学习笔记之数组">
+<meta property="og:url" content="http://sjf0115.github.io/2018/02/27/scala-notes-array/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
+<meta property="og:description" content="1. 定长数组如果你需要一个长度不变的数组，可以使用Scala中的 Array．val nums = new Array[Int](10) // 10个整数的数组　所有元素初始化为0val strs = new Array[String](10) // 10个字符串的数组　所有元素初始化为nullval s = Array(&quot;Hello&quot;, &quot;World&quot;) // 长度为2的Array[Strin">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-5.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.648Z">
+<meta property="og:updated_time" content="2018-02-27T02:32:03.477Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 数据流类型与转换关系">
-<meta name="twitter:description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-1.png?raw=true">
+<meta name="twitter:title" content="Scala 学习笔记之数组">
+<meta name="twitter:description" content="1. 定长数组如果你需要一个长度不变的数组，可以使用Scala中的 Array．val nums = new Array[Int](10) // 10个整数的数组　所有元素初始化为0val strs = new Array[String](10) // 10个字符串的数组　所有元素初始化为nullval s = Array(&quot;Hello&quot;, &quot;World&quot;) // 长度为2的Array[Strin">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/02/27/scala-notes-array/"/>
 
 
-  <title>Flink1.4 数据流类型与转换关系 | SmartSi</title>
+  <title>Scala 学习笔记之数组 | SmartSi</title>
   
 
 
@@ -308,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/27/scala-notes-array/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -325,7 +319,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 数据流类型与转换关系</h2>
+          <h2 class="post-title" itemprop="name headline">Scala 学习笔记之数组</h2>
         
 
         <div class="post-meta">
@@ -337,7 +331,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T15:47:01+08:00">2018-01-04</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-27T09:36:01+08:00">2018-02-27</time>
             
 
             
@@ -357,7 +351,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Scala/" itemprop="url" rel="index"><span itemprop="name">Scala</span></a></span>
 
                 
                 
@@ -371,7 +365,7 @@
 
           
           
-             <span id="/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/" class="leancloud_visitors" data-flag-title="Flink1.4 数据流类型与转换关系">
+             <span id="/2018/02/27/scala-notes-array/" class="leancloud_visitors" data-flag-title="Scala 学习笔记之数组">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -402,40 +396,42 @@
       
 
       
-        <p>Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的类型，以及它们之间的转换关系。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-1.png?raw=true" alt=""></p>
-<h3 id="1-DataStream"><a href="#1-DataStream" class="headerlink" title="1. DataStream"></a>1. DataStream</h3><p><code>DataStream</code> 是 <code>Flink</code> 流处理 API 中最核心的数据结构。它代表了一个运行在多个分区上的并行流。一个 <code>DataStream</code> 可以从 <code>StreamExecutionEnvironment</code> 通过 <code>env.addSource(SourceFunction)</code> 获得。</p>
-<p><code>DataStream</code> 上的转换操作都是逐条的，比如 <code>map()</code>，<code>flatMap()</code>，<code>filter()</code>。<code>DataStream</code> 也可以执行 <code>rebalance</code>（再平衡，用来减轻数据倾斜）和 <code>broadcaseted</code>（广播）等分区转换。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val stream: DataStream[MyType] = env.addSource(new FlinkKafkaConsumer08[String](...))</span><br><span class="line">val str1: DataStream[(String, MyType)] = stream.flatMap &#123; ... &#125;</span><br><span class="line">val str2: DataStream[(String, MyType)] = stream.rebalance()</span><br><span class="line">val str3: DataStream[AnotherType] = stream.map &#123; ... &#125;</span><br></pre></td></tr></table></figure>
-<p>上述 DataStream 上的转换在运行时会转换成如下的执行图：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-2.png?raw=true" alt=""></p>
-<p>如上图的执行图所示，<code>DataStream</code> 各个算子会并行运行，算子之间是数据流分区。如 <code>Source</code> 的第一个并行实例（S1）和 <code>flatMap()</code> 的第一个并行实例（m1）之间就是一个数据流分区。而在 <code>flatMap()</code> 和 <code>map()</code> 之间由于加了 <code>rebalance()</code>，它们之间的数据流分区就有3个子分区（m1的数据流向3个map()实例）。这与 <code>Apache Kafka</code> 是很类似的，把流想象成 <code>Kafka Topic</code>，而一个流分区就表示一个 <code>Topic Partition</code>，流的目标并行算子实例就是 <code>Kafka Consumers</code>。</p>
-<h3 id="2-KeyedStream"><a href="#2-KeyedStream" class="headerlink" title="2. KeyedStream"></a>2. KeyedStream</h3><p><code>KeyedStream</code> 用来表示根据指定的 <code>key</code> 进行分组的数据流。一个 <code>KeyedStream</code>可以通过调用 <code>DataStream.keyBy()</code> 来获得。而在 <code>KeyedStream</code> 上进行任何 <code>transformation</code> 都将转变回 <code>DataStream</code>。在实现中，<code>KeyedStream</code> 是把 <code>key</code> 的信息写入到了 <code>transformation</code> 中。每条记录只能访问所属 <code>key</code> 的状态，其上的聚合函数可以方便地操作和保存对应 <code>key</code> 的状态。</p>
-<h3 id="3-WindowedStream-amp-AllWindowedStream"><a href="#3-WindowedStream-amp-AllWindowedStream" class="headerlink" title="3. WindowedStream &amp; AllWindowedStream"></a>3. WindowedStream &amp; AllWindowedStream</h3><p><code>WindowedStream</code>代表了根据 <code>key</code> 分组，并且基于 <code>WindowAssigner</code> 切分窗口的数据流。所以 <code>WindowedStream</code> 都是从 <code>KeyedStream</code> 衍生而来的。而在 <code>WindowedStream</code> 上进行任何 <code>transformation</code> 也都将转变回 <code>DataStream</code>。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val stream: DataStream[MyType] = ...</span><br><span class="line">val windowed: WindowedDataStream[MyType] = stream</span><br><span class="line">        .keyBy(&quot;userId&quot;)</span><br><span class="line">        .window(TumblingEventTimeWindows.of(Time.seconds(5))) // Last 5 seconds of data</span><br><span class="line">val result: DataStream[ResultType] = windowed.reduce(myReducer)</span><br></pre></td></tr></table></figure>
-<p>上述 <code>WindowedStream</code> 的样例代码在运行时会转换成如下的执行图：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-3.png?raw=true" alt=""></p>
-<p><code>Flink</code> 的窗口实现中会将到达的数据缓存在对应的窗口<code>buffer</code>中（一个数据可能会对应多个窗口）。当到达窗口发送的条件时（由<code>Trigger</code>控制），<code>Flink</code> 会对整个窗口中的数据进行处理。<code>Flink</code> 在聚合类窗口有一定的优化，即不会保存窗口中的所有值，而是每到一个元素执行一次聚合函数，最终只保存一份数据即可。</p>
-<p>在<code>key</code>分组的流上进行窗口切分是比较常用的场景，也能够很好地并行化（不同的 <code>key</code> 上的窗口聚合可以分配到不同的 <code>task</code> 去处理）。不过有时候我们也需要在普通流上进行窗口的操作，这就是  <code>AllWindowedStream</code>。<code>AllWindowedStream</code> 是直接在 <code>DataStream</code> 上进行 <code>windowAll(...)</code> 操作。<code>AllWindowedStream</code> 的实现是基于 <code>WindowedStream</code> 的（Flink 1.1.x 开始）。<code>Flink</code> 不推荐使用 <code>AllWindowedStream</code>，因为在普通流上进行窗口操作，就势必需要将所有分区的流都汇集到单个的 <code>Task</code> 中，而这个单个的 <code>Task</code> 很显然就会成为整个Job的瓶颈。</p>
-<h3 id="4-JoinedStreams-amp-CoGroupedStreams"><a href="#4-JoinedStreams-amp-CoGroupedStreams" class="headerlink" title="4. JoinedStreams &amp; CoGroupedStreams"></a>4. JoinedStreams &amp; CoGroupedStreams</h3><p>双流 <code>Join</code> 也是一个非常常见的应用场景。深入源码你可以发现，<code>JoinedStreams</code> 和 <code>CoGroupedStreams</code> 的代码实现有80%是一模一样的，<code>JoinedStreams</code> 在底层又调用了 <code>CoGroupedStreams</code> 来实现 <code>Join</code> 功能。除了名字不一样，一开始很难将它们区分开来，而且为什么要提供两个功能类似的接口呢？</p>
-<p>实际上这两者还是很点区别的。首先 <code>co-group</code> 侧重的是 <code>group</code>，是对同一个 <code>key</code> 上的两组集合进行操作，而 <code>join</code> 侧重的是 <code>pair</code>，是对同一个 <code>key</code> 上的每对元素进行操作。<code>co-group</code> 比 <code>join</code> 更通用一些，因为 <code>join</code> 只是 <code>co-group</code> 的一个特例，所以 <code>join</code> 是可以基于 <code>co-group</code> 来实现的（当然有优化的空间）。而在 <code>co-group</code> 之外又提供了 <code>join</code> 接口是因为用户更熟悉 <code>join</code>（源于数据库吧），而且能够跟 <code>DataSet API</code> 保持一致，降低用户的学习成本。</p>
-<p><code>JoinedStreams</code> 和 <code>CoGroupedStreams</code> 是基于 <code>Window</code> 上实现的，所以 <code>CoGroupedStreams</code> 最终又调用了 <code>WindowedStream</code> 来实现。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val firstInput: DataStream[MyType] = ...</span><br><span class="line">val secondInput: DataStream[AnotherType] = ...</span><br><span class="line"></span><br><span class="line">val result: DataStream[(MyType, AnotherType)] = firstInput.join(secondInput)</span><br><span class="line">    .where(&quot;userId&quot;).equalTo(&quot;id&quot;)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(3)))</span><br><span class="line">    .apply (new JoinFunction () &#123;...&#125;)</span><br></pre></td></tr></table></figure>
-<p>上述 <code>JoinedStreams</code> 的样例代码在运行时会转换成如下的执行图：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-4.png?raw=true" alt=""></p>
-<p>双流上的数据在同一个 <code>key</code> 的会被分别分配到同一个 <code>window</code> 窗口的左右两个篮子里，当 <code>window</code> 结束的时候，会对左右篮子进行笛卡尔积从而得到每一对 <code>pair</code>，对每一对 <code>pair</code> 应用 <code>JoinFunction</code>。不过目前（Flink 1.1.x） <code>JoinedStreams</code> 只是简单地实现了流上的 <code>join</code> 操作而已，距离真正的生产使用还是有些距离。因为目前 <code>join</code> 窗口的双流数据都是被缓存在内存中的，也就是说如果某个 <code>key</code> 上的窗口数据太多就会导致 <code>JVM OOM</code>（然而数据倾斜是常态）。双流 <code>join</code> 的难点也正是在这里，这也是社区后面对 <code>join</code> 操作的优化方向，例如可以借鉴 <code>Flink</code> 在批处理 <code>join</code> 中的优化方案，也可以用 <code>ManagedMemory</code> 来管理窗口中的数据，并当数据超过阈值时能spill到硬盘。</p>
-<h3 id="5-ConnectedStreams"><a href="#5-ConnectedStreams" class="headerlink" title="5. ConnectedStreams"></a>5. ConnectedStreams</h3><p>在 <code>DataStream</code> 上有一个 <code>union</code> 的转换 <code>dataStream.union(otherStream1, otherStream2, ...)</code>，用来合并多个流，新的流会包含所有流中的数据。<code>union</code> 有一个限制，就是所有合并的流的类型必须是一致的。<code>ConnectedStreams</code> 提供了和 <code>union</code> 类似的功能，用来连接两个流，但是与 <code>union</code> 转换有以下几个区别：</p>
+        <h3 id="1-定长数组"><a href="#1-定长数组" class="headerlink" title="1. 定长数组"></a>1. 定长数组</h3><p>如果你需要一个长度不变的数组，可以使用Scala中的 <code>Array</code>．<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> nums = <span class="keyword">new</span> <span class="type">Array</span>[<span class="type">Int</span>](<span class="number">10</span>) <span class="comment">// 10个整数的数组　所有元素初始化为0</span></span><br><span class="line"><span class="keyword">val</span> strs = <span class="keyword">new</span> <span class="type">Array</span>[<span class="type">String</span>](<span class="number">10</span>) <span class="comment">// 10个字符串的数组　所有元素初始化为null</span></span><br><span class="line"><span class="keyword">val</span> s = <span class="type">Array</span>(<span class="string">"Hello"</span>, <span class="string">"World"</span>) <span class="comment">// 长度为2的Array[String] 类型是推断出来的　</span></span><br><span class="line">s(<span class="number">0</span>) = <span class="string">"GoodBye"</span> <span class="comment">// Array("GoodBye"，"World")</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注</p>
+</blockquote>
 <ul>
-<li><code>ConnectedStreams</code> 只能连接两个流，而 <code>union</code> 可以连接多于两个流。</li>
-<li><code>ConnectedStreams</code> 连接的两个流类型可以不一致，而 <code>union</code> 连接的流的类型必须一致。</li>
-<li><code>ConnectedStreams</code> 会对两个流的数据应用不同的处理方法，并且双流之间可以共享状态。这在第一个流的输入会影响第二个流时, 会非常有用。</li>
+<li>已提供初始值时不要使用<code>new</code>，例如上面的数组s</li>
+<li>使用<code>()</code>而不是<code>[]</code>来访问元素</li>
+<li>在JVM中，Scala的Array以Java数组方式实现．</li>
 </ul>
-<p>如下 <code>ConnectedStreams</code> 的样例，连接 <code>input</code> 和 <code>other</code> 流，并在 <code>input</code> 流上应用 <code>map1</code> 方法，在 <code>other</code> 上应用 <code>map2</code> 方法，双流可以共享状态（比如计数）。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val input: DataStream[MyType] = ...</span><br><span class="line">val other: DataStream[AnotherType] = ...</span><br><span class="line"></span><br><span class="line">val connected: ConnectedStreams[MyType, AnotherType] = input.connect(other)</span><br><span class="line"></span><br><span class="line">val result: DataStream[ResultType] =</span><br><span class="line">        connected.map(new CoMapFunction[MyType, AnotherType, ResultType]() &#123;</span><br><span class="line">            override def map1(value: MyType): ResultType = &#123; ... &#125;</span><br><span class="line">            override def map2(value: AnotherType): ResultType = &#123; ... &#125;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
-<p>当并行度为2时，其执行图如下所示：</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-5.png?raw=true" alt=""></p>
-<h3 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h3><p>本文介绍通过不同数据流类型的转换图来解释每一种数据流的含义、转换关系。后面的文章会深入讲解 Window 机制的实现，双流 Join 的实现等。</p>
-<p>原文:<a href="http://wuchong.me/blog/2016/05/20/flink-internals-streams-and-operations-on-streams/" target="_blank" rel="noopener">http://wuchong.me/blog/2016/05/20/flink-internals-streams-and-operations-on-streams/</a></p>
+<h3 id="2-变长数组"><a href="#2-变长数组" class="headerlink" title="2. 变长数组"></a>2. 变长数组</h3><p>对于那种长度按需要变化的数组，Java有 <code>ArrayList</code>．Scala中等效数据结构为 <code>ArrayBuffer</code>．<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> scala.collection.mutable.<span class="type">ArrayBuffer</span></span><br><span class="line"><span class="keyword">val</span> b = <span class="type">ArrayBuffer</span>[<span class="type">Int</span>]() <span class="comment">// 或者 new ArrayBuffer[Int]() 创建一个空的数组缓冲来存放整数</span></span><br><span class="line">b += <span class="number">1</span>　<span class="comment">// ArrayBuffer(1) 用+=在尾端添加元素</span></span><br><span class="line">b += (<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">5</span>) <span class="comment">// ArrayBuffer(1,1,2,3,5) 在尾端添加多个元素</span></span><br><span class="line">b ++= <span class="type">Array</span>(<span class="number">8</span>, <span class="number">13</span>, <span class="number">21</span>) <span class="comment">// ArrayBuffer(1,1,2,3,5,8,13,21) 用++=操作追加任何集合</span></span><br><span class="line">b.trimEnd(<span class="number">5</span>) <span class="comment">// ArrayBuffer(1,1,2) 移除最后５个元素</span></span><br></pre></td></tr></table></figure></p>
+<p>可以在任意位置插入或移除元素，但这样的操作不如在尾端添加或移除元素操作那么高效:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.insert(<span class="number">2</span>,<span class="number">6</span>) <span class="comment">// ArrayBuffer(1,1,6,2) 在下标2之前插入</span></span><br><span class="line">b.insert(<span class="number">2</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>) <span class="comment">// ArrayBuffer(1,1,7,8,9,6,2) 插入任意多的元素</span></span><br><span class="line">b.remove(<span class="number">2</span>) <span class="comment">// ArrayBuffer(1,1,8,9,6,2) 删除下标２的元素</span></span><br><span class="line">b.remove(<span class="number">2</span>,<span class="number">3</span>) <span class="comment">// ArrayBuffer(1,1,2) 第二个参数的含义是要移除多少个元素</span></span><br></pre></td></tr></table></figure></p>
+<p>有时需要构建一个Array，但不知道最终需要装多少元素．这种情况下可以先构建一个数组缓冲，然后调用:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">b.toArray <span class="comment">// Array(1,1,2)</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="3-遍历数组和数组缓冲"><a href="#3-遍历数组和数组缓冲" class="headerlink" title="3. 遍历数组和数组缓冲"></a>3. 遍历数组和数组缓冲</h3><p>使用for循环遍历数组和数组缓冲:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> b = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line"><span class="keyword">for</span>(i &lt;- <span class="number">0</span> until b.length)&#123;</span><br><span class="line">  println(i + <span class="string">"-"</span> + b(i))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出结果:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">0-6</span><br><span class="line">1-5</span><br><span class="line">2-4</span><br><span class="line">3-3</span><br><span class="line">4-2</span><br><span class="line">5-1</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注</p>
+</blockquote>
+<p><code>until</code> 是 <code>RichInt</code> 类的方法，返回所有小于(但不包括)上限的数字</p>
+<p>如果想要每两个元素一跳，可以让i这样来进行遍历:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> b = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line"><span class="keyword">for</span>(i &lt;- <span class="number">0</span> until (b.length, <span class="number">2</span>))&#123;</span><br><span class="line">  println(i + <span class="string">"-"</span> + b(i))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">0-6</span><br><span class="line">2-4</span><br><span class="line">4-2</span><br></pre></td></tr></table></figure></p>
+<p>如果要从数组的尾端开始:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> b = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">5</span>,<span class="number">4</span>,<span class="number">3</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line"><span class="keyword">for</span>(i &lt;- (<span class="number">0</span> until b.length).reverse)&#123;</span><br><span class="line">  println(i + <span class="string">"-"</span> + b(i))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果在循环体中不需要用到数组下标，我们也可以直接访问数组元素:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(elem &lt;- b)&#123;</span><br><span class="line">  println(elem)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-数组转换"><a href="#4-数组转换" class="headerlink" title="4. 数组转换"></a>4. 数组转换</h3><p>从一个数组(数组缓冲)出发，以某种方式对它进行转换是很简单的．这些转换操作不会修改原是数组，而是产生一个全新的数组:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>)</span><br><span class="line"><span class="keyword">val</span> result = <span class="keyword">for</span>(elem &lt;- a) <span class="keyword">yield</span> <span class="number">2</span> * elem <span class="comment">// result 是Array(2,4,6,8)</span></span><br></pre></td></tr></table></figure></p>
+<p><code>for(...) yield</code>循环创建了一个类型与原实际和相同的新集合．新元素为yield之后的表达式的值，每次迭代对应一个．</p>
+<p>当你遍历一个集合时，如果只想处理满足特定条件的元素．可以通过for中的if来实现:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>)</span><br><span class="line"><span class="keyword">val</span> result = <span class="keyword">for</span>(elem &lt;- a <span class="keyword">if</span> elem % <span class="number">2</span> == <span class="number">0</span>) <span class="keyword">yield</span> <span class="number">2</span> * elem</span><br></pre></td></tr></table></figure></p>
+<p>上面实例中对每个偶数元素翻倍，并丢掉奇数元素．</p>
+<h3 id="5-常用操作"><a href="#5-常用操作" class="headerlink" title="5. 常用操作"></a>5. 常用操作</h3><h4 id="5-1-sum"><a href="#5-1-sum" class="headerlink" title="5.1 sum"></a>5.1 sum</h4><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line">a.sum <span class="comment">// 18</span></span><br></pre></td></tr></table></figure>
+<p>要使用sum方法，元素类型必须是数值类型:整型，浮点数或者BigInteger/BigDecimal</p>
+<h4 id="5-2-min-max"><a href="#5-2-min-max" class="headerlink" title="5.2 min max"></a>5.2 min max</h4><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line">a.min <span class="comment">// 1</span></span><br><span class="line">a.max <span class="comment">// 7</span></span><br></pre></td></tr></table></figure>
+<p>min和max输出数组或数组缓冲中最小和最大的元素</p>
+<h4 id="5-3-sorted"><a href="#5-3-sorted" class="headerlink" title="5.3 sorted"></a>5.3 sorted</h4><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line"><span class="keyword">val</span> asorted = a.sorted <span class="comment">// Array(1, 4, 6, 7)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> a = <span class="type">ArrayBuffer</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line"><span class="keyword">val</span> asorted = a.sortWith(_ &gt; _) <span class="comment">// ArrayBuffer(7, 6, 4, 1)</span></span><br></pre></td></tr></table></figure>
+<p>sorted方法将数组或数组缓冲排序并返回经过排序的数组或数组缓冲，不会修改原始数组．可以使用sortWith方法提供一个比较函数．</p>
+<h4 id="5-4-mkString"><a href="#5-4-mkString" class="headerlink" title="5.4 mkString"></a>5.4 mkString</h4><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line">a.mkString(<span class="string">" and "</span>) <span class="comment">// 6 and 1 and 7 and 4</span></span><br></pre></td></tr></table></figure>
+<p>如果想要显示数组或者数组缓冲的内容，可以使用<code>mkString</code>，允许指定元素之间的分隔符<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = <span class="type">Array</span>(<span class="number">6</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">4</span>)</span><br><span class="line">a.mkString(<span class="string">"&lt;"</span>, <span class="string">","</span>, <span class="string">"&gt;"</span>) <span class="comment">// &lt;6,1,7,4&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>该方法的另一个重载版本可以让你指定前缀和后缀</p>
+<p>来源于: 快学Scala</p>
 
       
     </div>
@@ -482,7 +478,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Flink/" rel="tag"># Flink</a>
+            <a href="/tags/Scala/" rel="tag"># Scala</a>
           
         </div>
       
@@ -495,8 +491,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/04/Flink/[Flink]Flink1.4 执行计划/" rel="next" title="Flink1.4 执行计划">
-                <i class="fa fa-chevron-left"></i> Flink1.4 执行计划
+              <a href="/2018/02/27/scala-notes-basis/" rel="next" title="Scala 学习笔记之基础语法">
+                <i class="fa fa-chevron-left"></i> Scala 学习笔记之基础语法
               </a>
             
           </div>
@@ -504,10 +500,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/04/Flink/[Flink]Flink1.4 重启策略/" rel="prev" title="Flink1.4 重启策略">
-                Flink1.4 重启策略 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -723,7 +715,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-DataStream"><span class="nav-number">1.</span> <span class="nav-text">1. DataStream</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-KeyedStream"><span class="nav-number">2.</span> <span class="nav-text">2. KeyedStream</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-WindowedStream-amp-AllWindowedStream"><span class="nav-number">3.</span> <span class="nav-text">3. WindowedStream &amp; AllWindowedStream</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-JoinedStreams-amp-CoGroupedStreams"><span class="nav-number">4.</span> <span class="nav-text">4. JoinedStreams &amp; CoGroupedStreams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-ConnectedStreams"><span class="nav-number">5.</span> <span class="nav-text">5. ConnectedStreams</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-总结"><span class="nav-number">6.</span> <span class="nav-text">6. 总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-定长数组"><span class="nav-number">1.</span> <span class="nav-text">1. 定长数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-变长数组"><span class="nav-number">2.</span> <span class="nav-text">2. 变长数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-遍历数组和数组缓冲"><span class="nav-number">3.</span> <span class="nav-text">3. 遍历数组和数组缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-数组转换"><span class="nav-number">4.</span> <span class="nav-text">4. 数组转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-常用操作"><span class="nav-number">5.</span> <span class="nav-text">5. 常用操作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-sum"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 sum</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-min-max"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 min max</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-sorted"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 sorted</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-4-mkString"><span class="nav-number">5.4.</span> <span class="nav-text">5.4 mkString</span></a></li></ol></li></ol></div>
             
 
           </div>
