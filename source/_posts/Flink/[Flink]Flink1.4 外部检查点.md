@@ -8,7 +8,7 @@ tags:
   - Flink 容错
 
 categories: Flink
-permalink: flink_stream_deployment_externalized_checkpoints
+permalink: flink-stream-deployment-externalized-checkpoints
 ---
 
 ### 1. 概述

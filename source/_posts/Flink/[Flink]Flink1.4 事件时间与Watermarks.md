@@ -5,8 +5,10 @@ title: Flink1.4 事件时间与Watermarks
 date: 2018-01-04 17:57:01
 tags:
   - Flink
+  - Flink Stream
 
 categories: Flink
+permalink: flink-stream-event-time-and-watermark
 ---
 
 ### 1. watermark

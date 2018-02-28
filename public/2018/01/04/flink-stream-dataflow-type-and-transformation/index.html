@@ -97,14 +97,14 @@
 
 
   
-  <meta name="keywords" content="Flink," />
+  <meta name="keywords" content="Flink,Flink Stream," />
 
 
 <meta name="description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
-<meta name="keywords" content="Flink">
+<meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 数据流类型与转换关系">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/index.html">
+<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/flink-stream-dataflow-type-and-transformation/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
 <meta property="og:locale" content="zh-Hans">
@@ -113,7 +113,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-3.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-4.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E6%95%B0%E6%8D%AE%E6%B5%81%E7%B1%BB%E5%9E%8B%E4%B8%8E%E8%BD%AC%E6%8D%A2%E5%85%B3%E7%B3%BB-5.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.648Z">
+<meta property="og:updated_time" content="2018-02-28T11:05:16.599Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink1.4 数据流类型与转换关系">
 <meta name="twitter:description" content="Flink 为流处理和批处理分别提供了 DataStream API 和 DataSet API。正是这种高层的抽象和 flunent API 极大地便利了用户编写大数据应用。不过很多初学者在看到官方文档中那一大坨的转换时，常常会蒙了圈，文档中那些只言片语也很难讲清它们之间的关系。所以本文将介绍几种关键的数据流类型，它们之间是如何通过转换关联起来的。下图展示了 Flink 中目前支持的主要几种流的">
@@ -124,7 +124,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/flink-stream-dataflow-type-and-transformation/"/>
 
 
   <title>Flink1.4 数据流类型与转换关系 | SmartSi</title>
@@ -308,7 +308,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/flink-stream-dataflow-type-and-transformation/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -371,7 +371,7 @@
 
           
           
-             <span id="/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/" class="leancloud_visitors" data-flag-title="Flink1.4 数据流类型与转换关系">
+             <span id="/2018/01/04/flink-stream-dataflow-type-and-transformation/" class="leancloud_visitors" data-flag-title="Flink1.4 数据流类型与转换关系">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -483,6 +483,8 @@
         <div class="post-tags">
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
           
         </div>
       

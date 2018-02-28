@@ -5,7 +5,7 @@ title: Flink1.4 执行计划
 date: 2018-01-04 14:46:01
 tags:
   - Flink
-  - FLINK 基础
+  - Flink 基础
 
 categories: Flink
 permalink: flink-execution-plans

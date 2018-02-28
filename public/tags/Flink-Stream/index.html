@@ -97,35 +97,29 @@
 
 
   
-  <meta name="keywords" content="Flink," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
-<meta name="description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
-<meta name="keywords" content="Flink">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 事件时间与Watermarks">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 事件时间与Watermarks/index.html">
+<meta name="description" content="Stay Hungry, Stay Foolish">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SmartSi">
+<meta property="og:url" content="http://sjf0115.github.io/tags/Flink-Stream/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
+<meta property="og:description" content="Stay Hungry, Stay Foolish">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.657Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 事件时间与Watermarks">
-<meta name="twitter:description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true">
+<meta name="twitter:title" content="SmartSi">
+<meta name="twitter:description" content="Stay Hungry, Stay Foolish">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 事件时间与Watermarks/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/tags/Flink-Stream/"/>
 
 
-  <title>Flink1.4 事件时间与Watermarks | SmartSi</title>
+  <title>标签: Flink Stream | SmartSi</title>
   
 
 
@@ -172,7 +166,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -290,282 +284,198 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block tag">
 
-  
+    <div id="posts" class="posts-collapse">
+      <div class="collection-title">
+        <h2>Flink Stream<small>标签</small>
+        </h2>
+      </div>
 
-  
-  
-  
-
-  
+      
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/Flink/[Flink]Flink1.4 事件时间与Watermarks/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="sjf0115">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="SmartSi">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h3 class="post-title">
         
+            <a class="post-title-link" href="/2018/01/16/flink-stream-event-timestamp-and-extractors/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 内置的时间戳提取器和Watermark生成器</span>
+              
+            </a>
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 事件时间与Watermarks</h2>
-        
+      </h3>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T17:57:01+08:00">2018-01-04</time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/01/04/Flink/[Flink]Flink1.4 事件时间与Watermarks/" class="leancloud_visitors" data-flag-title="Flink1.4 事件时间与Watermarks">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <h3 id="1-watermark"><a href="#1-watermark" class="headerlink" title="1. watermark"></a>1. watermark</h3><p><code>Flink</code>实现了数据流模型(<code>Dataflow Model</code>)中许多技术。如果想对事件时间(<code>event time</code>)和<code>watermarks</code>更详细的了解，请参阅下面的文章:</p>
-<ul>
-<li><a href="https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-101" target="_blank" rel="noopener">The world beyond batch: Streaming 101
-</a></li>
-<li><a href="http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf" target="_blank" rel="noopener">The Dataflow Model</a></li>
-</ul>
-<p>支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(<code>operator</code>)，当事件时间超过一小时末尾时需要告知窗口算子，以便算子可以关闭正在进行的窗口。</p>
-<p>事件时间可以独立于处理时间来运行。例如，在一个程序中，算子的当前事件时间可以略微落后于处理时间(考虑到接收事件的延迟)，而两者以相同的速度继续运行。另一方面，另一个流式处理程序处理几个星期的事件时间只需几秒钟就可以，通过快速浏览缓存在<code>Kafka Topic</code>中历史数据。</p>
-<p><code>Flink</code>中测量事件时间进度的机制是<code>watermarks</code>。<code>watermarks</code>会作为数据流的一部分进行流动，并带有一个时间戳<code>t</code>。<code>Watermark(t)</code>表示数据流中的事件时间已达到时间<code>t</code>，意思就是说数据流之后不再有时间戳<code>t‘&lt;= t</code>的元素(即带时间戳的事件老于或等于<code>watermark</code>)。</p>
-<p>下图显示了具有时间戳(逻辑上)的事件流以及内嵌的<code>watermark</code>。在这个例子中，事件是有序的(相对于它们的时间戳)，这意味着<code>watermark</code>只是数据流中的周期性标记。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true" alt=""></p>
-<p><code>watermark</code>对于乱序数据流至关重要，如下图所示，事件并未按照时间戳进行排序。通常，<code>watermark</code>表示在数据流中那个时刻小于时间戳的所有事件都已经到达。一旦<code>watermark</code>到达算子，算子就可以将其内部的事件时间提到<code>watermark</code>的那个值。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true" alt=""></p>
-<h3 id="2-数据流中的并行Watermarks"><a href="#2-数据流中的并行Watermarks" class="headerlink" title="2. 数据流中的并行Watermarks"></a>2. 数据流中的并行Watermarks</h3><p><code>watermarks</code>是直接通过数据源函数(source functions)生成的或在数据源函数之后生成的。源函数的每个并行子任务通常独立生成<code>watermarks</code>。这些<code>watermarks</code>在指定并行数据源上定义事件时间。</p>
-<p><code>watermarks</code>贯穿整个流处理程序，他们会在<code>watermark</code>到达的算子时将事件时间提前(advance)。每当算子提前事件时间时，它都会为下游的后续算子生成一个新的<code>watermarks</code>(Whenever an operator advances its event time, it generates a new watermark downstream for its successor operators.)。</p>
-<p>一些算子消耗多个输入流；例如，union操作，或者算子后面跟着<code>keyBy(...)</code>函数或者<code>partition(...)函数</code>。这样的算子的当前事件时间是其输入流的所有事件时间中的最小值。随着输入流更新事件时间，算子也会更新事件。</p>
-<p>下图显示了事件和<code>watermarks</code>流经并行流的的示例，以及跟踪事件时间的算子:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true" alt=""></p>
-<h3 id="3-延迟元素"><a href="#3-延迟元素" class="headerlink" title="3. 延迟元素"></a>3. 延迟元素</h3><p>某些元素可能违反<code>watermarks</code>条件，这意味着即使出现<code>watermarks(t)</code>，但是还是会出现很多的时间戳<code>t&#39;&lt;= t</code>的元素。事实上，在现实世界中，某些元素可能被任意地延迟，因此指定一个时间，带有事件时间戳的所有事件在此之前出现是不可能的。此外，即使延迟时间是有限制的，也不希望延迟太多的<code>watermarks</code>，因为它会在事件时间窗口的评估中导致太多的延迟。</p>
-<p>因此，流处理程序中可能会明确的知道会有延迟元素。延迟元素是那些系统事件时钟(由<code>watermark</code>所示)已经超过了延迟元素的时间戳的那些元素。有关如何处理事件时间窗口中的延迟元素的更多信息，请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html#allowed-lateness" target="_blank" rel="noopener">Allowed Lateness</a>。</p>
-<h3 id="4-调试Watermarks"><a href="#4-调试Watermarks" class="headerlink" title="4. 调试Watermarks"></a>4. 调试Watermarks</h3><p>请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.3/monitoring/debugging_event_time.html" target="_blank" rel="noopener">调试Windows和事件时间</a>部分，以便在运行时调试Watermarks。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time-and-watermarks" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time-and-watermarks</a></p>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-      <div>
-        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
-  <div>您的支持将是我继续写作的动力！</div>
-  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
-    <span>打赏</span>
-  </button>
-  <div id="QR" style="display: none;">
-
-    
-      <div id="wechat" style="display: inline-block">
-        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
-        <p>微信支付</p>
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-16T16:30:17+08:00"
+              content="2018-01-16" >
+          01-16
+        </time>
       </div>
-    
 
-    
-      <div id="alipay" style="display: inline-block">
-        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
-        <p>支付宝</p>
-      </div>
-    
-
-    
-
-  </div>
-</div>
-
-      </div>
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/Flink/" rel="tag"># Flink</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2018/01/04/Flink/[Flink]Flink1.4 事件时间与处理时间/" rel="next" title="Flink1.4 事件时间与处理时间">
-                <i class="fa fa-chevron-left"></i> Flink1.4 事件时间与处理时间
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/" rel="prev" title="Stream 主流流处理框架比较(1)">
-                Stream 主流流处理框架比较(1) <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
-
-    <div class="post-spread">
       
         
-  <div class="bdsharebuttonbox">
-    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
-    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
-    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
-    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
-    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
-    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
-    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
-    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
-    <a href="#" class="bds_more" data-cmd="more"></a>
-    <a class="bds_count" data-cmd="count"></a>
-  </div>
-  <script>
-    window._bd_share_config = {
-      "common": {
-        "bdText": "",
-        "bdMini": "2",
-        "bdMiniList": false,
-        "bdPic": ""
-      },
-      "share": {
-        "bdSize": "16",
-        "bdStyle": "0"
-      },
-      "image": {
-        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
-        "viewText": "分享到：",
-        "viewSize": "16"
-      }
-    }
-  </script>
 
-<script>
-  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
-</script>
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h3 class="post-title">
+        
+            <a class="post-title-link" href="/2018/01/15/flink-stream-graphic-watermark/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 图解Watermark</span>
+              
+            </a>
+        
+      </h3>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-15T14:47:01+08:00"
+              content="2018-01-15" >
+          01-15
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+      
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h3 class="post-title">
+        
+            <a class="post-title-link" href="/2018/01/15/flink-stream-event-timestamps-and-watermark/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 生成时间戳与Watermarks</span>
+              
+            </a>
+        
+      </h3>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-15T09:47:01+08:00"
+              content="2018-01-15" >
+          01-15
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+      
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h3 class="post-title">
+        
+            <a class="post-title-link" href="/2018/01/04/flink-stream-event-time-and-watermark/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 事件时间与Watermarks</span>
+              
+            </a>
+        
+      </h3>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-04T17:57:01+08:00"
+              content="2018-01-04" >
+          01-04
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+      
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h3 class="post-title">
+        
+            <a class="post-title-link" href="/2018/01/04/flink-stream-event-time-and-processing-time/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 事件时间与处理时间</span>
+              
+            </a>
+        
+      </h3>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-04T16:47:01+08:00"
+              content="2018-01-04" >
+          01-04
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+      
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h3 class="post-title">
+        
+            <a class="post-title-link" href="/2018/01/04/flink-stream-dataflow-type-and-transformation/" itemprop="url">
+              
+                <span itemprop="name">Flink1.4 数据流类型与转换关系</span>
+              
+            </a>
+        
+      </h3>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-01-04T15:47:01+08:00"
+              content="2018-01-04" >
+          01-04
+        </time>
+      </div>
+
+    </header>
+  </article>
+
 
       
     </div>
+
   </div>
+  
+  
+  
+
+  
 
 
           </div>
           
-
-  
-    <div class="comments" id="comments">
-      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
-    </div>
-
-  
-
-
 
         </div>
         
@@ -586,17 +496,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -700,22 +601,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-watermark"><span class="nav-number">1.</span> <span class="nav-text">1. watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-数据流中的并行Watermarks"><span class="nav-number">2.</span> <span class="nav-text">2. 数据流中的并行Watermarks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-延迟元素"><span class="nav-number">3.</span> <span class="nav-text">3. 延迟元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-调试Watermarks"><span class="nav-number">4.</span> <span class="nav-text">4. 调试Watermarks</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -860,10 +745,6 @@
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
-
-
 
   
 
@@ -888,17 +769,6 @@
 
 
 
-  
-    <script type="text/javascript">
-      (function(d, s) {
-        var j, e = d.getElementsByTagName(s)[0];
-        if (typeof LivereTower === 'function') { return; }
-        j = d.createElement(s);
-        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-        j.async = true;
-        e.parentNode.insertBefore(j, e);
-      })(document, 'script');
-    </script>
   
 
 
@@ -1350,6 +1220,26 @@
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   
 
 

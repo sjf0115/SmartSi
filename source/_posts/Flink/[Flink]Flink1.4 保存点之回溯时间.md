@@ -8,7 +8,7 @@ tags:
   - Flink 容错
 
 categories: Flink
-permalink: flink_stream_turning_back_time_savepoints
+permalink: flink-stream-turning-back-time-savepoints
 ---
 
 这篇文章是系列文章的第一篇，数据工匠团队会在这里为大家展示一些Apache Flink的核心功能。

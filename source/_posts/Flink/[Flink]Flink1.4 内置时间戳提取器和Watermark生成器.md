@@ -5,8 +5,10 @@ title: Flink1.4 内置的时间戳提取器和Watermark生成器
 date: 2018-01-16 16:30:17
 tags:
   - Flink
+  - Flink Stream
 
 categories: Flink
+permalink: flink-stream-event-timestamp-and-extractors
 ---
 
 如[Flink1.4 生成时间戳与Watermarks](http://smartsi.club/2018/01/15/Flink/[Flink]Flink1.4%20%E7%94%9F%E6%88%90%E6%97%B6%E9%97%B4%E6%88%B3%E4%B8%8EWatermarks/)所介绍的，`Flink`提供了一个抽象类，允许程序员可以分配自己的时间戳并发送`Watermark`。更具体地说，可以通过`AssignerWithPeriodicWatermarks`或`AssignerWithPunctuatedWatermarks`接口来实现，具体实现取决于用户具体情况。第一个接口将周期性的发送`Watermark`，第二个则基于传入记录的某些属性发送`Watermark`，例如，当在流中遇到特殊元素时。

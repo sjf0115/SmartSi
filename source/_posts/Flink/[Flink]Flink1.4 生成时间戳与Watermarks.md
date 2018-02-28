@@ -5,8 +5,10 @@ title: Flink1.4 生成时间戳与Watermarks
 date: 2018-01-15 09:47:01
 tags:
   - Flink
+  - Flink Stream
 
 categories: Flink
+permalink: flink-stream-event-timestamps-and-watermark
 ---
 
 本节适用于在事件时间上运行的程序。有关事件时间，处理时间和提取时间的介绍，请参阅[Flink1.4 事件时间与处理时间](http://smartsi.club/2018/01/04/Flink/[Flink]Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4/)。

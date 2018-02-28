@@ -8,7 +8,7 @@ tags:
   - Flink 容错
 
 categories: Flink
-permalink: flink_stream_working_with_state
+permalink: flink-stream-working-with-state
 ---
 
 ### 1. Keyed State 与 Operator State

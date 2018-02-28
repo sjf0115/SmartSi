@@ -5,8 +5,10 @@ title: Flink1.4 事件时间与处理时间
 date: 2018-01-04 16:47:01
 tags:
   - Flink
+  - Flink Stream
 
 categories: Flink
+permalink: flink-stream-event-time-and-processing-time
 ---
 
 

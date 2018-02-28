@@ -8,7 +8,7 @@ tags:
   - Flink 容错
 
 categories: Flink
-permalink: flink_stream_state_overview
+permalink: flink-stream-state-overview
 ---
 
 有状态的函数和算子在处理单个元素/事件时存储数据，使得状态`state`成为任何精细操作的关键构件。

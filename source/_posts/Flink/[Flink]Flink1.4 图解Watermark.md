@@ -5,8 +5,10 @@ title: Flink1.4 图解Watermark
 date: 2018-01-15 14:47:01
 tags:
   - Flink
+  - Flink Stream
 
 categories: Flink
+permalink: flink-stream-graphic-watermark
 ---
 
 如果你正在构建实时流处理应用程序，那么事件时间处理是你迟早必须使用的功能之一。因为在现实世界的大多数用例中，消息到达都是无序的，应该有一些方法，通过你建立的系统知道消息可能延迟到达，并且有相应的处理方案。在这篇博文中，我们将看到为什么我们需要事件时间处理，以及我们如何在ApacheFlink中使用它。
