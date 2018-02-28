@@ -7,6 +7,7 @@ tags:
   - Flink
 
 categories: Flink
+permalink: flink-how-to-specifying-keys
 ---
 
 一些转换(例如，`join`，`coGroup`，`keyBy`，`groupBy`)要求在一组元素上定义一个key。其他转换(`Reduce`，`GroupReduce`，`Aggregate`，`Windows`)允许在使用这些函数之前根据`key`对数据进行分组。
