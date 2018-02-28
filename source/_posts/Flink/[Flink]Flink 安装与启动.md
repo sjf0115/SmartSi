@@ -5,8 +5,10 @@ title: Flink1.4 安装与启动
 date: 2018-01-04 08:54:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-how-to-install-and-run
 ---
 
 ### 1. 下载

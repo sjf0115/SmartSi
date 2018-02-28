@@ -8,7 +8,7 @@ tags:
   - Flink 基础
 
 categories: Flink
-permalink: flink_basic_command_line_interface
+permalink: flink-basic-command-line-interface
 ---
 
 ### 1. 概述

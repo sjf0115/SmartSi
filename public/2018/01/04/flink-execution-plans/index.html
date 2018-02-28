@@ -97,35 +97,34 @@
 
 
   
-  <meta name="keywords" content="Flink," />
+  <meta name="keywords" content="Flink,FLINK 基础," />
 
 
-<meta name="description" content="1. 概述Apache Flink提供了一个容错机制来持续恢复数据流应用程序的状态。该机制确保即使在出现故障的情况下，程序的状态也将最终反映每条来自数据流的记录严格一次exactly once。 请注意，有一个开关可以降级为保证至少一次(least once)（如下所述）。 容错机制连续生成分布式流数据流的快照。对于状态较小的流式应用程序，这些快照非常轻量级，可以频繁生成，而不会对性能造成太大影响">
-<meta name="keywords" content="Flink">
+<meta name="description" content="根据各种参数(如数据大小或集群中的机器数量)，Flink的优化器自动会为你的程序选择一个执行策略。很多情况下，准确的知道Flink如何执行你的程序是很有帮助的。 1. 计划可视化工具Flink内置一个执行计划的可视化工具。包含可视化工具的HTML文档位于tools/planVisualizer.html下。用JSON表示作业执行计划，并将其可视化为具有执行策略完整注释的图(visualizes i">
+<meta name="keywords" content="Flink,FLINK 基础">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 内部原理之数据流容错">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/24/flink_data_streaming_fault_tolerance/index.html">
+<meta property="og:title" content="Flink1.4 执行计划">
+<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/flink-execution-plans/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 概述Apache Flink提供了一个容错机制来持续恢复数据流应用程序的状态。该机制确保即使在出现故障的情况下，程序的状态也将最终反映每条来自数据流的记录严格一次exactly once。 请注意，有一个开关可以降级为保证至少一次(least once)（如下所述）。 容错机制连续生成分布式流数据流的快照。对于状态较小的流式应用程序，这些快照非常轻量级，可以频繁生成，而不会对性能造成太大影响">
+<meta property="og:description" content="根据各种参数(如数据大小或集群中的机器数量)，Flink的优化器自动会为你的程序选择一个执行策略。很多情况下，准确的知道Flink如何执行你的程序是很有帮助的。 1. 计划可视化工具Flink内置一个执行计划的可视化工具。包含可视化工具的HTML文档位于tools/planVisualizer.html下。用JSON表示作业执行计划，并将其可视化为具有执行策略完整注释的图(visualizes i">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-3.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:28:41.682Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92-1.png?raw=true">
+<meta property="og:updated_time" content="2018-02-28T03:35:14.687Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 内部原理之数据流容错">
-<meta name="twitter:description" content="1. 概述Apache Flink提供了一个容错机制来持续恢复数据流应用程序的状态。该机制确保即使在出现故障的情况下，程序的状态也将最终反映每条来自数据流的记录严格一次exactly once。 请注意，有一个开关可以降级为保证至少一次(least once)（如下所述）。 容错机制连续生成分布式流数据流的快照。对于状态较小的流式应用程序，这些快照非常轻量级，可以频繁生成，而不会对性能造成太大影响">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-1.png?raw=true">
+<meta name="twitter:title" content="Flink1.4 执行计划">
+<meta name="twitter:description" content="根据各种参数(如数据大小或集群中的机器数量)，Flink的优化器自动会为你的程序选择一个执行策略。很多情况下，准确的知道Flink如何执行你的程序是很有帮助的。 1. 计划可视化工具Flink内置一个执行计划的可视化工具。包含可视化工具的HTML文档位于tools/planVisualizer.html下。用JSON表示作业执行计划，并将其可视化为具有执行策略完整注释的图(visualizes i">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92-2.png?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/24/flink_data_streaming_fault_tolerance/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/flink-execution-plans/"/>
 
 
-  <title>Flink1.4 内部原理之数据流容错 | SmartSi</title>
+  <title>Flink1.4 执行计划 | SmartSi</title>
   
 
 
@@ -306,7 +305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/24/flink_data_streaming_fault_tolerance/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/flink-execution-plans/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -323,7 +322,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 内部原理之数据流容错</h2>
+          <h2 class="post-title" itemprop="name headline">Flink1.4 执行计划</h2>
         
 
         <div class="post-meta">
@@ -335,7 +334,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-24T14:39:01+08:00">2018-01-24</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T14:46:01+08:00">2018-01-04</time>
             
 
             
@@ -369,7 +368,7 @@
 
           
           
-             <span id="/2018/01/24/flink_data_streaming_fault_tolerance/" class="leancloud_visitors" data-flag-title="Flink1.4 内部原理之数据流容错">
+             <span id="/2018/01/04/flink-execution-plans/" class="leancloud_visitors" data-flag-title="Flink1.4 执行计划">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -400,54 +399,23 @@
       
 
       
-        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p><code>Apache Flink</code>提供了一个容错机制来持续恢复数据流应用程序的状态。该机制确保即使在出现故障的情况下，程序的状态也将最终反映每条来自数据流的记录严格一次<code>exactly once</code>。 请注意，有一个开关可以降级为保证至少一次(<code>least once</code>)（如下所述）。</p>
-<p>容错机制连续生成分布式流数据流的快照。对于状态较小的流式应用程序，这些快照非常轻量级，可以频繁生成，而不会对性能造成太大影响。流应用程序的状态存储在可配置的位置（例如主节点或<code>HDFS</code>）。</p>
-<p>如果应用程序发生故障（由于机器，网络或软件故障），<code>Flink</code>会停止分布式流式数据流。然后系统重新启动算子并将其重置为最新的成功检查点。输入流被重置为状态快照的时间点。作为重新启动的并行数据流处理的任何记录都保证不属于先前检查点状态的一部分。</p>
-<p>注意:默认情况下，检查点被禁用。有关如何启用和配置检查点的详细信息，请参<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html" target="_blank" rel="noopener">阅检查点</a>。</p>
-<p>为了实现这个机制的保证，数据流源（如消息队列或代理）需要能够将流重放到定义的最近时间点。<code>Apache Kafka</code>有这个能力，而<code>Flink</code>的Kafka连接器就是利用这个能力。有关<code>Flink</code>连接器提供的保证的更多信息，请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/connectors/guarantees.html" target="_blank" rel="noopener">数据源和接收器的容错保证</a>。</p>
-<p>因为<code>Flink</code>的检查点是通过分布式快照实现的，所以我们交替使用<code>快照</code>和<code>检查点</code>两个概念。</p>
-<h3 id="2-Checkpointing"><a href="#2-Checkpointing" class="headerlink" title="2. Checkpointing"></a>2. Checkpointing</h3><p><code>Flink</code>的容错机制的核心部分是生成分布式数据流和算子状态的一致性快照。这些快照作为一个一致性检查点，在系统发生故障时可以回溯。<code>Flink</code>的生成这些快照的机制在<a href="https://arxiv.org/abs/1506.08603" target="_blank" rel="noopener">分布式数据流的轻量级异步快照</a>中进行详细的描述。它受分布式快照<code>Chandy-Lamport</code>算法的启发，并且专门针对<code>Flink</code>的执行模型量身定制。</p>
-<h4 id="2-1-Barriers"><a href="#2-1-Barriers" class="headerlink" title="2.1 Barriers"></a>2.1 Barriers</h4><p><code>Flink</code>分布式快照的一个核心元素是数据流<code>Barriers</code>。这些<code>Barriers</code>被放入数据流中，并作为数据流的一部分与记录一起流动。<code>Barriers</code>永远不会超越记录，严格按照相对顺序流动。<code>Barriers</code>将数据流中的记录分成进入当前快照的记录集合和进入下一个快照的记录集合。每个<code>Barriers</code>都携带前面快照的ID。<code>Barriers</code>不会中断流的流动，因此非常轻。来自不同快照的多个<code>Barriers</code>可以同时在流中，这意味着不同快照可以同时发生。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-1.png?raw=true" alt=""></p>
-<p><code>Barriers</code>在数据流源处被放入的并行数据流。快照<code>n</code>放入<code>Barriers</code>的位置（我们称之为<code>Sn</code>）是快照覆盖数据的源流中的位置。例如，在<code>Apache Kafka</code>中，这个位置是分区中最后一个记录的偏移量。该位置<code>Sn</code>会报告给检查点协调员（<code>Flink</code>的<code>JobManager</code>）。</p>
-<p><code>Barriers</code>向下游流动。当中间算子从其所有输入流中接收到快照<code>n</code>的<code>Barriers</code>时，它会将快照<code>n</code>的<code>Barriers</code>发送到其所有输出流中。一旦<code>Sink</code>算子（流式<code>DAG</code>的末尾）从其所有输入流中接收到<code>Barriers n</code>，就向检查点协调器确认快照<code>n</code>。在所有<code>Sink</code>确认了快照之后，才被确认已经完成。</p>
-<p>一旦快照<code>n</code>完成，作业将不会再向数据源询问<code>Sn</code>之前的记录，因为那时这些记录（以及它们的后代记录）已经通过了整个数据流拓扑。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-2.png?raw=true" alt=""></p>
-<p>接收多个输入流的算子需要根据快照<code>Barriers</code>对其输入流。上图说明了这一点：</p>
-<ul>
-<li>只要算子从一个输入流接收到快照<code>Barriers n</code>时，就不能处理来自该数据流的任何记录(译者注:进行缓存)，当从其他输入流中接收到最后一个<code>Barriers n</code>时，才开始处理缓存的数据(即对齐的意思)。否则，就会混合属于快照<code>n</code>和快照<code>n + 1</code>的记录。</li>
-<li>报告<code>Barriers n</code>的数据流暂时搁置。从这些数据流接收到的记录不会被处理，而是放入输入缓冲区中(例如上图中的<code>aligning</code>部分)。</li>
-<li>一旦接收到最后一个流的<code>Barriers n</code>时，算子才发送所有待发送的记录，然后才发送快照<code>Barriers n</code>自己(例如上图中的<code>checkpoint</code>部分)。</li>
-<li>之后，恢复处理所有输入流中的记录，在处理来自数据流的记录之前优先处理来自输入缓冲区中的记录(例如上图中的<code>continue</code>部分)。</li>
-</ul>
-<h4 id="2-2-State"><a href="#2-2-State" class="headerlink" title="2.2 State"></a>2.2 State</h4><p>当算子包含任何形式的状态时，这个状态也必须是快照的一部分。算子状态有不同的形式：</p>
-<ul>
-<li>用户自定义状态：这是由转换函数（如<code>map（）</code>或<code>filter（）</code>）直接创建和修改的状态。有关详细信息，请参阅<a href="http://smartsi.club/2018/01/16/Flink/[Flink]Flink1.4%20%E7%8A%B6%E6%80%81%E6%A6%82%E8%BF%B0/" target="_blank" rel="noopener">状态概述</a></li>
-<li>系统状态：这种状态指的是作为算子计算一部分的数据缓冲区。这种状态的一个典型例子是窗口缓冲区，在窗口缓冲区中，系统为窗口收集（以及聚合）记录，直到窗口被计算和删除。</li>
-</ul>
-<p>在算子收到所有输入流中的所有快照<code>barriers</code>以及在<code>barriers</code>发送到输出流之前，算子对自己的状态进行快照。这时，At that point, all updates to the state from records before the barriers will have been made, and no updates that depend on records from after the barriers have been applied。由于快照的状态可能较大，因此需要其存储在可配置状态终端<code>state backend</code>中。默认情况下，会存储在<code>JobManager</code>的内存中，但是在生产环境下，应该配置为分布式可靠存储系统（如<code>HDFS</code>）。在状态被存储之后，算子确认检查点，将快照<code>barriers</code>发送到输出流，然后继续前行。</p>
-<p>生成的快照包含：</p>
-<ul>
-<li>对于每个并行流数据源，快照启动时在数据流中的偏移量/位置</li>
-<li>对于每个算子，指向作为快照中一部分的状态的指针</li>
-</ul>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-3.png?raw=true" alt=""></p>
-<h4 id="2-3-Exactly-Once-vs-At-Least-Once"><a href="#2-3-Exactly-Once-vs-At-Least-Once" class="headerlink" title="2.3 Exactly Once vs. At Least Once"></a>2.3 Exactly Once vs. At Least Once</h4><p>对齐步骤可能会给流式传输程序造成延迟。这个额外的延迟通常大约在几毫秒的数量级，但是我们已经看到一些因为异常值造成的延迟明显增加的情况。对于所有记录需要持续较低延迟（几毫秒）的应用程序而言，<code>Flink</code>有一个开关可以在检查点期间跳过流对齐。一旦算子看到每个输入的检查点<code>barriers</code>，就会生成检查点快照。</p>
-<p>当跳过对齐步骤时，即使在检查点<code>n</code>的一些检查点<code>barriers</code>到达之后，算子也会继续处理所有输入。这样，在为检查点<code>n</code>生成状态快照之前也会处理到属于检查点<code>n+1</code>的元素。在恢复时，这些记录将会重复出现，因为它们既包含在检查点<code>n</code>的状态快照中，也会在检查点<code>n</code>之后作为数据的一部分进行重放。</p>
-<p>备注:</p>
-<p>对齐仅发生在当算子具有多个输入（例如<code>join</code>）或者具有多个输出（在流<code>repartitioning</code>/<code>shuffle</code>之后）的情况。正因为如此，只有密集并行流操作(only embarrassingly parallel streaming operations)（<code>map（）</code>，<code>flatMap（）</code>，<code>filter（）</code>…）的数据流即使在至少一次模式下也只能提供严格一次。</p>
-<h4 id="2-4-异步状态快照"><a href="#2-4-异步状态快照" class="headerlink" title="2.4 异步状态快照"></a>2.4 异步状态快照</h4><p>请注意，上述机制意味着算子在状态终端存储状态快照时停止处理输入记录。这种同步状态快照在每次生成快照时都会造成延迟。</p>
-<p>可以让算子在存储其状态快照的同时继续处理输入记录，有效地让状态快照在后台异步发生。要做到这一点，算子必须能够产生一个以某种方式存储的状态对象，以至于对算子状态的进一步的修改不会影响状态对象。例如，<code>copy-on-write</code>数据结构（如<code>RocksDB</code>中使用的数据结构）具有这种功能。</p>
-<p>在接收到输入端的检查点<code>barriers</code>后，算子启动其状态的异步快照复制。<code>barriers</code>立即发送到输出流中，并继续进行正常的流处理。一旦后台复制过程完成，它就会向检查点协调器（JobManager）确认检查点。检查点现在只有在所有<code>sink</code>接收到<code>barriers</code>并且所有有状态的算子已经确认完成备份（可能在<code>barriers</code>到达<code>sink</code>之后）。</p>
-<p>有关状态快照的详细信息，请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/state/state_backends.html" target="_blank" rel="noopener">状态终端</a>。</p>
-<h3 id="3-恢复"><a href="#3-恢复" class="headerlink" title="3. 恢复"></a>3. 恢复</h3><p>在这种机制下恢复很简单：一旦失败，<code>Flink</code>选择最近完成的检查点<code>k</code>。然后系统重新部署整个分布式数据流，并为每个算子提供作为检查点<code>k</code>一部分的快照状态。数据源被设置为开始从位置<code>Sk</code>读取数据流。例如在<code>Apache Kafka</code>中，这意味着告诉消费者从偏移量<code>Sk</code>处开始提取数据。</p>
-<p>如果增量对状态进行快照，算子将从最新且完整的快照状态开始，然后对该状态应用一系列增量快照更新。</p>
-<p>请参阅<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink1.4%20%E9%87%8D%E5%90%AF%E7%AD%96%E7%95%A5/" target="_blank" rel="noopener">重启策略</a>了解更多信息。</p>
-<h3 id="4-实现算子快照"><a href="#4-实现算子快照" class="headerlink" title="4. 实现算子快照"></a>4. 实现算子快照</h3><p>对算子进行快照，有两部分：同步部分和异步部分。</p>
-<p>算子和状态终端将其快照作为<code>Java FutureTask</code>。该任务包含的状态同步部分已经完成异步部分挂起。然后异步部分由该检查点的后台线程执行。</p>
-<p>算子检查点只是同步返回一个已经完成的<code>FutureTask</code>。如果需要执行异步操作，则在<code>FutureTask的run（）</code>方法中执行。</p>
-<p>任务是可取消的，所以消耗句柄的数据流和其他资源是可以被释放。</p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/stream_checkpointing.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/stream_checkpointing.html</a></p>
+        <p>根据各种参数(如数据大小或集群中的机器数量)，<code>Flink</code>的优化器自动会为你的程序选择一个执行策略。很多情况下，准确的知道<code>Flink</code>如何执行你的程序是很有帮助的。</p>
+<h3 id="1-计划可视化工具"><a href="#1-计划可视化工具" class="headerlink" title="1. 计划可视化工具"></a>1. 计划可视化工具</h3><p><code>Flink</code>内置一个执行计划的可视化工具。包含可视化工具的<code>HTML</code>文档位于<code>tools/planVisualizer.html</code>下。用<code>JSON</code>表示作业执行计划，并将其可视化为具有执行策略完整注释的图(visualizes it as a graph with complete annotations of execution strategies)。</p>
+<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">打开可视化工具的方式有所改变:由本地文件 tools/planVisualizer.html 改为 url http://flink.apache.org/visualizer/index.html</span><br></pre></td></tr></table></figure></p>
+<p>以下代码显示了如何从程序中打印执行计划的<code>JSON</code>：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">...</span><br><span class="line">System.out.println(env.getExecutionPlan());</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment</span><br><span class="line">...</span><br><span class="line">println(env.getExecutionPlan())</span><br></pre></td></tr></table></figure></p>
+<p>要可视化执行计划，请执行以下操作：</p>
+<p>(1) 使用浏览器打开<code>planVisualizer.html</code>(或者直接在浏览器中输入<a href="http://flink.apache.org/visualizer/index.html" target="_blank" rel="noopener">http://flink.apache.org/visualizer/index.html</a> 网址)</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92-2.png?raw=true" alt=""></p>
+<p>(2) 将<code>JSON</code>字符串粘贴到文本框中</p>
+<p>(3) 点击<code>Draw</code>按钮</p>
+<p>完成上面这些步骤后，将会显示详细的执行计划。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92-1.png?raw=true" alt=""></p>
+<h3 id="2-Web界面"><a href="#2-Web界面" class="headerlink" title="2. Web界面"></a>2. Web界面</h3><p><code>Flink</code>提供了一个用于提交和执行作业的Web界面。这个界面是<code>JobManager Web</code>监控界面的一部分，默认情况下在端口<code>8081</code>上运行。通过这个界面提交作业需要你在<code>flink-conf.yaml</code>中设置<code>jobmanager.web.submit.enable：true</code>。</p>
+<p>你可以在作业执行之前指定程序参数。执行计划可视化器使你能够在执行Flink作业之前查看执行计划。</p>
+<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.3/dev/execution_plans.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.3/dev/execution_plans.html</a></p>
 
       
     </div>
@@ -496,6 +464,8 @@
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
           
+            <a href="/tags/FLINK-基础/" rel="tag"># FLINK 基础</a>
+          
         </div>
       
 
@@ -507,8 +477,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/16/flink_stream_working_with_state/" rel="next" title="Flink1.4 使用状态">
-                <i class="fa fa-chevron-left"></i> Flink1.4 使用状态
+              <a href="/2018/01/04/flink-parallel-execute/" rel="next" title="Flink1.4 并发执行">
+                <i class="fa fa-chevron-left"></i> Flink1.4 并发执行
               </a>
             
           </div>
@@ -517,8 +487,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/25/Hadoop/[Hadoop]Shell中判断HDFS文件是否存在/" rel="prev" title="Hadoop Shell中判断HDFS文件是否存在">
-                Hadoop Shell中判断HDFS文件是否存在 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/04/Flink/[Flink]Flink1.4 数据流类型和转换关系/" rel="prev" title="Flink1.4 数据流类型与转换关系">
+                Flink1.4 数据流类型与转换关系 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -662,7 +632,7 @@
                 
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
-                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-count">20</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -735,7 +705,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Checkpointing"><span class="nav-number">2.</span> <span class="nav-text">2. Checkpointing</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Barriers"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Barriers</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-State"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 State</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Exactly-Once-vs-At-Least-Once"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Exactly Once vs. At Least Once</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-异步状态快照"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 异步状态快照</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-恢复"><span class="nav-number">3.</span> <span class="nav-text">3. 恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-实现算子快照"><span class="nav-number">4.</span> <span class="nav-text">4. 实现算子快照</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-计划可视化工具"><span class="nav-number">1.</span> <span class="nav-text">1. 计划可视化工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Web界面"><span class="nav-number">2.</span> <span class="nav-text">2. Web界面</span></a></li></ol></div>
             
 
           </div>

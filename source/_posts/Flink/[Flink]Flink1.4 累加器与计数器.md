@@ -5,8 +5,10 @@ title: Flink1.4 累加器与计数器
 date: 2018-01-04 11:46:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-accumulators-counters
 ---
 
 ### 1. 概述

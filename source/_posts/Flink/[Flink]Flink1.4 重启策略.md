@@ -5,8 +5,10 @@ title: Flink1.4 重启策略
 date: 2018-01-04 16:36:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-restart-strategy
 ---
 
 `Flink`支持不同的重启策略，重启策略控制在作业失败后如何重启。可以使用默认的重启策略启动集群，这个默认策略在作业没有特别指定重启策略时使用。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。

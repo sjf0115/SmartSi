@@ -5,8 +5,10 @@ title: Flink1.4 并发执行
 date: 2018-01-04 14:07:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-parallel-execute
 ---
 
 本节介绍如何在`Flink`中配置程序的并行执行。一个`Flink`程序由多个任务(`transformations`/`operators`，`data sources`和`sinks`)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(`parallelism`)。

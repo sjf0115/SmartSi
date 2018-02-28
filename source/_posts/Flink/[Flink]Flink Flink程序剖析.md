@@ -5,8 +5,10 @@ title: Flink1.4 Flink程序剖析
 date: 2018-01-04 09:54:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-anatomy-of-a-flink-program
 ---
 
 `Flink`程序程序看起来像转换数据集合的普通程序。每个程序都由相同的基本部分组成：

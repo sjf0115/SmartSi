@@ -5,9 +5,10 @@ title: Flink1.4 内部原理之数据流容错
 date: 2018-01-24 14:39:01
 tags:
   - Flink
+  - Flink 内部原理
 
 categories: Flink
-permalink: flink_data_streaming_fault_tolerance
+permalink: flink-data-streaming-fault-tolerance
 ---
 
 ### 1. 概述

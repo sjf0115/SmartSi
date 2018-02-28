@@ -5,8 +5,10 @@ title: Flink1.4 Flink编程模型
 date: 2017-12-29 12:54:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-programming-model
 ---
 
 ### 1. 抽象层次

@@ -5,8 +5,10 @@ title: Flink 1.4 分布式运行环境
 date: 2018-01-03 11:03:01
 tags:
   - Flink
+  - Flink 基础
 
 categories: Flink
+permalink: flink-distributed-runtime
 ---
 
 ### 1. 任务链与算子链

@@ -5,8 +5,10 @@ title: Flink1.4 执行计划
 date: 2018-01-04 14:46:01
 tags:
   - Flink
+  - FLINK 基础
 
 categories: Flink
+permalink: flink-execution-plans
 ---
 
 根据各种参数(如数据大小或集群中的机器数量)，`Flink`的优化器自动会为你的程序选择一个执行策略。很多情况下，准确的知道`Flink`如何执行你的程序是很有帮助的。
