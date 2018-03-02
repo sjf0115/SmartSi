@@ -19,7 +19,7 @@ permalink: flink-data-streaming-fault-tolerance
 
 如果应用程序发生故障（由于机器，网络或软件故障），`Flink`会停止分布式流式数据流。然后系统重新启动算子并将其重置为最新的成功检查点。输入流被重置为状态快照的时间点。作为重新启动的并行数据流处理的任何记录都保证不属于先前检查点状态的一部分。
 
-注意:默认情况下，检查点被禁用。有关如何启用和配置检查点的详细信息，请参[阅检查点](https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html)。
+注意:默认情况下，检查点被禁用。有关如何启用和配置检查点的详细信息，请参[阅检查点](http://smartsi.club/2018/01/17/flink-stream-development-checkpointing-enable-config/)。
 
 为了实现这个机制的保证，数据流源（如消息队列或代理）需要能够将流重放到定义的最近时间点。`Apache Kafka`有这个能力，而`Flink`的Kafka连接器就是利用这个能力。有关`Flink`连接器提供的保证的更多信息，请参阅[数据源和接收器的容错保证](https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/connectors/guarantees.html)。
 
