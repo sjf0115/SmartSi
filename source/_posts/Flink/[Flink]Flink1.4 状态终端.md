@@ -37,7 +37,7 @@ env.setStateBackend(...)
 - `FsStateBackend`
 - `RocksDBStateBackend`
 
-如果没有其他配置，系统默认使用`MemoryStateBackend`。
+如果没有配置，系统默认使用`MemoryStateBackend`。
 
 #### 2.1 MemoryStateBackend
 
@@ -63,7 +63,7 @@ new MemoryStateBackend(MAX_MEM_STATE_SIZE, true);
 
 `FsStateBackend` 使用文件系统URL（类型，地址，路径）进行配置，如 `hdfs://namenode:40010/flink/checkpoints` 或 `file:///data/flink/checkpoints`。
 
-`FsStateBackend` 将正在运行的数据保存在 `TaskManager` 的内存中。在进行检查点操作时，将状态快照写入配置的文件系统文件和目录中。较小的元数据存储在 `JobManager` 的内存中（或者在高可用性模式下，存储在元数据检查点中）。
+`FsStateBackend` 将正在使用的数据保存在 `TaskManager` 的内存中。在进行检查点操作时，将状态快照写入配置的文件系统文件和目录中。较小的元数据存储在 `JobManager` 的内存中（或者在高可用性模式下，存储在元数据检查点中）。
 
 `FsStateBackend` 默认使用异步快照，以避免在写入状态检查点时阻塞处理管道。如果要禁用此功能，用户可以在实例化 `FsStateBackend` 的构造函数中将对应的布尔值设置为 `false`，例如：
 ```Java
@@ -78,7 +78,7 @@ new FsStateBackend（path，false）;
 
 `RocksDBStateBackend` 使用文件系统URL（类型，地址，路径）进行配置，例如 `hdfs://namenode:40010/flink/checkpoints` 或 `file:///data/flink/checkpoints`。
 
-`RocksDBStateBackend` 将 `RocksDB` 数据库中的数据保存在 `TaskManager` 数据目录中（默认情况下）。进行检查点操作时，整个 `RocksDB` 数据库进行检查点操作存储到配置的文件系统和目录中。较小的元数据存储在 `JobManager` 的内存中（或者在高可用性模式下，存储在元数据检查点中）。
+`RocksDBStateBackend` 将 正在使用的数据保存在 `RocksDB` 数据库中，其位于 `TaskManager` 数据目录下（默认情况下）。进行检查点操作时，整个 `RocksDB` 数据库进行检查点操作存储到配置的文件系统和目录中。较小的元数据存储在 `JobManager` 的内存中（或者在高可用性模式下，存储在元数据检查点中）。
 
 `RocksDBStateBackend` 总是执行异步快照。
 
