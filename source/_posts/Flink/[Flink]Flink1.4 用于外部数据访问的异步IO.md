@@ -17,7 +17,7 @@ permalink: flink-stream-asynchronous-io-for-external-data-access
 
 与外部数据库进行异步交互意味着一个并行函数实例可以并发地处理多个请求和并发地接收多个响应。那样的话，可以通过发送其他请求和接收响应来重叠等待时间。至少，等待时间可以被多个请求平摊，这在很多情况下会导致更高的流吞吐量。
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-asynchronous-io-for-external-data-access-1.png?raw=true)
 
 通过扩展 `MapFunction` 到一个很高的并发度来提高吞吐量在一定程度上是可行的，但是常常会导致很高的资源成本：有更多的并行 `MapFunction` 实例意味着更多的任务、线程、Flink内部网络连接、与数据库之间的网络连接、缓存以及通常的内部开销。
 

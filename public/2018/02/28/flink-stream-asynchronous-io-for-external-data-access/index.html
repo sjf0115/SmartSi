@@ -108,10 +108,12 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 异步IO操作的必要性当与外部系统交互时（例如，使用存储在数据库中数据丰富流事件），需要注意与外部系统的通信延迟并不决定流应用程序的整体工作。访问外部数据库中的数据（例如在 MapFunction 中）通常意味着同步交互：将请求发送到数据库，MapFunction 会等待直到收到响应。在许多情况下，这个等待时间占了该函数绝大部分时间。 与外部数据库进行异步交互意味着一个并行函数实例可以并发地处">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-03-02T03:33:25.127Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-asynchronous-io-for-external-data-access-1.png?raw=true">
+<meta property="og:updated_time" content="2018-03-07T02:01:49.573Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink1.4 用于外部数据访问的异步IO">
 <meta name="twitter:description" content="1. 异步IO操作的必要性当与外部系统交互时（例如，使用存储在数据库中数据丰富流事件），需要注意与外部系统的通信延迟并不决定流应用程序的整体工作。访问外部数据库中的数据（例如在 MapFunction 中）通常意味着同步交互：将请求发送到数据库，MapFunction 会等待直到收到响应。在许多情况下，这个等待时间占了该函数绝大部分时间。 与外部数据库进行异步交互意味着一个并行函数实例可以并发地处">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-asynchronous-io-for-external-data-access-1.png?raw=true">
 
 
 
@@ -398,7 +400,7 @@
       
         <h3 id="1-异步IO操作的必要性"><a href="#1-异步IO操作的必要性" class="headerlink" title="1. 异步IO操作的必要性"></a>1. 异步IO操作的必要性</h3><p>当与外部系统交互时（例如，使用存储在数据库中数据丰富流事件），需要注意与外部系统的通信延迟并不决定流应用程序的整体工作。访问外部数据库中的数据（例如在 <code>MapFunction</code> 中）通常意味着同步交互：将请求发送到数据库，<code>MapFunction</code> 会等待直到收到响应。在许多情况下，这个等待时间占了该函数绝大部分时间。</p>
 <p>与外部数据库进行异步交互意味着一个并行函数实例可以并发地处理多个请求和并发地接收多个响应。那样的话，可以通过发送其他请求和接收响应来重叠等待时间。至少，等待时间可以被多个请求平摊，这在很多情况下会导致更高的流吞吐量。</p>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-asynchronous-io-for-external-data-access-1.png?raw=true" alt=""></p>
 <p>通过扩展 <code>MapFunction</code> 到一个很高的并发度来提高吞吐量在一定程度上是可行的，但是常常会导致很高的资源成本：有更多的并行 <code>MapFunction</code> 实例意味着更多的任务、线程、Flink内部网络连接、与数据库之间的网络连接、缓存以及通常的内部开销。</p>
 <h3 id="2-前提条件"><a href="#2-前提条件" class="headerlink" title="2. 前提条件"></a>2. 前提条件</h3><p>如上面的部分所述，实现数据库（或key/value存储系统）适当的异步I/O访问需要该数据库的客户端支持异步请求。许多流行的数据库提供这样的客户端。在没有这样的客户端的情况下，可以尝试创建多个客户端并使用线程池处理同步调用，从而将同步客户端转换为有限的并发客户端。但是，这种方法通常比适当的异步客户端效率低。</p>
 <h3 id="3-Async-I-O-API"><a href="#3-Async-I-O-API" class="headerlink" title="3. Async I/O API"></a>3. Async I/O API</h3><p>Flink 的异步 I/O API允许用户在数据流中使用异步请求客户端。API处理与数据流的集成，以及处理顺序，事件时间，容错等。</p>
@@ -493,8 +495,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/02/28/introducing-apache-spark-2-3/" rel="next" title="Apache Spark 2.3 重要特性介绍">
-                <i class="fa fa-chevron-left"></i> Apache Spark 2.3 重要特性介绍
+              <a href="/2018/02/28/flink-stream-operators-overall/" rel="next" title="Flink1.4 Operator概述">
+                <i class="fa fa-chevron-left"></i> Flink1.4 Operator概述
               </a>
             
           </div>
@@ -503,8 +505,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/03/01/flink-stream-windows-function/" rel="prev" title="Flink1.4 窗口函数">
-                Flink1.4 窗口函数 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/28/flink-stream-windows-overall/" rel="prev" title="Flink1.4 窗口概述">
+                Flink1.4 窗口概述 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
