@@ -1,11 +1,11 @@
 ---
 layout: post
 author: sjf0115
-title: Flink1.4 Flink编程模型
+title: Flink 内部原理之编程模型
 date: 2017-12-29 12:54:01
 tags:
   - Flink
-  - Flink 基础
+  - Flink 内部原理
 
 categories: Flink
 permalink: flink-programming-model

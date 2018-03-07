@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: Flink1.4 内部原理之作业与调度
+title: Flink 内部原理之作业与调度
 date: 2018-01-29 17:31:01
 tags:
   - Flink

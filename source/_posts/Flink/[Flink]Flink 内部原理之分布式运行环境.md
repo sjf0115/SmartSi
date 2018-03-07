@@ -1,11 +1,11 @@
 ---
 layout: post
 author: sjf0115
-title: Flink 1.4 分布式运行环境
+title: Flink 内部原理之分布式运行环境
 date: 2018-01-03 11:03:01
 tags:
   - Flink
-  - Flink 基础
+  - Flink 内部原理
 
 categories: Flink
 permalink: flink-distributed-runtime

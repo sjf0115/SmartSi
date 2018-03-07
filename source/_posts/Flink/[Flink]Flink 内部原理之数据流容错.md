@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: Flink1.4 内部原理之数据流容错
+title: Flink 内部原理之数据流容错
 date: 2018-01-24 14:39:01
 tags:
   - Flink
