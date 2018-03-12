@@ -100,23 +100,23 @@
   <meta name="keywords" content="Flink,Flink 内部原理," />
 
 
-<meta name="description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator)子任务连接成任务。每个任务都只由一个线程执行。将运算符链接到任务中是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink运行时(runtime)由两种">
+<meta name="description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator) SubTask 连接成 Task。每个 Task 都只由一个线程执行。将算子链接到 Task 是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink">
 <meta name="keywords" content="Flink,Flink 内部原理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink 内部原理之分布式运行环境">
 <meta property="og:url" content="http://sjf0115.github.io/2018/01/03/flink-distributed-runtime/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator)子任务连接成任务。每个任务都只由一个线程执行。将运算符链接到任务中是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink运行时(runtime)由两种">
+<meta property="og:description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator) SubTask 连接成 Task。每个 Task 都只由一个线程执行。将算子链接到 Task 是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-1.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-2.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-3.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-4.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-5.png?raw=true">
-<meta property="og:updated_time" content="2018-03-07T02:43:17.860Z">
+<meta property="og:updated_time" content="2018-03-07T02:59:10.051Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 内部原理之分布式运行环境">
-<meta name="twitter:description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator)子任务连接成任务。每个任务都只由一个线程执行。将运算符链接到任务中是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink运行时(runtime)由两种">
+<meta name="twitter:description" content="1. 任务链与算子链在分布式运行中，Flink将算子(operator) SubTask 连接成 Task。每个 Task 都只由一个线程执行。将算子链接到 Task 是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。 下图中的示例数据流由五个子任务执行，因此具有五个并行线程。  2. 作业管理器, 任务管理器, 客户端Flink">
 <meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-1.png?raw=true">
 
 
@@ -402,7 +402,7 @@
       
 
       
-        <h3 id="1-任务链与算子链"><a href="#1-任务链与算子链" class="headerlink" title="1. 任务链与算子链"></a>1. 任务链与算子链</h3><p>在分布式运行中，<code>Flink</code>将算子(operator)子任务连接成任务。每个任务都只由一个线程执行。将运算符链接到任务中是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。</p>
+        <h3 id="1-任务链与算子链"><a href="#1-任务链与算子链" class="headerlink" title="1. 任务链与算子链"></a>1. 任务链与算子链</h3><p>在分布式运行中，<code>Flink</code>将算子(operator) <code>SubTask</code> 连接成 <code>Task</code>。每个 <code>Task</code> 都只由一个线程执行。将算子链接到 <code>Task</code> 是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。</p>
 <p>下图中的示例数据流由五个子任务执行，因此具有五个并行线程。</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%20%E5%88%86%E5%B8%83%E5%BC%8F%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83-1.png?raw=true" alt=""></p>
 <h3 id="2-作业管理器-任务管理器-客户端"><a href="#2-作业管理器-任务管理器-客户端" class="headerlink" title="2. 作业管理器, 任务管理器, 客户端"></a>2. 作业管理器, 任务管理器, 客户端</h3><p>Flink运行时(<code>runtime</code>)由两种类型的进程组成：</p>
@@ -623,7 +623,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">83</span>
+                    <span class="site-state-item-count">84</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -645,7 +645,7 @@
                 
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
-                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-count">21</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
