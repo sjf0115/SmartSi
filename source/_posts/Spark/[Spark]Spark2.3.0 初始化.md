@@ -58,9 +58,6 @@ appName 参数是应用程序在集群UI上显示的名称。master 是 Spark，
 ```
 可以执行 `spark-shell --help` 获取完整的选项列表。`spark-shell` 调用的是更常用的[`spark-submit`脚本](http://blog.csdn.net/sunnyyoona/article/details/55271395)。
 
-
-> 备注
-
 > Spark 版本: 2.3.0
 
 
