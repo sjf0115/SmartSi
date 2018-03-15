@@ -304,7 +304,7 @@ JavaPairRDD<String, Iterable<Integer>> groupRDD = rdd.groupByKey();
 // Banana --- 10 9
 ```
 
-#### 4.9 reduceByKey(func, [numTasks]) 分组聚合
+#### 4.9 reduceByKey(func, [numTasks]) 根据key聚合
 
 当在（K，V）键值对的数据集上调用时，返回（K，V）键值对的数据集，使用给定的reduce函数 func 聚合每个键的值，该函数类型必须是（V，V）=> V。类似于 groupByKey，可以通过设置可选的第二个参数来配置reduce任务的数量。
 
