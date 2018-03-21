@@ -301,7 +301,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/04/java-on-off-heap-memory/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/04/jvm-garbage-collection-algorithm/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -320,7 +320,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/02/04/java-on-off-heap-memory/" itemprop="url">Java 堆内内存与堆外内存</a></h2>
+                <a class="post-title-link" href="/2018/02/04/jvm-garbage-collection-algorithm/" itemprop="url">JVM 垃圾收集算法</a></h2>
         
 
         <div class="post-meta">
@@ -366,7 +366,7 @@
 
           
           
-             <span id="/2018/02/04/java-on-off-heap-memory/" class="leancloud_visitors" data-flag-title="Java 堆内内存与堆外内存">
+             <span id="/2018/02/04/jvm-garbage-collection-algorithm/" class="leancloud_visitors" data-flag-title="JVM 垃圾收集算法">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -399,11 +399,13 @@
       
         
           
-          一般情况下，Java 中分配的非空对象都是由 Java 虚拟机的垃圾收集器管理的，也称为堆内内存（on-heap memory）。虚拟机会定期对垃圾内存进行回收，在某些特定的时间点，它会进行一次彻底的回收（full gc）。彻底回收时，垃圾收集器会对所有分配的堆内内存进行完整的扫描，这意味着一个重要
+          本文“垃圾收集算法”节选自《深入理解Java虚拟机:JVM高级特性与最佳实践》【作者：周志明】
+由于垃圾收集算法的实现涉及大量的程序细节，而且各个平台的虚拟机操作内存的方法又各不相同，因此本节不打算过多地讨论算法的实现，只是介绍几种算法的思想及其发展过程。
+1. 标记-清除算法最基础的收集算法是 标
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/04/java-on-off-heap-memory/#meer" rel="contents">
+            <a class="btn" href="/2018/02/04/jvm-garbage-collection-algorithm/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -558,7 +560,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/03/cache-update-policy/#meer" rel="contents">
+            <a class="btn" href="/2018/02/03/cache-update-policy/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -715,7 +717,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/02/flink-sql-persistent-query-of-dynamic-table/#meer" rel="contents">
+            <a class="btn" href="/2018/02/02/flink-sql-persistent-query-of-dynamic-table/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -870,7 +872,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/02/hadoop-ecosystem-break-away-jvm/#meer" rel="contents">
+            <a class="btn" href="/2018/02/02/hadoop-ecosystem-break-away-jvm/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1025,7 +1027,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/01/spark-performance-optimization-basic/#meer" rel="contents">
+            <a class="btn" href="/2018/02/01/spark-performance-optimization-basic/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1181,7 +1183,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/31/flink-stream-turning-back-time-savepoints/#meer" rel="contents">
+            <a class="btn" href="/2018/01/31/flink-stream-turning-back-time-savepoints/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1336,7 +1338,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/30/flink-basic-command-line-interface/#meer" rel="contents">
+            <a class="btn" href="/2018/01/30/flink-basic-command-line-interface/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1493,7 +1495,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/30/flink-stream-deployment-externalized-checkpoints/#meer" rel="contents">
+            <a class="btn" href="/2018/01/30/flink-stream-deployment-externalized-checkpoints/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1648,7 +1650,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/29/flink-internals-job-scheduling/#meer" rel="contents">
+            <a class="btn" href="/2018/01/29/flink-internals-job-scheduling/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1803,7 +1805,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/25/Hadoop/[Hadoop]Shell中判断HDFS文件是否存在/#meer" rel="contents">
+            <a class="btn" href="/2018/01/25/Hadoop/[Hadoop]Shell中判断HDFS文件是否存在/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1959,7 +1961,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/24/flink-data-streaming-fault-tolerance/#meer" rel="contents">
+            <a class="btn" href="/2018/01/24/flink-data-streaming-fault-tolerance/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2116,7 +2118,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/17/flink-stream-development-checkpointing-enable-config/#meer" rel="contents">
+            <a class="btn" href="/2018/01/17/flink-stream-development-checkpointing-enable-config/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2272,7 +2274,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/17/flink-stream-state-backends/#meer" rel="contents">
+            <a class="btn" href="/2018/01/17/flink-stream-state-backends/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2429,7 +2431,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/16/flink-stream-working-with-state/#meer" rel="contents">
+            <a class="btn" href="/2018/01/16/flink-stream-working-with-state/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2590,7 +2592,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/16/flink-stream-state-overview/#meer" rel="contents">
+            <a class="btn" href="/2018/01/16/flink-stream-state-overview/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2745,7 +2747,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/16/flink-stream-event-timestamp-and-extractors/#meer" rel="contents">
+            <a class="btn" href="/2018/01/16/flink-stream-event-timestamp-and-extractors/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2900,7 +2902,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/15/flink-stream-graphic-watermark/#meer" rel="contents">
+            <a class="btn" href="/2018/01/15/flink-stream-graphic-watermark/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3057,7 +3059,7 @@ Java版本:final StreamExecutionEnvironment env = Str
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/15/flink-stream-event-timestamps-and-watermark/#meer" rel="contents">
+            <a class="btn" href="/2018/01/15/flink-stream-event-timestamps-and-watermark/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3212,7 +3214,7 @@ Java版本:final StreamExecutionEnvironment env = Str
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/11/Stream/Exactly once未必严格一次/#meer" rel="contents">
+            <a class="btn" href="/2018/01/11/Stream/Exactly once未必严格一次/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3369,7 +3371,7 @@ Java版本:final StreamExecutionEnvironment env = Str
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/11/Stream/[Stream]对于流处理技术的谬见/#meer" rel="contents">
+            <a class="btn" href="/2018/01/11/Stream/[Stream]对于流处理技术的谬见/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3525,7 +3527,7 @@ Java版本:final StreamExecutionEnvironment env = Str
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/10/Stream/[Stream]主流流处理框架比较(2)/#meer" rel="contents">
+            <a class="btn" href="/2018/01/10/Stream/[Stream]主流流处理框架比较(2)/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3681,7 +3683,7 @@ DAG是任务链的图形化表示，我们用它来描述流处理作业的拓�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/#meer" rel="contents">
+            <a class="btn" href="/2018/01/10/Stream/[Stream]主流流处理框架比较(1)/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3840,7 +3842,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-stream-event-time-and-watermark/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-stream-event-time-and-watermark/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3996,7 +3998,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-stream-event-time-and-processing-time/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-stream-event-time-and-processing-time/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4152,7 +4154,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-restart-strategy/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-restart-strategy/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4307,7 +4309,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-stream-dataflow-type-and-transformation/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-stream-dataflow-type-and-transformation/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4463,7 +4465,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-execution-plans/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-execution-plans/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4618,7 +4620,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-parallel-execute/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-parallel-execute/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4774,7 +4776,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-accumulators-counters/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-accumulators-counters/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4930,7 +4932,7 @@ The Dataflow Mo
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/01/04/flink-how-to-specifying-keys/#meer" rel="contents">
+            <a class="btn" href="/2018/01/04/flink-how-to-specifying-keys/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -5019,7 +5021,7 @@ The Dataflow Mo
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">92</span>
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
