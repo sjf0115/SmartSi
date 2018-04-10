@@ -47,7 +47,7 @@ Spark Streaming可以对已经接收的数据进行确认。输入的数据首�
 
 ### 3. 元数据持久化
 
-可靠的数据源和接收器可以让实时计算程序从接收器挂掉的情况下恢复。但是更棘手的问题是，如果Driver挂掉如何恢复？使用Checkpint应用程序元数据的方法可以解决这一问题。为此，Driver可以将应用程序的重要元数据（包含：配置信息、计算代码、未处理的batch数据）持久化到可靠的存储中，比如HDFS、S3；然后Driver可以利用这些持久化的数据进行恢复。
+可靠的数据源和接收器可以让实时计算程序从接收器挂掉的情况下恢复。但是更棘手的问题是，如果Driver挂掉如何恢复？使用Checkpoint应用程序元数据的方法可以解决这一问题。为此，Driver可以将应用程序的重要元数据（包含：配置信息、计算代码、未处理的batch数据）持久化到可靠的存储中，比如HDFS、S3；然后Driver可以利用这些持久化的数据进行恢复。
 
 ![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-3.jpg?raw=true)
 
@@ -71,9 +71,11 @@ Spark Streaming可以对已经接收的数据进行确认。输入的数据首�
 
 这对于很多关键型的应用程序来说还是无法容忍。这时，Spark团队再次引入了WAL解决以上这些问题。
 
-### 4 WAL（Write ahead log）
+### 4. WAL（Write ahead log）
 
 启用了WAL机制，所以已经接收的数据被接收器写入到容错存储中，比如HDFS或者S3。由于采用了WAl机制，Driver可以从失败的点重新读取数据，即使Exectuor中内存的数据已经丢失了。在这个简单的方法下，Spark Streaming提供了一种即使是Driver挂掉也可以避免数据丢失的机制。
+
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-4.jpg?raw=true)
 
 虽然WAL可以确保数据不丢失,它并不能对所有的数据源保证exactly-once语义。以下场景任然比较糟糕：
 
@@ -89,7 +91,7 @@ Spark Streaming可以对已经接收的数据进行确认。输入的数据首�
 
 6）一旦从WAL中读取所有的数据之后，接收器开始从Kafka中消费数据。因为接收器是采用Kafka的High-Level Consumer API实现的，它开始从Zookeeper当前记录的偏移量开始读取数据，但是因为接收器挂掉的时候偏移量并没有更新到Zookeeper中，所有有一些数据被处理了2次。
 
-![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-4.jpg?raw=true)
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-5.jpg?raw=true)
 
 除了上面描述的场景，WAL还有其他两个不可忽略的缺点:
 
@@ -97,11 +99,11 @@ Spark Streaming可以对已经接收的数据进行确认。输入的数据首�
 
 2）对于一些输入源来说，它会重复相同的数据。比如当从Kafka中读取数据，你需要在Kafka的brokers中保存一份数据，而且你还得在Spark Streaming中保存一份。
 
-### 5 Exactly-Once
+### 5. Exactly-Once
 
 为了解决由WAL引入的性能损失，并且保证 exactly-once 语义，新版的Spark中引入了名为Kafka direct API。这个想法对于这个特性是非常明智的。Spark driver只需要简单地计算下一个batch需要处理Kafka中偏移量的范围，然后命令Spark Exectuor直接从Kafka相应Topic的分区中消费数据。换句话说，这种方法把Kafka当作成一个文件系统，然后像读文件一样来消费Topic中的数据。
 
-![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-5.jpg?raw=true)
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-kafka-integration-achieve-zero-data-loss-6.jpg?raw=true)
 
 在这个简单但强大的设计中:
 
