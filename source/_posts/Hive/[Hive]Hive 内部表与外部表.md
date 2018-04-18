@@ -2,11 +2,12 @@
 layout: post
 author: sjf0115
 title: Hive 内部表与外部表
-date: 2017-12-12 20:19:01
+date: 2017-12-08 19:16:01
 tags:
   - Hive
 
 categories: Hive
+permalink: hive-managed-table-external-table
 ---
 
 托管表(内部表)和外部表是`Hive`中的两种不同类型的表，在这篇文章中，我们将讨论`Hive`中表的类型以及它们之间的差异以及如何创建这些表以及何时将这些表用于特定的数据集。
@@ -93,8 +94,8 @@ xiaosi@yoona:~$ hadoop fs -text  /user/hive/warehouse/tb_station_coordinate/stat
 ...
 ```
 
-备注:
 
+>
 `/home/xiaosi/station_coordinate.txt`是本地文件系统路径。从上面的输出我们可以看到数据是从本地的这个路径复制到`HDFS`上的`/user/hive/warehouse/tb_station_coordinate/`目录下。
 为什么会自动复制到`HDFS`这个目录下呢？这个是由`Hive`的配置文件设置的。在`Hive`的`${HIVE_HOME}/conf/hive-site.xml`配置文件中指定，`hive.metastore.warehouse.dir`属性指向的就是`Hive`表数据存放的路径(在这配置的是`/user/hive/warehouse/`)。`Hive`每创建一个表都会在`hive.metastore.warehouse.dir`指向的目录下以表名创建一个文件夹，所有属于这个表的数据都存放在这个文件夹里面`/user/hive/warehouse/tb_station_coordinate`。
 
@@ -239,15 +240,11 @@ FIELDS TERMINATED BY ','
 LOCATION '/user/xiaosi/test/coordinate/';
 ```
 
-备注:
-```
+>备注:
 你也可以通过在创建表时设置数据存储位置来创建一个内部表。但是，如果删除表，数据将被删除。
-```
 
-备注:
-```
-如果你想要创建外部表，需要在创建表的时候加上 EXTERNAL 关键字，同时指定外部表存放数据的路径(例如2.4所示)，也可以不指定外部表的存放路径(例如2.3所示)，这样Hive将在HDFS上的/user/hive/warehouse/目录下以外部表的表名创建一个文件夹，并将属于这个表的数据存放在这里。
-```
+> 如果你想要创建外部表，需要在创建表的时候加上 EXTERNAL 关键字，同时指定外部表存放数据的路径(例如2.4所示)，也可以不指定外部表的存放路径(例如2.3所示)，这样Hive将在HDFS上的/user/hive/warehouse/目录下以外部表的表名创建一个文件夹，并将属于这个表的数据存放在这里。
+
 
 ### 3. 使用场景
 

@@ -97,31 +97,31 @@
 
 
   
-  <meta name="keywords" content="Hive," />
+  <meta name="keywords" content="Hive,Hive 优化," />
 
 
-<meta name="description" content="托管表(内部表)和外部表是Hive中的两种不同类型的表，在这篇文章中，我们将讨论Hive中表的类型以及它们之间的差异以及如何创建这些表以及何时将这些表用于特定的数据集。 1. 内部表托管表(Managed TABLE)也称为内部表(Internal TABLE)。这是Hive中的默认表。当我们在Hive中创建一个表，没有指定为外部表时，默认情况下我们创建的是一个内部表。如果我们创建一个内部表，那么">
-<meta name="keywords" content="Hive">
+<meta name="description" content="对于数据密集型任务，I/O操作和网络数据传输需要花费相当长的时间才能完成。通过在 Hive 中启用压缩功能，我们可以提高 Hive 查询的性能，并节省 HDFS 集群上的存储空间。 1. Hive中的可用压缩编解码器要在 Hive 中启用压缩，首先我们需要找出 Hadoop 集群上可用的压缩编解码器，我们可以使用下面的 set 命令列出可用的压缩编解码器。hive&amp;gt; set io.compr">
+<meta name="keywords" content="Hive,Hive 优化">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hive 内部表与外部表">
-<meta property="og:url" content="http://sjf0115.github.io/2017/12/12/Hive/Hive使用指南 内部表与外部表/index.html">
+<meta property="og:title" content="Hive 启用压缩">
+<meta property="og:url" content="http://sjf0115.github.io/2018/04/12/hive-enable-compression/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="托管表(内部表)和外部表是Hive中的两种不同类型的表，在这篇文章中，我们将讨论Hive中表的类型以及它们之间的差异以及如何创建这些表以及何时将这些表用于特定的数据集。 1. 内部表托管表(Managed TABLE)也称为内部表(Internal TABLE)。这是Hive中的默认表。当我们在Hive中创建一个表，没有指定为外部表时，默认情况下我们创建的是一个内部表。如果我们创建一个内部表，那么">
+<meta property="og:description" content="对于数据密集型任务，I/O操作和网络数据传输需要花费相当长的时间才能完成。通过在 Hive 中启用压缩功能，我们可以提高 Hive 查询的性能，并节省 HDFS 集群上的存储空间。 1. Hive中的可用压缩编解码器要在 Hive 中启用压缩，首先我们需要找出 Hadoop 集群上可用的压缩编解码器，我们可以使用下面的 set 命令列出可用的压缩编解码器。hive&amp;gt; set io.compr">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.627Z">
+<meta property="og:updated_time" content="2018-04-18T12:57:06.871Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hive 内部表与外部表">
-<meta name="twitter:description" content="托管表(内部表)和外部表是Hive中的两种不同类型的表，在这篇文章中，我们将讨论Hive中表的类型以及它们之间的差异以及如何创建这些表以及何时将这些表用于特定的数据集。 1. 内部表托管表(Managed TABLE)也称为内部表(Internal TABLE)。这是Hive中的默认表。当我们在Hive中创建一个表，没有指定为外部表时，默认情况下我们创建的是一个内部表。如果我们创建一个内部表，那么">
+<meta name="twitter:title" content="Hive 启用压缩">
+<meta name="twitter:description" content="对于数据密集型任务，I/O操作和网络数据传输需要花费相当长的时间才能完成。通过在 Hive 中启用压缩功能，我们可以提高 Hive 查询的性能，并节省 HDFS 集群上的存储空间。 1. Hive中的可用压缩编解码器要在 Hive 中启用压缩，首先我们需要找出 Hadoop 集群上可用的压缩编解码器，我们可以使用下面的 set 命令列出可用的压缩编解码器。hive&amp;gt; set io.compr">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2017/12/12/Hive/Hive使用指南 内部表与外部表/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/04/12/hive-enable-compression/"/>
 
 
-  <title>Hive 内部表与外部表 | SmartSi</title>
+  <title>Hive 启用压缩 | SmartSi</title>
   
 
 
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2017/12/12/Hive/Hive使用指南 内部表与外部表/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/04/12/hive-enable-compression/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -319,7 +319,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Hive 内部表与外部表</h2>
+          <h2 class="post-title" itemprop="name headline">Hive 启用压缩</h2>
         
 
         <div class="post-meta">
@@ -331,7 +331,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-12T20:19:01+08:00">2017-12-12</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T20:16:01+08:00">2018-04-12</time>
             
 
             
@@ -365,7 +365,7 @@
 
           
           
-             <span id="/2017/12/12/Hive/Hive使用指南 内部表与外部表/" class="leancloud_visitors" data-flag-title="Hive 内部表与外部表">
+             <span id="/2018/04/12/hive-enable-compression/" class="leancloud_visitors" data-flag-title="Hive 启用压缩">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -396,44 +396,22 @@
       
 
       
-        <p>托管表(内部表)和外部表是<code>Hive</code>中的两种不同类型的表，在这篇文章中，我们将讨论<code>Hive</code>中表的类型以及它们之间的差异以及如何创建这些表以及何时将这些表用于特定的数据集。</p>
-<h3 id="1-内部表"><a href="#1-内部表" class="headerlink" title="1. 内部表"></a>1. 内部表</h3><p>托管表(<code>Managed TABLE</code>)也称为内部表(<code>Internal TABLE</code>)。这是Hive中的默认表。当我们在Hive中创建一个表，没有指定为外部表时，默认情况下我们创建的是一个内部表。如果我们创建一个内部表，那么表将在<code>HDFS</code>中的特定位置创建。默认情况下，表数据将在<code>HDFS</code>的<code>/usr/hive/warehouse</code>目录中创建。如果我们删除了一个内部表，那么这个表的表数据和元数据都将从<code>HDFS</code>中删除。</p>
-<h4 id="1-1-创建表"><a href="#1-1-创建表" class="headerlink" title="1.1 创建表"></a>1.1 创建表</h4><p>我们可以用下面的语句在Hive里面创建一个内部表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE  TABLE IF NOT EXISTS tb_station_coordinate(</span><br><span class="line">  station string,</span><br><span class="line">  lon string,</span><br><span class="line">  lat string</span><br><span class="line">)</span><br><span class="line">ROW FORMAT DELIMITED</span><br><span class="line">FIELDS TERMINATED BY &apos;,&apos;;</span><br></pre></td></tr></table></figure></p>
-<p>我们已经成功创建了表并使用如下命令检查表的详细信息：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; describe formatted tb_station_coordinate;</span><br><span class="line">OK</span><br><span class="line"># col_name            	data_type           	comment             </span><br><span class="line"></span><br><span class="line">station             	string              	                    </span><br><span class="line">lon                 	string              	                    </span><br><span class="line">lat                 	string              	                    </span><br><span class="line"></span><br><span class="line"># Detailed Table Information	 	 </span><br><span class="line">Database:           	default             	 </span><br><span class="line">Owner:              	xiaosi              	 </span><br><span class="line">CreateTime:         	Tue Dec 12 17:42:09 CST 2017	 </span><br><span class="line">LastAccessTime:     	UNKNOWN             	 </span><br><span class="line">Retention:          	0                   	 </span><br><span class="line">Location:           	hdfs://localhost:9000/user/hive/warehouse/tb_station_coordinate	 </span><br><span class="line">Table Type:         	MANAGED_TABLE       	 </span><br><span class="line">Table Parameters:	 	 </span><br><span class="line">	COLUMN_STATS_ACCURATE	&#123;\&quot;BASIC_STATS\&quot;:\&quot;true\&quot;&#125;</span><br><span class="line">	numFiles            	0                   </span><br><span class="line">	numRows             	0                   </span><br><span class="line">	rawDataSize         	0                   </span><br><span class="line">	totalSize           	0                   </span><br><span class="line">	transient_lastDdlTime	1513071729          </span><br><span class="line"></span><br><span class="line"># Storage Information	 	 </span><br><span class="line">SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 </span><br><span class="line">InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 </span><br><span class="line">OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 </span><br><span class="line">Compressed:         	No                  	 </span><br><span class="line">Num Buckets:        	-1                  	 </span><br><span class="line">Bucket Columns:     	[]                  	 </span><br><span class="line">Sort Columns:       	[]                  	 </span><br><span class="line">Storage Desc Params:	 	 </span><br><span class="line">	field.delim         	,                   </span><br><span class="line">	serialization.format	,                   </span><br><span class="line">Time taken: 0.16 seconds, Fetched: 33 row(s)</span><br></pre></td></tr></table></figure></p>
-<p>从上面我们可以看到表的类型<code>Table Type</code>为<code>MANAGED_TABLE</code>，即我们创建了一个托管表(内部表)。</p>
-<h4 id="1-2-导入数据"><a href="#1-2-导入数据" class="headerlink" title="1.2 导入数据"></a>1.2 导入数据</h4><p>我们使用如下命令将一个样本数据集导入到表中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; load data local inpath &apos;/home/xiaosi/station_coordinate.txt&apos; overwrite into table tb_station_coordinate;</span><br><span class="line">Loading data to table default.tb_station_coordinate</span><br><span class="line">OK</span><br><span class="line">Time taken: 2.418 seconds</span><br></pre></td></tr></table></figure></p>
-<p>如果我们在<code>HDFS</code>的目录<code>/user/hive/warehouse/tb_station_coordinate</code>查看，我们可以得到表中的内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ hadoop fs -ls  /user/hive/warehouse/tb_station_coordinate</span><br><span class="line">Found 1 items</span><br><span class="line">-rwxr-xr-x   1 xiaosi supergroup        374 2017-12-12 17:50 /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">xiaosi@yoona:~$</span><br><span class="line">xiaosi@yoona:~$</span><br><span class="line">xiaosi@yoona:~$ hadoop fs -text  /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">桂林北站,110.302159,25.329024</span><br><span class="line">杭州东站,120.213116,30.290998</span><br><span class="line">山海关站,119.767555,40.000793</span><br><span class="line">武昌站,114.317576,30.528401</span><br><span class="line">北京南站,116.378875,39.865052</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-<p>备注:</p>
-<p><code>/home/xiaosi/station_coordinate.txt</code>是本地文件系统路径。从上面的输出我们可以看到数据是从本地的这个路径复制到<code>HDFS</code>上的<code>/user/hive/warehouse/tb_station_coordinate/</code>目录下。<br>为什么会自动复制到<code>HDFS</code>这个目录下呢？这个是由<code>Hive</code>的配置文件设置的。在<code>Hive</code>的<code>${HIVE_HOME}/conf/hive-site.xml</code>配置文件中指定，<code>hive.metastore.warehouse.dir</code>属性指向的就是<code>Hive</code>表数据存放的路径(在这配置的是<code>/user/hive/warehouse/</code>)。<code>Hive</code>每创建一个表都会在<code>hive.metastore.warehouse.dir</code>指向的目录下以表名创建一个文件夹，所有属于这个表的数据都存放在这个文件夹里面<code>/user/hive/warehouse/tb_station_coordinate</code>。</p>
-<h4 id="1-3-删除表"><a href="#1-3-删除表" class="headerlink" title="1.3 删除表"></a>1.3 删除表</h4><p>现在让我们使用如下命令删除上面创建的表:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; drop table tb_station_coordinate;</span><br><span class="line">Moved: &apos;hdfs://localhost:9000/user/hive/warehouse/tb_station_coordinate&apos; to trash at: hdfs://localhost:9000/user/xiaosi/.Trash/Current</span><br><span class="line">OK</span><br><span class="line">Time taken: 1.327 seconds</span><br></pre></td></tr></table></figure></p>
-<p>从上面的输出我们可以得知，原来属于<code>tb_station_coordinate</code>表的数据被移到<code>hdfs://localhost:9000/user/xiaosi/.Trash/Current</code>文件夹中(如果你的Hadoop没有采用回收站机制，那么删除操作将会把属于该表的所有数据全部删除)(回收站机制请参阅:<a href="http://smartying.club/2017/12/07/Hadoop/Hadoop%20Trash%E5%9B%9E%E6%94%B6%E7%AB%99%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" target="_blank" rel="noopener">Hadoop Trash回收站使用指南</a>)。</p>
-<p>如果我们在<code>HDFS</code>的目录<code>/user/hive/warehouse/tb_station_coordinate</code>查看：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ hadoop fs -ls  /user/hive/warehouse/tb_station_coordinate</span><br><span class="line">ls: `/user/hive/warehouse/tb_station_coordinate&apos;: No such file or directory</span><br></pre></td></tr></table></figure></p>
-<p>你可以看到输出为<code>No such file or directory</code>，因为表及其内容都从HDFS从删除了。</p>
-<h3 id="2-外部表"><a href="#2-外部表" class="headerlink" title="2. 外部表"></a>2. 外部表</h3><p>当数据在Hive之外使用时，创建外部表(<code>EXTERNAL TABLE</code>)来在外部使用。无论何时我们想要删除表的元数据，并且想保留表中的数据，我们使用外部表。外部表只删除表的<code>schema</code>。</p>
-<h4 id="2-1-外部普通表"><a href="#2-1-外部普通表" class="headerlink" title="2.1 外部普通表"></a>2.1 外部普通表</h4><p>我们使用如下命令创建一个外部表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE EXTERNAL TABLE IF NOT EXISTS tb_station_coordinate(</span><br><span class="line">  station string,</span><br><span class="line">  lon string,</span><br><span class="line">  lat string</span><br><span class="line">)</span><br><span class="line">ROW FORMAT DELIMITED</span><br><span class="line">FIELDS TERMINATED BY &apos;,&apos;;</span><br></pre></td></tr></table></figure></p>
-<p>我们现在已经成功创建了外部表。我们使用如下命令检查关于表的细节：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; describe formatted tb_station_coordinate;</span><br><span class="line">OK</span><br><span class="line"># col_name            	data_type           	comment             </span><br><span class="line"></span><br><span class="line">station             	string              	                    </span><br><span class="line">lon                 	string              	                    </span><br><span class="line">lat                 	string              	                    </span><br><span class="line"></span><br><span class="line"># Detailed Table Information	 	 </span><br><span class="line">Database:           	default             	 </span><br><span class="line">Owner:              	xiaosi              	 </span><br><span class="line">CreateTime:         	Tue Dec 12 18:16:13 CST 2017	 </span><br><span class="line">LastAccessTime:     	UNKNOWN             	 </span><br><span class="line">Retention:          	0                   	 </span><br><span class="line">Location:           	hdfs://localhost:9000/user/hive/warehouse/tb_station_coordinate	 </span><br><span class="line">Table Type:         	EXTERNAL_TABLE      	 </span><br><span class="line">Table Parameters:	 	 </span><br><span class="line">	COLUMN_STATS_ACCURATE	&#123;\&quot;BASIC_STATS\&quot;:\&quot;true\&quot;&#125;</span><br><span class="line">	EXTERNAL            	TRUE                </span><br><span class="line">	numFiles            	0                   </span><br><span class="line">	numRows             	0                   </span><br><span class="line">	rawDataSize         	0                   </span><br><span class="line">	totalSize           	0                   </span><br><span class="line">	transient_lastDdlTime	1513073773          </span><br><span class="line"></span><br><span class="line"># Storage Information	 	 </span><br><span class="line">SerDe Library:      	org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe	 </span><br><span class="line">InputFormat:        	org.apache.hadoop.mapred.TextInputFormat	 </span><br><span class="line">OutputFormat:       	org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat	 </span><br><span class="line">Compressed:         	No                  	 </span><br><span class="line">Num Buckets:        	-1                  	 </span><br><span class="line">Bucket Columns:     	[]                  	 </span><br><span class="line">Sort Columns:       	[]                  	 </span><br><span class="line">Storage Desc Params:	 	 </span><br><span class="line">	field.delim         	,                   </span><br><span class="line">	serialization.format	,                   </span><br><span class="line">Time taken: 0.132 seconds, Fetched: 34 row(s)</span><br></pre></td></tr></table></figure></p>
-<p>从上面我们可以看到表的类型<code>Table Type</code>为<code>EXTERNAL_TABLE</code>，即我们创建了一个外部表。</p>
-<h4 id="2-2-导入数据"><a href="#2-2-导入数据" class="headerlink" title="2.2 导入数据"></a>2.2 导入数据</h4><p>我们使用如下命令将一个样本数据集导入到表中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; load data local inpath &apos;/home/xiaosi/station_coordinate.txt&apos; overwrite into table tb_station_coordinate;</span><br><span class="line">Loading data to table default.tb_station_coordinate</span><br><span class="line">OK</span><br><span class="line">Time taken: 2.418 seconds</span><br></pre></td></tr></table></figure></p>
-<p>如果我们在<code>HDFS</code>的目录<code>/user/hive/warehouse/tb_station_coordinate</code>查看，我们可以得到表中的内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ hadoop fs -ls  /user/hive/warehouse/tb_station_coordinate</span><br><span class="line">Found 1 items</span><br><span class="line">-rwxr-xr-x   1 xiaosi supergroup        374 2017-12-12 18:19 /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">xiaosi@yoona:~$</span><br><span class="line">xiaosi@yoona:~$</span><br><span class="line">xiaosi@yoona:~$ hadoop fs -text  /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">桂林北站,110.302159,25.329024</span><br><span class="line">杭州东站,120.213116,30.290998</span><br><span class="line">山海关站,119.767555,40.000793</span><br><span class="line">武昌站,114.317576,30.528401</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-<h4 id="2-3-删除表"><a href="#2-3-删除表" class="headerlink" title="2.3 删除表"></a>2.3 删除表</h4><p>现在让我们使用如下命令删除上面创建的表:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; drop table tb_station_coordinate;</span><br><span class="line">OK</span><br><span class="line">Time taken: 0.174 seconds</span><br><span class="line">hive&gt;</span><br></pre></td></tr></table></figure></p>
-<p>我们的Hadoop已经开启了回收站机制，但是删除操作并没有将数据进行删除，不像删除内部表一样，输出<code>Moved: &#39;hdfs://localhost:9000/user/hive/warehouse/tb_station_coordinate&#39; to trash at: hdfs://localhost:9000/user/xiaosi/.Trash/Current</code>(回收站机制请参阅:<a href="http://smartying.club/2017/12/07/Hadoop/Hadoop%20Trash%E5%9B%9E%E6%94%B6%E7%AB%99%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97/" target="_blank" rel="noopener">Hadoop Trash回收站使用指南</a>)。为了验证我们真的没有删除数据，我们在HDFS目录下查看数据:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ hadoop fs -ls  /user/hive/warehouse/tb_station_coordinate</span><br><span class="line">Found 1 items</span><br><span class="line">-rwxr-xr-x   1 xiaosi supergroup        374 2017-12-12 18:19 /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">xiaosi@yoona:~$</span><br><span class="line">xiaosi@yoona:~$ hadoop fs -text  /user/hive/warehouse/tb_station_coordinate/station_coordinate.txt</span><br><span class="line">桂林北站,110.302159,25.329024</span><br><span class="line">杭州东站,120.213116,30.290998</span><br><span class="line">山海关站,119.767555,40.000793</span><br><span class="line">武昌站,114.317576,30.528401</span><br><span class="line">北京南站,116.378875,39.865052</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
-<p>你可以看到表中的数据仍然在HDFS中。所以我们得知如果我们创建一个外部表，在删除表之后，只有与表相关的元数据被删除，而不会删除表的内容。</p>
-<h4 id="2-4-创建表指定外部目录"><a href="#2-4-创建表指定外部目录" class="headerlink" title="2.4 创建表指定外部目录"></a>2.4 创建表指定外部目录</h4><p>只有当你的数据在<code>/user/hive/warehouse</code>目录中时，上述方法才能有效。但是，如果你的数据在另一个位置，如果你删除该表，数据也将被删除。所以在这种情况下，你需要在创建表时设置数据的外部位置，如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE EXTERNAL TABLE IF NOT EXISTS tb_station_coordinate(</span><br><span class="line">  station string,</span><br><span class="line">  lon string,</span><br><span class="line">  lat string</span><br><span class="line">)</span><br><span class="line">ROW FORMAT DELIMITED</span><br><span class="line">FIELDS TERMINATED BY &apos;,&apos;</span><br><span class="line">LOCATION &apos;/user/xiaosi/test/coordinate/&apos;;</span><br></pre></td></tr></table></figure></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">你也可以通过在创建表时设置数据存储位置来创建一个内部表。但是，如果删除表，数据将被删除。</span><br></pre></td></tr></table></figure></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">如果你想要创建外部表，需要在创建表的时候加上 EXTERNAL 关键字，同时指定外部表存放数据的路径(例如2.4所示)，也可以不指定外部表的存放路径(例如2.3所示)，这样Hive将在HDFS上的/user/hive/warehouse/目录下以外部表的表名创建一个文件夹，并将属于这个表的数据存放在这里。</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-使用场景"><a href="#3-使用场景" class="headerlink" title="3. 使用场景"></a>3. 使用场景</h3><h4 id="3-1-内部表"><a href="#3-1-内部表" class="headerlink" title="3.1 内部表"></a>3.1 内部表</h4><ul>
-<li>数据是临时的</li>
-<li>希望使用<code>Hive</code>来管理表和数据的生命周期</li>
-<li>删除后不想要数据</li>
-</ul>
-<h4 id="3-2-外部表"><a href="#3-2-外部表" class="headerlink" title="3.2 外部表"></a>3.2 外部表</h4><ul>
-<li>这些数据也在<code>Hive</code>之外使用。</li>
-<li><code>Hive</code>不管理数据和权限设置以及目录等，需要你有另一个程序或过程来做这些事情</li>
-<li>不是基于现有表(AS SELECT)来创建的表</li>
-<li>可以创建表并使用相同的模式并指向数据的位置</li>
-</ul>
-<p>参考:<a href="https://acadgild.com/blog/managed-and-external-tables-in-hive/" target="_blank" rel="noopener">https://acadgild.com/blog/managed-and-external-tables-in-hive/</a></p>
-<p><a href="https://www.linkedin.com/pulse/internal-external-tables-hadoop-hive-big-data-island-amandeep-modgil" target="_blank" rel="noopener">https://www.linkedin.com/pulse/internal-external-tables-hadoop-hive-big-data-island-amandeep-modgil</a></p>
+        <p>对于数据密集型任务，I/O操作和网络数据传输需要花费相当长的时间才能完成。通过在 Hive 中启用压缩功能，我们可以提高 Hive 查询的性能，并节省 HDFS 集群上的存储空间。</p>
+<h3 id="1-Hive中的可用压缩编解码器"><a href="#1-Hive中的可用压缩编解码器" class="headerlink" title="1. Hive中的可用压缩编解码器"></a>1. Hive中的可用压缩编解码器</h3><p>要在 Hive 中启用压缩，首先我们需要找出 Hadoop 集群上可用的压缩编解码器，我们可以使用下面的 set 命令列出可用的压缩编解码器。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; set io.compression.codecs;</span><br><span class="line">io.compression.codecs=</span><br><span class="line">  org.apache.hadoop.io.compress.GzipCodec,</span><br><span class="line">  org.apache.hadoop.io.compress.DefaultCodec,</span><br><span class="line">  org.apache.hadoop.io.compress.BZip2Codec,</span><br><span class="line">  org.apache.hadoop.io.compress.SnappyCodec,</span><br><span class="line">  com.hadoop.compression.lzo.LzoCodec,</span><br><span class="line">  com.hadoop.compression.lzo.LzopCodec</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-在中间数据上启用压缩"><a href="#2-在中间数据上启用压缩" class="headerlink" title="2. 在中间数据上启用压缩"></a>2. 在中间数据上启用压缩</h3><p>提交后，一个复杂的 Hive 查询通常会转换为一系列多阶段 MapReduce 作业，这些作业将通过 Hive 引擎进行链接以完成整个查询。因此，这里的 ‘中间输出’ 是指前一个 MapReduce 作业的输出，将会作为下一个 MapReduce 作业的输入数据。</p>
+<p>可以通过使用 Hive Shell 中的 set 命令或者修改 hive-site.xml 配置文件来修改 <code>hive.exec.compress.intermediate</code> 属性，这样我们就可以在 Hive Intermediate 输出上启用压缩。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.exec.compress.intermediate<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">description</span>&gt;</span></span><br><span class="line">     This controls whether intermediate files produced by Hive between multiple map-reduce jobs are compressed.</span><br><span class="line">     The compression codec and other options are determined from Hadoop config variables mapred.output.compress*</span><br><span class="line">   <span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.intermediate.compression.codec<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>org.apache.hadoop.io.compress.SnappyCodec<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">description</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.intermediate.compression.type<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">value</span>&gt;</span>BLOCK<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">description</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>或者我们可以使用 set 命令在 hive shell 中设置这些属性，如下所示:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; set hive.exec.compress.intermediate=true;</span><br><span class="line">hive&gt; set hive.intermediate.compression.codec=org.apache.hadoop.io.compress.SnappyCodec;</span><br><span class="line">hive&gt; set hive.intermediate.compression.type=BLOCK;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-在最终输出上启用压缩"><a href="#3-在最终输出上启用压缩" class="headerlink" title="3. 在最终输出上启用压缩"></a>3. 在最终输出上启用压缩</h3><p>通过设置以下属性，我们可以在 Hive shell 中的最终输出上启用压缩:<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hive.exec.compress.output<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">description</span>&gt;</span></span><br><span class="line">    This controls whether the final outputs of a query (to a local/HDFS file or a Hive table) is compressed.</span><br><span class="line">    The compression codec and other options are determined from Hadoop config variables mapred.output.compress*</span><br><span class="line">  <span class="tag">&lt;/<span class="name">description</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; set hive.exec.compress.output=true;</span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress=true;</span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.GzipCodec;  </span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress.type=BLOCK;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-Example"><a href="#4-Example" class="headerlink" title="4. Example"></a>4. Example</h3><p>在下面的 shell 代码片段中，我们在 hive shell 中将压缩属性设置为 true 后，根据现有表 tmp_order_id 创建一个压缩后的表 tmp_order_id_compress。</p>
+<p>为了对比，我们先根据现有表 tmp_order_id 创建一个不经压缩的表 tmp_order_id_2:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CREATE TABLE tmp_order_id_2 ROW FORMAT DELIMITED LINES TERMINATED BY &apos;\n&apos;</span><br><span class="line">AS SELECT * FROM tmp_order_id;</span><br></pre></td></tr></table></figure></p>
+<p>我们看一下不设置压缩属性输出:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[xiaosi@ying:~]$  sudo -uxiaosi hadoop fs -ls /user/hive/warehouse/xiaosidata.db/tmp_order_id_2/</span><br><span class="line">Found 1 items</span><br><span class="line">-rwxr-xr-x   3 xiaosi xiaosi       2565 2018-04-18 20:38 /user/hive/warehouse/hivedata.db/tmp_order_id_2/000000_0</span><br></pre></td></tr></table></figure></p>
+<p>在 Hive Shell 中设置压缩属性：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; set hive.exec.compress.output=true;</span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress=true;</span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress.codec=org.apache.hadoop.io.compress.GzipCodec;</span><br><span class="line">hive&gt; set mapreduce.output.fileoutputformat.compress.type=BLOCK;</span><br><span class="line">hive&gt; set hive.exec.compress.intermediate=true;</span><br></pre></td></tr></table></figure></p>
+<p>根据现有表 tmp_order_id 创建一个压缩后的表 tmp_order_id_compress:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; CREATE TABLE tmp_order_id_compress ROW FORMAT DELIMITED LINES TERMINATED BY &apos;\n&apos;</span><br><span class="line">    &gt; AS SELECT * FROM tmp_order_id;</span><br><span class="line">Query ID = xiaosi_20180418204750_445d742f-be89-47fb-9d2c-2b0eeac76c09</span><br><span class="line">Total jobs = 3</span><br><span class="line">Launching Job 1 out of 3</span><br><span class="line">Number of reduce tasks is set to 0 since there&apos;s no reduce operator</span><br><span class="line">Starting Job = job_1504162679223_21624651, Tracking URL = http://xxx:9981/proxy/application_1504162679223_21624651/</span><br><span class="line">Kill Command = /home/xiaosi/hadoop-2.2.0/bin/hadoop job  -kill job_1504162679223_21624651</span><br><span class="line">Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 0</span><br><span class="line">2018-04-18 20:47:59,575 Stage-1 map = 0%,  reduce = 0%</span><br><span class="line">2018-04-18 20:48:04,711 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.28 sec</span><br><span class="line">MapReduce Total cumulative CPU time: 1 seconds 280 msec</span><br><span class="line">Ended Job = job_1504162679223_21624651</span><br><span class="line">Stage-4 is selected by condition resolver.</span><br><span class="line">Stage-3 is filtered out by condition resolver.</span><br><span class="line">Stage-5 is filtered out by condition resolver.</span><br><span class="line">Moving data to directory hdfs://cluster/user/hive/warehouse/hivedata.db/.hive-staging_hive_2018-04-18_20-47-50_978_2339056359585839454-1/-ext-10002</span><br><span class="line">Moving data to directory hdfs://cluster/user/hive/warehouse/hivedata.db/tmp_order_id_compress</span><br><span class="line">MapReduce Jobs Launched:</span><br><span class="line">Stage-Stage-1: Map: 1   Cumulative CPU: 1.28 sec   HDFS Read: 6012 HDFS Write: 1436 SUCCESS</span><br><span class="line">Total MapReduce CPU Time Spent: 1 seconds 280 msec</span><br><span class="line">OK</span><br><span class="line">Time taken: 14.902 seconds</span><br></pre></td></tr></table></figure></p>
+<p>我们在看一下设置压缩属性后输出:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[xiaosi@ying:~]$  sudo -uxiaosi hadoop fs -ls /user/hive/warehouse/hivedata.db/tmp_order_id_compress/</span><br><span class="line">Found 1 items</span><br><span class="line">-rwxr-xr-x   3 xiaosi xiaosi       1343 2018-04-18 20:48 /user/hive/warehouse/hivedata.db/tmp_order_id_compress/000000_0.gz</span><br></pre></td></tr></table></figure></p>
+<p>因此，我们可以使用 gzip 格式创建输出文件。</p>
+<p>原文：<a href="http://hadooptutorial.info/enable-compression-in-hive/" target="_blank" rel="noopener">http://hadooptutorial.info/enable-compression-in-hive/</a></p>
 
       
     </div>
@@ -446,7 +424,7 @@
     
       <div>
         <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
-  <div>您的支持将是我继续写作的动力！</div>
+  <div>赏几毛白！</div>
   <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
     <span>打赏</span>
   </button>
@@ -482,6 +460,8 @@
           
             <a href="/tags/Hive/" rel="tag"># Hive</a>
           
+            <a href="/tags/Hive-优化/" rel="tag"># Hive 优化</a>
+          
         </div>
       
 
@@ -493,8 +473,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/12/08/Hadoop/Hadoop MapReduce新一代架构MRv2/" rel="next" title="Hadoop MapReduce新一代架构MRv2">
-                <i class="fa fa-chevron-left"></i> Hadoop MapReduce新一代架构MRv2
+              <a href="/2018/04/10/spark-base-shared-variables/" rel="next" title="Spark2.3.0 共享变量">
+                <i class="fa fa-chevron-left"></i> Spark2.3.0 共享变量
               </a>
             
           </div>
@@ -502,10 +482,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/12/Hadoop/Hadoop MapReduce2.0 架构详解/" rel="prev" title="Hadoop MapReduce2.0 架构详解">
-                Hadoop MapReduce2.0 架构详解 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -626,7 +602,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">101</span>
+                    <span class="site-state-item-count">102</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -648,7 +624,7 @@
                 
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
-                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-count">28</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -721,7 +697,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-内部表"><span class="nav-number">1.</span> <span class="nav-text">1. 内部表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-创建表"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 创建表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-导入数据"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 导入数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-删除表"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 删除表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-外部表"><span class="nav-number">2.</span> <span class="nav-text">2. 外部表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-外部普通表"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 外部普通表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-导入数据"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 导入数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-删除表"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 删除表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-创建表指定外部目录"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 创建表指定外部目录</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用场景"><span class="nav-number">3.</span> <span class="nav-text">3. 使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-内部表"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 内部表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-外部表"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 外部表</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Hive中的可用压缩编解码器"><span class="nav-number">1.</span> <span class="nav-text">1. Hive中的可用压缩编解码器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-在中间数据上启用压缩"><span class="nav-number">2.</span> <span class="nav-text">2. 在中间数据上启用压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-在最终输出上启用压缩"><span class="nav-number">3.</span> <span class="nav-text">3. 在最终输出上启用压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Example"><span class="nav-number">4.</span> <span class="nav-text">4. Example</span></a></li></ol></div>
             
 
           </div>
