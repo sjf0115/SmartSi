@@ -1,4 +1,3 @@
-
 ---
 layout: post
 author: sjf0115
@@ -8,6 +7,7 @@ tags:
   - Hadoop
 
 categories: Hadoop
+permalink: hadoop-hdfs-trash
 ---
 
 我们在删除一个文件时，遇到如下问题，提示我们不能删除文件放回回收站:
@@ -36,7 +36,7 @@ mkdir: 无法创建目录"employee": 文件已存在
 ### 1. 配置
 
 `HDFS`的回收站就像`Windows`操作系统中的回收站一样。它的目的是防止你无意中删除某些东西。你可以通过设置如下属性来启用此功能(默认是不开启的)：
-```
+```xml
 <property>  
     <name>fs.trash.interval</name>  
     <value>1440</value>  

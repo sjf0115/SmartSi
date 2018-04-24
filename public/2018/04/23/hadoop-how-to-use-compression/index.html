@@ -97,40 +97,38 @@
 
 
   
-  <meta name="keywords" content="Hadoop," />
+  <meta name="keywords" content="Hadoop,Hadoop 优化," />
 
 
-<meta name="description" content="1. 从输入到输出一个MapReducer作业经过了input，map，combine，reduce，output五个阶段，其中combine阶段并不一定发生，map输出的中间结果被分到reduce的过程成为shuffle（数据清洗）。在shuffle阶段还会发生copy（复制）和sort（排序）。 在MapReduce的过程中，一个作业被分成Map和Reducer两个计算阶段，它们由一个或者多个">
-<meta name="keywords" content="Hadoop">
+<meta name="description" content="就如上一篇文章介绍的那样，如果输入文件是压缩文件，当 MapReduce 程序读取压缩文件时，根据文件名的后缀来选择 codes，输入文件自动解压缩（我们不需要指定压缩文件是哪一种压缩格式）。 下面我们列出了一些代码，为 Hadoop 中常用的压缩格式设置输出压缩。 1. 常用压缩格式1.1 Gzip对于最终输出，我们可以使用FileOutputFormat上的静态方便方法来设置属性：FileOu">
+<meta name="keywords" content="Hadoop,Hadoop 优化">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hadoop MapReducer工作过程">
-<meta property="og:url" content="http://sjf0115.github.io/2016/12/30/Hadoop/Hadoop MapReducer工作过程/index.html">
+<meta property="og:title" content="Hadoop 如何使用压缩">
+<meta property="og:url" content="http://sjf0115.github.io/2018/04/23/hadoop-how-to-use-compression/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 从输入到输出一个MapReducer作业经过了input，map，combine，reduce，output五个阶段，其中combine阶段并不一定发生，map输出的中间结果被分到reduce的过程成为shuffle（数据清洗）。在shuffle阶段还会发生copy（复制）和sort（排序）。 在MapReduce的过程中，一个作业被分成Map和Reducer两个计算阶段，它们由一个或者多个">
+<meta property="og:description" content="就如上一篇文章介绍的那样，如果输入文件是压缩文件，当 MapReduce 程序读取压缩文件时，根据文件名的后缀来选择 codes，输入文件自动解压缩（我们不需要指定压缩文件是哪一种压缩格式）。 下面我们列出了一些代码，为 Hadoop 中常用的压缩格式设置输出压缩。 1. 常用压缩格式1.1 Gzip对于最终输出，我们可以使用FileOutputFormat上的静态方便方法来设置属性：FileOu">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102351523?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102431790?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102503415?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102521915?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102548036?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102655183?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102708631?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:image" content="http://img.blog.csdn.net/20161230102726615?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:updated_time" content="2016-12-30T02:28:17.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-6.png?raw=true">
+<meta property="og:updated_time" content="2018-04-24T05:04:51.337Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hadoop MapReducer工作过程">
-<meta name="twitter:description" content="1. 从输入到输出一个MapReducer作业经过了input，map，combine，reduce，output五个阶段，其中combine阶段并不一定发生，map输出的中间结果被分到reduce的过程成为shuffle（数据清洗）。在shuffle阶段还会发生copy（复制）和sort（排序）。 在MapReduce的过程中，一个作业被分成Map和Reducer两个计算阶段，它们由一个或者多个">
-<meta name="twitter:image" content="http://img.blog.csdn.net/20161230102351523?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta name="twitter:title" content="Hadoop 如何使用压缩">
+<meta name="twitter:description" content="就如上一篇文章介绍的那样，如果输入文件是压缩文件，当 MapReduce 程序读取压缩文件时，根据文件名的后缀来选择 codes，输入文件自动解压缩（我们不需要指定压缩文件是哪一种压缩格式）。 下面我们列出了一些代码，为 Hadoop 中常用的压缩格式设置输出压缩。 1. 常用压缩格式1.1 Gzip对于最终输出，我们可以使用FileOutputFormat上的静态方便方法来设置属性：FileOu">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-1.png?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2016/12/30/Hadoop/Hadoop MapReducer工作过程/"/>
+  <link rel="canonical" href="http://sjf0115.github.io/2018/04/23/hadoop-how-to-use-compression/"/>
 
 
-  <title>Hadoop MapReducer工作过程 | SmartSi</title>
+  <title>Hadoop 如何使用压缩 | SmartSi</title>
   
 
 
@@ -311,7 +309,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2016/12/30/Hadoop/Hadoop MapReducer工作过程/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/04/23/hadoop-how-to-use-compression/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -328,7 +326,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Hadoop MapReducer工作过程</h2>
+          <h2 class="post-title" itemprop="name headline">Hadoop 如何使用压缩</h2>
         
 
         <div class="post-meta">
@@ -340,7 +338,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-12-30T10:28:17+08:00">2016-12-30</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T19:32:17+08:00">2018-04-23</time>
             
 
             
@@ -374,7 +372,7 @@
 
           
           
-             <span id="/2016/12/30/Hadoop/Hadoop MapReducer工作过程/" class="leancloud_visitors" data-flag-title="Hadoop MapReducer工作过程">
+             <span id="/2018/04/23/hadoop-how-to-use-compression/" class="leancloud_visitors" data-flag-title="Hadoop 如何使用压缩">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -405,41 +403,40 @@
       
 
       
-        <h3 id="1-从输入到输出"><a href="#1-从输入到输出" class="headerlink" title="1. 从输入到输出"></a>1. 从输入到输出</h3><p>一个MapReducer作业经过了input，map，combine，reduce，output五个阶段，其中combine阶段并不一定发生，map输出的中间结果被分到reduce的过程成为shuffle（数据清洗）。<br><img src="http://img.blog.csdn.net/20161230102351523?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>在shuffle阶段还会发生copy（复制）和sort（排序）。</p>
-<p>在MapReduce的过程中，一个作业被分成Map和Reducer两个计算阶段，它们由一个或者多个Map任务和Reduce任务组成。如下图所示，一个MapReduce作业从数据的流向可以分为Map任务和Reduce任务。当用户向Hadoop提交一个MapReduce作业时，JobTracker则会根据各个TaskTracker周期性发送过来的心跳信息综合考虑TaskTracker的资源剩余量，作业优先级，作业提交时间等因素，为TaskTracker分配合适的任务。Reduce任务默认会在Map任务数量完成5%后才开始启动。<br><img src="http://img.blog.csdn.net/20161230102431790?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>Map任务的执行过程可以概括为：首先通过用户指定的InputFormat类中的getSplits方法和next方法将输入文件切片并解析成键值对作为map函数的输入。然后map函数经过处理之后将中间结果交给指定的Partitioner处理，确保中间结果分发到指定的Reduce任务处理，此时如果用户指定了Combiner，将执行combine操作。最后map函数将中间结果保存到本地。</p>
-<p>Reduce任务的执行过程可以概括为：首先需要将已经完成Map任务的中间结果复制到Reduce任务所在的节点，待数据复制完成后，再以key进行排序，通过排序，将所有key相同的数据交给reduce函数处理，处理完成后，结果直接输出到HDFS上。</p>
-<h3 id="2-input"><a href="#2-input" class="headerlink" title="2. input"></a>2. input</h3><p>如果使用HDFS上的文件作为MapReduce的输入，MapReduce计算框架首先会用org.apache.hadoop.mapreduce.InputFomat类的子类FileInputFormat类将作为输入HDFS上的文件切分形成输入分片(InputSplit)，每个InputSplit将作为一个Map任务的输入，再将InputSplit解析为键值对。InputSplit的大小和数量对于MaoReduce作业的性能有非常大的影响。</p>
-<p>InputSplit只是逻辑上对输入数据进行分片，并不会将文件在磁盘上分成分片进行存储。InputSplit只是记录了分片的元数据节点信息，例如起始位置，长度以及所在的节点列表等。数据切分的算法需要确定InputSplit的个数，对于HDFS上的文件，FileInputFormat类使用computeSplitSize方法计算出InputSplit的大小，代码如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">long</span> <span class="title">computeSplitSize</span><span class="params">(<span class="keyword">long</span> blockSize, <span class="keyword">long</span> minSize, <span class="keyword">long</span> maxSize)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Math.max(minSize, Math.min(maxSize, blockSize));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>其中 minSize 由mapred-site.xml文件中的配置项mapred.min.split.size决定，默认为1；maxSize 由mapred-site.xml文件中的配置项mapred.max.split.size决定，默认为9223 372 036 854 775 807；而blockSize是由hdfs-site.xml文件中的配置项dfs.block.size决定，默认为67 108 864字节（64M）。所以InputSplit的大小确定公式为：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">max(mapred.min.split.size, min(mapred.max.split.size, dfs.block.size));</span><br></pre></td></tr></table></figure></p>
-<p>一般来说，dfs.block.size的大小是确定不变的，所以得到目标InputSplit大小，只需改变mapred.min.split.size 和 mapred.max.split.size 的大小即可。InputSplit的数量为文件大小除以InputSplitSize。InputSplit的原数据信息会通过一下代码取得：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">splits.add(<span class="keyword">new</span> FileSplit(path, length - bytesRemaining, splitSize, blkLocations[blkIndex].getHosts()));</span><br></pre></td></tr></table></figure></p>
-<p>从上面的代码可以发现，元数据的信息由四部分组成：文件路径，文件开始位置，文件结束位置，数据块所在的host。</p>
-<p>对于Map任务来说，处理的单位为一个InputSplit。而InputSplit是一个逻辑概念，InputSplit所包含的数据是仍然存储在HDFS的块里面，它们之间的关系如下图所示：<br><img src="http://img.blog.csdn.net/20161230102503415?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>当输入文件切分为InputSplit后，由FileInputFormat的子类（如TextInputFormat）的createRecordReader方法将InputSplit解析为键值对，代码如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> RecordReader&lt;LongWritable, Text&gt;</span><br><span class="line">  createRecordReader(InputSplit split,</span><br><span class="line">                     TaskAttemptContext context) &#123;</span><br><span class="line">  String delimiter = context.getConfiguration().get(</span><br><span class="line">      <span class="string">"textinputformat.record.delimiter"</span>);</span><br><span class="line">  <span class="keyword">byte</span>[] recordDelimiterBytes = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">null</span> != delimiter)</span><br><span class="line">    recordDelimiterBytes = delimiter.getBytes(Charsets.UTF_8);</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> LineRecordReader(recordDelimiterBytes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>此处默认是将行号作为键。解析出来的键值对将被用来作为map函数的输入。至此input阶段结束。</p>
-<h3 id="3-map及中间结果的输出"><a href="#3-map及中间结果的输出" class="headerlink" title="3. map及中间结果的输出"></a>3. map及中间结果的输出</h3><p>InputSplit将解析好的键值对交给用户编写的map函数处理，处理后的中间结果会写到本地磁盘上，在刷写磁盘的过程中，还做了partition（分区）和 sort（排序）的操作。</p>
-<p>map函数产生输出时，并不是简单的刷写磁盘。为了保证I/O效率，采取了先写到内存的环形内存缓冲区，并做一次预排序，如下图所示：<br><img src="http://img.blog.csdn.net/20161230102521915?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>每个Map任务都有一个环形内存缓冲区，用于存储map函数的输出。默认情况下，缓冲区大小是100M，该值可以通过mapred-site.xml文件中的io.sort.mb的配置项配置。一旦缓冲区内容达到阈值（由mapred-site.xml文件的io.sort.spill.percent的值决定，默认为0.80 或者 80%），一个后台线程便会将缓冲区的内容溢写到磁盘中。再写磁盘的过程中，map函数的输出继续被写到缓冲区，但如果在此期间缓冲区被填满，map会阻塞直到写磁盘过程完成。写磁盘会以轮询的方式写到mapred.local.dir（mapred-site.xml文件的配置项）配置的作业特定目录下。</p>
-<p>在写磁盘之前，线程会根据数据最终要传入到的Reducer把缓冲区的数据划分成（默认是按照键）相应的分区。在每个分区中，后台线程按照建进行内排序，此时如果有一个Combiner，它会在排序后的输出上运行。</p>
-<p>一旦内存缓冲区达到溢出的阈值，就会新建一个溢出写文件，因此在Map任务完成最后一个输出记录之后，会有若干个溢出写文件。在Map任务完成之前，溢出写文件被合并成一个已分区且已排序的输出文件作为map输出的中间结果，这也是Map任务的输出结果。</p>
-<p>如果已经指定Combiner且溢出写次数至少为3时，Combiner就会在输出文件写到磁盘之前运行。如前文所述，Combiner可以多次运行，并不影响输出结果。运行Combiner的意义在于使map输出的中间结果更紧凑，使得写到本地磁盘和传给Reducer的数据更少。</p>
-<p>为了提高磁盘IO性能，可以考虑压缩map的输出，这样会写磁盘的速度更快，节约磁盘空间，从而使传送给Reducer的数据量减少。默认情况下，map的输出是不压缩的，但只要将mapred-site.xml文件的配置项mapred.compress.map.output设为true即可开启压缩功能。使用的压缩库由mapred-site.xml文件的配置项mapred.map.output.compression.codec</p>
-<p>指定，如下列出了目前hadoop支持的压缩格式：</p>
-<p>map输出的中间结果存储的格式为IFile，IFile是一种支持航压缩的存储格式，支持上述压缩算法。</p>
-<p>Reducer通过Http方式得到输出文件的分区。将map输出的中间结果发送到Reducer的工作线程的数量由mapred-site.xml文件的tasktracker.http.threds配置项决定，此配置针对每个节点，而不是每个Map任务，默认是40，可以根据作业大小，集群规模以及节点的计算能力而增大。</p>
-<h3 id="4-shuffle"><a href="#4-shuffle" class="headerlink" title="4. shuffle"></a>4. shuffle</h3><p>shuffle，也叫数据清洗。在某些语境下，代表map函数产生输出到reduce的消化输入的整个过程。</p>
-<h4 id="4-1-copy阶段"><a href="#4-1-copy阶段" class="headerlink" title="4.1 copy阶段"></a>4.1 copy阶段</h4><p>Map任务输出的结果位于Map任务的TaskTracker所在的节点的本地磁盘上。TaskTracker需要为这些分区文件（map输出）运行Reduce任务。但是，Reduce任务可能需要多个Map任务的输出作为其特殊的分区文件。每个Map任务的完成时间可能不同，当只要有一个任务完成，Reduce任务就开始复制其输出。这就是shuffle的copy阶段。如下图所示，Reduce任务有少量复制线程，可以并行取得Map任务的输出，默认值为5个线程，该值可以通过设置mapred-site.xml的mapred.reduce.parallel.copies的配置项来改变。<br><img src="http://img.blog.csdn.net/20161230102548036?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"><br>如果map输出相当小，则会被复制到Reduce所在TaskTracker的内存的缓冲区中，缓冲区的大小由mapred-site.xml文件中的mapred.job.shuffle.input.buffer.percent配置项指定。否则，map输出将会被复制到磁盘。一旦内存缓冲区达到阈值大小（由mapred-site.xml文件mapred.job.shuffle.merge.percent配置项决定）或缓冲区的文件数达到阈值大小（由mapred-site.xml文件mapred.inmem.merge.threshold配置项决定），则合并后溢写到磁盘中。</p>
-<h4 id="4-2-sort阶段"><a href="#4-2-sort阶段" class="headerlink" title="4.2 sort阶段"></a>4.2 sort阶段</h4><p>随着溢写到磁盘的文件增多，shuffle进行sort阶段。这个阶段将合并map的输出文件，并维持其顺序排序，其实做的是归并排序。排序的过程是循环进行，如果有50个map的输出文件，而合并因子（由mapred-site.xml文件的io.sort.factor配置项决定，默认为10）为10，合并操作将进行5次，每次将10个文件合并成一个文件，最后有5个文件，这5个文件由于不满足合并条件（文件数小于合并因子），则不会进行合并，将会直接把5个文件交给Reduce函数处理。到此shuffle阶段完成。</p>
-<p>从shuffle的过程可以看出，Map任务处理的是一个InputSplit，而Reduce任务处理的是所有Map任务同一个分区的中间结果。</p>
-<h3 id="5-reduce及最后结果的输出"><a href="#5-reduce及最后结果的输出" class="headerlink" title="5. reduce及最后结果的输出"></a>5. reduce及最后结果的输出</h3><p>reduce阶段操作的实质就是对经过shuffle处理后的文件调用reduce函数处理。由于经过了shuffle的处理，文件都是按键分区且有序，对相同分区的文件调用一次reduce函数处理。</p>
-<p>与map的中间结果不同的是，reduce的输出一般为HDFS。</p>
-<h3 id="6-sort"><a href="#6-sort" class="headerlink" title="6. sort"></a>6. sort</h3><p>排序贯穿于Map任务和Reduce任务，排序操作属于MapReduce计算框架的默认行为，不管流程是否需要，都会进行排序。在MapReduce计算框架中，主要用到了两种排序算法：快速排序和归并排序。</p>
-<p>在Map任务和Reduce任务的过程中，一共发生了3次排序操作。</p>
-<p>(1) 当map函数产生输出时，会首先写入内存的环形缓冲区，当达到设定的阈值，在刷写磁盘之前，后台线程会将缓冲区的数据划分相应的分区。在每个分区中，后台线程按键进行内排序。如下图所示。</p>
-<p>(2) 在Map任务完成之前，磁盘上存在多个已经分好区，并排好序，大小和缓冲区一样的溢写文件，这时溢写文件将被合并成一个已分区且已排序的输出文件。由于溢写文件已经经过一次排序，所以合并文件时只需再做一次排序就可使输出文件整体有序。如下图所示。</p>
-<p><img src="http://img.blog.csdn.net/20161230102655183?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"></p>
-<p>(3) 在shuffle阶段，需要将多个Map任务的输出文件合并，由于经过第二次排序，所以合并文件时只需在做一次排序就可以使输出文件整体有序。<br><img src="http://img.blog.csdn.net/20161230102708631?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"></p>
-<p>在这3次排序中第一次是在内存缓冲区做的内排序，使用的算法是快速排序；第二次排序和第三次排序都是在文件合并阶段发生的，使用的是归并排序。</p>
-<h3 id="7-作业的进度组成"><a href="#7-作业的进度组成" class="headerlink" title="7. 作业的进度组成"></a>7. 作业的进度组成</h3><p>一个MapReduce作业在Hadoop上运行时，客户端的屏幕通常会打印作业日志，如下：</p>
-<p><img src="http://img.blog.csdn.net/20161230102726615?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"></p>
-<p>对于一个大型的MapReduce作业来说，执行时间可能会比较比较长，通过日志了解作业的运行状态和作业进度是非常重要的。对于Map来说，进度代表实际处理输入所占比例，例如 map 60% reduce 0% 表示Map任务已经处理了作业输入文件的60%，而Reduce任务还没有开始。而对于Reduce的进度来说，情况比较复杂，从前面得知，reduce阶段分为copy，sort 和 reduce，这三个步骤共同组成了reduce的进度，各占1/3。如果reduce已经处理了2/3的输入，那么整个reduce的进度应该为1/3 + 1/3 + 1/3 * (2/3) = 5/9 ，因为reduce开始处理时，copy和sort已经完成。</p>
+        <p>就如上一篇文章介绍的那样，如果输入文件是压缩文件，当 MapReduce 程序读取压缩文件时，根据文件名的后缀来选择 codes，输入文件自动解压缩（我们不需要指定压缩文件是哪一种压缩格式）。</p>
+<p>下面我们列出了一些代码，为 Hadoop 中常用的压缩格式设置输出压缩。</p>
+<h3 id="1-常用压缩格式"><a href="#1-常用压缩格式" class="headerlink" title="1. 常用压缩格式"></a>1. 常用压缩格式</h3><h4 id="1-1-Gzip"><a href="#1-1-Gzip" class="headerlink" title="1.1 Gzip"></a>1.1 Gzip</h4><p>对于最终输出，我们可以使用FileOutputFormat上的静态方便方法来设置属性：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">FileOutputFormat.setCompressOutput(job, <span class="keyword">true</span>);</span><br><span class="line">FileOutputFormat.setOutputCompressorClass(job, GzipCodec,<span class="class"><span class="keyword">class</span>)</span>;</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Configuration conf = <span class="keyword">new</span> Configuration();</span><br><span class="line">conf.setBoolean(<span class="string">"mapreduce.output.fileoutputformat.compress"</span>, <span class="keyword">true</span>);</span><br><span class="line">conf.setClass(<span class="string">"mapreduce.output.fileoutputformat.compress.codec"</span>, GzipCodec.class, CompressionCodec.class);</span><br></pre></td></tr></table></figure></p>
+<p>对于 Map 输出：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Configuration conf = <span class="keyword">new</span> Configuration();</span><br><span class="line">conf.setBoolean(<span class="string">"mapreduce.map.output.compress"</span>,<span class="keyword">true</span>);</span><br><span class="line">conf.setClass(<span class="string">"mapreduce.map.output.compress.codec"</span>, GzipCodec.class, CompressionCodec.class);</span><br><span class="line">Job job = Job.getInstance(conf);</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-2-LZO"><a href="#1-2-LZO" class="headerlink" title="1.2 LZO"></a>1.2 LZO</h4><p>对于最终输出：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">FileOutputFormat.setCompressOutput(conf, <span class="keyword">true</span>);</span><br><span class="line">FileOutputFormat.setOutputCompressorClass(conf, LzoCodec.class);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>为了使LZO可分割，我们需要生成一个LZO索引文件。</p>
+</blockquote>
+<p>对于 Map 输出：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Configuration conf = <span class="keyword">new</span> Configuration();</span><br><span class="line">conf.setBoolean(<span class="string">"mapreduce.map.output.compress"</span>,<span class="keyword">true</span>);</span><br><span class="line">conf.setClass(<span class="string">"mapreduce.map.output.compress.codec"</span>, LzoCodec.class, CompressionCodec.class);</span><br><span class="line">Job job = Job.getInstance(conf);</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-3-Snappy"><a href="#1-3-Snappy" class="headerlink" title="1.3 Snappy"></a>1.3 Snappy</h4><p>对于最终输出：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">conf.setOutputFormat(SequenceFileOutputFormat.class);</span><br><span class="line">SequenceFileOutputFormat.setOutputCompressionType(conf, CompressionType.BLOCK);</span><br><span class="line">SequenceFileOutputFormat.setCompressOutput(conf, <span class="keyword">true</span>);</span><br><span class="line">conf.set(<span class="string">"mapreduce.output.fileoutputformat.compress.codec"</span>,<span class="string">"org.apache.hadoop.io.compress.SnappyCodec"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>对于Map输出：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Configuration conf = <span class="keyword">new</span> Configuration();</span><br><span class="line">conf.setBoolean(<span class="string">"mapreduce.map.output.compress"</span>, <span class="keyword">true</span>);</span><br><span class="line">conf.set(<span class="string">"mapreduce.map.output.compress.codec"</span>,<span class="string">"org.apache.hadoop.io.compress.SnappyCodec"</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-实验与结果"><a href="#2-实验与结果" class="headerlink" title="2. 实验与结果"></a>2. 实验与结果</h3><h4 id="2-1-Filesystem-counters"><a href="#2-1-Filesystem-counters" class="headerlink" title="2.1 Filesystem counters"></a>2.1 Filesystem counters</h4><p>文件系统计数器用于分析实验结果。以下是典型的内置文件系统计数器。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-1.png?raw=true" alt=""></p>
+<p><code>FILE_BYTES_READ</code> 是本地文件系统读取的字节数。假设所有的 map 输入数据都来自 HDFS，那么在 map 阶段，<code>FILE_BYTES_READ</code> 应该为零。另一方面，reducer 的输入文件是 reduce 端本地磁盘上的数据，它们是从 map 端磁盘拉取过来的。因此，reduce 端 <code>FILE_BYTES_READ</code> 表示 reducer 读取的总字节数。</p>
+<p><code>FILE_BYTES_WRITTEN</code> 由两部分组成。第一部分来自 mappers。所有的 mappers 都会将中间输出溢出到磁盘上。mappers 写入磁盘的所有字节将包含在 <code>FILE_BYTES_WRITTEN</code> 中。第二部分来自 reducers。 在 shuffle 阶段，所有 reducers 将从 mappers 中获取中间数据，合并并溢写到 reducer 端的磁盘上。reducers 写入磁盘的所有字节也将包含在 <code>FILE_BYTES_WRITTEN</code> 中。</p>
+<p><code>HDFS_BYTES_READ</code> 表示作业启动时 mappers 从 HDFS 上读取的字节数。这些数据不仅包括源文件的内容，还包括关于 splits 的元数据。</p>
+<p><code>HDFS_BYTES_WRITTEN</code> 表示写入 HDFS 的字节。这是最终输出的字节数。</p>
+<p>请注意，由于 HDFS 和本地文件系统是不同的文件系统，因此来自两个文件系统的数据不会重叠。</p>
+<h4 id="2-2-压缩比较"><a href="#2-2-压缩比较" class="headerlink" title="2.2 压缩比较"></a>2.2 压缩比较</h4><p>(1) 没有压缩</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-2.png?raw=true" alt=""></p>
+<p>(2) 只压缩输入</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-3.png?raw=true" alt=""></p>
+<p>我们可以看到 <code>HDFS_BYTES_READ</code> 明显减少。这表明 mappers 从 HDFS 上读取的总字节数显着减少。</p>
+<p>(3) 只压缩map中间输出</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-4.png?raw=true" alt=""></p>
+<p>我们可以看到 <code>FILE_BYTES_READ</code> 和 <code>FILE_BYTES_WRITTEN</code> 显着减少。这意味着本地文件系统节点之间的数据传输显着减少。</p>
+<p>(4) 只压缩最终输出</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-5.png?raw=true" alt=""></p>
+<p>我们可以看到 <code>HDFS_BYTES_WRITTEN</code> 显着减少。这表明 HDFS 的最终输出显着降低。</p>
+<h4 id="2-3-不同压缩格式的比较：gzip，lzo"><a href="#2-3-不同压缩格式的比较：gzip，lzo" class="headerlink" title="2.3 不同压缩格式的比较：gzip，lzo"></a>2.3 不同压缩格式的比较：gzip，lzo</h4><p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-how-to-use-compression-6.png?raw=true" alt=""></p>
+<p>正如我们所看到的，LZO 文件略大于对应的 gzip 文件，但都比原来未压缩文件小得多。另外，LZO 文件压缩速度快了近五倍，解压速度快了两倍。</p>
+<p>我们还可以看到 Snappy 文件比相应的 LZO 文件大，但仍然是原来未压缩文件的一半。另外，Snappy 的压缩和解压缩速度都比 LZO 更快。总之，Snappy 在压缩和解压缩时间方面速度更快，但在压缩比方面效率更低。</p>
+<p>原文：<a href="http://comphadoop.weebly.com/how-to-use-compression.html" target="_blank" rel="noopener">http://comphadoop.weebly.com/how-to-use-compression.html</a></p>
 
       
     </div>
@@ -488,6 +485,8 @@
           
             <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
           
+            <a href="/tags/Hadoop-优化/" rel="tag"># Hadoop 优化</a>
+          
         </div>
       
 
@@ -499,8 +498,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/29/Hadoop/[Hadoop]Hadoop SSH免密码登录/" rel="next" title="Hadoop SSH免密码登录">
-                <i class="fa fa-chevron-left"></i> Hadoop SSH免密码登录
+              <a href="/2018/04/22/hadoop-data-compress/" rel="next" title="Hadoop 数据压缩简介">
+                <i class="fa fa-chevron-left"></i> Hadoop 数据压缩简介
               </a>
             
           </div>
@@ -508,10 +507,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/01/hexo_generate_blog/" rel="prev" title="Hexo 搭建静态博客">
-                Hexo 搭建静态博客 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -632,7 +627,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">107</span>
+                    <span class="site-state-item-count">108</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -654,7 +649,7 @@
                 
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
-                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-count">30</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -727,7 +722,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-从输入到输出"><span class="nav-number">1.</span> <span class="nav-text">1. 从输入到输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-input"><span class="nav-number">2.</span> <span class="nav-text">2. input</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-map及中间结果的输出"><span class="nav-number">3.</span> <span class="nav-text">3. map及中间结果的输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-shuffle"><span class="nav-number">4.</span> <span class="nav-text">4. shuffle</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-copy阶段"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 copy阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-sort阶段"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 sort阶段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-reduce及最后结果的输出"><span class="nav-number">5.</span> <span class="nav-text">5. reduce及最后结果的输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-sort"><span class="nav-number">6.</span> <span class="nav-text">6. sort</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-作业的进度组成"><span class="nav-number">7.</span> <span class="nav-text">7. 作业的进度组成</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-常用压缩格式"><span class="nav-number">1.</span> <span class="nav-text">1. 常用压缩格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-Gzip"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Gzip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-LZO"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 LZO</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-Snappy"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 Snappy</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-实验与结果"><span class="nav-number">2.</span> <span class="nav-text">2. 实验与结果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Filesystem-counters"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Filesystem counters</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-压缩比较"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 压缩比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-不同压缩格式的比较：gzip，lzo"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 不同压缩格式的比较：gzip，lzo</span></a></li></ol></li></ol></div>
             
 
           </div>
