@@ -22,7 +22,7 @@ permalink: spark-streaming-input-dstreams-and-receivers
 
 请注意，如果希望在流应用程序中并行的接收多个数据流，你可以创建多个输入 DStream（在[性能调优](http://spark.apache.org/docs/2.2.0/streaming-programming-guide.html#level-of-parallelism-in-data-receiving)部分中进一步讨论）。这需要创建多个接收器（Receivers），来同时接收多个数据流。但请注意，Spark 的 worker/executor 是一个长期运行的任务，因此会占用分配给 Spark Streaming 应用程序的其中一个核（core）。因此，记住重要的一点，Spark Streaming 应用程序需要分配足够的核（或线程，如果在本地运行）来处理接收的数据，以及来运行接收器。
 
->
+>注意
 - 当在本地运行 Spark Streaming 程序时，不要使用 `local` 或 `local [1]` 作为 master 的 URL。这两个都意味着只会有一个线程用于本地任务运行。如果使用基于接收器（例如套接字，Kafka，Flume等）的输入 DStream，那么唯一的那个线程会用于运行接收器，不会有其他线程来处理接收到的数据。因此，在本地运行时，始终使用 `local [n]` 作为 master 的 URL，其中 `n > 要运行的接收器的数目`。
 - 将逻辑扩展到集群上运行，分配给 Spark Streaming 应用程序的核数量必须大于接收器的数量。否则系统将只接收数据，而无法处理。
 
@@ -46,7 +46,7 @@ streamingContext.fileStream[KeyClass, ValueClass, InputFormatClass](dataDirector
 ```
 Spark Streaming 会监视 dataDirectory 目录并处理在该目录中创建的任何文件（不支持嵌套目录中写入的文件）。
 
->
+>注意
 - 所有文件必须具有相同的数据格式
 - 通过原子地移动或重命名它们到数据目录中，来在dataDirectory目录下创建文件。
 - 一旦移动到dataDirectory目录后，不能进行更改。因此，如果文件被连续追加数据，新的数据将不会被读取。
