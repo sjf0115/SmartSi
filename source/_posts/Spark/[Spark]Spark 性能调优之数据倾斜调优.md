@@ -51,7 +51,7 @@ Spark在做Shuffle时，默认使用HashPartitioner（非Hash Shuffle）对数�
 
 ##### 2.2.2 案例
 
-现有一张测试表，名为student_external，内有10.5亿条数据，每条数据有一个唯一的id值。现从中取出id取值为9亿到10.5亿的共1.5条数据，并通过一些处理，使得id为9亿到9.4亿间的所有数据对12取模后余数为8（即在Shuffle并行度为12时该数据集全部被HashPartition分配到第8个Task），其它数据集对其id除以100取整，从而使得id大于9.4亿的数据在Shuffle时可被均匀分配到所有Task中，而id小于9.4亿的数据全部分配到同一个Task中。处理过程如下
+现有一张测试表，名为student_external，内有10.5亿条数据，每条数据有一个唯一的id值。现从中取出id取值为9亿到10.5亿的共1.5亿条数据，并通过一些处理，使得id为9亿到9.4亿间的所有数据对12取模后余数为8（即在Shuffle并行度为12时该数据集全部被HashPartition分配到第8个Task），其它数据集对其id除以100取整，从而使得id大于9.4亿的数据在Shuffle时可被均匀分配到所有Task中，而id小于9.4亿的数据全部分配到同一个Task中。处理过程如下
 ```sql
 INSERT OVERWRITE TABLE test
 SELECT CASE WHEN id < 940000000 THEN (9500000  + (CAST (RAND() * 8 AS INTEGER)) * 12 )
@@ -121,7 +121,7 @@ GroupBy Stage的Task状态如下图所示，Task 8处理的记录数为4500万�
 
 (3) 优势
 
-实现简单，可在需要Shuffle的操作算子上直接设置并行度或者使用spark.default.parallelism设置。如果是Spark SQL，还可通过SET spark.sql.shuffle.partitions=[num_tasks]设置并行度。可用最小的代价解决问题。一般如果出现数据倾斜，都可以通过这种方法先试验几次，如果问题未解决，再尝试其它方法。
+实现简单，可在需要Shuffle的操作算子上直接设置并行度或者使用 `spark.default.parallelism` 设置。如果是Spark SQL，还可通过 `SET spark.sql.shuffle.partitions=[num_tasks]` 设置并行度。可用最小的代价解决问题。一般如果出现数据倾斜，都可以通过这种方法先试验几次，如果问题未解决，再尝试其它方法。
 
 (4) 劣势
 
