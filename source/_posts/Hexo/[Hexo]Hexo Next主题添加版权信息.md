@@ -7,7 +7,10 @@ tags:
   - Hexo
 
 categories: Hexo
-copyright: true
+post_copyright:
+  enable: true
+  license: CC BY-NC-SA 4.0
+  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
 permalink: hexo-next-add-copyright-information
 ---
 
