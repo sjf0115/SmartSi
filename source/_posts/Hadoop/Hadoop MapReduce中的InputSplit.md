@@ -5,16 +5,16 @@ title: Hadoop MapReduce中的InputSplit
 date: 2017-12-06 13:20:17
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
+permalink: hadoop-mapreduce-inputsplit
 ---
 
 
 Hadoop的初学者经常会有这样两个问题：
-
-(1) Hadoop的一个`Block`默认是128M(或者64M)，那么对于一条记录来说，会不会造成一条记录被分到两个`Block`中？
-
-(2) 从`Block`中读取数据进行切分时，会不会造成一条记录被分到两个`InputSplit`中？
+- Hadoop的一个`Block`默认是128M(或者64M)，那么对于一条记录来说，会不会造成一条记录被分到两个`Block`中？
+- 从`Block`中读取数据进行切分时，会不会造成一条记录被分到两个`InputSplit`中？
 
 对于上面的两个问题，首先要明确两个概念：`Block`和`InputSplit`。在Hadoop中，文件由一个一个的记录组成，最终由mapper任务一个一个的处理。
 例如，示例数据集包含有关1987至2008年间美国境内已完成航班的信息。如果要下载数据集可以打开如下网址： http://stat-computing.org/dataexpo/2009/the-data.html 。每一年都会生成一个大文件（例如：2008年文件大小为108M），在每个文件中每单独的一行都代表一次航班信息。换句话说，一行代表一个记录。

@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: Hadoop MapReduce工作过程
+title: Hadoop MapReduce 工作过程
 date: 2017-12-30 09:32:17
 tags:
   - Hadoop

@@ -5,8 +5,10 @@ title: Hadoop Reducer总是能复用为Combiner？
 date: 2017-12-06 09:39:01
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
+permalink: hadoop-can-reducer-always-be-reused-for-combiner
 ---
 
 `Combiner`函数是一个可选的中间函数，发生在`Map`阶段，`Mapper`执行完成后立即执行。使用`Combiner`有如下两个优势：
@@ -26,7 +28,7 @@ categories: Hadoop
 
 ### 2. Reducer作为Combiner的不适用场景
 
-假设我们正在编写一个`MapReduce`程序来计算股票数据集中每个股票代码的平均交易量（average volume for each symbol）。`Mapper`将数据集中每个股票记录的股票代码作为key和交易量（volume）作为value。`Reducer`然后将循环遍历股票代码对应的所有交易量，并从交易量列表中计算出平均交易量（average volume from the list of volumes for that symbol）。假设`Mapper 1`处理股票代码为ABC的3个记录，收盘价分别为50，60和111。让我们假设`Mapper 2`处理股票代码为ABC的2个记录，收盘价分别为100和31。那么`Reducer`将收到股票代码ABC五个收盘价---50，60，111，100和31。Reducer的工作非常简单，它将简单地循环遍历所有交易量，并将计算出平均交易量为70.4。
+假设我们正在编写一个`MapReduce`程序来计算股票数据集中每个股票代码的平均交易量（average volume for each symbol）。`Mapper`将数据集中每个股票记录的股票代码作为key和交易量（volume）作为value。`Reducer`然后将循环遍历股票代码对应的所有交易量，并从交易量列表中计算出平均交易量（average volume from the list of volumes for that symbol）。假设`Mapper 1`处理股票代码为ABC的3个记录，收盘价分别为50，60和111。让我们假设`Mapper 2`处理股票代码为ABC的2个记录，收盘价分别为100和31。那么`Reducer`将收到股票代码ABC五个收盘价---50，60，111，100和31。Reducer的工作非常简单，它将简单地循环遍历所有交易量，并将计算出平均交易量为70.4。permalink: hadoop-setup-and-start
 ```
 50 + 60 + 111 + 100 + 31 /  5 = 352 / 5 = 70.4
 ```

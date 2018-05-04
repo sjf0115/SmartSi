@@ -5,6 +5,7 @@ title: Hadoop Trash回收站使用指南
 date: 2017-12-07 10:07:01
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
 permalink: hadoop-hdfs-trash

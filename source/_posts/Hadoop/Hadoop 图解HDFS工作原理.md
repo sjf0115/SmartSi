@@ -5,8 +5,10 @@ title: Hadoop 图解HDFS工作原理
 date: 2017-12-19 10:03:01
 tags:
   - Hadoop
+  - Hadoop 内部原理
 
 categories: Hadoop
+permalink: hadoop-illustrate-how-hdfs-works
 ---
 
 结合Maneesh Varshney的漫画改编，为大家分析HDFS存储机制与运行原理。

@@ -5,6 +5,7 @@ title: Hadoop 推测执行
 date: 2017-12-07 19:32:17
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
 permalink: speculative-execution-in-hadoop-mapreduce

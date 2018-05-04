@@ -4,8 +4,10 @@ title: Hadoop Shell中判断HDFS文件是否存在
 date: 2018-01-25 15:49:01
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
+permalink: hadoop-how-to-determine-the-hdfs-file-exists
 ---
 
 ### 1. 用法

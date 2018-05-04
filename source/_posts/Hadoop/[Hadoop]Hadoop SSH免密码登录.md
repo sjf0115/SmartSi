@@ -5,8 +5,10 @@ title: Hadoop SSH免密码登录
 date: 2016-12-29 11:13:01
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
+permalink: hadoop-ssh-password-free-login
 ---
 
 ### 1. 创建ssh-key

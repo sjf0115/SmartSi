@@ -5,8 +5,10 @@ title: Hadoop 安装与启动
 date: 2016-12-29 11:01:01
 tags:
   - Hadoop
+  - Hadoop 基础
 
 categories: Hadoop
+permalink: hadoop-setup-and-start
 ---
 
 ### 1. SSH

@@ -1,4 +1,3 @@
-
 ---
 layout: post
 author: sjf0115
@@ -6,8 +5,10 @@ title: Hadoop MapReduce新一代架构MRv2
 date: 2017-12-08 13:49:01
 tags:
   - Hadoop
+  - Hadoop 内部原理
 
 categories: Hadoop
+permalink: hadoop-mapReduce-new-generation-architecture-mrv2
 ---
 
 `MapReduce`在`hadoop-0.23`中经历了彻底的改变，现在我们称之为`MapReduce 2.0`(MRv2)或者`YARN`。
