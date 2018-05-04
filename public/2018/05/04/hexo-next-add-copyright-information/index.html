@@ -100,18 +100,21 @@
   <meta name="keywords" content="Hexo," />
 
 
-<meta name="description" content="在目录 next/layout/_macro/ 下添加 my-copyright.swig：&amp;#123;% if page.copyright %&amp;#125;&amp;lt;div class=&amp;quot;post-copyright-information&amp;quot;&amp;gt;  &amp;lt;script src=&amp;quot;//cdn.bootcss.com/clipboard.js/1.5.10/clip">
+<meta name="description" content="1. 开启版权声明主题配置文件下,搜索关键字 post_copyright , 将 enable 改为 true：# Declare license on postspost_copyright:  enable: true  license: CC BY-NC-SA 4.0  license_url: https://creativecommons.org/licenses/by-nc-sa/4">
 <meta name="keywords" content="Hexo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hexo Next主题添加版权信息">
 <meta property="og:url" content="http://sjf0115.github.io/2018/05/04/hexo-next-add-copyright-information/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="在目录 next/layout/_macro/ 下添加 my-copyright.swig：&amp;#123;% if page.copyright %&amp;#125;&amp;lt;div class=&amp;quot;post-copyright-information&amp;quot;&amp;gt;  &amp;lt;script src=&amp;quot;//cdn.bootcss.com/clipboard.js/1.5.10/clip">
+<meta property="og:description" content="1. 开启版权声明主题配置文件下,搜索关键字 post_copyright , 将 enable 改为 true：# Declare license on postspost_copyright:  enable: true  license: CC BY-NC-SA 4.0  license_url: https://creativecommons.org/licenses/by-nc-sa/4">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-05-04T10:48:51.263Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-2.png?raw=true">
+<meta property="og:updated_time" content="2018-05-04T11:15:47.194Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo Next主题添加版权信息">
-<meta name="twitter:description" content="在目录 next/layout/_macro/ 下添加 my-copyright.swig：&amp;#123;% if page.copyright %&amp;#125;&amp;lt;div class=&amp;quot;post-copyright-information&amp;quot;&amp;gt;  &amp;lt;script src=&amp;quot;//cdn.bootcss.com/clipboard.js/1.5.10/clip">
+<meta name="twitter:description" content="1. 开启版权声明主题配置文件下,搜索关键字 post_copyright , 将 enable 改为 true：# Declare license on postspost_copyright:  enable: true  license: CC BY-NC-SA 4.0  license_url: https://creativecommons.org/licenses/by-nc-sa/4">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-1.png?raw=true">
 
 
 
@@ -396,7 +399,11 @@
       
 
       
-        <p>在目录 <code>next/layout/_macro/</code> 下添加 <code>my-copyright.swig</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% if page.copyright %&#125;</span><br><span class="line">&lt;div class=&quot;post-copyright-information&quot;&gt;</span><br><span class="line">  &lt;script src=&quot;//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- JS库 sweetalert 可修改路径 --&gt;</span><br><span class="line">  &lt;script src=&quot;https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line">  &lt;script src=&quot;https://unpkg.com/sweetalert/dist/sweetalert.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;本文标题:&lt;/span&gt;&lt;a href=&quot;&#123;&#123; url_for(page.path) &#125;&#125;&quot;&gt;&#123;&#123; page.title &#125;&#125;&lt;/a&gt;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;文章作者:&lt;/span&gt;&lt;a href=&quot;/&quot; title=&quot;访问 &#123;&#123; theme.author &#125;&#125; 的个人博客&quot;&gt;&#123;&#123; theme.author &#125;&#125;&lt;/a&gt;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;发布时间:&lt;/span&gt;&#123;&#123; page.date.format(&quot;YYYY年MM月DD日 - HH:MM&quot;) &#125;&#125;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;原始链接:&lt;/span&gt;&lt;a href=&quot;&#123;&#123; url_for(page.path) &#125;&#125;&quot; title=&quot;&#123;&#123; page.title &#125;&#125;&quot;&gt;&#123;&#123; page.permalink &#125;&#125;&lt;/a&gt;</span><br><span class="line">    &lt;span class=&quot;copy-path&quot;  title=&quot;点击复制文章链接&quot;&gt;&lt;i class=&quot;fa fa-clipboard&quot; data-clipboard-text=&quot;&#123;&#123; page.permalink &#125;&#125;&quot;  aria-label=&quot;复制成功！&quot;&gt;&lt;/i&gt;&lt;/span&gt;</span><br><span class="line">  &lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;许可协议:&lt;/span&gt;&lt;i class=&quot;fa fa-creative-commons&quot;&gt;&lt;/i&gt; &lt;a rel=&quot;license&quot; href=&quot;https://creativecommons.org/licenses/by-nc-nd/4.0/&quot; target=&quot;_blank&quot; title=&quot;Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)&quot;&gt;转载请保留原文链接及作者。&lt;/p&gt;  </span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">    var clipboard = new Clipboard(&apos;.fa-clipboard&apos;);</span><br><span class="line">      $(&quot;.fa-clipboard&quot;).click(function()&#123;</span><br><span class="line">      clipboard.on(&apos;success&apos;, function()&#123;</span><br><span class="line">        swal(&#123;   </span><br><span class="line">          title: &quot;&quot;,   </span><br><span class="line">          text: &apos;复制成功&apos;,</span><br><span class="line">          icon: &quot;success&quot;,</span><br><span class="line">          showConfirmButton: true</span><br><span class="line">          &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);  </span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure></p>
+        <h3 id="1-开启版权声明"><a href="#1-开启版权声明" class="headerlink" title="1. 开启版权声明"></a>1. 开启版权声明</h3><p>主题配置文件下,搜索关键字 post_copyright , 将 <code>enable</code> 改为 <code>true</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># Declare license on posts</span><br><span class="line">post_copyright:</span><br><span class="line">  enable: true</span><br><span class="line">  license: CC BY-NC-SA 4.0</span><br><span class="line">  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/</span><br></pre></td></tr></table></figure></p>
+<p>这样设置之后出现一个问题:<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-1.png?raw=true" alt=""><br>文章的链接并不是我设置域名之后的链接，对 <code>next/layout/_macro/</code> 下的 <code>post-copyright.swig</code> 做如下修改:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;li class=&quot;post-copyright-link&quot;&gt;</span><br><span class="line">  &lt;strong&gt;&#123;&#123; __(&apos;post.copyright.link&apos;) + __(&apos;symbol.colon&apos;) &#125;&#125;&lt;/strong&gt;</span><br><span class="line">  &lt;a href=&quot;http://smartsi.club/&#123;&#123; post.path | default(post.permalink) &#125;&#125;&quot; title=&quot;&#123;&#123; post.title &#125;&#125;&quot;&gt;http://smartsi.club/&#123;&#123; post.path | default(post.permalink) &#125;&#125;&lt;/a&gt;</span><br><span class="line">&lt;/li&gt;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-2.png?raw=true" alt=""></p>
+<p>不知道还有没有什么更好的方法解决这个问题，欢迎留言指教。</p>
+<h3 id="2-自定义文章底部版权声明"><a href="#2-自定义文章底部版权声明" class="headerlink" title="2. 自定义文章底部版权声明"></a>2. 自定义文章底部版权声明</h3><p>在目录 <code>next/layout/_macro/</code> 下添加 <code>my-copyright.swig</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#123;% if page.copyright %&#125;</span><br><span class="line">&lt;div class=&quot;post-copyright-information&quot;&gt;</span><br><span class="line">  &lt;script src=&quot;//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">  &lt;!-- JS库 sweetalert 可修改路径 --&gt;</span><br><span class="line">  &lt;script src=&quot;https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line">  &lt;script src=&quot;https://unpkg.com/sweetalert/dist/sweetalert.min.js&quot;&gt;&lt;/script&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;本文标题:&lt;/span&gt;&lt;a href=&quot;&#123;&#123; url_for(page.path) &#125;&#125;&quot;&gt;&#123;&#123; page.title &#125;&#125;&lt;/a&gt;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;文章作者:&lt;/span&gt;&lt;a href=&quot;/&quot; title=&quot;访问 &#123;&#123; theme.author &#125;&#125; 的个人博客&quot;&gt;&#123;&#123; theme.author &#125;&#125;&lt;/a&gt;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;发布时间:&lt;/span&gt;&#123;&#123; page.date.format(&quot;YYYY年MM月DD日 - HH:MM&quot;) &#125;&#125;&lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;原始链接:&lt;/span&gt;&lt;a href=&quot;&#123;&#123; url_for(page.path) &#125;&#125;&quot; title=&quot;&#123;&#123; page.title &#125;&#125;&quot;&gt;&#123;&#123; page.permalink &#125;&#125;&lt;/a&gt;</span><br><span class="line">    &lt;span class=&quot;copy-path&quot;  title=&quot;点击复制文章链接&quot;&gt;&lt;i class=&quot;fa fa-clipboard&quot; data-clipboard-text=&quot;&#123;&#123; page.permalink &#125;&#125;&quot;  aria-label=&quot;复制成功！&quot;&gt;&lt;/i&gt;&lt;/span&gt;</span><br><span class="line">  &lt;/p&gt;</span><br><span class="line">  &lt;p&gt;&lt;span&gt;许可协议:&lt;/span&gt;&lt;i class=&quot;fa fa-creative-commons&quot;&gt;&lt;/i&gt; &lt;a rel=&quot;license&quot; href=&quot;https://creativecommons.org/licenses/by-nc-nd/4.0/&quot; target=&quot;_blank&quot; title=&quot;Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)&quot;&gt;转载请保留原文链接及作者。&lt;/p&gt;  </span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">    var clipboard = new Clipboard(&apos;.fa-clipboard&apos;);</span><br><span class="line">      $(&quot;.fa-clipboard&quot;).click(function()&#123;</span><br><span class="line">      clipboard.on(&apos;success&apos;, function()&#123;</span><br><span class="line">        swal(&#123;   </span><br><span class="line">          title: &quot;&quot;,   </span><br><span class="line">          text: &apos;复制成功&apos;,</span><br><span class="line">          icon: &quot;success&quot;,</span><br><span class="line">          showConfirmButton: true</span><br><span class="line">          &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);  </span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure></p>
 <p>在目录 <code>next/source/css/_common/components/post/</code> 下添加 <code>post-copyright-information.styl</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">.post-copyright-information &#123;</span><br><span class="line">  width: 85%;</span><br><span class="line">  max-width: 45em;</span><br><span class="line">  margin: 2.8em auto 0;</span><br><span class="line">  padding: 0.5em 1.0em;</span><br><span class="line">  border: 1px solid #d3d3d3;</span><br><span class="line">  font-size: 0.93rem;</span><br><span class="line">  line-height: 1.6em;</span><br><span class="line">  word-break: break-all;</span><br><span class="line">  background: rgba(255,255,255,0.4);</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information p&#123;margin:0;&#125;</span><br><span class="line">.post-copyright-information span &#123;</span><br><span class="line">  display: inline-block;</span><br><span class="line">  width: 5.2em;</span><br><span class="line">  color: #b5b5b5;</span><br><span class="line">  font-weight: bold;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information .raw &#123;</span><br><span class="line">  margin-left: 1em;</span><br><span class="line">  width: 5em;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information a &#123;</span><br><span class="line">  color: #808080;</span><br><span class="line">  border-bottom:0;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information a:hover &#123;</span><br><span class="line">  color: #a3d2a3;</span><br><span class="line">  text-decoration: underline;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information:hover .fa-clipboard &#123;</span><br><span class="line">  color: #000;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information .post-url:hover &#123;</span><br><span class="line">  font-weight: normal;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information .copy-path &#123;</span><br><span class="line">  margin-left: 1em;</span><br><span class="line">  width: 1em;</span><br><span class="line">  +mobile()&#123;display:none;&#125;</span><br><span class="line">&#125;</span><br><span class="line">.post-copyright-information .copy-path:hover &#123;</span><br><span class="line">  color: #808080;</span><br><span class="line">  cursor: pointer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>修改 <code>next/layout/_macro/post.swig</code>:</p>
 <p>在代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;div&gt;</span><br><span class="line">      &#123;% if not is_index %&#125;</span><br><span class="line">        &#123;% include &apos;wechat-subscriber.swig&apos; %&#125;</span><br><span class="line">      &#123;% endif %&#125;</span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure></p>
@@ -457,7 +464,7 @@
     <a href="http://smartsi.club/2018/05/04/hexo-next-add-copyright-information/" title="Hexo Next主题添加版权信息">http://smartsi.club/2018/05/04/hexo-next-add-copyright-information/</a>
   </li>
   <li class="post-copyright-license">
-    <strong>版权声明： </strong>
+    <strong>： </strong>
     本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
   </li>
 </ul>
@@ -582,8 +589,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -687,6 +703,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-开启版权声明"><span class="nav-number">1.</span> <span class="nav-text">1. 开启版权声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-自定义文章底部版权声明"><span class="nav-number">2.</span> <span class="nav-text">2. 自定义文章底部版权声明</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

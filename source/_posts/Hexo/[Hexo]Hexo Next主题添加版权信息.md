@@ -10,6 +10,31 @@ categories: Hexo
 permalink: hexo-next-add-copyright-information
 ---
 
+### 1. 开启版权声明
+
+主题配置文件下,搜索关键字 post_copyright , 将 `enable` 改为 `true`：
+```
+# Declare license on posts
+post_copyright:
+  enable: true
+  license: CC BY-NC-SA 4.0
+  license_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+```
+这样设置之后出现一个问题:
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-1.png?raw=true)
+文章的链接并不是我设置域名之后的链接，对 `next/layout/_macro/` 下的 `post-copyright.swig` 做如下修改:
+```
+<li class="post-copyright-link">
+  <strong>{{ __('post.copyright.link') + __('symbol.colon') }}</strong>
+  <a href="http://smartsi.club/{{ post.path | default(post.permalink) }}" title="{{ post.title }}">http://smartsi.club/{{ post.path | default(post.permalink) }}</a>
+</li>
+```
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/hexo-next-add-copyright-information-2.png?raw=true)
+
+不知道还有没有什么更好的方法解决这个问题，欢迎留言指教。
+
+### 2. 自定义文章底部版权声明
+
 在目录 `next/layout/_macro/` 下添加 `my-copyright.swig`：
 ```
 {% if page.copyright %}
@@ -129,4 +154,5 @@ copyright: true
 permalink: hexo-next-add-copyright-information
 ---
 ```
+
 原文:https://segmentfault.com/a/1190000009544924#articleHeader19

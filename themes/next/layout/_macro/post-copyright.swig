@@ -8,7 +8,7 @@
     <a href="http://smartsi.club/{{ post.path | default(post.permalink) }}" title="{{ post.title }}">http://smartsi.club/{{ post.path | default(post.permalink) }}</a>
   </li>
   <li class="post-copyright-license">
-    <strong>{{ __('post.copyright.license_title') + __('symbol.colon') }} </strong>
+    <strong>{{ __('symbol.colon') }} </strong>
     {{ __('post.copyright.license_content', theme.post_copyright.license_url, theme.post_copyright.license) }}
   </li>
 </ul>
