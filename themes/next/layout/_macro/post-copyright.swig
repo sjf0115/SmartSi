@@ -5,7 +5,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>{{ __('post.copyright.link') + __('symbol.colon') }}</strong>
-    <a href="{{ post.path | default(post.permalink) }}" title="{{ post.title }}">{{ post.path | default(post.permalink) }}</a>
+    <a href="{{ url_for(post.path) | default(post.permalink) }}" title="{{ post.title }}">{{ url_for(post.path) | default(post.permalink) }}</a>
   </li>
   <li class="post-copyright-license">
     <strong>{{ __('post.copyright.license_title') + __('symbol.colon') }} </strong>
