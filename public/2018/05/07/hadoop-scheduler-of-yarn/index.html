@@ -113,7 +113,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-scheduler-of-yarn-2.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-scheduler-of-yarn-3.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-scheduler-of-yarn-4.png?raw=true">
-<meta property="og:updated_time" content="2018-05-09T05:14:03.588Z">
+<meta property="og:updated_time" content="2018-05-10T06:21:04.125Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hadoop Yarn上的调度器">
 <meta name="twitter:description" content="1. 引言Yarn在Hadoop的生态系统中担任了资源管理和任务调度的角色。在讨论其构造器之前先简单了解一下Yarn的架构。  上图是Yarn的基本架构，其中 ResourceManager 是整个架构的核心组件，负责集群上的资源管理，包括内存、CPU以及集群上的其他资； ApplicationMaster 负责在生命周期内的应用程序调度； NodeManager 负责本节点上资源的供给和隔离；C">
@@ -441,7 +441,7 @@
 <p>(7) <code>yarn.scheduler.fair.locality.threashod.rack</code>：同上，满足 <code>rack-local</code>。</p>
 <p>(8) <code>yarn.scheduler.fair.sizebaseweight</code>：是否根据应用程序的大小(Job的个数)作为权重。默认为 false，如果为 true，那么复杂的应用程序会获取更多的资源。</p>
 <h3 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h3><p>如果业务逻辑比较简单或者刚接触 Hadoop 的时建议使用 FIFO 调度器；如果需要控制部分应用程序的优先级，同时又想要充分利用集群资源的情况下，建议使用 Capacity 调度器；如果想要多用户或者多队列公平的共享集群资源，那么就选用Fair调度器。希望大家能够根据业务所需选择合适的调度器。</p>
-<p>原文：<a href="http://www.cocoachina.com/design/20170726/20010.html" target="_blank" rel="noopener">http://www.cocoachina.com/design/20170726/20010.html</a></p>
+<p>原文：<a href="http://www.cobub.com/en/the-selection-and-use-of-hadoop-yarn-scheduler/" target="_blank" rel="noopener">http://www.cobub.com/en/the-selection-and-use-of-hadoop-yarn-scheduler/</a></p>
 
       
     </div>
@@ -650,7 +650,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">116</span>
+                    <span class="site-state-item-count">117</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>

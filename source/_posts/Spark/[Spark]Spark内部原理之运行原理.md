@@ -1,7 +1,7 @@
 ---
 layout: post
 author: 加米谷大数据
-title: Spark内部原理之运行原理一
+title: Spark内部原理之运行原理
 date: 2018-03-14 11:33:01
 tags:
   - Spark

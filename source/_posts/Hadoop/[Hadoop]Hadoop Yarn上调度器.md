@@ -106,4 +106,4 @@ Fair 调度器也可以在多个队列上工作，如上图所示，例如有两
 
 如果业务逻辑比较简单或者刚接触 Hadoop 的时建议使用 FIFO 调度器；如果需要控制部分应用程序的优先级，同时又想要充分利用集群资源的情况下，建议使用 Capacity 调度器；如果想要多用户或者多队列公平的共享集群资源，那么就选用Fair调度器。希望大家能够根据业务所需选择合适的调度器。
 
-原文：http://www.cocoachina.com/design/20170726/20010.html
+原文：http://www.cobub.com/en/the-selection-and-use-of-hadoop-yarn-scheduler/
