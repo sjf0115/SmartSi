@@ -32,7 +32,7 @@ Hadoop的初学者经常会有这样两个问题：
 
 当`MapReduce`作业客户端计算`InputSplit`时，它会计算出块中第一个记录的开始位置和最后一个记录的结束位置。在最后一个记录不完整的情况下，`InputSplit`包括下一个块的位置信息和完成该记录所需的数据的字节偏移（In cases where the last record in a block is incomplete, the input split includes location information for the next block and the byte offset of the data needed to complete the record）。下图显示了数据块和InputSplit之间的关系：
 
-![image](http://img.blog.csdn.net/20170929115859522?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-mapreduce-inputsplit-1.jpg?raw=true)
 
 块是磁盘中的数据存储的物理块，其中`InputSplit`不是物理数据块。它只是一个逻辑概念，并没有对实际文件进行切分，指向块中的开始和结束位置。因此，当`Mapper`尝试读取数据时，它清楚地知道从何处开始读取以及在哪里停止读取。`InputSplit`的开始位置可以在一个块中开始，在另一个块中结束。`InputSplit`代表了逻辑记录边界，在`MapReduce`执行期间，`Hadoop`扫描块并创建`InputSplits`，并且每个`InputSplit`将被分配给一个`Mapper`进行处理。
 

@@ -108,12 +108,12 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="Hadoop的初学者经常会有这样两个问题：  Hadoop的一个Block默认是128M(或者64M)，那么对于一条记录来说，会不会造成一条记录被分到两个Block中？ 从Block中读取数据进行切分时，会不会造成一条记录被分到两个InputSplit中？  对于上面的两个问题，首先要明确两个概念：Block和InputSplit。在Hadoop中，文件由一个一个的记录组成，最终由mapper任务">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://img.blog.csdn.net/20170929115859522?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
-<meta property="og:updated_time" content="2018-05-04T05:39:59.025Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-mapreduce-inputsplit-1.jpg?raw=true">
+<meta property="og:updated_time" content="2018-05-22T01:55:29.921Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hadoop MapReduce中的InputSplit">
 <meta name="twitter:description" content="Hadoop的初学者经常会有这样两个问题：  Hadoop的一个Block默认是128M(或者64M)，那么对于一条记录来说，会不会造成一条记录被分到两个Block中？ 从Block中读取数据进行切分时，会不会造成一条记录被分到两个InputSplit中？  对于上面的两个问题，首先要明确两个概念：Block和InputSplit。在Hadoop中，文件由一个一个的记录组成，最终由mapper任务">
-<meta name="twitter:image" content="http://img.blog.csdn.net/20170929115859522?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-mapreduce-inputsplit-1.jpg?raw=true">
 
 
 
@@ -408,7 +408,7 @@
 <p>假设我们的集群中<code>block size</code>是128MB，每个逻辑记录大约100MB（假设为巨大的记录）。所以第一个记录将完全在一个块中，因为记录大小为100MB小于块大小128 MB。但是，第二个记录不能完全在一个块中，第二条记录将出现在两个块中，从块1开始，溢出到块2中。</p>
 <h3 id="2-InputSplit"><a href="#2-InputSplit" class="headerlink" title="2.InputSplit"></a>2.InputSplit</h3><p>但是如果每个<code>Map</code>任务都处理特定数据块中的所有记录，那怎么处理这种跨越块边界的记录呢？如果分配一个<code>Mapper</code>给块1，在这种情况下，<code>Mapper</code>不能处理第二条记录，因为块1中没有完整的第二条记录。因为<code>HDFS</code>对文件块内部并不清楚，它不知道一个记录会什么时候可能溢出到另一个块(because HDFS has no conception of what’s inside the file blocks, it can’t gauge when a record might spill over into another block)。<code>InputSplit</code>就是解决这种跨越块边界记录问题的，Hadoop使用逻辑表示存储在文件块中的数据，称为输入拆分<code>InputSplit</code>。<code>InputSplit</code>是一个逻辑概念，并没有对实际文件进行切分，它只包含一些元数据信息，比如数据的起始位置，数据长度，数据所在的节点等。它的划分方法完全取决于用户自己。但是需要注意的是<code>InputSplit</code>的多少决定了<code>MapTask</code>的数目，因为每个<code>InputSplit</code>会交由一个<code>MapTask</code>处理。</p>
 <p>当<code>MapReduce</code>作业客户端计算<code>InputSplit</code>时，它会计算出块中第一个记录的开始位置和最后一个记录的结束位置。在最后一个记录不完整的情况下，<code>InputSplit</code>包括下一个块的位置信息和完成该记录所需的数据的字节偏移（In cases where the last record in a block is incomplete, the input split includes location information for the next block and the byte offset of the data needed to complete the record）。下图显示了数据块和InputSplit之间的关系：</p>
-<p><img src="http://img.blog.csdn.net/20170929115859522?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="image"></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hadoop/hadoop-mapreduce-inputsplit-1.jpg?raw=true" alt=""></p>
 <p>块是磁盘中的数据存储的物理块，其中<code>InputSplit</code>不是物理数据块。它只是一个逻辑概念，并没有对实际文件进行切分，指向块中的开始和结束位置。因此，当<code>Mapper</code>尝试读取数据时，它清楚地知道从何处开始读取以及在哪里停止读取。<code>InputSplit</code>的开始位置可以在一个块中开始，在另一个块中结束。<code>InputSplit</code>代表了逻辑记录边界，在<code>MapReduce</code>执行期间，<code>Hadoop</code>扫描块并创建<code>InputSplits</code>，并且每个<code>InputSplit</code>将被分配给一个<code>Mapper</code>进行处理。</p>
 <p>原文：<a href="http://www.dummies.com/programming/big-data/hadoop/input-splits-in-hadoops-mapreduce/" target="_blank" rel="noopener">http://www.dummies.com/programming/big-data/hadoop/input-splits-in-hadoops-mapreduce/</a><br><a href="http://hadoopinrealworld.com/inputsplit-vs-block/" target="_blank" rel="noopener">http://hadoopinrealworld.com/inputsplit-vs-block/</a></p>
 <p><a href="http://hadoopinrealworld.com/inputsplit-vs-block/" target="_blank" rel="noopener">http://hadoopinrealworld.com/inputsplit-vs-block/</a></p>
