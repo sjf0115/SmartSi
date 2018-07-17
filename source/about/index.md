@@ -19,3 +19,7 @@ CSDN：[sunnyyoona](http://blog.csdn.net/sunnyyoona)
 Github: [sjf0115](https://github.com/sjf0115)
 
 Email: 1203745031@qq.com
+
+# 公众号
+
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/%E5%85%AC%E4%BC%97%E5%8F%B7.jpg?raw=true)
