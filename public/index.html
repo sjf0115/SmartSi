@@ -4823,7 +4823,7 @@ Hive仅在FROM子句中支持子查
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/04/05/spark-performance-data-skew-tuning/">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/04/05/spark-streaming-input-dstreams-and-receivers/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -4842,7 +4842,7 @@ Hive仅在FROM子句中支持子查
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/04/05/spark-performance-data-skew-tuning/" itemprop="url">Spark 性能调优之数据倾斜调优</a></h2>
+                <a class="post-title-link" href="/2018/04/05/spark-streaming-input-dstreams-and-receivers/" itemprop="url">Spark Streaming 2.2.0 Input DStreams和Receivers</a></h2>
         
 
         <div class="post-meta">
@@ -4888,7 +4888,7 @@ Hive仅在FROM子句中支持子查
 
           
           
-             <span id="/2018/04/05/spark-performance-data-skew-tuning/" class="leancloud_visitors" data-flag-title="Spark 性能调优之数据倾斜调优">
+             <span id="/2018/04/05/spark-streaming-input-dstreams-and-receivers/" class="leancloud_visitors" data-flag-title="Spark Streaming 2.2.0 Input DStreams和Receivers">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -4921,12 +4921,11 @@ Hive仅在FROM子句中支持子查
       
         
           
-          1. 为何要处理数据倾斜1.1 什么是数据倾斜对Spark/Hadoop这样的大数据系统来讲，数据量大并不可怕，可怕的是数据倾斜。
-何谓数据倾斜？数据倾斜指的是，并行处理的数据集中，某一部分（如Spark或Kafka的一个Partition）的数据显著多于其它部分，从而使得该部分的处理速度成为整个数
+          1. 输入DStream与Receiver输入 DStreams 表示从 source 中获取输入数据流的 DStreams。在入门示例中，lines 表示输入DStream，它代表从netcat服务器获取的数据流。每一个输入DStream(除 file stream)都与一个 Receiver (
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/04/05/spark-performance-data-skew-tuning/#more" rel="contents">
+            <a class="btn" href="/2018/04/05/spark-streaming-input-dstreams-and-receivers/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>

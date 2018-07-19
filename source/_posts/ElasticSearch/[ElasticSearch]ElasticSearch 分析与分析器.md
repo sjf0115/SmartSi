@@ -82,6 +82,7 @@ String whitespaceAnalyzer = "whitespace";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, whitespaceAnalyzer, value);
 ```
+
 产生结果为：
 ```
 Set, the, shape, to, semi-transparent, by, calling, set_trans(5)
