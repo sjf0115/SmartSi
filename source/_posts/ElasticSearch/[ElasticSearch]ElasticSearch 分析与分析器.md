@@ -54,6 +54,7 @@ String standardAnalyzer = "standard";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, standardAnalyzer, value);
 ```
+
 产生的结果为：
 ```
 set, the, shape, to, semi, transparent, by, calling, set_trans, 5
@@ -67,7 +68,8 @@ set, the, shape, to, semi, transparent, by, calling, set_trans, 5
 String simpleAnalyzer = "simple";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, simpleAnalyzer, value);
-```    
+```
+
 产生的结果为：
 ```
 set, the, shape, to, semi, transparent, by, calling, set, trans
@@ -79,7 +81,7 @@ set, the, shape, to, semi, transparent, by, calling, set, trans
 String whitespaceAnalyzer = "whitespace";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, whitespaceAnalyzer, value);
-```    
+```
 产生结果为：
 ```
 Set, the, shape, to, semi-transparent, by, calling, set_trans(5)
@@ -94,7 +96,8 @@ Set, the, shape, to, semi-transparent, by, calling, set_trans(5)
 String englishAnalyzer = "english";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, englishAnalyzer, value);
-```    
+```
+
 产生结果为：
 ```
 set, shape, semi, transpar, call, set_tran, 5

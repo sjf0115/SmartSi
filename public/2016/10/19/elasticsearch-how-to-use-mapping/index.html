@@ -108,7 +108,7 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-19T12:40:37.645Z">
+<meta property="og:updated_time" content="2018-07-19T12:43:19.802Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch Mapping映射">
 <meta name="twitter:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
@@ -478,7 +478,29 @@
 <h4 id="4-1-type"><a href="#4-1-type" class="headerlink" title="4.1 type"></a>4.1 type</h4><p>Mapping 中最重要的字段参数是type。对于不是 string 类型的字段，你可能很少需要映射除type之外的其他映射：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"number_of_clicks"</span>: &#123;</span><br><span class="line">        <span class="attr">"type"</span>: <span class="string">"integer"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>string 类型的字段，默认的，考虑到包含全文本，它们的值在索引前要经过分析器分析，并且在此字段上进行全文搜索前要把查询字符串经过分析器的处理。</p>
 <h4 id="4-2-index"><a href="#4-2-index" class="headerlink" title="4.2 index"></a>4.2 index</h4><p>对于 string 类型字段，其中最重要的一个映射参数是index，另一个是analyzer，下面会讲解到。</p>
-<p>index参数控制字符串以何种方式被索引。它包含三种方式：<br>值|说明<br>—|—<br>analyzed|首先分析这个字符串，然后索引。换言之，以全文形式索引此字段。<br>not_analyzed|索引这个字段，使之可以被索引，但是索引内容和指定值一样。不分析此字段。<br>no|不索引这个字段。这个字段不能被搜索到。</p>
+<p>index参数控制字符串以何种方式被索引。它包含三种方式：</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>analyzed</td>
+<td>首先分析这个字符串，然后索引。换言之，以全文形式索引此字段。</td>
+</tr>
+<tr>
+<td>not_analyzed</td>
+<td>索引这个字段，使之可以被索引，但是索引内容和指定值一样。不分析此字段。</td>
+</tr>
+<tr>
+<td>no</td>
+<td>不索引这个字段。这个字段不能被搜索到。</td>
+</tr>
+</tbody>
+</table>
 <p>对于 string 类型字段，index默认值为 <code>analyzed</code>。如果我们想把字段映射为确切值，我们需要设置为 <code>not_analyzed</code>：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"tag"</span>: &#123;</span><br><span class="line">        <span class="attr">"type"</span>:     <span class="string">"string"</span>,</span><br><span class="line">        <span class="attr">"index"</span>:    <span class="string">"not_analyzed"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>其他简单类型（long、double、date等等）也接受index参数，但相应的值只能是no和not_analyzed，它们的值不能是analyzed。</p>
