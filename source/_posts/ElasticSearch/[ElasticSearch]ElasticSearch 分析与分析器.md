@@ -53,7 +53,7 @@ Set the shape to semi-transparent by calling set_trans(5)
 String standardAnalyzer = "standard";
 String value = "Set the shape to semi-transparent by calling set_trans(5)";
 AnalyzeAPI.analyzeByAnalyzer(client, standardAnalyzer, value);
-```    
+```
 产生的结果为：
 ```
 set, the, shape, to, semi, transparent, by, calling, set_trans, 5

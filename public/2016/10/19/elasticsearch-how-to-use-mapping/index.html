@@ -108,7 +108,7 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-19T12:13:18.541Z">
+<meta property="og:updated_time" content="2018-07-19T12:40:37.645Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch Mapping映射">
 <meta name="twitter:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
@@ -399,7 +399,37 @@
         <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。</p>
 <p>索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中定义字段，每个字段的数据类型，以及字段被Elasticsearch处理的方式。Mapping 还可用于设置关联到 Type 上的元数据。</p>
 <p>例如下面的Mapping：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">"mppings":&#123;</span><br><span class="line">    "football-type": &#123;</span><br><span class="line">        "properties": &#123;</span><br><span class="line">            "country": &#123;</span><br><span class="line">                "index": "not_analyzed",</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "club": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "name": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h3 id="2-核心字段类型"><a href="#2-核心字段类型" class="headerlink" title="2. 核心字段类型"></a>2. 核心字段类型</h3><p>Elasticsearch支持以下简单字段类型：<br>类型|数据类型<br>—|—<br>String|string<br>Whole number| byte short integer long<br>Floating point|float double<br>Boolean|boolean<br>Date|date</p>
+<h3 id="2-核心字段类型"><a href="#2-核心字段类型" class="headerlink" title="2. 核心字段类型"></a>2. 核心字段类型</h3><p>Elasticsearch支持以下简单字段类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td>string</td>
+</tr>
+<tr>
+<td>Whole number</td>
+<td>byte short integer long</td>
+</tr>
+<tr>
+<td>Floating point</td>
+<td>float double</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date</td>
+</tr>
+</tbody>
+</table>
 <p>当你索引一个包含新字段的文档（之前没有这个字段），Elasticsearch将根据JSON中的基本数据类型使用<a href="https://www.elastic.co/guide/en/elasticsearch/guide/2.x/dynamic-mapping.html" target="_blank" rel="noopener">动态映射</a>猜测字段的类型，基于使用以下规则：</p>
 <table>
 <thead>
@@ -545,8 +575,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/10/19/elasticsearch-how-to-use-analysis-and-analyser/" rel="next" title="ElasticSearch 分析与分析器">
-                <i class="fa fa-chevron-left"></i> ElasticSearch 分析与分析器
+              <a href="/2016/10/18/elasticsearch-how-to-indexing/" rel="next" title="ElasticSearch2.x 索引">
+                <i class="fa fa-chevron-left"></i> ElasticSearch2.x 索引
               </a>
             
           </div>
@@ -555,8 +585,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/12/29/hadoop-setup-and-start/" rel="prev" title="Hadoop 安装与启动">
-                Hadoop 安装与启动 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/10/19/elasticsearch-how-to-use-analysis-and-analyser/" rel="prev" title="ElasticSearch 分析与分析器">
+                ElasticSearch 分析与分析器 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

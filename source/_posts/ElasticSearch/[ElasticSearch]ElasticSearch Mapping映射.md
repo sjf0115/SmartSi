@@ -43,6 +43,7 @@ permalink: elasticsearch-how-to-use-mapping
 ### 2. 核心字段类型
 
 Elasticsearch支持以下简单字段类型：
+
 类型|数据类型
 ---|---
 String|string
