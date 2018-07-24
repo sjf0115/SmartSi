@@ -2,7 +2,7 @@
 layout: post
 author: sjf0115
 title: ElasticSearch 内部原理之分布式文档搜索
-date: 2016-07-06 23:15:17
+date: 2016-10-26 21:15:17
 tags:
   - ElasticSearch
   - ElasticSearch 内部原理
@@ -38,7 +38,7 @@ GET /_search
 
 Query阶段过程如下图所示：
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-internal-distributed-document-search-1.png?raw=true)
 
 Query阶段包含如下步骤：
 - 客户端发送一个`Search`请求给节点3，节点3创建了一个大小为 `from+size` 的空优先级队列。
@@ -47,7 +47,7 @@ Query阶段包含如下步骤：
 
 当一个搜索请求被发送到一个节点，这个节点就变成了协调节点。这个节点的工作是向所有相关的分片广播搜索请求并且把它们的响应整合成一个全局的有序结果集。将这个结果集返回给客户端。
 
-第一步是将请求广播到索引里每个节点的分片拷贝上。就像document的GET请求一样，搜索请求可以被任意主分片或者副本分片处理。这就是为什么说更多的副本能够提高搜索吞吐率的原因。协调节点将在之后的请求中轮询所有的分片拷贝来分摊负载。
+第一步是将请求广播到索引里每个节点的分片拷贝上。就像[document GET requests](http://smartsi.club/2016/10/25/elasticsearch-internal-distributed-document-store/#2-2-检索文档)请求一样，搜索请求可以被任意主分片或者副本分片处理。这就是为什么说更多的副本能够提高搜索吞吐率的原因。协调节点将在之后的请求中轮询所有的分片拷贝来分摊负载。
 
 每个分片在本地执行查询并建立一个长度为 `from+size` 的有序优先级队列，这个长度意味着它自己的结果数量就足够满足全局的请求要求。分片返回一个轻量级的结果列表给协调节点。只包含文档ID值和排序需要用到的值，例如 `_score`。
 
@@ -60,7 +60,7 @@ Query阶段包含如下步骤：
 
 查询阶段标示出哪些文档满足我们的搜索请求，我们只返回了文档ID以及对排序有用的值，并没有返回文档本身。我们仍然需要检索那些文档。这就是 `fetch` 阶段的工作，过程如下图所示：
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-internal-distributed-document-search-2.png?raw=true)
 
 `Fetch` 阶段由以下步骤构成：
 - 协调节点标示出哪些文档需要取回，并且向相关分片发出多个GET请求。
@@ -69,7 +69,7 @@ Query阶段包含如下步骤：
 
 协调节点首先决定哪些文档是实际需要取回的。例如，如果我们查询指定`{ "from": 90, "size": 10 }`，那么前90条结果将会被丢弃，只需要检索接下来的10个结果。这些文档可能来自与查询请求相关的一个、多个或者全部分片。
 
-协调节点给拥有相关文档的每个分片创建一个`multi-get request`，并发送请求给同样处理查询阶段的分片拷贝。
+协调节点给拥有相关文档的每个分片创建一个 [multi-get request](http://smartsi.club/2016/10/25/elasticsearch-internal-distributed-document-store/#2-4-多文档模式)，并发送请求给同样处理查询阶段的分片拷贝。
 
 分片加载文档体-- `_source` 字段--如果有需要，用`metadata`和`search snippet highlighting`丰富结果文档。一旦协调节点接收到所有的结果文档，它就组合这些结果为单个响应返回给客户端。
 
