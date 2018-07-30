@@ -23,18 +23,18 @@ Elasticsearch添加了一个 `Translog` 或者叫事务日志，它记录了 Ela
 
 (1) 索引文档时，将其添加到内存索引缓冲区中，并追加到 `Translog` 中，如下图所示:
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-1.png?raw=true)
 
 (2) 刷新`refresh`使分片处于下图描述的状态，分片每秒被刷新（refresh）一次：
 - 内存缓冲区中的文档写入一个新的段中，而没有 `fsync`。
 - 段被打开以使其可以搜索。
 - 内存缓冲区被清除。
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-2.png?raw=true)
 
 (3) 该过程继续，将更多的文档添加到内存缓冲区并追加到 `Translog` 中，如下图所示:
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-3.png?raw=true)
 
 (4) 每隔一段时间，例如 `Translog` 变得非常大，索引被刷新 `flush` 到磁盘，一个新的 `Translog` 被创建，并执行一个全量提交：
 - 内存缓冲区中的任何文档都将写入新的段。
@@ -43,7 +43,7 @@ Elasticsearch添加了一个 `Translog` 或者叫事务日志，它记录了 Ela
 - 文件系统缓存通过 `fsync` 被刷新 `flush` 到磁盘。
 - 老的 `Translog` 被删除。
 
-![]()
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-4.png?raw=true)
 
 `Translog` 提供所有尚未刷新 `flush` 到磁盘的操作的一个持久化记录。启动时，Elasticsearch 将使用最后一个提交点从磁盘中恢复已知的段，然后将重新执行 `Translog` 中的所有操作，以添加最后一次提交后发生的更改。
 

@@ -108,10 +108,15 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 持久化变更如果没有使用 fsync 将文件系统缓存中的数据刷（flush）到磁盘上，我们无法保证数据在断电后甚至在正常退出应用程序后仍然存在。为了使 Elasticsearch 具有可靠性，我们需要确保将更改持久化到磁盘上。 在ElasticSearch 动态更新索引中，我们说过一次完整提交会将段刷到磁盘，并写入到一个包含所有段列表的提交点 commit point。Elasticsearc">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-07-30T10:42:16.111Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-4.png?raw=true">
+<meta property="og:updated_time" content="2018-07-30T10:49:27.586Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticSearch 持久化变更">
 <meta name="twitter:description" content="1. 持久化变更如果没有使用 fsync 将文件系统缓存中的数据刷（flush）到磁盘上，我们无法保证数据在断电后甚至在正常退出应用程序后仍然存在。为了使 Elasticsearch 具有可靠性，我们需要确保将更改持久化到磁盘上。 在ElasticSearch 动态更新索引中，我们说过一次完整提交会将段刷到磁盘，并写入到一个包含所有段列表的提交点 commit point。Elasticsearc">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-1.png?raw=true">
 
 
 
@@ -401,16 +406,16 @@
 <p>当我们每秒刷新（refresh）一次即可实现近实时搜索，但是我们仍然需要定期进行全面的提交，以确保我们可以从故障中恢复。但发生在两次提交之间文件变化怎么办？ 我们也不想丢失。</p>
 <p>Elasticsearch添加了一个 <code>Translog</code> 或者叫事务日志，它记录了 Elasticsearch 中的每个操作。使用 <code>Translog</code>，处理过程现在如下所示：</p>
 <p>(1) 索引文档时，将其添加到内存索引缓冲区中，并追加到 <code>Translog</code> 中，如下图所示:</p>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-1.png?raw=true" alt=""></p>
 <p>(2) 刷新<code>refresh</code>使分片处于下图描述的状态，分片每秒被刷新（refresh）一次：</p>
 <ul>
 <li>内存缓冲区中的文档写入一个新的段中，而没有 <code>fsync</code>。</li>
 <li>段被打开以使其可以搜索。</li>
 <li>内存缓冲区被清除。</li>
 </ul>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-2.png?raw=true" alt=""></p>
 <p>(3) 该过程继续，将更多的文档添加到内存缓冲区并追加到 <code>Translog</code> 中，如下图所示:</p>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-3.png?raw=true" alt=""></p>
 <p>(4) 每隔一段时间，例如 <code>Translog</code> 变得非常大，索引被刷新 <code>flush</code> 到磁盘，一个新的 <code>Translog</code> 被创建，并执行一个全量提交：</p>
 <ul>
 <li>内存缓冲区中的任何文档都将写入新的段。</li>
@@ -419,7 +424,7 @@
 <li>文件系统缓存通过 <code>fsync</code> 被刷新 <code>flush</code> 到磁盘。</li>
 <li>老的 <code>Translog</code> 被删除。</li>
 </ul>
-<p><img src="" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ElasticSearch/elasticsearch-base-making-changes-persistent-4.png?raw=true" alt=""></p>
 <p><code>Translog</code> 提供所有尚未刷新 <code>flush</code> 到磁盘的操作的一个持久化记录。启动时，Elasticsearch 将使用最后一个提交点从磁盘中恢复已知的段，然后将重新执行 <code>Translog</code> 中的所有操作，以添加最后一次提交后发生的更改。</p>
 <p><code>Translog</code>也被用来提供实时<code>CRUD</code>。当你试着通过ID查询、更新、删除一个文档，在尝试从相应的段中检索文档之前，首先检查 <code>Translog</code> 来查看最近的变更。这意味着它总是能够实时地获取到文档的最新版本。</p>
 <h3 id="2-flush-API"><a href="#2-flush-API" class="headerlink" title="2. flush API"></a>2. flush API</h3><p>在 Elasticsearch 中执行提交和截断 <code>Translog</code> 的操作被称作一次 <code>flush</code>。分片每30分钟或者当 <code>Translog</code> 变得太大时会自动 flush 一次。有关可用于控制这些阈值的设置，请参阅<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html#_translog_settings" target="_blank" rel="noopener">Translog文档</a>。</p>
@@ -528,8 +533,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/12/29/hadoop-setup-and-start/" rel="prev" title="Hadoop 安装与启动">
-                Hadoop 安装与启动 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/11/11/elasticsearch-base-near-real-time-search/" rel="prev" title="ElasticSearch 近实时搜索">
+                ElasticSearch 近实时搜索 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -651,7 +656,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">150</span>
+                    <span class="site-state-item-count">151</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
