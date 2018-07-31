@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: ElasticSearch2.x Java API之索引文档
+title: ElasticSearch Java API之索引文档
 date: 2016-07-07 23:15:17
 tags:
   - ElasticSearch

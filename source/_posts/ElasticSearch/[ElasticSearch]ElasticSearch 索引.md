@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: ElasticSearch2.x 索引
+title: ElasticSearch 索引
 date: 2016-10-18 19:15:17
 tags:
   - ElasticSearch

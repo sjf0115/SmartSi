@@ -2,7 +2,7 @@
 layout: post
 author: sjf0115
 title: ElasticSearch 动态更新索引
-date: 2016-10-30 10:15:17
+date: 2016-11-04 09:15:17
 tags:
   - ElasticSearch
   - ElasticSearch 基础
