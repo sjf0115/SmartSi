@@ -100,18 +100,18 @@
   <meta name="keywords" content="Spark,Spark 基础," />
 
 
-<meta name="description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区（RDD在内存中计算），并且该数据集（或从其派生的数据集）上的 action 操作可以重用它。这样可以使以后的 action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互使用的关键工具。 可以使用 RDD 上的 persist() 或 ca">
+<meta name="description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当你持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区，RDD在内存中计算时该数据集（或从其派生的数据集）上的其他 Action 可以重用它。这样可以使后面的 Action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互的关键工具。 可以使用 RDD 上的 persist() 或 cache(">
 <meta name="keywords" content="Spark,Spark 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark2.3.0 持久化">
 <meta property="og:url" content="http://sjf0115.github.io/2018/03/16/spark-base-rdd-persistence/index.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区（RDD在内存中计算），并且该数据集（或从其派生的数据集）上的 action 操作可以重用它。这样可以使以后的 action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互使用的关键工具。 可以使用 RDD 上的 persist() 或 ca">
+<meta property="og:description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当你持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区，RDD在内存中计算时该数据集（或从其派生的数据集）上的其他 Action 可以重用它。这样可以使后面的 Action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互的关键工具。 可以使用 RDD 上的 persist() 或 cache(">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-03-19T11:02:35.523Z">
+<meta property="og:updated_time" content="2018-08-07T10:32:41.313Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Spark2.3.0 持久化">
-<meta name="twitter:description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区（RDD在内存中计算），并且该数据集（或从其派生的数据集）上的 action 操作可以重用它。这样可以使以后的 action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互使用的关键工具。 可以使用 RDD 上的 persist() 或 ca">
+<meta name="twitter:description" content="1. 概述Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当你持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区，RDD在内存中计算时该数据集（或从其派生的数据集）上的其他 Action 可以重用它。这样可以使后面的 Action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互的关键工具。 可以使用 RDD 上的 persist() 或 cache(">
 
 
 
@@ -396,9 +396,9 @@
       
 
       
-        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区（RDD在内存中计算），并且该数据集（或从其派生的数据集）上的 action 操作可以重用它。这样可以使以后的 action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互使用的关键工具。</p>
-<p>可以使用 RDD 上的 <code>persist()</code> 或 <code>cache()</code> 方法来标记要持久化的 RDD (译者注：执行这两个方法不会立即持久化 RDD)。当 RDD 第一次在 action 操作中计算时，将持久化(缓存)到节点的内存中。Spark 的缓存是可容错的 - 如果 RDD 的任意分区丢失，它将使用最初创建的转换操作自动重新计算。</p>
-<h3 id="2-存储级别"><a href="#2-存储级别" class="headerlink" title="2. 存储级别"></a>2. 存储级别</h3><p>除此之外，可以使用不同的持久化级别来存储每个持久化的 RDD，从而允许你，例如，将数据集存储在磁盘上，或者以序列化的 Java 对象形式存储在内存中(以节省空间)，或者在不同机器节点上进行备份。通过将 StorageLevel 对象传递给 <code>persist()</code> 方法来设置持久化级别。<code>cache()</code> 方法使用默认存储级别，即 <code>StorageLevel.MEMORY_ONLY</code>（将反序列化的对象存储在内存中）。</p>
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>Spark 中最重要的功能之一是在操作之间将数据集持久化(缓存)在内存中。当你持久化一个 RDD 时，每个节点都会保存 RDD 的任意分区，RDD在内存中计算时该数据集（或从其派生的数据集）上的其他 Action 可以重用它。这样可以使后面的 Action 操作执行的更快（通常超过10倍）。缓存是迭代算法和快速交互的关键工具。</p>
+<p>可以使用 RDD 上的 <code>persist()</code> 或 <code>cache()</code> 方法来标记要持久化的 RDD (译者注：执行这两个方法不会立即持久化 RDD)。当 RDD 第一次在 action 操作中计算时，将持久化(缓存)到节点的内存中。Spark 的缓存是可容错的 - 如果 RDD 的任意分区丢失，将使用最初创建的转换操作自动重新计算。</p>
+<h3 id="2-存储级别"><a href="#2-存储级别" class="headerlink" title="2. 存储级别"></a>2. 存储级别</h3><p>除此之外，可以使用不同的持久化级别来存储每个持久化的 RDD，从而允许你，例如，将数据集存储在磁盘上，或者以 Java 序列化对象形式存储在内存中(以节省空间)，或者在不同机器节点上进行备份。通过将 StorageLevel 对象传递给 <code>persist()</code> 方法来设置持久化级别。<code>cache()</code> 方法使用默认存储级别，即 <code>StorageLevel.MEMORY_ONLY</code>（将反序列化的对象存储在内存中）。</p>
 <table>
 <thead>
 <tr>
@@ -409,15 +409,15 @@
 <tbody>
 <tr>
 <td>MEMORY_ONLY</td>
-<td>将 RDD 以反列化的 Java 对象存储在 JVM 中。如果没有足够的内存存储 RDD，则某些分区将不会被缓存，每次需要时都会重新计算。这是默认级别。</td>
+<td>将 RDD 以 Java 对象形式存储在 JVM 中。如果没有足够的内存存储 RDD，则某些分区将不会被缓存，每次需要时都会重新计算。这是默认级别。</td>
 </tr>
 <tr>
 <td>MEMORY_AND_DISK</td>
-<td>将 RDD 以反序列化的 Java 对象存储在 JVM 中。如果数据在内存中放不下，则溢写到磁盘上．需要时则会从磁盘上读取</td>
+<td>将 RDD 以 Java 对象形式存储在 JVM 中。如果数据在内存中放不下，则溢写到磁盘上．需要时则会从磁盘上读取</td>
 </tr>
 <tr>
 <td>MEMORY_ONLY_SER (Java and Scala)</td>
-<td>将 RDD 以序列化的 Java 对象(每个分区一个字节数组)的方式存储．这通常比反序列化对象更具空间效率，特别是在使用<a href="http://spark.apache.org/docs/2.3.0/tuning.html" target="_blank" rel="noopener">快速序列化器</a>的情况下，但是这种方式读取数据会消耗更多的CPU。</td>
+<td>此级别与<code>MEMORY_ONLY</code>完全相同，但会在存储到内存之前序列化对象。这通常比 Java 对象更具空间效率，特别是在使用<a href="http://spark.apache.org/docs/2.3.0/tuning.html" target="_blank" rel="noopener">快速序列化器</a>的情况下，但是这种方式读取数据会消耗更多的CPU。</td>
 </tr>
 <tr>
 <td>MEMORY_AND_DISK_SER (Java and Scala)</td>
@@ -425,7 +425,7 @@
 </tr>
 <tr>
 <td>DISK_ONLY</td>
-<td>将 RDD 分区存储在磁盘上。</td>
+<td>将 RDD 分区存储在磁盘上而不是内存上。</td>
 </tr>
 <tr>
 <td>MEMORY_ONLY_2, MEMORY_AND_DISK_2等</td>
@@ -532,8 +532,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/16/spark-streaming-kafka-0-8-integration/" rel="next" title="Spark Streaming 与 Kafka0.8 整合">
-                <i class="fa fa-chevron-left"></i> Spark Streaming 与 Kafka0.8 整合
+              <a href="/2018/03/14/spark-internal-operating-principle-one/" rel="next" title="Spark内部原理之运行原理">
+                <i class="fa fa-chevron-left"></i> Spark内部原理之运行原理
               </a>
             
           </div>
@@ -542,8 +542,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/03/18/improvements-to-kafka-integration-of-spark-streaming/" rel="prev" title="Spark Streaming 与 Kafka 整合的改进">
-                Spark Streaming 与 Kafka 整合的改进 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/03/16/spark-streaming-kafka-0-8-integration/" rel="prev" title="Spark Streaming 与 Kafka0.8 整合">
+                Spark Streaming 与 Kafka0.8 整合 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -665,7 +665,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">154</span>
+                    <span class="site-state-item-count">156</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
