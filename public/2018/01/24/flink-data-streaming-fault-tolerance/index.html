@@ -111,7 +111,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-1.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-2.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-3.png?raw=true">
-<meta property="og:updated_time" content="2018-03-07T02:42:08.118Z">
+<meta property="og:updated_time" content="2018-09-13T06:34:08.029Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 内部原理之数据流容错">
 <meta name="twitter:description" content="1. 概述Apache Flink提供了一个容错机制来持续恢复数据流应用程序的状态。该机制确保即使在出现故障的情况下，程序的状态也将最终反映每条记录来自数据流严格一次exactly once。 请注意，有一个开关可以降级为保证至少一次(least once)（如下所述）。 容错机制连续生成分布式流数据流的快照。对于状态较小的流式应用程序，这些快照非常轻量级，可以频繁生成，而不会对性能造成太大影响。">
@@ -415,9 +415,9 @@
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-2.png?raw=true" alt=""></p>
 <p>接收多个输入流的算子需要根据快照<code>Barriers</code>对其输入流。上图说明了这一点：</p>
 <ul>
-<li>只要算子从一个输入流接收到快照<code>Barriers n</code>时，就不能处理来自该数据流的任何记录(译者注:进行缓存)，当从其他输入流中接收到最后一个<code>Barriers n</code>时，才开始处理缓存的数据(即对齐的意思)。否则，就会混合属于快照<code>n</code>和快照<code>n + 1</code>的记录。</li>
-<li>报告<code>Barriers n</code>的数据流暂时搁置。从这些数据流接收到的记录不会被处理，而是放入输入缓冲区中(例如上图中的<code>aligning</code>部分)。</li>
-<li>一旦接收到最后一个流的<code>Barriers n</code>时，算子才发送所有待发送的记录，然后才发送快照<code>Barriers n</code>自己(例如上图中的<code>checkpoint</code>部分)。</li>
+<li>当算子从一个输入流接收到<code>Barriers n</code>时，先不处理来自该数据流的记录，而是先进行缓存，等从其他所有输入流中都接收到<code>Barriers n</code>时，才开始处理缓存的数据(译者注：根据 <code>Barriers n</code> 对齐所有的输入流)。否则，就会把属于快照<code>n</code>和快照<code>n + 1</code>的记录混合在一起。</li>
+<li><code>Barriers n</code>的数据流暂时搁置。从这些数据流接收到的记录不会被处理，而是放入输入缓冲区中，等待其他输入数据流进行对齐(例如上图中的<code>aligning</code>部分)。</li>
+<li>一旦接收到最后一个流的<code>Barriers n</code>时（译者注：这是触发Checkpoint），算子才发送所有缓存的记录，然后发送快照<code>Barriers n</code>(例如上图中的<code>checkpoint</code>部分)。</li>
 <li>之后，恢复处理所有输入流中的记录，在处理来自数据流的记录之前优先处理来自输入缓冲区中的记录(例如上图中的<code>continue</code>部分)。</li>
 </ul>
 <h4 id="2-2-State"><a href="#2-2-State" class="headerlink" title="2.2 State"></a>2.2 State</h4><p>当算子包含任何形式的状态时，这个状态也必须是快照的一部分。算子状态有不同的形式：</p>
@@ -425,28 +425,32 @@
 <li>用户自定义状态：这是由转换函数（如<code>map（）</code>或<code>filter（）</code>）直接创建和修改的状态。有关详细信息，请参阅<a href="http://smartsi.club/2018/01/16/flink-stream-state-overview/" target="_blank" rel="noopener">状态概述</a></li>
 <li>系统状态：这种状态指的是作为算子计算一部分的数据缓冲区。这种状态的一个典型例子是窗口缓冲区，在窗口缓冲区中，系统为窗口收集（以及聚合）记录，直到窗口被计算和删除。</li>
 </ul>
-<p>在算子收到所有输入流中的所有快照<code>barriers</code>以及在<code>barriers</code>发送到输出流之前，算子对自己的状态进行快照。这时，At that point, all updates to the state from records before the barriers will have been made, and no updates that depend on records from after the barriers have been applied。由于快照的状态可能较大，因此需要其存储在可配置状态终端<code>state backend</code>中。默认情况下，会存储在<code>JobManager</code>的内存中，但是在生产环境下，应该配置为分布式可靠存储系统（如<code>HDFS</code>）。在状态被存储之后，算子确认检查点，将快照<code>barriers</code>发送到输出流，然后继续前行。</p>
+<p>在算子收到所有输入流中的<code>Barriers</code>以及在<code>barriers</code>发送到输出流之前，算子对其状态进行快照。这时，<code>Barriers</code>之前的记录都更新到状态中，<code>Barriers</code>之后的记录不会进行更新。由于快照的状态可能较大，因此需要存储在可配置的状态后端<code>state backend</code>中。默认情况下，会存储在<code>JobManager</code>的内存中，但是在生产环境下，应该配置为分布式可靠存储系统（如<code>HDFS</code>）。在状态被存储之后，算子确认检查点，将快照<code>barriers</code>发送到输出流，然后继续进行。</p>
 <p>生成的快照包含：</p>
 <ul>
 <li>对于每个并行流数据源，快照启动时在数据流中的偏移量/位置</li>
-<li>对于每个算子，指向作为快照中一部分的状态的指针</li>
+<li>对于每个算子，指向的状态（作为快照中一部分）的指针</li>
 </ul>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86%E4%B9%8B%E6%95%B0%E6%8D%AE%E6%B5%81%E5%AE%B9%E9%94%99-3.png?raw=true" alt=""></p>
-<h4 id="2-3-Exactly-Once-vs-At-Least-Once"><a href="#2-3-Exactly-Once-vs-At-Least-Once" class="headerlink" title="2.3 Exactly Once vs. At Least Once"></a>2.3 Exactly Once vs. At Least Once</h4><p>对齐步骤可能会给流式传输程序造成延迟。这个额外的延迟通常大约在几毫秒的数量级，但是我们已经看到一些因为异常值造成的延迟明显增加的情况。对于所有记录需要持续较低延迟（几毫秒）的应用程序而言，<code>Flink</code>有一个开关可以在检查点期间跳过流对齐。一旦算子看到每个输入的检查点<code>barriers</code>，就会生成检查点快照。</p>
-<p>当跳过对齐步骤时，即使在检查点<code>n</code>的一些检查点<code>barriers</code>到达之后，算子也会继续处理所有输入。这样，在为检查点<code>n</code>生成状态快照之前也会处理到属于检查点<code>n+1</code>的元素。在恢复时，这些记录将会重复出现，因为它们既包含在检查点<code>n</code>的状态快照中，也会在检查点<code>n</code>之后作为数据的一部分进行重放。</p>
-<p>备注:</p>
-<p>对齐仅发生在当算子具有多个输入（例如<code>join</code>）或者具有多个输出（在流<code>repartitioning</code>/<code>shuffle</code>之后）的情况。正因为如此，只有密集并行流操作(only embarrassingly parallel streaming operations)（<code>map（）</code>，<code>flatMap（）</code>，<code>filter（）</code>…）的数据流即使在至少一次模式下也只能提供严格一次。</p>
-<h4 id="2-4-异步状态快照"><a href="#2-4-异步状态快照" class="headerlink" title="2.4 异步状态快照"></a>2.4 异步状态快照</h4><p>请注意，上述机制意味着算子在状态终端存储状态快照时停止处理输入记录。这种同步状态快照在每次生成快照时都会造成延迟。</p>
-<p>可以让算子在存储其状态快照的同时继续处理输入记录，有效地让状态快照在后台异步发生。要做到这一点，算子必须能够产生一个以某种方式存储的状态对象，以至于对算子状态的进一步的修改不会影响状态对象。例如，<code>copy-on-write</code>数据结构（如<code>RocksDB</code>中使用的数据结构）具有这种功能。</p>
-<p>在接收到输入端的检查点<code>barriers</code>后，算子启动其状态的异步快照复制。<code>barriers</code>立即发送到输出流中，并继续进行正常的流处理。一旦后台复制过程完成，它就会向检查点协调器（JobManager）确认检查点。检查点现在只有在所有<code>sink</code>接收到<code>barriers</code>并且所有有状态的算子已经确认完成备份（可能在<code>barriers</code>到达<code>sink</code>之后）。</p>
-<p>有关状态快照的详细信息，请参阅<a href="http://smartsi.club/2018/01/17/flink-stream-state-backends/" target="_blank" rel="noopener">状态终端</a>。</p>
-<h3 id="3-恢复"><a href="#3-恢复" class="headerlink" title="3. 恢复"></a>3. 恢复</h3><p>在这种机制下恢复很简单：一旦失败，<code>Flink</code>选择最近完成的检查点<code>k</code>。然后系统重新部署整个分布式数据流，并为每个算子提供作为检查点<code>k</code>一部分的快照状态。数据源被设置为开始从位置<code>Sk</code>读取数据流。例如在<code>Apache Kafka</code>中，这意味着告诉消费者从偏移量<code>Sk</code>处开始提取数据。</p>
+<h4 id="2-3-Exactly-Once-vs-At-Least-Once"><a href="#2-3-Exactly-Once-vs-At-Least-Once" class="headerlink" title="2.3 Exactly Once vs. At Least Once"></a>2.3 Exactly Once vs. At Least Once</h4><p>对齐步骤可能会给流处理程序造成延迟。这个额外的延迟通常大约在几毫秒的数量级，但是我们已经看到一些因为异常值造成的延迟明显增加的情况。对于需要连续较低延迟（几毫秒）的应用程序而言，<code>Flink</code>有一个开关可以在检查点期间跳过流对齐。一旦算子看到每个输入的检查点<code>Barriers</code>，就会生成检查点快照。</p>
+<p>当跳过对齐步骤时，当检查点<code>n</code>的某些<code>barriers</code>到达时，算子就会处理输入数据（译者注：不需要缓存输入数据来等待最后一个 <code>Barriers</code>的到来）。这样的话，在为检查点<code>n</code>生成状态快照之前也会处理到属于检查点<code>n+1</code>的元素。在恢复时，这些记录将会重复出现，因为它们既包含在检查点<code>n</code>的状态快照中，也会在检查点<code>n</code>之后作为数据的一部分进行重放。</p>
+<blockquote>
+<p>对齐仅发生在当算子具有多个输入（例如<code>join</code>）或者具有多个输出（在流<code>repartitioning</code>/<code>shuffle</code>之后）的情况。正因为如此，只有高度并行流操作（<code>map（）</code>，<code>flatMap（）</code>，<code>filter（）</code>…）的数据流即使在 At-Least-Once 模式下也只能提供Exactly-Once语义。</p>
+</blockquote>
+<h4 id="2-4-异步状态快照"><a href="#2-4-异步状态快照" class="headerlink" title="2.4 异步状态快照"></a>2.4 异步状态快照</h4><p>请注意，上述机制意味着当算子在状态后端存储状态快照时会停止处理输入记录。这种同步状态快照在每次生成快照时都会造成延迟。</p>
+<p>可以让算子在存储其状态快照的同时继续处理输入记录，有效地让状态快照在后台异步发生。要做到这一点，算子必须能够产生一个状态对象，以某种方式进行存储以便对算子状态进行修改后不会影响该状态对象。例如，<code>copy-on-write</code>数据结构（如<code>RocksDB</code>中使用的数据结构）具有这种功能。</p>
+<p>在接收到输入端的<code>Barriers</code>后，算子启动其状态的异步快照复制。<code>Barriers</code>立即发送到输出流中，并继续进行正常的流处理。一旦后台复制过程完成，它就会向检查点协调器（JobManager）确认检查点。只有在所有<code>sink</code>接收到<code>Barriers</code>并且所有有状态的算子已经确认完成备份（可能在<code>Barriers</code>到达<code>sink</code>之后）时检查点才算完成。</p>
+<p>有关状态快照的详细信息，请参阅<a href="http://smartsi.club/2018/01/17/flink-stream-state-backends/" target="_blank" rel="noopener">状状态后端</a>。</p>
+<h3 id="3-恢复"><a href="#3-恢复" class="headerlink" title="3. 恢复"></a>3. 恢复</h3><p>在这种机制下恢复很简单：一旦失败，<code>Flink</code>选择最近完成的检查点<code>k</code>。然后系统重新部署整个分布式数据流，并为每个算子提供作状态。数据源被设置为从位置<code>Sk</code>读取数据流。例如在<code>Apache Kafka</code>中，这意味着告诉消费者从偏移量<code>Sk</code>处开始提取数据。</p>
 <p>如果增量对状态进行快照，算子将从最新且完整的快照状态开始，然后对该状态应用一系列增量快照更新。</p>
 <p>请参阅<a href="http://smartsi.club/2018/01/04/flink-restart-strategy/" target="_blank" rel="noopener">重启策略</a>了解更多信息。</p>
 <h3 id="4-实现算子快照"><a href="#4-实现算子快照" class="headerlink" title="4. 实现算子快照"></a>4. 实现算子快照</h3><p>对算子进行快照，有两部分：同步部分和异步部分。</p>
-<p>算子和状态终端将其快照作为<code>Java FutureTask</code>。该任务包含的状态同步部分已经完成异步部分挂起。然后异步部分由该检查点的后台线程执行。</p>
+<p>算子和状态后端将其快照作为<code>Java FutureTask</code>。该任务包含的状态同步部分已经完成异步部分挂起。然后异步部分由该检查点的后台线程执行。</p>
 <p>算子检查点只是同步返回一个已经完成的<code>FutureTask</code>。如果需要执行异步操作，则在<code>FutureTask的run（）</code>方法中执行。</p>
 <p>任务是可取消的，所以消耗句柄的数据流和其他资源是可以被释放。</p>
+<blockquote>
+<p>Flink版本：1.4</p>
+</blockquote>
 <p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/stream_checkpointing.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/stream_checkpointing.html</a></p>
 
       
