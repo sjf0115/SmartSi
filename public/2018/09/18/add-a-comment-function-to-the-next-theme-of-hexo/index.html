@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hexo," />
+
+
+<meta name="description" content="1. 添加评论功能之前使用的来必力，最近评论功能一直出不来，用户体验比较差，所以重新评估选择了Valine。 1.1 创建账号这个评论系统是基于 LeanCloud 进行的，先去注册一个账号，点这里进行注册。 点这里创建应用，应用名看个人喜好。选择刚刚创建的应用，点击设置按钮，再点击应用Key按钮，你就能看到你的APP ID和APP KEY了：  为了您的数据安全，请填写应用&amp;gt;设置&amp;gt;安">
+<meta name="keywords" content="Hexo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo 为Next主题添加评论功能">
+<meta property="og:url" content="http://sjf0115.github.io/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/index.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 添加评论功能之前使用的来必力，最近评论功能一直出不来，用户体验比较差，所以重新评估选择了Valine。 1.1 创建账号这个评论系统是基于 LeanCloud 进行的，先去注册一个账号，点这里进行注册。 点这里创建应用，应用名看个人喜好。选择刚刚创建的应用，点击设置按钮，再点击应用Key按钮，你就能看到你的APP ID和APP KEY了：  为了您的数据安全，请填写应用&amp;gt;设置&amp;gt;安">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-8.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-9.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-10.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-11.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-12.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-13.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-14.png?raw=true">
+<meta property="og:updated_time" content="2018-09-18T11:51:53.663Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo 为Next主题添加评论功能">
+<meta name="twitter:description" content="1. 添加评论功能之前使用的来必力，最近评论功能一直出不来，用户体验比较差，所以重新评估选择了Valine。 1.1 创建账号这个评论系统是基于 LeanCloud 进行的，先去注册一个账号，点这里进行注册。 点这里创建应用，应用名看个人喜好。选择刚刚创建的应用，点击设置按钮，再点击应用Key按钮，你就能看到你的APP ID和APP KEY了：  为了您的数据安全，请填写应用&amp;gt;设置&amp;gt;安">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://sjf0115.github.io/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/"/>
+
+
+  <title>Hexo 为Next主题添加评论功能 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Hexo 为Next主题添加评论功能</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-18T21:14:01+08:00">2018-09-18</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Hexo/" itemprop="url" rel="index"><span itemprop="name">Hexo</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/" class="leancloud_visitors" data-flag-title="Hexo 为Next主题添加评论功能">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-添加评论功能"><a href="#1-添加评论功能" class="headerlink" title="1. 添加评论功能"></a>1. 添加评论功能</h3><p>之前使用的<a href="https://livere.com" target="_blank" rel="noopener">来必力</a>，最近评论功能一直出不来，用户体验比较差，所以重新评估选择了<a href="https://valine.js.org/" target="_blank" rel="noopener">Valine</a>。</p>
+<h4 id="1-1-创建账号"><a href="#1-1-创建账号" class="headerlink" title="1.1 创建账号"></a>1.1 创建账号</h4><p>这个评论系统是基于 LeanCloud 进行的，先去注册一个账号，点<a href="https://leancloud.cn/" target="_blank" rel="noopener">这里</a>进行注册。</p>
+<p><a href="https://leancloud.cn/dashboard/applist.html#/newapp" target="_blank" rel="noopener">点这里</a>创建应用，应用名看个人喜好。选择刚刚创建的应用，点击设置按钮，再点击应用Key按钮，你就能看到你的<code>APP ID</code>和<code>APP KEY</code>了：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-1.png?raw=true" alt=""></p>
+<p>为了您的数据安全，请填写<code>应用&gt;设置&gt;安全设置</code>中的Web 安全域名，如下图：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-2.png?raw=true" alt=""></p>
+<h4 id="1-2-配置"><a href="#1-2-配置" class="headerlink" title="1.2 配置"></a>1.2 配置</h4><p>修改你主题目录下的<code>_config.yml</code>文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">valine:</span><br><span class="line">  enable: true</span><br><span class="line">  appid:  # 你的 App ID</span><br><span class="line">  appkey: # 你的 App Key</span><br><span class="line">  notify: false # mail notifier , https://github.com/xCss/Valine/wiki</span><br><span class="line">  verify: false # Verification code</span><br><span class="line">  placeholder: 有什么问题，欢迎留言指正与交流... # comment box placeholder</span><br><span class="line">  avatar: robohash # gravatar style</span><br><span class="line">  guest_info: nick,mail,link # custom comment header</span><br><span class="line">  pageSize: 10 # pagination size</span><br></pre></td></tr></table></figure></p>
+<p>发布之后，我们看一下效果如何：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-3.png?raw=true" alt=""></p>
+<p>在进行评论之后，我们可以从后台看一下我们的评论数据：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-7.png?raw=true" alt=""></p>
+<p>这样我们就可以管理我们的评论数据了。</p>
+<h3 id="2-设置评论头像"><a href="#2-设置评论头像" class="headerlink" title="2. 设置评论头像"></a>2. 设置评论头像</h3><p>目前默认头像有以下7种默认值可选:</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-5.png?raw=true" alt=""></p>
+<p>下面我们换一种头像展现，在NexT主题中，进行如下修改，把我们的默认头像修改为一种具有不同颜色、面部等的机器人：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">avatar: robohash # gravatar style</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-3.png?raw=true" alt=""></p>
+<p>如果想自定义我们的头像，我们可以在<a href="https://cn.gravatar.com" target="_blank" rel="noopener">这</a>点击进行创建用户，并上传自己的头像：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-6.png?raw=true" alt=""></p>
+<p>经过一定时间的数据全球化同步，头像会根据你设置的 E-mail 进行匹配：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-4.png?raw=true" alt=""></p>
+<blockquote>
+<p>如果想显示我们上传的头像，在进行评论时一定要留下设置的 E-mail 账号，否则会显示默认头像。</p>
+</blockquote>
+<h3 id="3-邮件提醒"><a href="#3-邮件提醒" class="headerlink" title="3. 邮件提醒"></a>3. 邮件提醒</h3><p>进入<code>Leancloud</code>&gt;选择你的评论所存放的<code>应用&gt;设置&gt;邮件模板</code>，按下图设置好用于<code>重置密码</code>的邮件主题&gt;然后保存:</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-8.png?raw=true" alt=""></p>
+<blockquote>
+<p>请注意修改链接为你的博客或者网站首页。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;p&gt;Hi, &#123;&#123;username&#125;&#125;&lt;/p&gt;</span><br><span class="line">&lt;p&gt;</span><br><span class="line">你在 &#123;&#123;appname&#125;&#125; 的评论收到了新的回复，请点击查看：</span><br><span class="line">&lt;/p&gt;</span><br><span class="line">&lt;p&gt;&lt;a href=&quot;你的网址首页链接&quot; style=&quot;display: inline-block; padding: 10px 20px; border-radius: 4px; background-color: #3090e4; color: #fff; text-decoration: none;&quot;&gt;马上查看&lt;/a&gt;&lt;/p&gt;</span><br></pre></td></tr></table></figure>
+<p>注意事项:</p>
+<ul>
+<li>发送次数过多，可能会暂时被Leancloud 屏蔽邮件发送功能</li>
+<li>由于邮件提醒功能使用的Leancloud的密码重置邮件提醒，只能传递昵称、邮箱两个属性，所以邮件提醒链接无法直达指定文章页。请悉知。</li>
+<li>开启邮件提醒会默认开启验证码选项。</li>
+<li>该功能目前还在测试阶段，谨慎使用。</li>
+<li>目前邮件提醒正处于测试阶段，仅在子级对存在邮件地址的父级发表评论时发送邮件</li>
+</ul>
+<h3 id="4-增强版邮件提醒"><a href="#4-增强版邮件提醒" class="headerlink" title="4. 增强版邮件提醒"></a>4. 增强版邮件提醒</h3><h4 id="4-1-快速开始"><a href="#4-1-快速开始" class="headerlink" title="4.1 快速开始"></a>4.1 快速开始</h4><p>首先需要确保 Valine 的基础功能是正常的，参考 <a href="https://valine.js.org/" target="_blank" rel="noopener">Valine Docs</a>。然后进入 <a href="https://leancloud.cn/dashboard/applist.html#/apps" target="_blank" rel="noopener">Leancloud</a> 对应的 Valine 应用中。点击 <code>云引擎 -&gt; 设置</code> 填写代码库并保存：<code>https://github.com/zhaojun1998/Valine-Admin</code>。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-9.png?raw=true" alt=""></p>
+<p>切换到部署标签页，分支使用 <code>master</code>，点击部署即可：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-10.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-11.png?raw=true" alt=""></p>
+<h4 id="4-2-配置项"><a href="#4-2-配置项" class="headerlink" title="4.2 配置项"></a>4.2 配置项</h4><p>此外，你需要设置云引擎的环境变量以提供必要的信息，点击云引擎的设置页，设置如下信息：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-12.png?raw=true" alt=""></p>
+<p>必选参数</p>
+<ul>
+<li><code>SITE_NAME</code> : 网站名称。</li>
+<li><code>SITE_URL</code> : 网站地址, 最后不要加 / 。</li>
+<li><code>SMTP_USER</code> : SMTP 服务用户名，一般为邮箱地址。</li>
+<li><code>SMTP_PASS</code> : SMTP 密码，一般为授权码，而不是邮箱的登陆密码，请自行查询对应邮件服务商的获取方式。</li>
+<li><code>SMTP_SERVICE</code> : 邮件服务提供商，支持 QQ、163、126、Gmail、”Yahoo”、…… ，全部支持请参考 : <a href="https://nodemailer.com/smtp/well-known/#supported-services" target="_blank" rel="noopener">Nodemailer Supported services</a>。如这里没有你使用的邮件提供商，请查看<a href="https://github.com/zhaojun1998/Valine-Admin/blob/master/%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE.md#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%82%AE%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8" target="_blank" rel="noopener">自定义邮件服务器</a>。</li>
+<li>SENDER_NAME : 寄件人名称。</li>
+<li><code>TEMPLATE_NAME</code>：自定义邮件模板。目前内置了两款主题，分别为 <code>default</code> 与 <code>rainbow</code>，默认为 <code>default</code>。此配置会去寻找 <code>template\{TEMPLATE_NAME}</code> 目录下的 <code>notice.ejs</code> 与 <code>send.ejs</code> 模板文件，分别用于通知站长和通知游客。</li>
+<li><code>TO_EMAIL</code>：指定站长收信邮箱，默认值为 <code>SITE_USER</code>。用于 SMTP 发件人与站长收件人不一致的情况下使用。</li>
+</ul>
+<h4 id="4-3-Web评论管理"><a href="#4-3-Web评论管理" class="headerlink" title="4.3 Web评论管理"></a>4.3 Web评论管理</h4><p>此项目还为 Valine 提供了更方便的评论管理功能，可以在 web 端对评论进行查看与删除操作。配置方式如下。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-13.png?raw=true" alt=""></p>
+<p>后台登录需要账号密码，需要在这里设置，只需要填写 <code>email</code>、<code>password</code>、<code>username</code>，这三个字段即可, 使用 <code>email</code> 作为账号登陆即可。（为了安全考虑，此 <code>email</code> 必须为配置中的 <code>SMTP_USER</code> 或 <code>TO_EMAIL</code>， 否则不允许登录）：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-14.png?raw=true" alt=""></p>
+<p>资料：</p>
+<ul>
+<li><a href="https://valine.js.org/avatar.html" target="_blank" rel="noopener">头像配置</a></li>
+<li><a href="https://ioliu.cn/2017/add-valine-comments-to-your-blog/" target="_blank" rel="noopener">Valine – 一款极简的评论系统</a></li>
+<li><a href="https://valine.js.org/notify.html" target="_blank" rel="noopener">邮件提醒</a></li>
+<li><a href="https://github.com/zhaojun1998/Valine-Admin" target="_blank" rel="noopener">增强版邮件通知</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/" title="Hexo 为Next主题添加评论功能">http://smartsi.club/2018/09/18/add-a-comment-function-to-the-next-theme-of-hexo/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/" rel="next" title="Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理">
+                <i class="fa fa-chevron-left"></i> Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-添加评论功能"><span class="nav-number">1.</span> <span class="nav-text">1. 添加评论功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-创建账号"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 创建账号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-配置"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-设置评论头像"><span class="nav-number">2.</span> <span class="nav-text">2. 设置评论头像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-邮件提醒"><span class="nav-number">3.</span> <span class="nav-text">3. 邮件提醒</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-增强版邮件提醒"><span class="nav-number">4.</span> <span class="nav-text">4. 增强版邮件提醒</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-快速开始"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 快速开始</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-配置项"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 配置项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-Web评论管理"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 Web评论管理</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: true,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
