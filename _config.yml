@@ -49,8 +49,22 @@ duoshuo_username:  # 你的多说帐号
 duoshuo_share: false                     # set to false if you want to use Comment without Sharing
 
 # Use livere
-use_livere: true
+use_livere: false
 livere_uid: MTAyMC8zMjQ2MS85MDIy
+
+# Valine.
+# You can get your appid and appkey from https://leancloud.cn
+# more info please open https://valine.js.org
+valine:
+  enable: true
+  appid:  WcatPOhgHcPT9a3qgmvD3ppV-gzGzoHsz
+  appkey: a8MnXFQOyOwRQSyHX0xJCnp9
+  notify: false # mail notifier , https://github.com/xCss/Valine/wiki
+  verify: false # Verification code
+  placeholder: 有什么问题，欢迎留言指正与交流... # comment box placeholder
+  avatar: mm # gravatar style
+  guest_info: nick,mail,link # custom comment header
+  pageSize: 10 # pagination size
 
 # Analytics settings
 # Baidu Analytics
