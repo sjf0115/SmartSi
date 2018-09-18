@@ -359,9 +359,9 @@
 
       <h3 class="post-title">
         
-            <a class="post-title-link" href="/2018/02/28/flink-stream-windows-overall/" itemprop="url">
+            <a class="post-title-link" href="/2018/02/28/introducing-apache-spark-2-3/" itemprop="url">
               
-                <span itemprop="name">Flink1.4 窗口概述</span>
+                <span itemprop="name">Spark 2.3.0 重要特性介绍</span>
               
             </a>
         
@@ -396,9 +396,9 @@
 
       <h3 class="post-title">
         
-            <a class="post-title-link" href="/2018/02/28/introducing-apache-spark-2-3/" itemprop="url">
+            <a class="post-title-link" href="/2018/02/28/flink-stream-windows-overall/" itemprop="url">
               
-                <span itemprop="name">Spark 2.3.0 重要特性介绍</span>
+                <span itemprop="name">Flink1.4 窗口概述</span>
               
             </a>
         
@@ -581,9 +581,9 @@
 
       <h3 class="post-title">
         
-            <a class="post-title-link" href="/2018/02/27/scala-notes-file/" itemprop="url">
+            <a class="post-title-link" href="/2018/02/27/scala-notes-object/" itemprop="url">
               
-                <span itemprop="name">Scala 学习笔记之文件操作</span>
+                <span itemprop="name">Scala 学习笔记之Object</span>
               
             </a>
         
@@ -618,9 +618,9 @@
 
       <h3 class="post-title">
         
-            <a class="post-title-link" href="/2018/02/27/scala-notes-object/" itemprop="url">
+            <a class="post-title-link" href="/2018/02/27/scala-notes-file/" itemprop="url">
               
-                <span itemprop="name">Scala 学习笔记之Object</span>
+                <span itemprop="name">Scala 学习笔记之文件操作</span>
               
             </a>
         
@@ -1472,6 +1472,28 @@
 
 
 
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'WcatPOhgHcPT9a3qgmvD3ppV-gzGzoHsz',
+        appKey: 'a8MnXFQOyOwRQSyHX0xJCnp9',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
 
 
 
