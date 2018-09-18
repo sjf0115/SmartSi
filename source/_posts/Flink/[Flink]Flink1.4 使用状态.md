@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: Flink1.4 使用状态
+title: Flink1.4 如何使用状态
 date: 2018-01-16 20:32:17
 tags:
   - Flink
@@ -11,25 +11,24 @@ categories: Flink
 permalink: flink-stream-working-with-state
 ---
 
+
 ### 1. Keyed State 与 Operator State
 
 `Flink`有两种基本的状态：`Keyed State`和`Operator State`。
 
 #### 1.1 Keyed State
 
-`Keyed State`总是与`key`相关，只能在`KeyedStream`的函数和运算符中使用。
+`Keyed State`总是与`key`相关，只能在与`KeyedStream`相关的函数和算子中使用。
 
-备注:
-```
-KeyedStream继承DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的KeySelector根据key对其上的算子State进行分区。
+> KeyedStream 继承 DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的KeySelector根据key对其上的算子State进行分区。
 DataStream支持的典型操作也可以在KeyedStream上进行，除了诸如shuffle，forward和keyBy之类的分区方法之外。
 
-一个KeyedStream可以通过调用DataStream.keyBy()来获得。而在KeyedStream上进行任何transformation都将转变回DataStream。
-```
+> KeyedStream可以通过调用DataStream.keyBy()来获得。而在KeyedStream上进行任何transformation都将转变回DataStream。
+
 
 你可以将 `Keyed State` 视为已经分区或分片的`Operator State`，每个 `key` 对应一个状态分区。每个`Keyed State`在逻辑上只对应一个 `<并行算子实例，key>`，并且由于每个 `key` "只属于" 一个`Keyed Operator`的一个并行实例，我们可以简单地认为成 `<operator，key>`。
 
-`Keyed State` 被进一步组织成所谓的 `Key Group`。`Key Group` 是 `Flink` 可以重新分配 `Keyed State` 的最小单位；`Key Group`的数量与最大并行度一样多。在执行期间，`Keyed Operator`的每个并行实例都与一个或多个`Key Group`的`key`一起工作。
+`Keyed State` 被进一步组织成所谓的 `Key Group`。`Key Group` 是 `Flink` 可以分配 `Keyed State` 的最小原子单位；`Key Group`的数量与最大并行度一样多。在执行期间，`Keyed Operator`的每个并行实例都与一个或多个`Key Group`的`key`一起工作。
 
 #### 1.2 Operator State
 
@@ -39,39 +38,33 @@ DataStream支持的典型操作也可以在KeyedStream上进行，除了诸如sh
 
 ### 2. Raw State 与 Managed State
 
-`Keyed State`和`Operator State`以两种形式存在：托管状态`Managed State`和原始状态`Raw State`。
+`Keyed State`和`Operator State`以两种形式存在：托管状态`Managed State`和原生状态`Raw State`。
 
-`Managed State`由`Flink`运行时控制的数据结构表示，如内部哈希表或`RocksDB`。例如`ValueState`，`ListState`等。`Flink`的运行时对状态进行编码并将它们写入检查点。
+`Managed State`由`Flink RunTime`控制的数据结构表示，如内部哈希表或`RocksDB`。例如`ValueState`，`ListState`等。`Flink RunTime`对状态进行编码并将它们写入检查点。
 
-`Raw State`是指算子保持在它们自己数据结构中的状态。当检查点时，他们只写入一个字节序列到检查点。`Flink`对状态的数据结构一无所知，只能看到原始字节。
+`Raw State`是指算子保留在它们自己数据结构中的状态。当 `Checkpoint` 时，他们只写入一个字节序列到检查点中。`Flink`对状态的数据结构一无所知，只能看到原始字节。
 
-所有数据流函数都可以使用`Managed State`，但`Raw State`接口只能在实现算子时使用。建议使用`Managed State`（而不是`Raw State`），因为在`Managed State`下，`Flin`k可以在并行度发生变化时自动重新分配状态，并且还可以更好地进行内存管理。
+所有数据流函数都可以使用`Managed State`，但`Raw State`接口只能在实现算子时使用。建议使用`Managed State`（而不是`Raw State`），因为在`Managed State`下，`Flink`可以在并行度发生变化时自动重新分配状态，并且还可以更好地进行内存管理。
 
-备注:
-```
-如果你的Managed State需要自定义序列化逻辑，请参阅相应的指南以确保将来的兼容性。Flink的默认序列化器不需要特殊处理。
-```
+> 如果你的Managed State需要自定义序列化逻辑，请参阅相应的[指南](https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/custom_serialization.html)以确保将来的兼容性。Flink的默认序列化器不需要特殊处理。
 
-### 3. Managed Keyed State
+### 3. 使用Managed Keyed State
 
 `Managed Keyed State`接口提供了对不同类型状态的访问，这些状态的作用域为当前输入元素的`key`。这意味着这种类型的状态只能用于`KeyedStream`，可以通过`stream.keyBy（...）`创建。
 
-现在，我们先看看可用状态的不同类型，然后我们将看到如何在一个程序中使用它们。可用状态是：
-- `ValueState <T>`：保存了一个可以更新和检索的值（如上所述，作用域为输入元素的`key`，所以操作看到的每个`key`可能有一个值）。该值可以使用`update（T）`来设置，使用`T value（）`来检索。
+现在，我们先看看可用状态的不同类型，然后我们会看到如何在程序中使用。可用状态有：
+- `ValueState <T>`：保存了一个可以更新和检索的值（如上所述，作用域为输入元素的`key`，所以每个`key`可能对应一个值）。该值可以使用`update（T）`来更新，使用`T value（）`来检索。
 - `ListState <T>`：保存了一个元素列表。可以追加元素并检索当前存储的所有元素的`Iterable`。使用`add（T）`添加元素，可以使用`Iterable <T> get（）`来检索`Iterable`。
-- `ReducingState <T>`：保存一个单一的值，表示添加到状态所有值的聚合。接口与`ListState`相同，但使用`add（T）`添加的元素，使用指定的`ReduceFunction`转换为聚合。
+- `ReducingState <T>`：保存一个单一的值，表示添加到状态所有值的聚合。接口与`ListState`相同，但使用`add（T）`添加的元素时需要指定`ReduceFunction`。
 - `AggregatingState <IN，OUT>`：保存一个单一的值，表示添加到状态所有值的聚合。与`ReducingState`不同，聚合后的类型可能与添加到状态的元素类型不同。接口与`ListState`相同，但使用`add（IN）`添加到状态的元素使用指定的`AggregateFunction`进行聚合。
-- `FoldingState <T，ACC>`：保存一个单一的值，表示添加到状态所有值的聚合。与`ReducingState`不同，聚合后类型可能与添加到状态的元素类型不同。接口与`ListState`相同，但使用`add（T）`添加到状态的元素使用指定的`FoldFunction`折叠成聚合。
+- `FoldingState <T，ACC>`：保存一个单一的值，表示添加到状态所有值的聚合。与`ReducingState`不同，聚合后类型可能与添加到状态的元素类型不同。接口与`ListState`相同，但使用`add（T）`添加到状态的元素使用指定`FoldFunction`。
 - MapState <UK，UV>：保存了一个映射列表。可以将键值对放入状态，并检索当前存储的所有映射的`Iterable`。使用`put（UK，UV）`或`putAll（Map <UK，UV>）`添加映射。与用户`key`相关的值可以使用`get（UK）`来检索。映射，键和值的迭代视图可分别使用`entries（）`，`keys（）`和`values（）`来检索。
 
 所有类型的状态都有一个`clear（）`方法，它清除了当前活跃`key`的状态，即输入元素的`key`。
 
-备注:
-```
-FoldingState和FoldingStateDescriptor已经在Flink 1.4中被弃用，将来会被彻底删除。请改用AggregatingState和AggregatingStateDescriptor。
-```
+> FoldingState和FoldingStateDescriptor已经在Flink 1.4中被弃用，将来会被彻底删除。请改用AggregatingState和AggregatingStateDescriptor。
 
-请记住，这些状态对象仅能用于状态接口，这一点很重要。状态没有必要存储在内存中，也可以驻留在磁盘或其他地方。第二件要记住的是，你从状态获得的值取决于输入元素的`key`。因此，如果所涉及的`key`不同，那你在用户函数调用中获得的值可能与另一个调用中的值不同。
+请记住，这些状态对象仅能用于状态接口。状态没有必要一定存储在内存中，也可以保存在磁盘或其他地方。第二件要记住的是，你从状态获取的值取决于输入元素的`key`。因此，如果所使用的`key`不同，那你在一次用户函数调用中获得的值可能与另一次调用的不同。
 
 为了得到一个状态句柄，你必须创建一个`StateDescriptor`。它包含了状态的名字（我们将在后面看到，你可以创建多个状态，必须有唯一的名称，以便引用它们），状态值的类型，以及用户自定义函数，如`ReduceFunction`。根据要检索的状态类型，你可以创建一个`ValueStateDescriptor`，`ListStateDescriptor`，`ReducingStateDescriptor`，`FoldingStateDescriptor`或`MapStateDescriptor`。
 
@@ -210,24 +203,24 @@ val counts: DataStream[(String, Int)] = stream
     })
 ```
 
-### 4. Managed Operator State
+### 4. 使用Managed Operator State
 
 要使用`Managed Operator State`，有状态函数可以实现更通用的`CheckpointedFunction`接口或`ListCheckpointed <T extends Serializable>`接口。
 
 #### 4.1 CheckpointedFunction
 
-`CheckpointedFunction`接口提供了使用不同的重分配方案对非`Ked State`的访问。它需要实现一下两种方法：
+`CheckpointedFunction`接口提供了对有不同的重分配方案的非`Keyed State`的访问。它需要实现一下两种方法：
 ```
 void snapshotState(FunctionSnapshotContext context) throws Exception;
 
 void initializeState(FunctionInitializationContext context) throws Exception;
 ```
 
-每当执行检查点时，将调用`snapshotState（）`。每当用户自定义函数被初始化时，对应的`initializeState（）`都被调用，或当函数被初始化时，或者当函数实际上从早期的检查点恢复时被调用(The counterpart, initializeState(), is called every time the user-defined function is initialized, be that when the function is first initialized or be that when the function is actually recovering from an earlier checkpoint. )。鉴于此，`initializeState（）`不仅是初始化不同类型的状态的地方，而且还包括状态恢复逻辑的位置。
+每当执行 `Checkpoint` 时，会调用`snapshotState（）`方法。每当用户自定义函数被初始化时，或当函数第一次初始化时，或者当函数从之前的检查点恢复时，`initializeState（）`方法被调用。鉴于此，`initializeState（）`不仅是初始化不同类型的状态的地方，而且还包括状态恢复逻辑的地方。
 
 目前支持列表式的`Managed Operator State`。状态应该是一个可序列化的对象列表，相互间彼此独立，因此可以在扩展时重新分配。换句话说，这些对象可以在非`Keyed State`中重新分配比较细的粒度。根据状态访问方法，定义了以下重新分配方案：
-- 均分再分配: 每个算子都返回一个状态元素列表。整个状态在逻辑上是所有列表的连接。在恢复/重新分配时，列表被平分为与并行算子一样多的子列表。每个算子都可以得到一个可以为空或者包含一个或多个元素的子列表。例如，如果并行度为`1`，算子的检查点状态包含元素`element1`和`element2`，将并行度增加到`2`时，`element1`在算子实例0上运行，而`element2`将转至算子实例1。
-- 合并再分配: 每个算子都返回一个状态元素列表。整个状态在逻辑上是所有列表的连接。在恢复/重新分配时，每个算子都可以获得完整的状态元素列表。
+- `Even-split redistribution`: 每个算子都返回一个状态元素的列表。状态是逻辑上所有列表的连接。在恢复/重新分配时，列表被均分成与并行算子一样多的子列表。每个算子都可以得到一个可能为空或者包含一个或多个元素的子列表。例如，如果并行度为`1`，一个算子的检查点状态包含元素`element1`和`element2`，将并行度增加到`2`时，`element1`在算子实例0上运行，而`element2`将转至算子实例1。
+- `Union redistribution`: 每个算子都返回一个状态元素列表。状态是逻辑上所有列表的连接。在恢复/重新分配时，每个算子都可以获得全部的状态元素列表。
 
 下面是一个有状态的`SinkFunction`的例子，它使用`CheckpointedFunction`在将元素输出到外部之前进行缓冲元素。它演示了基本的均分再分配列表状态：
 
@@ -342,7 +335,7 @@ class BufferingSink(threshold: Int = 0)
 }
 ```
 
-`initializeState`方法以`FunctionInitializationContext`为参数。这用来初始化非`keyed state`"容器"。这是一个`ListState`类型的容器，非`keyed state`对象将在检查点时存储。
+`initializeState`方法有一个`FunctionInitializationContext`参数。这用来初始化非`keyed state`"容器"。这是一个`ListState`类型的容器，非`keyed state`对象将在检查点时存储。
 
 注意一下状态是如何被初始化，类似于`keyed state`状态，使用包含状态名称和状态值类型相关信息的`StateDescriptor`：
 
