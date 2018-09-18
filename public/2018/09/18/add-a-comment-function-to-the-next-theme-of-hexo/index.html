@@ -123,7 +123,8 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-12.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-13.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-14.png?raw=true">
-<meta property="og:updated_time" content="2018-09-18T11:51:53.663Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-15.png?raw=true">
+<meta property="og:updated_time" content="2018-09-18T12:18:20.002Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hexo 为Next主题添加评论功能">
 <meta name="twitter:description" content="1. 添加评论功能之前使用的来必力，最近评论功能一直出不来，用户体验比较差，所以重新评估选择了Valine。 1.1 创建账号这个评论系统是基于 LeanCloud 进行的，先去注册一个账号，点这里进行注册。 点这里创建应用，应用名看个人喜好。选择刚刚创建的应用，点击设置按钮，再点击应用Key按钮，你就能看到你的APP ID和APP KEY了：  为了您的数据安全，请填写应用&amp;gt;设置&amp;gt;安">
@@ -451,6 +452,7 @@
 <p>请注意修改链接为你的博客或者网站首页。</p>
 </blockquote>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;p&gt;Hi, &#123;&#123;username&#125;&#125;&lt;/p&gt;</span><br><span class="line">&lt;p&gt;</span><br><span class="line">你在 &#123;&#123;appname&#125;&#125; 的评论收到了新的回复，请点击查看：</span><br><span class="line">&lt;/p&gt;</span><br><span class="line">&lt;p&gt;&lt;a href=&quot;你的网址首页链接&quot; style=&quot;display: inline-block; padding: 10px 20px; border-radius: 4px; background-color: #3090e4; color: #fff; text-decoration: none;&quot;&gt;马上查看&lt;/a&gt;&lt;/p&gt;</span><br></pre></td></tr></table></figure>
+<p>这还需要修改你主题目录下的<code>_config.yml</code>文件，开启邮件提醒与验证码功能：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">valine:</span><br><span class="line">  enable: true</span><br><span class="line">  appid:  # 你的 App ID</span><br><span class="line">  appkey: # 你的 App Key</span><br><span class="line">  notify: true # mail notifier , https://github.com/xCss/Valine/wiki</span><br><span class="line">  verify: true # Verification code</span><br><span class="line">  placeholder: 有什么问题，欢迎留言指正与交流... # comment box placeholder</span><br><span class="line">  avatar: robohash # gravatar style</span><br><span class="line">  guest_info: nick,mail,link # custom comment header</span><br><span class="line">  pageSize: 10 # pagination size</span><br></pre></td></tr></table></figure></p>
 <p>注意事项:</p>
 <ul>
 <li>发送次数过多，可能会暂时被Leancloud 屏蔽邮件发送功能</li>
@@ -472,7 +474,7 @@
 <li><code>SMTP_USER</code> : SMTP 服务用户名，一般为邮箱地址。</li>
 <li><code>SMTP_PASS</code> : SMTP 密码，一般为授权码，而不是邮箱的登陆密码，请自行查询对应邮件服务商的获取方式。</li>
 <li><code>SMTP_SERVICE</code> : 邮件服务提供商，支持 QQ、163、126、Gmail、”Yahoo”、…… ，全部支持请参考 : <a href="https://nodemailer.com/smtp/well-known/#supported-services" target="_blank" rel="noopener">Nodemailer Supported services</a>。如这里没有你使用的邮件提供商，请查看<a href="https://github.com/zhaojun1998/Valine-Admin/blob/master/%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE.md#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%82%AE%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8" target="_blank" rel="noopener">自定义邮件服务器</a>。</li>
-<li>SENDER_NAME : 寄件人名称。</li>
+<li><code>SENDER_NAME</code>: 寄件人名称。</li>
 <li><code>TEMPLATE_NAME</code>：自定义邮件模板。目前内置了两款主题，分别为 <code>default</code> 与 <code>rainbow</code>，默认为 <code>default</code>。此配置会去寻找 <code>template\{TEMPLATE_NAME}</code> 目录下的 <code>notice.ejs</code> 与 <code>send.ejs</code> 模板文件，分别用于通知站长和通知游客。</li>
 <li><code>TO_EMAIL</code>：指定站长收信邮箱，默认值为 <code>SITE_USER</code>。用于 SMTP 发件人与站长收件人不一致的情况下使用。</li>
 </ul>
@@ -480,6 +482,8 @@
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-13.png?raw=true" alt=""></p>
 <p>后台登录需要账号密码，需要在这里设置，只需要填写 <code>email</code>、<code>password</code>、<code>username</code>，这三个字段即可, 使用 <code>email</code> 作为账号登陆即可。（为了安全考虑，此 <code>email</code> 必须为配置中的 <code>SMTP_USER</code> 或 <code>TO_EMAIL</code>， 否则不允许登录）：</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-14.png?raw=true" alt=""></p>
+<p>上述完成之后，可以点击<a href="https://smartsi.leanapp.cn" target="_blank" rel="noopener">这</a>，根据上面设置的账号与密码登录评论后台管理：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/add-a-comment-function-to-the-next-theme-of-hexo-15.png?raw=true" alt=""></p>
 <p>资料：</p>
 <ul>
 <li><a href="https://valine.js.org/avatar.html" target="_blank" rel="noopener">头像配置</a></li>
