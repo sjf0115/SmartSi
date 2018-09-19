@@ -403,8 +403,8 @@ valine:
   enable: true
   appid:  TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz
   appkey: MsfAHet79NrOIrFB82biqYDx
-  notify: true # mail notifier , https://github.com/xCss/Valine/wiki
-  verify: true # Verification code
+  notify: false # mail notifier , https://github.com/xCss/Valine/wiki
+  verify: false # Verification code
   placeholder: 有什么问题，欢迎留言指正与交流... # comment box placeholder
   avatar: robohash # gravatar style
   guest_info: nick,mail,link # custom comment header
