@@ -7,6 +7,7 @@ tags:
   - Stream
 
 categories: Stream
+permalink: misunderstanding-of-stream-processing
 ---
 
 我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。

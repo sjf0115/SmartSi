@@ -7,6 +7,7 @@ tags:
   - Stream
 
 categories: Stream
+permalink: main-stream-processing-framework-comparison-part-one
 ---
 
 

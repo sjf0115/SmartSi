@@ -7,6 +7,7 @@ tags:
   - Stream
 
 categories: Stream
+permalink: main-stream-processing-framework-comparison-part-two
 ---
 
 在上篇文章中，我们过了下基本的理论，也介绍了主流的流处理框架：`Storm`，`Trident`，`Spark Streaming`，`Samza`和`Flink`。今天咱们来点有深度的主题，比如，容错，状态管理或者性能。除此之外，我们也将讨论开发分布式流处理应用的指南，并给出推荐的流处理框架。

@@ -100,34 +100,33 @@
   <meta name="keywords" content="Stream," />
 
 
-<meta name="description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta name="description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
 <meta name="keywords" content="Stream">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Stream Exactly once 未必严格一次">
-<meta property="og:url" content="http://smartsi.club/Stream/Exactly once未必严格一次.html">
+<meta property="og:title" content="Stream 对于流处理技术的谬见">
+<meta property="og:url" content="http://smartsi.club/misunderstanding-of-stream-processing.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta property="og:description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true">
-<meta property="og:updated_time" content="2018-01-29T09:36:59.616Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-4.png?raw=true">
+<meta property="og:updated_time" content="2018-09-19T07:16:03.607Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Stream Exactly once 未必严格一次">
-<meta name="twitter:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
+<meta name="twitter:title" content="Stream 对于流处理技术的谬见">
+<meta name="twitter:description" content="我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。 我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。 在这篇文章里，我们选出了其中的六个作为例子。因为我们对Apache Flink比较熟悉，所以我们会基于Flink来讲解这些例子。  谬见1：没有不使用批处理的流（L">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://smartsi.club/Stream/Exactly once未必严格一次.html"/>
+  <link rel="canonical" href="http://smartsi.club/misunderstanding-of-stream-processing.html"/>
 
 
-  <title>Stream Exactly once 未必严格一次 | SmartSi</title>
+  <title>Stream 对于流处理技术的谬见 | SmartSi</title>
   
 
 
@@ -308,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/Stream/Exactly once未必严格一次.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/misunderstanding-of-stream-processing.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -325,7 +324,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Stream Exactly once 未必严格一次</h2>
+          <h2 class="post-title" itemprop="name headline">Stream 对于流处理技术的谬见</h2>
         
 
         <div class="post-meta">
@@ -337,7 +336,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T11:18:01+08:00">2018-01-11</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T10:25:01+08:00">2018-01-11</time>
             
 
             
@@ -372,8 +371,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/Stream/Exactly once未必严格一次.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/Stream/Exactly once未必严格一次.html" itemprop="commentCount"></span>
+                <a href="/misunderstanding-of-stream-processing.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/misunderstanding-of-stream-processing.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -381,7 +380,7 @@
 
           
           
-             <span id="/Stream/Exactly once未必严格一次.html" class="leancloud_visitors" data-flag-title="Stream Exactly once 未必严格一次">
+             <span id="/misunderstanding-of-stream-processing.html" class="leancloud_visitors" data-flag-title="Stream 对于流处理技术的谬见">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -412,77 +411,109 @@
       
 
       
-        <p>分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很多 SPE 均宣称可提供”严格一次”的处理语义。</p>
-<p>然而<code>exactly-once</code>具体指什么，需要具备哪些能力，当 SPE 宣称可支持时这实际上意味着什么，对于这些问题还有很多误解和歧义。使用<code>exactly-once</code>来描述处理语义，这本身也容易造成误导。本文将探讨各大主要 SPE 在<code>exactly-once</code>处理语义方面的差异，以及为什么<code>exactly-once</code>更适合称之为<code>有效一次</code>(Effectively-once)。同时本文还将探讨在实现所谓<code>exactly-once</code>的语义过程中，各类常用技术之间需要进行的取舍。</p>
-<h3 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h3><p>流处理通常也被称之为事件处理，简单来说是指持续不断地处理一系列无穷无尽地数据或事件地过程。流处理或事件处理应用程序大致可以看作一种有向图，大部分情况（但也并非总是如此）下也可以看作有向无环图（Directed acyclic graph，DAG）。在这种图中，每个边（Edge）可代表一个数据或事件流，每个顶点（Vertex）代表使用应用程序定义的逻辑处理来自相邻边的数据或事件的算子（Operator）。有两种特殊类型的顶点，通常称之为 <code>Source</code> 和 <code>Sink</code>，<code>Source</code> 会消耗外部数据/事件并将其注入应用程序，而<code>Sink</code>通常负责收集应用程序生成的结果。图1展示了这样的一个流应用程序范例。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true" alt=""></p>
-<p>执行流/事件处理应用程序的 SPE 通常可供用户指定可靠性模式或处理语义，这代表了在跨越整个应用程序图处理数据时所能提供的保证。这些保证是有一定意义的，因为我们始终可以假设由于网络、计算机等原因遇到失败进而导致数据丢失的概率。在描述 SPE 能为应用程序提供的数据处理语义时，通常会使用三种模式 / 标签：<code>最多一次</code>（At-most-once）、<code>最少一次</code>（At-least-once），以及<code>严格一次</code>（Exactly-once）。<br>这些不同处理语义可粗略理解如下：</p>
-<h3 id="2-最多一次"><a href="#2-最多一次" class="headerlink" title="2. 最多一次"></a>2. 最多一次</h3><p>这其实是一种”尽力而为”的方法。数据或事件可以保证被应用程序中的所有算子最多处理一次。这意味着如果在流应用程序最终成功处理之前就已丢失，则不会额外试图重试或重新传输事件。图2列举了一个范例。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true" alt=""></p>
-<h3 id="3-最少一次"><a href="#3-最少一次" class="headerlink" title="3. 最少一次"></a>3. 最少一次</h3><p>数据或事件可保证被应用程序图中的所有算子最少处理一次。这通常意味着如果在流应用程序最终成功处理之前就已丢失，那么事件将从来源重播（Replayed）或重新传输。然而因为可以重新传输，有时候一个事件可能被多次处理，因此这种方式被称之为”最少一次”。图3展示了一个范例。在本例中，第一个算子最初处理事件时失败了，随后重试并成功，然后第二次重试并再次成功，然而第二次重试实际上是不必要的。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true" alt=""></p>
-<h3 id="3-严格一次"><a href="#3-严格一次" class="headerlink" title="3. 严格一次"></a>3. 严格一次</h3><p>事件可保证被流应用程序中的所有算子“严格一次”处理，哪怕遇到各种失败。<br>为了实现<code>exactly-once</code>处理语义，通常主要会使用下列两种机制：</p>
+        <p>我们在思考流处理问题上花了很多时间，更酷的是，我们也花了很多时间帮助其他人认识流处理，以及如何在他们的组织里应用流处理来解决数据问题。</p>
+<p>我们首先要做的是纠正人们对流处理（作为一个快速变化的领域，这里有很多误见值得我们思考）的错误认识。</p>
+<p>在这篇文章里，我们选出了其中的六个作为例子。因为我们对<code>Apache Flink</code>比较熟悉，所以我们会基于<code>Flink</code>来讲解这些例子。</p>
 <ul>
-<li>分布式快照/状态检查点</li>
-<li>最少一次事件交付，外加消息去重</li>
+<li>谬见1：没有不使用批处理的流（Lambda架构）</li>
+<li>谬见2：延迟和吞吐量：只能选择一个</li>
+<li>谬见3：微批次意味着更好的吞吐量</li>
+<li>谬见4：<code>Exactly once</code>？完全不可能</li>
+<li>谬见5：流只能被应用在“实时”场景里</li>
+<li>谬见6：不管怎么样，流仍然很复杂</li>
 </ul>
-<p>通过分布式快照/状态检查点方法实现的<code>exactly-once</code>是由 <a href="http://lamport.azurewebsites.net/pubs/chandy.pdf" target="_blank" rel="noopener">Chandy-Lamport 分布式快照算法</a>启发而来的。在这种机制中，会定期为流应用程序中每个算子的所有状态创建检查点，一旦系统中任何位置出现失败，每个算子的所有状态会回滚至最新的全局一致检查点。回滚过程中所有处理工作会暂停。随后源也会重置为与最新检查点相符的偏移量。整个流应用程序基本上会被回退到最新一致状态，并从该状态开始重新处理。图4展示了这种机制的一些基本概念。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true" alt=""></p>
-<p>在图4中，流应用程序在 T1 时正在正常运行，并创建了状态检查点。然而在 T2 时，算子在处理传入的数据时失败了。此时 <code>S = 4</code> 这个状态值已经被保存到持久存储中，而 <code>S = 12</code> 状态值正位于算子的内存中。为了解决这种差异，在 T3 时处理图将状态回退至 <code>S = 4</code>，并”重播”流中每个连续状态直到最新状态，并处理每个数据。最终结果是有些数据被处理了多次，但这也没问题，因为无论回滚多少次，结果状态都是相同的。</p>
-<p>实现<code>exactly-once</code>的另一种方法是在实现至少一次事件交付的同时在每个算子一端进行事件去重。使用这种方法的 SPE 会重播失败的事件并再次尝试处理，并从每个算子中移除重复的事件，随后才将结果事件发送给用户在算子中定义的逻辑。这种机制要求为每个算子保存事务日志，借此才能追踪哪些事件已经处理过了。为此 SPE 通常会使用诸如 Google 的 MillWheel 以及 Apache Kafka Streams 等机制。图 5 展示了这种机制的概况。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true" alt=""></p>
-<h3 id="4-严格一次真的就一次吗？"><a href="#4-严格一次真的就一次吗？" class="headerlink" title="4. 严格一次真的就一次吗？"></a>4. 严格一次真的就一次吗？</h3><p>接着重新考虑一下<code>exactly-once</code>处理语义实际上能为最终用户提供怎样的保证。<code>exactly-once</code>这样的标签对于描述严格一次起到了一定的误导效果。</p>
-<p>有些人可能认为<code>exactly-once</code>描述了一种保证：在事件处理过程中，流中的每个事件只被处理一次。但实际上没有一个 SPE 能完全保证只处理一次。面对各种可能的失败，根本不可能保证每个算子中由用户自定义的逻辑针对每个事件只执行一次，因为用户代码的不完整执行（Partial execution）这种可能性始终会出现。</p>
-<p>假设这样一个场景：有个流处理算子需要执行 <code>Map</code> 操作输出传入事件的 <code>ID</code>，随后原样返回事件。例如这个操作可能使用了如下的虚构代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Map (Event event) &#123;</span><br><span class="line">    Print &quot;Event ID: &quot; + event.getId()</span><br><span class="line">    Return event</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>每个事件有自己的 GUID（全局唯一 ID）。如果用户逻辑严格一次执行可以得到保证，那么事件 ID 只输出一次。然而这一点永远无法保证，因为用户自定义的逻辑执行过程中可能随时随地面临失败。SPE 无法自行判断用户自定义的逻辑到底执行到哪一步了。因此任何用户自定义逻辑都无法保证只执行一次。这也意味着用户自定义逻辑中实现的外部操作，例如数据库写入也无法严格保证只执行一次。此类操作依然需要通过幂等的方式实现。</p>
-<p>那么当 SPE 宣称提供<code>exactly-once</code>的处理语义保证时，它们指的到底是什么？如果用户逻辑无法严格保证只执行一次，那么到底是什么东西只执行了一次？当 SPE 宣称<code>exactly-once</code>处理语义时，它们真正的含义在于可以保证在对 SPE 管理的状态进行更新时，可以只向后端的持久存储提交一次。</p>
-<p>上文提到的两种机制均使用持久的后端存储作为事实来源（Source of truth），用于保存每个算子的状态，并自动提交状态更新。对于机制1（分布式快照/状态检查点），这个持久的后端存储可用于保存流应用程序中全局一致的状态检查点（每个算子的状态检查点）；对于机制2（至少一次事件交付，外加去重），这个持久的后端存储可用于保存每个算子的状态以及每个算子追踪已经被成功处理过事件的事务日志。</p>
-<p>状态提交或对事实来源的持久后端进行的更新可描述为事件（Occurring）的严格一次(The committing of state or applying updates to the durable backend that is the source of truth can be described as occurring exactly-once)。然而在计算状态的更新/改动，例如处理在事件上执行用户自定义逻辑的事件，但是如果出现失败则可能进行多次，这一点正如上文所述。换句话说，事件的处理可能会进行多次，但处理的效果只会在持久后端状态存储中体现一次。因此在这里我们认为”有效一次（Effectively-once）”术语可以更精确地描述这样的处理语义。</p>
-<h3 id="5-分布式快照与至少一次事件交付外加去重机制的对比"><a href="#5-分布式快照与至少一次事件交付外加去重机制的对比" class="headerlink" title="5. 分布式快照与至少一次事件交付外加去重机制的对比"></a>5. 分布式快照与至少一次事件交付外加去重机制的对比</h3><p>从语义的角度来看，分布式快照以及至少一次事件交付外加去重，这两种机制可以提供相同的保证。然而由于两种机制在实现方面的差异，有可能会产生明显的性能差异。</p>
-<p>基于机制1（分布式快照 / 状态检查点）的 SPE 在性能方面的开销可能是最低的，因为基本上，SPE 只需要在流应用程序正常处理事件的过程之外发送少量特殊事件，而状态检查点操作可以在后台以异步的方式进行。但是对于大型流应用程序，失败的概率会更高一点，这会导致 SPE 需要暂停应用程序并回滚所有算子的状态，这会对性能产生较大影响。流应用程序规模越大，遇到失败的频率就会越高，因此性能方面受到的影响也会越大。然而需要再次提醒的是，这种机制是非侵入式的，只会对资源的使用造成最少量的影响。</p>
-<p>机制2（至少一次事件交付外加去重）可能需要更多资源，尤其是存储资源。在这种机制中，SPE 需要能追踪已经被算子的每个实例成功处理的每个元组（Tuple），借此才能执行去重并实现自身在每个事件中的去重。这可能需要追踪非常大量的数据，尤其是当流应用程序规模非常大，或运行了很多应用程序的时候。每个算子中的每个事件执行去重操作，这本身也会产生巨大的性能开销。然而对于这种机制，流应用程序的性能不太可能受到应用程序规模的影响。对于机制 1，如果任何算子遇到任何失败，均需要全局暂停并状态回滚；对于机制 2，失败只能影响到局部。如果某个算子遇到失败，只需要从上游来源重播 / 重新传输尚未成功处理的事件，对性能的影响可隔离在流应用程序中实际发生失败的地方，只会对流应用程序中其他算子的性能产生最少量的影响。从性能的角度来看，两种机制各有利弊，具体情况可参阅下文表格:</p>
-<p>分布式快照/状态检查点</p>
-<table>
-<thead>
-<tr>
-<th>利</th>
-<th>弊</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>性能和资源开销小</td>
-<td>从失败中恢复时的性能影响大</td>
-</tr>
-<tr>
-<td></td>
-<td>随着拓扑规模的增大，对性能的潜在影响增高</td>
-</tr>
-</tbody>
-</table>
-<p>至少一次交付外加去重</p>
-<table>
-<thead>
-<tr>
-<th>利</th>
-<th>弊</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>失败对性能的影响更为局部</td>
-<td>可能需要大量的存储与基础设施的支持</td>
-</tr>
-<tr>
-<td>失败的影响未必会随着拓扑规模一起增加</td>
-<td>每个算子处理每个事件均会产生性能开销</td>
-</tr>
-</tbody>
-</table>
-<p>虽然从理论上看，分布式快照，和至少一次事件交付外加去重，这两种机制之间存在差异，但两者均可理解为至少一次处理外加幂等。对于这两种机制，如果遇到失败事件将会重播/重新传输（为了实现至少一次），而在状态回滚或事件去重时，如果从内部更新所管理的状态，算子实际上将具备幂等的特性。</p>
-<h3 id="6-结论"><a href="#6-结论" class="headerlink" title="6. 结论"></a>6. 结论</h3><p>希望本文可以帮助大家意识到<code>exactly-once</code>这个术语极具误导性。提供<code>exactly-once</code>的处理语义实际上意味着在对流处理引擎所管理的算子的状态进行不同更新只会影响一次。<code>exactly-once</code>完全无法保证事件的处理（例如执行各类用户定义的逻辑）只需要进行一次。因此这里我们更愿意使用有效一次这个术语来描述这种保证，因为没必要确保处理工作只进行一次，只要保证由 SPE 管理的状态的最终结果只影响一次就够了。分布式快照和消息去重，这两种主流机制就是为了实现严格/有效一次的处理语义。在消息处理和状态更新方面，这两种机制均可提供相同的语义保证，但在性能方面可能有所差异。本文并不是为了探讨哪种机制更胜一筹，因为每种机制都各有利弊。</p>
-<p>原文:<a href="https://streaml.io/blog/exactly-once/" target="_blank" rel="noopener">https://streaml.io/blog/exactly-once/</a></p>
-<p>译文:<a href="https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw</a></p>
+<h3 id="1-谬见1：没有不使用批处理的流（Lambda架构）"><a href="#1-谬见1：没有不使用批处理的流（Lambda架构）" class="headerlink" title="1. 谬见1：没有不使用批处理的流（Lambda架构）"></a>1. 谬见1：没有不使用批处理的流（Lambda架构）</h3><p><code>Lambda架构</code>在<code>Apache Storm</code>的早期阶段和其它流处理项目里是一个很有用的设计模式。这个架构包含了一个<code>快速流层</code>和一个<code>批次层</code>。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-1.png?raw=true" alt=""></p>
+<p>之所以使用两个单独的层，是因为Lambda架构里的流处理只能计算出大致的结果（也就是说，如果中间出现了错误，那么计算结果就不可信），而且只能处理相对少量的事件。</p>
+<p>就算<code>Storm</code>的早期版本存在这样的问题，但现今的很多开源流处理框架都具有容错能力，它们可以在出现故障的前提下生成准确的计算结果，而且具有高吞吐的计算能力。所以没有必要再为了分别得到“快”和“准确”的结果而维护多层架构。现今的流处理器（比如<code>Flink</code>）可以同时帮你得到两种结果。</p>
+<p>好在人们不再更多地讨论Lambda架构，说明流处理正在走向成熟。</p>
+<h3 id="2-谬见2：延迟和吞吐量：只能选择一个"><a href="#2-谬见2：延迟和吞吐量：只能选择一个" class="headerlink" title="2. 谬见2：延迟和吞吐量：只能选择一个"></a>2. 谬见2：延迟和吞吐量：只能选择一个</h3><p>早期的开源流处理框架要么是<code>高吞吐</code>的，要么是<code>低延迟</code>的，而<code>海量且快速</code>一直未能成为开源流处理框架的代名词。</p>
+<p>不过<code>Flink</code>（可能还有其它的框架）就同时提供了高吞吐和低延迟。这里有一个基准测试结果的<a href="https://data-artisans.com/blog/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink" target="_blank" rel="noopener">样例</a>。</p>
+<p>让我们从底层来剖析这个例子，特别是从硬件层，并结合具有网络瓶颈的流处理管道（很多使用<code>Flink</code>的管道都有这个瓶颈）。在硬件层不应该存在需要作出权衡的条件，所以网络才是影响吞吐量和延迟的主要因素。</p>
+<p>一个设计良好的软件系统应该会充分利用网络的上限而不会引入瓶颈问题。不过对<code>Flink</code>来说，总是有可优化的空间，可以让它更接近硬件所能提供的效能。使用一个包含10个节点的集群，<code>Flink</code>现在每秒可以处理千万级别的事件量，如果扩展到1000个节点，它的延迟可以降低到几十毫秒。在我们看来，这种水平已经比很多现有的方案高出很多。</p>
+<h3 id="谬见3：微批次意味着更好的吞吐量"><a href="#谬见3：微批次意味着更好的吞吐量" class="headerlink" title="谬见3：微批次意味着更好的吞吐量"></a>谬见3：微批次意味着更好的吞吐量</h3><p>我们可以从另一个角度来讨论性能，不过先让我们来澄清两个容易混淆的概念：</p>
+<ul>
+<li>微批次:微批次建立在传统批次之上，是处理数据的一个执行或编程模型。通过这项技术，进程或任务可以把一个流当作一系列小型的批次或数据块(参阅:<a href="https://hortonworks.com/blog/apache-storm-design-pattern-micro-batching/" target="_blank" rel="noopener">Apache Storm 微批次设计模式</a>)。</li>
+<li>缓冲:缓冲技术用于对网络、磁盘、缓存的访问进行优化。Wikipedia完美地把它定义为<code>物理内存里的一块用于临时储存移动数据的区域</code>。</li>
+</ul>
+<p>那么第3个缪见就是说，使用微批次的数据处理框架能够比每次处理一个事件的框架达到更高的吞吐量，因为微批次在网络上传输的效率更高。这个缪见忽略了一个事实，流框架不会依赖任何编程模型层面的批次，它们只会在物理层面使用缓冲。<code>Flink</code>确实也会对数据进行缓冲，也就是说它会通过网络发送一组处理过的记录，而不是每次发送一条记录。从性能方面说，不对数据进行缓冲是不可取的，因为通过网络逐个发送记录不会带来任何性能上的好处。所以我们得承认在物理层面根本不存在类似一次一条记录这样的情况。</p>
+<p>不过缓冲只能作为对性能的优化，所以缓冲：</p>
+<ul>
+<li>对用户是不可见的</li>
+<li>不应该对系统造成任何影响</li>
+<li>不应该出现人为的边界</li>
+<li>不应该限制系统功能</li>
+</ul>
+<p>所以对<code>Flink</code>的用户来说，他们开发的程序能够单独地处理每个记录，那是因为<code>Flink</code>为了提升性能隐藏了使用缓冲的细节。</p>
+<p>事实上，在任务调度里使用微批次会带来额外的开销，而如果这样做是为了降低延迟，那么这种开销会只增不减！流处理器知道该如何利用缓冲的优势而不会带来任务调度方面的开销。</p>
+<h3 id="4-谬见4：Exactly-once？完全不可能"><a href="#4-谬见4：Exactly-once？完全不可能" class="headerlink" title="4. 谬见4：Exactly once？完全不可能"></a>4. 谬见4：Exactly once？完全不可能</h3><p>这个缪见包含了几个方面的内容：</p>
+<ul>
+<li>从根本上说，<code>Exactly once</code>是不可能的</li>
+<li>从端到端的<code>Exactly once</code>是不可能的</li>
+<li><code>Exactly once</code>从来都不是真实世界的需求</li>
+<li><code>Exactly once</code>以牺牲性能为代价</li>
+</ul>
+<p>我们退一步讲，我们并不介意<code>Exactly once</code>这种观点的存在。<code>Exactly once</code>原先指的是<code>一次性传递</code>，而现在这个词被随意用在流处理里，让这个词变得令人困惑，失去了它原本的意义。不过相关的概念还是很重要的，我们不打算跳过去。</p>
+<p>为了尽量准确，我们把<code>一次性状态</code>和<code>一次性传递</code>视为两种不同的概念。因为之前人们对这两个词的使用方式导致了它们的混淆。<code>Apache Storm</code>使用<code>at least once</code>来描述传递(<code>Storm</code>不支持状态)，而<code>Apache Samza</code>使用<code>at least once</code>来描述应用状态。</p>
+<p>(1) <code>一次性状态</code>是指应用程序在经历了故障以后恍如没有发生过故障一样。例如，假设我们在维护一个计数器应用程序，在发生了一次故障之后，它既不能多计数也不能少计数。在这里使用<code>Exactly once</code>这个词是因为应用程序状态认为每个消息只被处理了一次。</p>
+<p>(2) <code>一次性传递</code>是指接收端(应用程序之外的系统)在故障发生后会收到处理过的事件，恍如没有发生过故障一样。</p>
+<p>流处理框架在任何情况下都不保证一次性传递，但可以做到一次性状态。<code>Flink</code>可以做到一次性状态，而且不会对性能造成显著影响。<code>Flink</code>还能在与<code>Flink</code>检查点相关的数据槽上做到一次性传递。</p>
+<p><code>Flink</code>检查点就是应用程序状态的快照，<code>Flink</code>会为应用程序定时异步地生成快照。这就是<code>Flink</code>在发生故障时仍然能保证一次性状态的原因：<code>Flink</code>定时记录（快照）输入流的读取位置和每个操作数的相关状态。如果发生故障，<code>Flink</code>会回滚到之前的状态，并重新开始计算。所以说，尽管记录被重新处理，但从结果来看，记录好像只被处理过一次。</p>
+<p>那么端到端的一次性处理呢？通过恰当的方式让检查点兼具事务协调机制是可能的，换句话说，就是让源操作和目标操作参与到检查点里来。在框架内部，结果是一次性的，从端到端来看，也是一次性的，或者说<code>接近一次性</code>。例如，在使用<code>Flink</code>和<code>Kafka</code>作为数据源并发生数据槽（HDFS）滚动时，从<code>Kafka</code>到<code>HDFS</code>就是端到端的一次性处理。类似地，在把<code>Kafka</code>作为<code>Flink</code>的源并且把<code>Cassandra</code>作为<code>Flink</code>的槽时，如果针对<code>Cassandra</code>的更新是幂等时，那么就可以实现端到端的一次性处理。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-2.png?raw=true" alt=""></p>
+<p>值得一提的是，利用<code>Flink</code>的保存点，检查点可以兼具状态版本机制。使用保存点，在保持状态一致性的同时还可以“随着时间移动”。这样可以让代码的更新、维护、迁移、调试和各种模拟测试变得简单。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-3.png?raw=true" alt=""></p>
+<h3 id="5-谬见5：流只能被应用在“实时”场景里"><a href="#5-谬见5：流只能被应用在“实时”场景里" class="headerlink" title="5. 谬见5：流只能被应用在“实时”场景里"></a>5. 谬见5：流只能被应用在“实时”场景里</h3><p>这个谬见包括几点内容：</p>
+<ul>
+<li>我没有低延迟的应用，所以我不需要流处理器</li>
+<li>流处理只跟那些持久化之前的过渡数据有关系</li>
+<li>我们需要批处理器来完成笨重的离线计算</li>
+</ul>
+<p>现在是时候思考一下数据集的类型和处理模型之间的关系了。</p>
+<p>(1) 首先，有两种数据集：</p>
+<ul>
+<li>没有边界的：从非预定义的端点持续产生的数据</li>
+<li>有边界的：有限且完整的数据</li>
+</ul>
+<p>很多真实的数据集是没有边界的，不管这些数据时存储在文件里，还是在HDFS的目录里，还是在像Kafka这样的系统里。举一些例子：</p>
+<ul>
+<li>移动设备或网站用户的交互信息</li>
+<li>物理传感器提供的度量指标</li>
+<li>金融市场数据</li>
+<li>机器日志数据</li>
+</ul>
+<p>实际上，在现实世界中很难找到有边界的数据集，不过一个公司所有大楼的位置信息倒是有边界的（不过它也会随着公司业务的增长而变化）。</p>
+<p>(2) 其次，有两种处理模型：</p>
+<ul>
+<li>流：只要有数据生成就会一直处理</li>
+<li>批次：在有限的时间内结束处理，并释放资源</li>
+</ul>
+<p>让我们再深入一点，来区分两种没有边界的数据集：连续性流和间歇性流。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/%E5%AF%B9%E4%BA%8E%E6%B5%81%E5%A4%84%E7%90%86%E6%8A%80%E6%9C%AF%E7%9A%84%E8%B0%AC%E8%A7%81-4.png?raw=true" alt=""></p>
+<p>使用任意一种模型来处理任意一种数据集是完全可能的，虽然这不是最优的做法。例如，批次处理模型被长时间地应用在无边界的数据集上，特别是间歇性的无边界数据集。现实情况是，大多数<code>批处理</code>任务是通过调度来执行的，每次只处理无边界数据集的一小部分。这意味着流的无边界特质会给某些人带来麻烦（那些工作在流入管道上的人）。</p>
+<p>批处理是无状态的，输出只取决于输入。现实情况是，批处理任务会在内部保留状态（比如reducer经常会保留状态），但这些状态只限在批次的边界内，而且它们不会在批次间流窜。当有人尝试实现类似带有”事件时间戳”的时间窗，那么”批次的边界内状态”就会变得很有用，这在处理无边界数据集时是个很常用的手段。处理无边界数据集的批处理器将不可避免地遇到延迟事件(因为上游的延迟)，批次内的数据有可能因此变得不完整。要注意，这里假设我们是基于事件时间戳来移动时间窗的，因为事件时间戳是现实当中最为准确的模型。在执行批处理的时候，迟到的数据会成为问题，即使通过简单的时间窗修复(比如翻转或滑动时间窗)也解决不了这个问题，特别是如果使用会话时间窗，就更难以处理了。因为完成一个计算所需要的数据不会都在一个批次里，所以在使用批次处理无边界数据集时，很难保证结果的正确性。最起码，它需要额外的开销来处理迟到的数据，还要维护批次之间的状态(要等到所有数据达到后才开始处理，或者重新处理批次)。</p>
+<p><code>Flink</code>内建了处理迟到数据的机制，迟到数据被视为真实世界无边界数据的正常现象，所以<code>Flink</code>设计了一个流处理器专门处理迟到数据。有状态的流处理器更适合用来处理无边界数据集，不管数据集是持续生成的还是间歇生成的。使用流处理器只是个锦上添花的事情。</p>
+<h3 id="6-缪见6：不管怎么样，流仍然很复杂"><a href="#6-缪见6：不管怎么样，流仍然很复杂" class="headerlink" title="6. 缪见6：不管怎么样，流仍然很复杂"></a>6. 缪见6：不管怎么样，流仍然很复杂</h3><p>这是最后一个缪见。你也许会想：”理论虽好，但我仍然不会采用流技术，因为……”：</p>
+<ul>
+<li>流框架难以掌握</li>
+<li>流难以解决时间窗、事件时间戳、触发器的问题</li>
+<li>流需要结合批次，而我已经知道如何使用批次，那为什么还要使用流？</li>
+</ul>
+<p>我们从来没有打算怂恿你使用流，虽然我们觉得流是个很酷的东西。我们相信，是否使用流完全取决于数据和代码的特点。在做决定之前问问自己：”我正在跟什么样类型的数据集打交道？”</p>
+<ul>
+<li>无边界的（用户活动数据、日志、传感器数据）</li>
+<li>有边界的</li>
+</ul>
+<p>然后再问另一个问题：”哪部分变化最频繁？”</p>
+<ul>
+<li>代码比数据变化更频繁</li>
+<li>数据比代码变化更频繁</li>
+</ul>
+<p>对于数据比代码变化更频繁的情况，例如在经常变化的数据集上执行一个相对固定的查询操作，这样会出现流方面的问题。所以，在认定流是一个”复杂”的东西之前，你可能在不知不觉中已经解决过流方面的问题！你可能使用过基于小时的批次任务调度，团队里的其他人可以创建和管理这些批次（在这种情况下，你得到的结果可能是不准确的，而你意识不到这样的结果是批次的时间问题和之前提过的状态问题造成的）。</p>
+<p>为了能够提供一组封装了这些时间和状态复杂性的API，<code>Flink</code>社区为此工作了很长时间。在<code>Flink</code>里可以很简单地处理事件时间戳，只要定义一个时间窗口和一个能够抽取时间戳和水印的函数(只在每个流上调用一次)。处理状态也很简单，类似于定义<code>Java</code>变量，再把这些变量注册到<code>Flink</code>。使用<code>Flink</code>的<code>StreamSQL</code>可以在源源不断的流上面运行<code>SQL</code>查询。</p>
+<p>最后一点：对代码比数据变化更频繁的情况该怎么办？对于这种情况，我们认为你遇到了探索性问题。使用笔记本或其它类似的工具进行迭代可能适合用来解决探索性问题。在代码稳定了之后，你仍然会碰到流方面的问题。我们建议从一开始就使用长远的方案来解决流方面的问题。</p>
+<h3 id="7-流处理的未来"><a href="#7-流处理的未来" class="headerlink" title="7. 流处理的未来"></a>7. 流处理的未来</h3><p>随着流处理的日渐成熟和这些缪见的逐步淡去，我们发现流正朝着除分析应用之外的领域发展。正如我们所讨论的那样，真实世界正连续不断地生成数据。</p>
+<p>原文:<a href="http://www.infoq.com/cn/news/2016/12/error-stream-proce-eliminate" target="_blank" rel="noopener">http://www.infoq.com/cn/news/2016/12/error-stream-proce-eliminate</a></p>
 
       
     </div>
@@ -528,11 +559,11 @@
         <ul class="post-copyright">
   <li class="post-copyright-author">
     <strong>本文作者：</strong>
-    大愚若智
+    Kostas Tzoumas
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/Stream/Exactly once未必严格一次.html" title="Stream Exactly once 未必严格一次">http://smartsi.club/Stream/Exactly once未必严格一次.html</a>
+    <a href="http://smartsi.club/misunderstanding-of-stream-processing.html" title="Stream 对于流处理技术的谬见">http://smartsi.club/misunderstanding-of-stream-processing.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -560,8 +591,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/Stream/[Stream]对于流处理技术的谬见.html" rel="next" title="Stream 对于流处理技术的谬见">
-                <i class="fa fa-chevron-left"></i> Stream 对于流处理技术的谬见
+              <a href="/main-stream-processing-framework-comparison-part-two.html" rel="next" title="Stream 主流流处理框架比较(2)">
+                <i class="fa fa-chevron-left"></i> Stream 主流流处理框架比较(2)
               </a>
             
           </div>
@@ -570,8 +601,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/flink-stream-event-timestamps-and-watermark.html" rel="prev" title="Flink1.4 生成时间戳与Watermarks">
-                Flink1.4 生成时间戳与Watermarks <i class="fa fa-chevron-right"></i>
+              <a href="/exactly-once-is-not-necessarily-exactly-once.html" rel="prev" title="Exactly once 未必严格一次">
+                Exactly once 未必严格一次 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -788,7 +819,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-背景"><span class="nav-number">1.</span> <span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-最多一次"><span class="nav-number">2.</span> <span class="nav-text">2. 最多一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-最少一次"><span class="nav-number">3.</span> <span class="nav-text">3. 最少一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-严格一次"><span class="nav-number">4.</span> <span class="nav-text">3. 严格一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-严格一次真的就一次吗？"><span class="nav-number">5.</span> <span class="nav-text">4. 严格一次真的就一次吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-分布式快照与至少一次事件交付外加去重机制的对比"><span class="nav-number">6.</span> <span class="nav-text">5. 分布式快照与至少一次事件交付外加去重机制的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-结论"><span class="nav-number">7.</span> <span class="nav-text">6. 结论</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-谬见1：没有不使用批处理的流（Lambda架构）"><span class="nav-number">1.</span> <span class="nav-text">1. 谬见1：没有不使用批处理的流（Lambda架构）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-谬见2：延迟和吞吐量：只能选择一个"><span class="nav-number">2.</span> <span class="nav-text">2. 谬见2：延迟和吞吐量：只能选择一个</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#谬见3：微批次意味着更好的吞吐量"><span class="nav-number">3.</span> <span class="nav-text">谬见3：微批次意味着更好的吞吐量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-谬见4：Exactly-once？完全不可能"><span class="nav-number">4.</span> <span class="nav-text">4. 谬见4：Exactly once？完全不可能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-谬见5：流只能被应用在“实时”场景里"><span class="nav-number">5.</span> <span class="nav-text">5. 谬见5：流只能被应用在“实时”场景里</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-缪见6：不管怎么样，流仍然很复杂"><span class="nav-number">6.</span> <span class="nav-text">6. 缪见6：不管怎么样，流仍然很复杂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-流处理的未来"><span class="nav-number">7.</span> <span class="nav-text">7. 流处理的未来</span></a></li></ol></div>
             
 
           </div>

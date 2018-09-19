@@ -1,12 +1,13 @@
 ---
 layout: post
 author: 大愚若智
-title: Stream Exactly once 未必严格一次
+title: Exactly once 未必严格一次
 date: 2018-01-11 11:18:01
 tags:
   - Stream
 
 categories: Stream
+permalink: exactly-once-is-not-necessarily-exactly-once
 ---
 
 分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中"严格一次（Exactly-once）" 是很多引擎追求的目标之一，很多 SPE 均宣称可提供"严格一次"的处理语义。
