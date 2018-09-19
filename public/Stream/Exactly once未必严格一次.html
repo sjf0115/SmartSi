@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Stream," />
+
+
+<meta name="description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta name="keywords" content="Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stream Exactly once 未必严格一次">
+<meta property="og:url" content="http://smartsi.club/Stream/Exactly once未必严格一次.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true">
+<meta property="og:updated_time" content="2018-01-29T09:36:59.616Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Stream Exactly once 未必严格一次">
+<meta name="twitter:description" content="分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/Stream/Exactly once未必严格一次.html"/>
+
+
+  <title>Stream Exactly once 未必严格一次 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/Stream/Exactly once未必严格一次.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Stream Exactly once 未必严格一次</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-11T11:18:01+08:00">2018-01-11</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Stream/" itemprop="url" rel="index"><span itemprop="name">Stream</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/Stream/Exactly once未必严格一次.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/Stream/Exactly once未必严格一次.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/Stream/Exactly once未必严格一次.html" class="leancloud_visitors" data-flag-title="Stream Exactly once 未必严格一次">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>分布式事件流处理已逐渐成为大数据领域的热点话题。该领域主要的流处理引擎（SPE）包括 Apache Storm、Apache Flink、Heron、Apache Kafka（Kafka Streams）以及 Apache Spark（Spark Streaming）等。处理语义是围绕 SPE 最受关注，讨论最多的话题之一，其中”严格一次（Exactly-once）” 是很多引擎追求的目标之一，很多 SPE 均宣称可提供”严格一次”的处理语义。</p>
+<p>然而<code>exactly-once</code>具体指什么，需要具备哪些能力，当 SPE 宣称可支持时这实际上意味着什么，对于这些问题还有很多误解和歧义。使用<code>exactly-once</code>来描述处理语义，这本身也容易造成误导。本文将探讨各大主要 SPE 在<code>exactly-once</code>处理语义方面的差异，以及为什么<code>exactly-once</code>更适合称之为<code>有效一次</code>(Effectively-once)。同时本文还将探讨在实现所谓<code>exactly-once</code>的语义过程中，各类常用技术之间需要进行的取舍。</p>
+<h3 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h3><p>流处理通常也被称之为事件处理，简单来说是指持续不断地处理一系列无穷无尽地数据或事件地过程。流处理或事件处理应用程序大致可以看作一种有向图，大部分情况（但也并非总是如此）下也可以看作有向无环图（Directed acyclic graph，DAG）。在这种图中，每个边（Edge）可代表一个数据或事件流，每个顶点（Vertex）代表使用应用程序定义的逻辑处理来自相邻边的数据或事件的算子（Operator）。有两种特殊类型的顶点，通常称之为 <code>Source</code> 和 <code>Sink</code>，<code>Source</code> 会消耗外部数据/事件并将其注入应用程序，而<code>Sink</code>通常负责收集应用程序生成的结果。图1展示了这样的一个流应用程序范例。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-1.png?raw=true" alt=""></p>
+<p>执行流/事件处理应用程序的 SPE 通常可供用户指定可靠性模式或处理语义，这代表了在跨越整个应用程序图处理数据时所能提供的保证。这些保证是有一定意义的，因为我们始终可以假设由于网络、计算机等原因遇到失败进而导致数据丢失的概率。在描述 SPE 能为应用程序提供的数据处理语义时，通常会使用三种模式 / 标签：<code>最多一次</code>（At-most-once）、<code>最少一次</code>（At-least-once），以及<code>严格一次</code>（Exactly-once）。<br>这些不同处理语义可粗略理解如下：</p>
+<h3 id="2-最多一次"><a href="#2-最多一次" class="headerlink" title="2. 最多一次"></a>2. 最多一次</h3><p>这其实是一种”尽力而为”的方法。数据或事件可以保证被应用程序中的所有算子最多处理一次。这意味着如果在流应用程序最终成功处理之前就已丢失，则不会额外试图重试或重新传输事件。图2列举了一个范例。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-2.png?raw=true" alt=""></p>
+<h3 id="3-最少一次"><a href="#3-最少一次" class="headerlink" title="3. 最少一次"></a>3. 最少一次</h3><p>数据或事件可保证被应用程序图中的所有算子最少处理一次。这通常意味着如果在流应用程序最终成功处理之前就已丢失，那么事件将从来源重播（Replayed）或重新传输。然而因为可以重新传输，有时候一个事件可能被多次处理，因此这种方式被称之为”最少一次”。图3展示了一个范例。在本例中，第一个算子最初处理事件时失败了，随后重试并成功，然后第二次重试并再次成功，然而第二次重试实际上是不必要的。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-3.png?raw=true" alt=""></p>
+<h3 id="3-严格一次"><a href="#3-严格一次" class="headerlink" title="3. 严格一次"></a>3. 严格一次</h3><p>事件可保证被流应用程序中的所有算子“严格一次”处理，哪怕遇到各种失败。<br>为了实现<code>exactly-once</code>处理语义，通常主要会使用下列两种机制：</p>
+<ul>
+<li>分布式快照/状态检查点</li>
+<li>最少一次事件交付，外加消息去重</li>
+</ul>
+<p>通过分布式快照/状态检查点方法实现的<code>exactly-once</code>是由 <a href="http://lamport.azurewebsites.net/pubs/chandy.pdf" target="_blank" rel="noopener">Chandy-Lamport 分布式快照算法</a>启发而来的。在这种机制中，会定期为流应用程序中每个算子的所有状态创建检查点，一旦系统中任何位置出现失败，每个算子的所有状态会回滚至最新的全局一致检查点。回滚过程中所有处理工作会暂停。随后源也会重置为与最新检查点相符的偏移量。整个流应用程序基本上会被回退到最新一致状态，并从该状态开始重新处理。图4展示了这种机制的一些基本概念。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-4.png?raw=true" alt=""></p>
+<p>在图4中，流应用程序在 T1 时正在正常运行，并创建了状态检查点。然而在 T2 时，算子在处理传入的数据时失败了。此时 <code>S = 4</code> 这个状态值已经被保存到持久存储中，而 <code>S = 12</code> 状态值正位于算子的内存中。为了解决这种差异，在 T3 时处理图将状态回退至 <code>S = 4</code>，并”重播”流中每个连续状态直到最新状态，并处理每个数据。最终结果是有些数据被处理了多次，但这也没问题，因为无论回滚多少次，结果状态都是相同的。</p>
+<p>实现<code>exactly-once</code>的另一种方法是在实现至少一次事件交付的同时在每个算子一端进行事件去重。使用这种方法的 SPE 会重播失败的事件并再次尝试处理，并从每个算子中移除重复的事件，随后才将结果事件发送给用户在算子中定义的逻辑。这种机制要求为每个算子保存事务日志，借此才能追踪哪些事件已经处理过了。为此 SPE 通常会使用诸如 Google 的 MillWheel 以及 Apache Kafka Streams 等机制。图 5 展示了这种机制的概况。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Stream/Exactly%20once%E6%9C%AA%E5%BF%85%E4%B8%A5%E6%A0%BC%E4%B8%80%E8%87%B4-5.png?raw=true" alt=""></p>
+<h3 id="4-严格一次真的就一次吗？"><a href="#4-严格一次真的就一次吗？" class="headerlink" title="4. 严格一次真的就一次吗？"></a>4. 严格一次真的就一次吗？</h3><p>接着重新考虑一下<code>exactly-once</code>处理语义实际上能为最终用户提供怎样的保证。<code>exactly-once</code>这样的标签对于描述严格一次起到了一定的误导效果。</p>
+<p>有些人可能认为<code>exactly-once</code>描述了一种保证：在事件处理过程中，流中的每个事件只被处理一次。但实际上没有一个 SPE 能完全保证只处理一次。面对各种可能的失败，根本不可能保证每个算子中由用户自定义的逻辑针对每个事件只执行一次，因为用户代码的不完整执行（Partial execution）这种可能性始终会出现。</p>
+<p>假设这样一个场景：有个流处理算子需要执行 <code>Map</code> 操作输出传入事件的 <code>ID</code>，随后原样返回事件。例如这个操作可能使用了如下的虚构代码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Map (Event event) &#123;</span><br><span class="line">    Print &quot;Event ID: &quot; + event.getId()</span><br><span class="line">    Return event</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>每个事件有自己的 GUID（全局唯一 ID）。如果用户逻辑严格一次执行可以得到保证，那么事件 ID 只输出一次。然而这一点永远无法保证，因为用户自定义的逻辑执行过程中可能随时随地面临失败。SPE 无法自行判断用户自定义的逻辑到底执行到哪一步了。因此任何用户自定义逻辑都无法保证只执行一次。这也意味着用户自定义逻辑中实现的外部操作，例如数据库写入也无法严格保证只执行一次。此类操作依然需要通过幂等的方式实现。</p>
+<p>那么当 SPE 宣称提供<code>exactly-once</code>的处理语义保证时，它们指的到底是什么？如果用户逻辑无法严格保证只执行一次，那么到底是什么东西只执行了一次？当 SPE 宣称<code>exactly-once</code>处理语义时，它们真正的含义在于可以保证在对 SPE 管理的状态进行更新时，可以只向后端的持久存储提交一次。</p>
+<p>上文提到的两种机制均使用持久的后端存储作为事实来源（Source of truth），用于保存每个算子的状态，并自动提交状态更新。对于机制1（分布式快照/状态检查点），这个持久的后端存储可用于保存流应用程序中全局一致的状态检查点（每个算子的状态检查点）；对于机制2（至少一次事件交付，外加去重），这个持久的后端存储可用于保存每个算子的状态以及每个算子追踪已经被成功处理过事件的事务日志。</p>
+<p>状态提交或对事实来源的持久后端进行的更新可描述为事件（Occurring）的严格一次(The committing of state or applying updates to the durable backend that is the source of truth can be described as occurring exactly-once)。然而在计算状态的更新/改动，例如处理在事件上执行用户自定义逻辑的事件，但是如果出现失败则可能进行多次，这一点正如上文所述。换句话说，事件的处理可能会进行多次，但处理的效果只会在持久后端状态存储中体现一次。因此在这里我们认为”有效一次（Effectively-once）”术语可以更精确地描述这样的处理语义。</p>
+<h3 id="5-分布式快照与至少一次事件交付外加去重机制的对比"><a href="#5-分布式快照与至少一次事件交付外加去重机制的对比" class="headerlink" title="5. 分布式快照与至少一次事件交付外加去重机制的对比"></a>5. 分布式快照与至少一次事件交付外加去重机制的对比</h3><p>从语义的角度来看，分布式快照以及至少一次事件交付外加去重，这两种机制可以提供相同的保证。然而由于两种机制在实现方面的差异，有可能会产生明显的性能差异。</p>
+<p>基于机制1（分布式快照 / 状态检查点）的 SPE 在性能方面的开销可能是最低的，因为基本上，SPE 只需要在流应用程序正常处理事件的过程之外发送少量特殊事件，而状态检查点操作可以在后台以异步的方式进行。但是对于大型流应用程序，失败的概率会更高一点，这会导致 SPE 需要暂停应用程序并回滚所有算子的状态，这会对性能产生较大影响。流应用程序规模越大，遇到失败的频率就会越高，因此性能方面受到的影响也会越大。然而需要再次提醒的是，这种机制是非侵入式的，只会对资源的使用造成最少量的影响。</p>
+<p>机制2（至少一次事件交付外加去重）可能需要更多资源，尤其是存储资源。在这种机制中，SPE 需要能追踪已经被算子的每个实例成功处理的每个元组（Tuple），借此才能执行去重并实现自身在每个事件中的去重。这可能需要追踪非常大量的数据，尤其是当流应用程序规模非常大，或运行了很多应用程序的时候。每个算子中的每个事件执行去重操作，这本身也会产生巨大的性能开销。然而对于这种机制，流应用程序的性能不太可能受到应用程序规模的影响。对于机制 1，如果任何算子遇到任何失败，均需要全局暂停并状态回滚；对于机制 2，失败只能影响到局部。如果某个算子遇到失败，只需要从上游来源重播 / 重新传输尚未成功处理的事件，对性能的影响可隔离在流应用程序中实际发生失败的地方，只会对流应用程序中其他算子的性能产生最少量的影响。从性能的角度来看，两种机制各有利弊，具体情况可参阅下文表格:</p>
+<p>分布式快照/状态检查点</p>
+<table>
+<thead>
+<tr>
+<th>利</th>
+<th>弊</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>性能和资源开销小</td>
+<td>从失败中恢复时的性能影响大</td>
+</tr>
+<tr>
+<td></td>
+<td>随着拓扑规模的增大，对性能的潜在影响增高</td>
+</tr>
+</tbody>
+</table>
+<p>至少一次交付外加去重</p>
+<table>
+<thead>
+<tr>
+<th>利</th>
+<th>弊</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>失败对性能的影响更为局部</td>
+<td>可能需要大量的存储与基础设施的支持</td>
+</tr>
+<tr>
+<td>失败的影响未必会随着拓扑规模一起增加</td>
+<td>每个算子处理每个事件均会产生性能开销</td>
+</tr>
+</tbody>
+</table>
+<p>虽然从理论上看，分布式快照，和至少一次事件交付外加去重，这两种机制之间存在差异，但两者均可理解为至少一次处理外加幂等。对于这两种机制，如果遇到失败事件将会重播/重新传输（为了实现至少一次），而在状态回滚或事件去重时，如果从内部更新所管理的状态，算子实际上将具备幂等的特性。</p>
+<h3 id="6-结论"><a href="#6-结论" class="headerlink" title="6. 结论"></a>6. 结论</h3><p>希望本文可以帮助大家意识到<code>exactly-once</code>这个术语极具误导性。提供<code>exactly-once</code>的处理语义实际上意味着在对流处理引擎所管理的算子的状态进行不同更新只会影响一次。<code>exactly-once</code>完全无法保证事件的处理（例如执行各类用户定义的逻辑）只需要进行一次。因此这里我们更愿意使用有效一次这个术语来描述这种保证，因为没必要确保处理工作只进行一次，只要保证由 SPE 管理的状态的最终结果只影响一次就够了。分布式快照和消息去重，这两种主流机制就是为了实现严格/有效一次的处理语义。在消息处理和状态更新方面，这两种机制均可提供相同的语义保证，但在性能方面可能有所差异。本文并不是为了探讨哪种机制更胜一筹，因为每种机制都各有利弊。</p>
+<p>原文:<a href="https://streaml.io/blog/exactly-once/" target="_blank" rel="noopener">https://streaml.io/blog/exactly-once/</a></p>
+<p>译文:<a href="https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/QjKQcFnbMxBBxFgIQ_f5lw</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    大愚若智
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/Stream/Exactly once未必严格一次.html" title="Stream Exactly once 未必严格一次">http://smartsi.club/Stream/Exactly once未必严格一次.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Stream/" rel="tag"># Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Stream/[Stream]对于流处理技术的谬见.html" rel="next" title="Stream 对于流处理技术的谬见">
+                <i class="fa fa-chevron-left"></i> Stream 对于流处理技术的谬见
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/flink-stream-event-timestamps-and-watermark.html" rel="prev" title="Flink1.4 生成时间戳与Watermarks">
+                Flink1.4 生成时间戳与Watermarks <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-背景"><span class="nav-number">1.</span> <span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-最多一次"><span class="nav-number">2.</span> <span class="nav-text">2. 最多一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-最少一次"><span class="nav-number">3.</span> <span class="nav-text">3. 最少一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-严格一次"><span class="nav-number">4.</span> <span class="nav-text">3. 严格一次</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-严格一次真的就一次吗？"><span class="nav-number">5.</span> <span class="nav-text">4. 严格一次真的就一次吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-分布式快照与至少一次事件交付外加去重机制的对比"><span class="nav-number">6.</span> <span class="nav-text">5. 分布式快照与至少一次事件交付外加去重机制的对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-结论"><span class="nav-number">7.</span> <span class="nav-text">6. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

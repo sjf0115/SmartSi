@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Spark,Spark 基础," />
+
+
+<meta name="description" content="1. 简介Spark的 bin 目录中的 spark-submit 脚本用于在集群上启动应用程序。可以通过一个统一的接口使用 Spark 所有支持的集群管理器，因此不必为每个集群管理器专门配置你的应用程序。 2. 语法xiaosi@yoona:~/opt/spark-2.1.0-bin-hadoop2.7$ spark-submit --helpUsage: spark-submit [optio">
+<meta name="keywords" content="Spark,Spark 基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark2.3.0 使用spark-submit部署应用程序">
+<meta property="og:url" content="http://smartsi.club/spark-base-launching-applications-with-spark-submit.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 简介Spark的 bin 目录中的 spark-submit 脚本用于在集群上启动应用程序。可以通过一个统一的接口使用 Spark 所有支持的集群管理器，因此不必为每个集群管理器专门配置你的应用程序。 2. 语法xiaosi@yoona:~/opt/spark-2.1.0-bin-hadoop2.7$ spark-submit --helpUsage: spark-submit [optio">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-26T08:40:01.653Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark2.3.0 使用spark-submit部署应用程序">
+<meta name="twitter:description" content="1. 简介Spark的 bin 目录中的 spark-submit 脚本用于在集群上启动应用程序。可以通过一个统一的接口使用 Spark 所有支持的集群管理器，因此不必为每个集群管理器专门配置你的应用程序。 2. 语法xiaosi@yoona:~/opt/spark-2.1.0-bin-hadoop2.7$ spark-submit --helpUsage: spark-submit [optio">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/spark-base-launching-applications-with-spark-submit.html"/>
+
+
+  <title>Spark2.3.0 使用spark-submit部署应用程序 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/spark-base-launching-applications-with-spark-submit.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Spark2.3.0 使用spark-submit部署应用程序</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-07T11:28:01+08:00">2018-04-07</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/spark-base-launching-applications-with-spark-submit.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/spark-base-launching-applications-with-spark-submit.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/spark-base-launching-applications-with-spark-submit.html" class="leancloud_visitors" data-flag-title="Spark2.3.0 使用spark-submit部署应用程序">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p>Spark的 bin 目录中的 <code>spark-submit</code> 脚本用于在集群上启动应用程序。可以通过一个统一的接口使用 Spark 所有支持的<a href="http://spark.apache.org/docs/2.3.0/cluster-overview.html#cluster-manager-types" target="_blank" rel="noopener">集群管理器</a>，因此不必为每个集群管理器专门配置你的应用程序。</p>
+<h3 id="2-语法"><a href="#2-语法" class="headerlink" title="2. 语法"></a>2. 语法</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~/opt/spark-2.1.0-bin-hadoop2.7$ spark-submit --help</span><br><span class="line">Usage: spark-submit [options] &lt;app jar | python file&gt; [app arguments]</span><br><span class="line">Usage: spark-submit --kill [submission ID] --master [spark://...]</span><br><span class="line">Usage: spark-submit --status [submission ID] --master [spark://...]</span><br><span class="line">Usage: spark-submit run-example [options] example-class [example args]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  --master MASTER_URL         spark://host:port, mesos://host:port, yarn, or local.</span><br><span class="line">  --deploy-mode DEPLOY_MODE   Whether to launch the driver program locally (&quot;client&quot;) or</span><br><span class="line">                              on one of the worker machines inside the cluster (&quot;cluster&quot;)</span><br><span class="line">                              (Default: client).</span><br><span class="line">  --class CLASS_NAME          Your application&apos;s main class (for Java / Scala apps).</span><br><span class="line">  --name NAME                 A name of your application.</span><br><span class="line">  --jars JARS                 Comma-separated list of local jars to include on the driver</span><br><span class="line">                              and executor classpaths.</span><br><span class="line">  --packages                  Comma-separated list of maven coordinates of jars to include</span><br><span class="line">                              on the driver and executor classpaths. Will search the local</span><br><span class="line">                              maven repo, then maven central and any additional remote</span><br><span class="line">                              repositories given by --repositories. The format for the</span><br><span class="line">                              coordinates should be groupId:artifactId:version.</span><br><span class="line">  --exclude-packages          Comma-separated list of groupId:artifactId, to exclude while</span><br><span class="line">                              resolving the dependencies provided in --packages to avoid</span><br><span class="line">                              dependency conflicts.</span><br><span class="line">  --repositories              Comma-separated list of additional remote repositories to</span><br><span class="line">                              search for the maven coordinates given with --packages.</span><br><span class="line">  --py-files PY_FILES         Comma-separated list of .zip, .egg, or .py files to place</span><br><span class="line">                              on the PYTHONPATH for Python apps.</span><br><span class="line">  --files FILES               Comma-separated list of files to be placed in the working</span><br><span class="line">                              directory of each executor.</span><br><span class="line"></span><br><span class="line">  --conf PROP=VALUE           Arbitrary Spark configuration property.</span><br><span class="line">  --properties-file FILE      Path to a file from which to load extra properties. If not</span><br><span class="line">                              specified, this will look for conf/spark-defaults.conf.</span><br><span class="line"></span><br><span class="line">  --driver-memory MEM         Memory for driver (e.g. 1000M, 2G) (Default: 1024M).</span><br><span class="line">  --driver-java-options       Extra Java options to pass to the driver.</span><br><span class="line">  --driver-library-path       Extra library path entries to pass to the driver.</span><br><span class="line">  --driver-class-path         Extra class path entries to pass to the driver. Note that</span><br><span class="line">                              jars added with --jars are automatically included in the</span><br><span class="line">                              classpath.</span><br><span class="line"></span><br><span class="line">  --executor-memory MEM       Memory per executor (e.g. 1000M, 2G) (Default: 1G).</span><br><span class="line"></span><br><span class="line">  --proxy-user NAME           User to impersonate when submitting the application.</span><br><span class="line">                              This argument does not work with --principal / --keytab.</span><br><span class="line"></span><br><span class="line">  --help, -h                  Show this help message and exit.</span><br><span class="line">  --verbose, -v               Print additional debug output.</span><br><span class="line">  --version,                  Print the version of current Spark.</span><br><span class="line"></span><br><span class="line"> Spark standalone with cluster deploy mode only:</span><br><span class="line">  --driver-cores NUM          Cores for driver (Default: 1).</span><br><span class="line"></span><br><span class="line"> Spark standalone or Mesos with cluster deploy mode only:</span><br><span class="line">  --supervise                 If given, restarts the driver on failure.</span><br><span class="line">  --kill SUBMISSION_ID        If given, kills the driver specified.</span><br><span class="line">  --status SUBMISSION_ID      If given, requests the status of the driver specified.</span><br><span class="line"></span><br><span class="line"> Spark standalone and Mesos only:</span><br><span class="line">  --total-executor-cores NUM  Total cores for all executors.</span><br><span class="line"></span><br><span class="line"> Spark standalone and YARN only:</span><br><span class="line">  --executor-cores NUM        Number of cores per executor. (Default: 1 in YARN mode,</span><br><span class="line">                              or all available cores on the worker in standalone mode)</span><br><span class="line"></span><br><span class="line"> YARN-only:</span><br><span class="line">  --driver-cores NUM          Number of cores used by the driver, only in cluster mode</span><br><span class="line">                              (Default: 1).</span><br><span class="line">  --queue QUEUE_NAME          The YARN queue to submit to (Default: &quot;default&quot;).</span><br><span class="line">  --num-executors NUM         Number of executors to launch (Default: 2).</span><br><span class="line">                              If dynamic allocation is enabled, the initial number of</span><br><span class="line">                              executors will be at least NUM.</span><br><span class="line">  --archives ARCHIVES         Comma separated list of archives to be extracted into the</span><br><span class="line">                              working directory of each executor.</span><br><span class="line">  --principal PRINCIPAL       Principal to be used to login to KDC, while running on</span><br><span class="line">                              secure HDFS.</span><br><span class="line">  --keytab KEYTAB             The full path to the file that contains the keytab for the</span><br><span class="line">                              principal specified above. This keytab will be copied to</span><br><span class="line">                              the node running the Application Master via the Secure</span><br><span class="line">                              Distributed Cache, for renewing the login tickets and the</span><br><span class="line">                              delegation tokens periodically.</span><br></pre></td></tr></table></figure>
+<h3 id="3-打包应用依赖"><a href="#3-打包应用依赖" class="headerlink" title="3. 打包应用依赖"></a>3. 打包应用依赖</h3><p>如果你的代码依赖于其他项目，则需要将它们与应用程序一起打包，以便将代码分发到 Spark 集群上。为此，需要创建一个包含代码及其依赖关系的 <code>assembly jar</code>（或 <code>Uber jar</code>）。sbt 和 Maven 都有 <code>assembly</code> 插件。创建 <code>assembly jar</code> 时，将 Spark 和 Hadoop 的依赖设置为 <code>provided</code>。他们不需要打包，因为它们在运行时由集群管理器提供。一旦你有一个 <code>assembly jar</code>，你可以调用 <code>bin/spark-submit</code> 脚本，如下所示，同时传递你的 jar。</p>
+<p>对于Python，你可以使用 spark-submit 的 <code>--py-files</code> 参数来添加 <code>.py</code>， <code>.zip</code> 或 <code>.egg</code> 文件来与应用程序一起分发。如果你依赖于多个 Python 文件，我们建议将它们打包成一个 <code>.zip</code> 或 <code>.egg</code> 文件。</p>
+<h3 id="4-使用spark-submit启动应用程序"><a href="#4-使用spark-submit启动应用程序" class="headerlink" title="4. 使用spark-submit启动应用程序"></a>4. 使用spark-submit启动应用程序</h3><p>用户应用程序打包成功后，就可以使用 <code>bin/spark-submit</code> 脚本启动应用程序。脚本负责设置 Spark 及其依赖关系的 classpath，并且可以支持不同集群管理器和部署模式（Spark所支持的）：<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">./bin/spark-submit \</span><br><span class="line">  --class &lt;main-class&gt; \</span><br><span class="line">  --master &lt;master-url&gt; \</span><br><span class="line">  --deploy-mode &lt;deploy-mode&gt; \</span><br><span class="line">  --conf &lt;key&gt;=&lt;value&gt; \</span><br><span class="line">  ... # other options</span><br><span class="line">  &lt;application-jar&gt; \</span><br><span class="line">  [application-arguments]</span><br></pre></td></tr></table></figure></p>
+<p>一些常用的选项：</p>
+<ul>
+<li><code>--class</code>: 应用程序入口 (例如：<code>com.sjf.open.spark.Java.JavaWordCount</code> 包含包名的全路径名称)</li>
+<li><code>--master</code>: 集群的 master URL (例如：<code>spark://23.195.26.187:7077</code>)</li>
+<li><code>--deploy-mode</code>: 是在工作节点(cluster)上还是在本地作为一个外部的客户端(client)部署你的 driver (默认: client)</li>
+<li><code>--conf</code>: 按照 <code>key=value</code> 格式任意的 Spark 配置属性。对于包含空格的 value（值）使用引号包 <code>“key=value”</code> 起来。</li>
+<li><code>application-jar</code>: 包含应用程序和所有依赖关系的 jar 路径。URL必须在集群内部全局可见，例如，对所有节点上可见的 <code>hdfs：//</code> 路径或 <code>file：//</code> 路径。</li>
+<li><code>application-arguments</code>: 传递给主类 main 方法的参数（如果有的话）</li>
+</ul>
+<p>Example:<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">bin/spark-submit --class com.sjf.open.spark.Java.JavaWordCount --master local common-tool-jar-with-dependencies.jar /home/xiaosi/click_uv.txt</span><br></pre></td></tr></table></figure></p>
+<p>常见的部署策略是将你的应用程序从与工作节点机器物理位置相同的网关机器（例如，独立EC2集群中的主节点）提交。在这种设置中， <code>client</code> 模式比较合适。在 client 模式中，驱动程序作为集群的客户端直接在 spark-submit 进程内启动。应用程序的输入和输出直接连到控制台。因此，这个模式特别适合那些涉及 REPL（例如，Spark shell）的应用程序。</p>
+<p>如果你提交应用程序的机器远离工作节点机器（例如在笔记本电脑本地提交），则通常使用 <code>cluster</code> 模式来最小化 drivers 和 executors 之间的网络延迟。目前，对于 Python 应用程序而言，在独立模式上不支持集群模式。</p>
+<p>对于Python应用程序，只需在 <code>&lt;application-jar&gt;</code> 位置传递一个 <code>.py</code> 文件来代替 JAR，然后使用 <code>--py-files</code> 参数将 Python 的 <code>.zip</code>，<code>.egg</code> 或 <code>.py</code> 文件添加到搜索路径。</p>
+<p>有几个可用选项是特定用于集群管理器。例如，对于具有集群部署模式的Spark独立集群，可以指定 <code>--supervise</code> 参数以确保如果驱动程序以非零退出码失败时，可以自动重新启动。如果要列举 spark-submit 所有可用选项，可以使用 <code>spark-submit --help</code> 命令来查看。以下是常见选项的几个示例：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 在本地运行 8 核</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --class org.apache.spark.examples.SparkPi \</span><br><span class="line">  --master local[8] \</span><br><span class="line">  /path/to/examples.jar \</span><br><span class="line">  100</span><br><span class="line"></span><br><span class="line"># 以客户端部署模式在Spark独立集群上运行</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --class org.apache.spark.examples.SparkPi \</span><br><span class="line">  --master spark://207.184.161.138:7077 \</span><br><span class="line">  --executor-memory 20G \</span><br><span class="line">  --total-executor-cores 100 \</span><br><span class="line">  /path/to/examples.jar \</span><br><span class="line">  1000</span><br><span class="line"></span><br><span class="line"># 在集群部署模式下使用supervise在Spark独立集群上运行</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --class org.apache.spark.examples.SparkPi \</span><br><span class="line">  --master spark://207.184.161.138:7077 \</span><br><span class="line">  --deploy-mode cluster \</span><br><span class="line">  --supervise \</span><br><span class="line">  --executor-memory 20G \</span><br><span class="line">  --total-executor-cores 100 \</span><br><span class="line">  /path/to/examples.jar \</span><br><span class="line">  1000</span><br><span class="line"></span><br><span class="line"># 在 YARN 集群上运行</span><br><span class="line">export HADOOP_CONF_DIR=XXX</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --class org.apache.spark.examples.SparkPi \</span><br><span class="line">  --master yarn \</span><br><span class="line">  --deploy-mode cluster \  # can be client for client mode</span><br><span class="line">  --executor-memory 20G \</span><br><span class="line">  --num-executors 50 \</span><br><span class="line">  /path/to/examples.jar \</span><br><span class="line">  1000</span><br><span class="line"></span><br><span class="line"># 在 Spark 独立集群上运行Python程序</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --master spark://207.184.161.138:7077 \</span><br><span class="line">  examples/src/main/python/pi.py \</span><br><span class="line">  1000</span><br><span class="line"></span><br><span class="line"># 在集群部署模式下使用supervise在Mesos集群上运行</span><br><span class="line">./bin/spark-submit \</span><br><span class="line">  --class org.apache.spark.examples.SparkPi \</span><br><span class="line">  --master mesos://207.184.161.138:7077 \</span><br><span class="line">  --deploy-mode cluster \</span><br><span class="line">  --supervise \</span><br><span class="line">  --executor-memory 20G \</span><br><span class="line">  --total-executor-cores 100 \</span><br><span class="line">  http://path/to/examples.jar \</span><br><span class="line">  1000</span><br></pre></td></tr></table></figure>
+<h3 id="5-Master-Urls"><a href="#5-Master-Urls" class="headerlink" title="5. Master Urls"></a>5. Master Urls</h3><p>传递给Spark的master url 可以采用如下格式：</p>
+<table>
+<thead>
+<tr>
+<th>Master URL</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>local</code></td>
+<td>使用一个线程本地运行 Spark。</td>
+</tr>
+<tr>
+<td><code>local[K]</code></td>
+<td>使用K个工作线程本地运行 Spark（理想情况下，设置这个值的数量为你机器内核数量）。</td>
+</tr>
+<tr>
+<td><code>local[K,F]</code></td>
+<td>使用K工作线程和F个 maxFailures 在本地运行 Spark（有关此变量的解释，请参阅<a href="http://spark.apache.org/docs/2.3.0/configuration.html#scheduling" target="_blank" rel="noopener">spark.task.maxFailures</a>）</td>
+</tr>
+<tr>
+<td><code>local[*]</code></td>
+<td>使用与你机器上的逻辑内核一样多的工作线程在本地运行 Spark。</td>
+</tr>
+<tr>
+<td><code>local[*,F]</code></td>
+<td>使用与你机器上的逻辑内核一样多的工作线程以及F个 maxFailures 在本地运行 Spark。</td>
+</tr>
+<tr>
+<td><code>spark://HOST:PORT</code></td>
+<td>连接到给定的Spark独立集群主机。端口必须是主机配置可使用的端口，默认情况下为7077。</td>
+</tr>
+<tr>
+<td><code>spark://HOST1:PORT1,HOST2:PORT2</code></td>
+<td>使用 Zookeeper 连接到具有备用 masters 的给定 Spark 独立集群。该列表必须包含使用 Zookeeper 搭建的高可用集群中的所有 master 主机。端口必须是每个 master 可以配置使用的端口，默认情况下为7077。</td>
+</tr>
+<tr>
+<td><code>mesos://HOST:PORT</code></td>
+<td>连接到给定的Mesos集群。端口必须是主机配置可使用的端口，默认为5050。或者，对于使用ZooKeeper的Mesos集群，借助 <code>--deploy-mode cluster</code> 参数使用 <code>mesos://zk:// ....</code> 提交。</td>
+</tr>
+<tr>
+<td><code>yarn</code></td>
+<td>以客户端模式还是以集群模式连接到YARN群集具体取决于 <code>--deploy-mode</code> 的值。可以根据HADOOP_CONF_DIR或YARN_CONF_DIR变量找到集群位置</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6-从文件加载配置"><a href="#6-从文件加载配置" class="headerlink" title="6. 从文件加载配置"></a>6. 从文件加载配置</h3><p>spark-submit 脚本可以从 properties 文件加载默认 Spark 配置选项，并将它们传递到应用程序。默认情况下，spark 从 spark 目录下的 conf/spark-defaults.conf 配置文件中读取配置选项。有关更多详细信息，请参考<a href="http://spark.apache.org/docs/2.3.0/configuration.html#loading-default-configurations" target="_blank" rel="noopener">加载默认配置</a>。</p>
+<p>以这种方式加载 Spark 默认配置可以避免在 spark-submit 上添加配置选项。例如，如果默认配置文件中设置了 <code>spark.master</code> 属性，那么可以安全地从 spark-submit 中省略 <code>--master</code> 参数。一般来说，在 SparkConf 上显式设置的配置选项拥有最高优先级，然后是传递到 spark-submit 的配置选项，最后是默认配置文件中的配置选项。</p>
+<p>如果不清楚配置选项来自哪里，可以通过使用 <code>--verbose</code> 选项运行 spark-submit 打印出细粒度的调试信息。</p>
+<h3 id="7-高级依赖管理"><a href="#7-高级依赖管理" class="headerlink" title="7. 高级依赖管理"></a>7. 高级依赖管理</h3><p>使用 spark-submit 时，包含在 <code>--jars</code> 选项中的应用程序 jar 以及其他 jar 将自动分发到集群。在 <code>--jars</code> 之后提供的 URL 列表必须用逗号分隔。该列表会包含在 driver 和 executor 的 classpath 中。<code>--jars</code> 不支持目录的形式。</p>
+<p>Spark使用如下URL来允许以不同策略分发 jar：</p>
+<ul>
+<li><code>file</code> : 绝对路径和 <code>file:/URI</code> 通过 driver 的HTTP文件服务器提供，每个 executor 从 driver HTTP服务器上拉取文件。</li>
+<li><code>hdfs</code> : <code>http :</code>, <code>https :</code>, <code>ftp：</code> 正如你希望的一样，从这些URI拉取文件和 JAR。</li>
+<li><code>local</code> : 以 <code>local:/</code> 开头的URI应该作为每个工作节点上的本地文件存在。这意味着不会产生网络IO，适用于推送大文件或者JAR到每个工作线程或通过 NFS，GlusterFS 等方式共享这些大文件或者jar。</li>
+</ul>
+<p>请注意，JAR和文件被复制到 executor 节点上每个 SparkContext 的工作目录下。随着时间的推移，这可能会占用大量的空间，需要定时清理。使用 YARN，清理会自动执行；使用 Spark 独立集群，可以使用 <code>spark.worker.cleanup.appDataTtl</code> 属性配置自动清理。</p>
+<p>用户还可以通过用 <code>--packages</code> 提供以逗号分隔的 maven 坐标列表来包含任何其他依赖项。使用此命令时将处理所有传递依赖性。可以使用配置选项 <code>--repositories</code> 以逗号分隔的方式添加其他存储库（或SBT中的解析器）。pyspark，spark-shell和 spark-submit 都可以使用这些命令来包含 Spark 的 Packages。</p>
+<p>对于Python，等价的 <code>--py-files</code> 选项可用于将 <code>.egg</code>，<code>.zip</code> 和 <code>.py</code> 库分发给执行程序。</p>
+<blockquote>
+<p>Spark版本:2.3.0</p>
+</blockquote>
+<p>原文:<a href="http://spark.apache.org/docs/2.3.0/submitting-applications.html" target="_blank" rel="noopener">http://spark.apache.org/docs/2.3.0/submitting-applications.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/spark-base-launching-applications-with-spark-submit.html" title="Spark2.3.0 使用spark-submit部署应用程序">http://smartsi.club/spark-base-launching-applications-with-spark-submit.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+            <a href="/tags/Spark-基础/" rel="tag"># Spark 基础</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/spark-streaming-input-dstreams-and-receivers.html" rel="next" title="Spark Streaming 2.2.0 Input DStreams和Receivers">
+                <i class="fa fa-chevron-left"></i> Spark Streaming 2.2.0 Input DStreams和Receivers
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/linux-split-file-usage.html" rel="prev" title="Linux 使用split命令分割文件">
+                Linux 使用split命令分割文件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-简介"><span class="nav-number">1.</span> <span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-语法"><span class="nav-number">2.</span> <span class="nav-text">2. 语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-打包应用依赖"><span class="nav-number">3.</span> <span class="nav-text">3. 打包应用依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-使用spark-submit启动应用程序"><span class="nav-number">4.</span> <span class="nav-text">4. 使用spark-submit启动应用程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Master-Urls"><span class="nav-number">5.</span> <span class="nav-text">5. Master Urls</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-从文件加载配置"><span class="nav-number">6.</span> <span class="nav-text">6. 从文件加载配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-高级依赖管理"><span class="nav-number">7.</span> <span class="nav-text">7. 高级依赖管理</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Stream," />
+
+
+<meta name="description" content="1. 概述分布式有状态流处理支持在云中部署和执行大规模连续计算，主要针对低延迟和高吞吐量。这种模式的一个最根本的挑战就是在可能的失败情况下提供处理保证。现有方法依赖于可用于故障恢复的周期性全局状态快照。这些方法有两个主要缺点。首先，他们经常拖延影响数据摄取的整体计算过程。其次，持久化存储所有传输中的记录以及算子状态，这会导致比所需的快照要更大。 因此，提出了一种新的分布式快照的算法，即在 Apac">
+<meta name="keywords" content="Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Stream 分布式数据流的轻量级异步快照">
+<meta property="og:url" content="http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 概述分布式有状态流处理支持在云中部署和执行大规模连续计算，主要针对低延迟和高吞吐量。这种模式的一个最根本的挑战就是在可能的失败情况下提供处理保证。现有方法依赖于可用于故障恢复的周期性全局状态快照。这些方法有两个主要缺点。首先，他们经常拖延影响数据摄取的整体计算过程。其次，持久化存储所有传输中的记录以及算子状态，这会导致比所需的快照要更大。 因此，提出了一种新的分布式快照的算法，即在 Apac">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-8.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-9.png?raw=true">
+<meta property="og:updated_time" content="2018-03-06T09:15:33.778Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Stream 分布式数据流的轻量级异步快照">
+<meta name="twitter:description" content="1. 概述分布式有状态流处理支持在云中部署和执行大规模连续计算，主要针对低延迟和高吞吐量。这种模式的一个最根本的挑战就是在可能的失败情况下提供处理保证。现有方法依赖于可用于故障恢复的周期性全局状态快照。这些方法有两个主要缺点。首先，他们经常拖延影响数据摄取的整体计算过程。其次，持久化存储所有传输中的记录以及算子状态，这会导致比所需的快照要更大。 因此，提出了一种新的分布式快照的算法，即在 Apac">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html"/>
+
+
+  <title>Stream 分布式数据流的轻量级异步快照 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Stream 分布式数据流的轻量级异步快照</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-06T12:04:01+08:00">2018-03-06</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Stream/" itemprop="url" rel="index"><span itemprop="name">Stream</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/lightweight-asynchronous-snapshots-for-distributed-dataflows.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/lightweight-asynchronous-snapshots-for-distributed-dataflows.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/lightweight-asynchronous-snapshots-for-distributed-dataflows.html" class="leancloud_visitors" data-flag-title="Stream 分布式数据流的轻量级异步快照">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>分布式有状态流处理支持在云中部署和执行大规模连续计算，主要针对低延迟和高吞吐量。这种模式的一个最根本的挑战就是在可能的失败情况下提供处理保证。现有方法依赖于可用于故障恢复的周期性全局状态快照。这些方法有两个主要缺点。首先，他们经常拖延影响数据摄取的整体计算过程。其次，持久化存储所有传输中的记录以及算子状态，这会导致比所需的快照要更大。</p>
+<p>因此，提出了一种新的分布式快照的算法，即在 <code>Apache Flink</code> 中的异步屏障快照（Asynchronous Barrier Snapshotting (ABS)）。这是一种适用于现代数据流执行引擎的轻量级算法，可最大限度地减少空间需求，让快照发生时对系统的影响降到最低。这种算法不会停止流处理，它只会引入很少的运行时间开销，而且对于整个无环图的拓扑结构，只对有状态的算子进行快照，因此快照的大小只会占用很小的空间。该算法不会对执行产生重大影响，保证线性可伸缩性，并且可以在频繁的快照下正常运行。</p>
+<p>这里所说的新型的快照算法，既适用于有向无环图，也适用于有向有环图。本文重点关注在有向无环图中的应用。</p>
+<h3 id="2-Apache-Flink-System"><a href="#2-Apache-Flink-System" class="headerlink" title="2. Apache Flink System"></a>2. Apache Flink System</h3><p><code>Apache Flink</code> 围绕通用运行时引擎进行架构，可以统一处理批处理和流式作业。Flink 中的作业被编译成任务的有向图。数据元素从外部数据源获取，并以流水线方式通过任务图。基于接收到的输入，任务不断操作其内部状态，并产生新的输出。</p>
+<h4 id="2-1-流处理编程模型"><a href="#2-1-流处理编程模型" class="headerlink" title="2.1 流处理编程模型"></a>2.1 流处理编程模型</h4><p>可以从外部来源（例如消息队列，套接字流，自定义生成器）或通过调用其他 <code>DataStream</code> 上的操作来创建 <code>DataStreams</code>。<code>DataStreams</code> 支持多种算子，如 <code>map</code>，<code>filter</code> 和 <code>reduce</code> 等形式的高阶函数，这些函数在每个记录上逐步应用并生成新的 <code>DataStream</code>。每个算子可以通过将并行实例放置在相应流的不同分区上运行来并行化，从而允许分布式执行流转换。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-1.png?raw=true" alt=""></p>
+<p>下面的代码示例中显示了如何在 <code>Apache Flink</code> 中实现简单的 <code>Word Count</code> 程序。在此程序中，从文本文件中读取单词，并将每个单词的当前计数打印到标准输出上。这是一个有状态的流处理程序，所以数据源需要知道它们在文件中的当前偏移量，并且需要计数器来将每个单词的当前计数保持在内部状态中。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-2.png?raw=true" alt=""></p>
+<h4 id="2-2-分布式数据流执行"><a href="#2-2-分布式数据流执行" class="headerlink" title="2.2 分布式数据流执行"></a>2.2 分布式数据流执行</h4><p>当用户执行一个应用程序时，所有的 <code>DataStream</code> 算子都将编译成一个执行图，原理上为一个有向图 <code>G =（T，E）</code>，其中顶点 <code>T</code> 表示任务，边 <code>E</code> 表示两个任务之间的 <code>data channels</code>。上图就描绘了一个 <code>Word Count</code> 例子的执行图。如图所示，算子的每个实例都封装在相应的任务上。任务可以进一步细分为没有 <code>input channels</code> 的 <code>Source</code> 以及没有 <code>output channels</code> 的 <code>Sink</code>。此外，<code>M</code> 表示任务在并行执行期间传输的所有记录的集合。每个任务 <code>t ∈ T</code> 封装了一个算子实例的独立运行，其由以下内容组成：</p>
+<ul>
+<li>一组 <code>input channels</code> 和 <code>output channels</code>: <code>It , Ot ⊆ E</code></li>
+<li>算子状态 <code>St</code></li>
+<li>用户自定义函数 <code>ft</code> 。<br>在执行过程中，每个任务消耗输入记录，更新算子状态并根据其用户自定义函数生成新的记录。对于流入算子的每一条数据 <code>r ∈ M</code>，通过 <code>UDF</code>，产生一个新的状态值 <code>st’</code>，同时产生一个新的输出的集合 <code>D ⊆ M</code>。</li>
+</ul>
+<h3 id="3-Asynchronous-Barrier-Snapshotting"><a href="#3-Asynchronous-Barrier-Snapshotting" class="headerlink" title="3. Asynchronous Barrier Snapshotting"></a>3. Asynchronous Barrier Snapshotting</h3><p>为了提供一致性结果，分布式处理系统需要对失败任务进行恢复。提供这种弹性的一种方法是定期捕获执行图的快照，然后可以用它来从故障中恢复。快照是执行图的全局状态，捕获所有必要信息以从该特定执行状态重新开始计算。</p>
+<h4 id="3-1-问题定义"><a href="#3-1-问题定义" class="headerlink" title="3.1 问题定义"></a>3.1 问题定义</h4><p>我们定义了一个执行图 <code>G =（T，E）</code> 的全局快照 <code>G * =（T *，E *）</code>，其中 <code>T *</code> 和 <code>E *</code> 分别表示所有任务和边的状态集合。更详细地说，<code>T *</code> 由所有算子状态 <code>St * ∈ T *</code> 组成， <code>∀t ∈ T</code>， <code>E *</code> 是所有 <code>channels</code> 状态 <code>e * ∈ E *</code> 的集合，其中 <code>e *</code> 由在 <code>e</code> 上传输的记录组成。</p>
+<p>我们确保每个快照 <code>G *</code> 都保留某些属性，例如最终性 <code>Termination</code> 和可行性 <code>Feasibility</code>，以便在故障恢复后保证结果的正确性。最终性保证，如果所有进程都处于活跃状态，那么快照算法最终会在启动后的有限时间内完成。可行性表达了快照的意义，即在快照过程中关于计算的信息不会丢失。</p>
+<h4 id="3-2-非循环数据流的ABS"><a href="#3-2-非循环数据流的ABS" class="headerlink" title="3.2 非循环数据流的ABS"></a>3.2 非循环数据流的ABS</h4><p>当一个执行过程被分成多个阶段 (<code>stage</code>)，在不保留 <code>channels</code> 状态的情况下执行快照是可行的。<code>stage</code> 将注入的数据流和所有相关的计算划分为一系列可能的执行过程，其中所有先前的输入和生成的输出已经完全处理。在一个 <code>Stage</code> 结束时的算子状态集合反映了整个执行历史，因此它可以用于快照。我们算法背后的核心思想是在保持连续数据摄入的同时使用分段快照创建一致性快照（create identical snapshots with staged snapshotting）。</p>
+<p>在我们的方法中，在持续的数据流执行中模拟 <code>stage</code> 是通过向数据流中周期性注入特殊屏障 <code>barrier</code> 标记完成的，这些标记在整个执行图中一直传输到 <code>sink</code>。全局快照是随着每个任务接收表示执行 <code>stage</code> 的 <code>barrier</code> 而逐步构建的。 我们进一步为我们的算法做出以下假设：</p>
+<ul>
+<li>网络通道是准确可靠的，遵循 <code>FIFO</code> 先进先出的顺序，并且可以被阻塞以及解除阻塞。当一个 <code>channels</code> 被阻塞时，所有的消息都会被缓存，但是不会被传递，直到它被解除阻塞。</li>
+<li>任务可以触发其通道组件上的操作，例如阻塞，解除阻塞和发送消息。所有输出通道都支持广播消息。</li>
+<li>在 <code>source</code> 任务中注入的消息(即 <code>stage barrier</code> )被解析为 <code>Nil</code>。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-3.png?raw=true" alt=""></p>
+<p>算法执行过程如下：</p>
+<p>(1) 中央协调器周期性的给所有 <code>source</code> 注入 <code>stage barrier</code>（黑色实线）。当 <code>source</code> 接收到 <code>barrier</code> 时，会为当前的状态生成一个快照，然后将 <code>barrier</code> 广播到它的所有输出中（图（a））。</p>
+<p>(2) 当一个非 <code>source</code> 任务接收到其中一个输入的 <code>barrier</code> 时，它会阻塞该输入，直到它接收到来自所有输入的 <code>barrier</code>（第9行 图2（b））。</p>
+<p>(3) 当收到来自所有输入的 <code>barrier</code> 时，该任务会生成当前状态的一个快照并将其 <code>barrier</code> 广播到其输出（第12-13行 图2（c））。</p>
+<p>(4) 然后，该任务解除输入通道的阻塞来继续后续的计算（第15行，图2（d））。完整的全局快照 <code>G * =（T *，E *）</code> 仅包含所有算子状态 <code>T *</code>，其中 <code>E * = 0</code>。</p>
+<p>伪代码如下：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-4.png?raw=true" alt=""></p>
+<p>如前所述，快照算法应该保证最终性和可行性。最终性由通道和非循环执行图属性保证。<code>channels</code> 的可靠性确保只要任务存活，发送的每个 <code>barrier</code> 最终都会被接收的。此外，由于始终存在来自 <code>source</code> 的一条路径，因此 <code>DAG</code> 拓扑中的每个任务最终都将从其所有 <code>input channels</code> 接收 <code>barrier</code> 并生成快照。</p>
+<p>对于可行性，足以证明在全局快照中的算子状态仅反映了直到最后阶段处理的记录的历史过程。这可以通过 <code>channels</code> 的 <code>FIFO</code> 顺序特性以及 <code>barrier</code> 全部接收之前阻塞 <code>input channels</code> 保证 <code>stage</code> 的 <code>post-shot</code> 记录不会在快照生成之前处理。</p>
+<h4 id="3-3-循环数据流的ABS"><a href="#3-3-循环数据流的ABS" class="headerlink" title="3.3 循环数据流的ABS"></a>3.3 循环数据流的ABS</h4><p>在存在有向循环的执行图中的情况下，上面的 <code>ABS</code> 算法不会终止而会导致死锁，因为一个循环中的任务将无限期地等待接收来自其所有输入的 <code>barrier</code>。此外，在循环中传输的记录不会包含在快照中，因此违反了可行性。因此，为了可行性需要在快照中包含在循环中生成的所有记录，并在恢复时将这些记录重新传输。我们处理循环图的方法继承了基本算法，而不会像上面算法中看到的那样引起任何额外的 <code>channels</code> 阻塞。首先，我们通过静态分析来识别执行图中循环中的 <code>back-edge</code> <code>L</code>。根据控制流图理论，有向图中的 <code>back-edge</code> 是指在深度优先搜索中已经访问过的顶点的边。执行图 <code>G（T，E \ L）</code> 是一个包含拓扑中所有任务的 <code>DAG</code>。从该 <code>DAG</code> 的角度来看，该算法与以前一样运行，但是，我们需要在快照期间对下游 <code>back-edge</code> 接收的记录进行备份。<code>barrier</code> 将循环中的所有记录都推送到下游日志中，以便将它们包含在一致的快照中。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-5.png?raw=true" alt=""></p>
+<h3 id="4-故障恢复"><a href="#4-故障恢复" class="headerlink" title="4. 故障恢复"></a>4. 故障恢复</h3><p>在这提供关于故障恢复操作的简要说明。有几种故障恢复方案可用于一致性快照。最简单的是，整个执行图可以从上一个全局快照重新启动，每个任务 <code>t</code> ，如下所示：</p>
+<ul>
+<li>从持久性存储中检索与快照 <code>St</code> 相关联的状态并将其设置为其初始状态</li>
+<li>恢复备份的日志以及处理所包含的记录</li>
+<li>从其 <code>input channels</code> 开始摄取记录</li>
+</ul>
+<p>仅通过重新调度上游任务依赖（其包含到失败任务的 <code>output channels</code>）以及它们各自直到 <code>source</code> 的上游任务，重新恢复调度部分图也是可能的。下图显示了一个恢复示例。为了提供 <code>exactly-once</code> 的语义，应该在所有下游节点中忽略重复记录以避免重新计算。为了达到这个目的，我们用来自<code>source</code> 的序列号标记记录，因此，每个下游节点都可以丢弃序号小于他们已经处理的记录。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-6.png?raw=true" alt=""></p>
+<h3 id="5-实现"><a href="#5-实现" class="headerlink" title="5. 实现"></a>5. 实现</h3><p>我们向 <code>Apache Flink</code> 提供了 <code>ABS</code> 算法的实现，以便为流式运行提供 <code>exactly-once</code> 处理语义。在我们当前的实现中，阻塞通道将所有传入的记录存储在磁盘上，而不是将它们保存在内存中以增加可扩展性。虽然此技术可确保鲁棒性，但会增加 <code>ABS</code> 算法的运行时影响。</p>
+<p>为了区分算子状态和数据，我们引入了一个显式的 <code>OperatorState</code> 接口，该接口包含更新状态以及对状态进行检查点的方法。我们为 <code>Apache Flink</code> 支持的有状态运行时算子（例如基于偏移量的源或聚合）提供了 <code>OperatorState</code> 实现。</p>
+<h3 id="6-评估"><a href="#6-评估" class="headerlink" title="6. 评估"></a>6. 评估</h3><p>评估的目标是将 <code>ABS</code> 的运行时间开销与 <code>Naiad</code> 中采用的全局同步快照算法进行比较，并测试算法在大数量节点上的可伸缩性。用于评估的执行拓扑结构（如下图）由6个不同的算子组成，其并行度等于集群节点的个数，转换为 <code>6 * 集群大小</code> 个任务顶点。执行包含3个完整的网络 <code>shuffle</code>，以突显 <code>ABS</code> 中通道阻塞的可能影响。<code>source</code> 产生总共10亿条记录，这些记录在 <code>source</code> 实例中均匀分布。拓扑中算子的状态是按键的聚合以及 <code>source</code> 的偏移量。在 <code>Amazon EC2</code> 集群上使用多达40个 <code>m3.medium</code> 实例在运行实验。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-7.png?raw=true" alt=""></p>
+<p>我们测量了在不同快照间隔下 <code>ABS</code> 和同步快照两种快照方案运行的运行时间开销。我们实现了在 <code>Apache Flink Naiad</code> 上使用的同步快照算法，以便在相同终端上执行进行比较。该实验在10节点集群上运行。为了评估我们算法的可伸缩性，我们处理固定数量的输入记录（10亿），同时将我们拓扑的并行度从5个增加到40个节点。</p>
+<p>在下图中，我们描述了两种算法对基线的运行时影响（无容错）。当快照时间间隔较小时，同步快照的性能影响尤其明显。这是由于系统花费更多时间来获取全局快照而不是处理数据。<code>ABS</code> 对运行时的影响要低得多，因为它可以持续运行而不会阻碍整体执行，同时保持相当稳定的吞吐率。当快照时间间隔变大时，同步算法的影响逐渐变小。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-8.png?raw=true" alt=""></p>
+<p>在下图中，我们使用3秒快照间隔的 <code>ABS</code> 拓扑与基准（无容错）进行比较可扩展性。很明显，基准作业和 <code>ABS</code> 都实现了线性可扩展性。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/lightweight-asynchronous-snapshots-for-distributed-dataflows-9.png?raw=true" alt=""></p>
+<h3 id="7-总结"><a href="#7-总结" class="headerlink" title="7. 总结"></a>7. 总结</h3><p>我们的目的是解决在分布式数据流系统上执行定期全局快照的问题。我们引入了 <code>ABS</code>，这是一种新的快照技术，可实现良好的吞吐量。<code>ABS</code> 是第一种考虑非循环执行拓扑的最小可能状态的算法。此外，我们通过仅存储需要在恢复时重新处理的记录来扩展 <code>ABS</code> 以在循环执行图上使用。我们在 <code>Apache Flink</code> 上实现了 <code>ABS</code>，并对比同步快照算法评估了我们算法的性能。在早期阶段，<code>ABS</code> 显示出良好的结果，对整体执行吞吐量影响较小并具有线性可扩展性。</p>
+<p>原文: <a href="http://pdfs.semanticscholar.org/541e/cf8c5b9db97eb5fcd1ffdf863d948b8954cc.pdf" target="_blank" rel="noopener">http://pdfs.semanticscholar.org/541e/cf8c5b9db97eb5fcd1ffdf863d948b8954cc.pdf</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html" title="Stream 分布式数据流的轻量级异步快照">http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Stream/" rel="tag"># Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-stream-hdfs-connector.html" rel="next" title="Flink1.4 HDFS Connector">
+                <i class="fa fa-chevron-left"></i> Flink1.4 HDFS Connector
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/spark-first-application-word-count.html" rel="prev" title="Spark 第一个Spark程序WordCount">
+                Spark 第一个Spark程序WordCount <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Apache-Flink-System"><span class="nav-number">2.</span> <span class="nav-text">2. Apache Flink System</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-流处理编程模型"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 流处理编程模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-分布式数据流执行"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 分布式数据流执行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Asynchronous-Barrier-Snapshotting"><span class="nav-number">3.</span> <span class="nav-text">3. Asynchronous Barrier Snapshotting</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-问题定义"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 问题定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-非循环数据流的ABS"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 非循环数据流的ABS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-循环数据流的ABS"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 循环数据流的ABS</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-故障恢复"><span class="nav-number">4.</span> <span class="nav-text">4. 故障恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-实现"><span class="nav-number">5.</span> <span class="nav-text">5. 实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-评估"><span class="nav-number">6.</span> <span class="nav-text">6. 评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-总结"><span class="nav-number">7.</span> <span class="nav-text">7. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

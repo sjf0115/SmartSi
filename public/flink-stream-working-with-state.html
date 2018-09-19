@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink 容错," />
+
+
+<meta name="description" content="1. Keyed State 与 Operator StateFlink有两种基本的状态：Keyed State和Operator State。 1.1 Keyed StateKeyed State总是与key相关，只能在与KeyedStream相关的函数和算子中使用。  KeyedStream 继承 DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的Key">
+<meta name="keywords" content="Flink,Flink 容错">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink1.4 如何使用状态">
+<meta property="og:url" content="http://smartsi.club/flink-stream-working-with-state.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. Keyed State 与 Operator StateFlink有两种基本的状态：Keyed State和Operator State。 1.1 Keyed StateKeyed State总是与key相关，只能在与KeyedStream相关的函数和算子中使用。  KeyedStream 继承 DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的Key">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-14T08:57:01.492Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink1.4 如何使用状态">
+<meta name="twitter:description" content="1. Keyed State 与 Operator StateFlink有两种基本的状态：Keyed State和Operator State。 1.1 Keyed StateKeyed State总是与key相关，只能在与KeyedStream相关的函数和算子中使用。  KeyedStream 继承 DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的Key">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-stream-working-with-state.html"/>
+
+
+  <title>Flink1.4 如何使用状态 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-working-with-state.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink1.4 如何使用状态</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-16T20:32:17+08:00">2018-01-16</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-stream-working-with-state.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-working-with-state.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-stream-working-with-state.html" class="leancloud_visitors" data-flag-title="Flink1.4 如何使用状态">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Keyed-State-与-Operator-State"><a href="#1-Keyed-State-与-Operator-State" class="headerlink" title="1. Keyed State 与 Operator State"></a>1. Keyed State 与 Operator State</h3><p><code>Flink</code>有两种基本的状态：<code>Keyed State</code>和<code>Operator State</code>。</p>
+<h4 id="1-1-Keyed-State"><a href="#1-1-Keyed-State" class="headerlink" title="1.1 Keyed State"></a>1.1 Keyed State</h4><p><code>Keyed State</code>总是与<code>key</code>相关，只能在与<code>KeyedStream</code>相关的函数和算子中使用。</p>
+<blockquote>
+<p>KeyedStream 继承 DataStream，表示根据指定的key进行分组的数据流。使用DataStream提供的KeySelector根据key对其上的算子State进行分区。<br>DataStream支持的典型操作也可以在KeyedStream上进行，除了诸如shuffle，forward和keyBy之类的分区方法之外。</p>
+<p>KeyedStream可以通过调用DataStream.keyBy()来获得。而在KeyedStream上进行任何transformation都将转变回DataStream。</p>
+</blockquote>
+<p>你可以将 <code>Keyed State</code> 视为已经分区或分片的<code>Operator State</code>，每个 <code>key</code> 对应一个状态分区。每个<code>Keyed State</code>在逻辑上只对应一个 <code>&lt;并行算子实例，key&gt;</code>，并且由于每个 <code>key</code> “只属于” 一个<code>Keyed Operator</code>的一个并行实例，我们可以简单地认为成 <code>&lt;operator，key&gt;</code>。</p>
+<p><code>Keyed State</code> 被进一步组织成所谓的 <code>Key Group</code>。<code>Key Group</code> 是 <code>Flink</code> 可以分配 <code>Keyed State</code> 的最小原子单位；<code>Key Group</code>的数量与最大并行度一样多。在执行期间，<code>Keyed Operator</code>的每个并行实例都与一个或多个<code>Key Group</code>的<code>key</code>一起工作。</p>
+<h4 id="1-2-Operator-State"><a href="#1-2-Operator-State" class="headerlink" title="1.2 Operator State"></a>1.2 Operator State</h4><p>使用<code>Operator State</code> (或非<code>Keyed State</code>)，每个算子状态都绑定到一个并行算子实例。<code>Kafka Connector</code> 是在<code>Flink</code>中使用算子状态的一个很好的例子。<code>Kafka</code>消费者的每个并行实例都要维护一个<code>topic</code>分区和偏移量的map作为其<code>Operator State</code>。</p>
+<p>在并行度发生变化时，<code>Operator State</code>接口支持在并行算子实例之间进行重新分配状态。可以有不同的方案来处理这个重新分配。</p>
+<h3 id="2-Raw-State-与-Managed-State"><a href="#2-Raw-State-与-Managed-State" class="headerlink" title="2. Raw State 与 Managed State"></a>2. Raw State 与 Managed State</h3><p><code>Keyed State</code>和<code>Operator State</code>以两种形式存在：托管状态<code>Managed State</code>和原生状态<code>Raw State</code>。</p>
+<p><code>Managed State</code>由<code>Flink RunTime</code>控制的数据结构表示，如内部哈希表或<code>RocksDB</code>。例如<code>ValueState</code>，<code>ListState</code>等。<code>Flink RunTime</code>对状态进行编码并将它们写入检查点。</p>
+<p><code>Raw State</code>是指算子保留在它们自己数据结构中的状态。当 <code>Checkpoint</code> 时，他们只写入一个字节序列到检查点中。<code>Flink</code>对状态的数据结构一无所知，只能看到原始字节。</p>
+<p>所有数据流函数都可以使用<code>Managed State</code>，但<code>Raw State</code>接口只能在实现算子时使用。建议使用<code>Managed State</code>（而不是<code>Raw State</code>），因为在<code>Managed State</code>下，<code>Flink</code>可以在并行度发生变化时自动重新分配状态，并且还可以更好地进行内存管理。</p>
+<blockquote>
+<p>如果你的Managed State需要自定义序列化逻辑，请参阅相应的<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/custom_serialization.html" target="_blank" rel="noopener">指南</a>以确保将来的兼容性。Flink的默认序列化器不需要特殊处理。</p>
+</blockquote>
+<h3 id="3-使用Managed-Keyed-State"><a href="#3-使用Managed-Keyed-State" class="headerlink" title="3. 使用Managed Keyed State"></a>3. 使用Managed Keyed State</h3><p><code>Managed Keyed State</code>接口提供了对不同类型状态的访问，这些状态的作用域为当前输入元素的<code>key</code>。这意味着这种类型的状态只能用于<code>KeyedStream</code>，可以通过<code>stream.keyBy（...）</code>创建。</p>
+<p>现在，我们先看看可用状态的不同类型，然后我们会看到如何在程序中使用。可用状态有：</p>
+<ul>
+<li><code>ValueState &lt;T&gt;</code>：保存了一个可以更新和检索的值（如上所述，作用域为输入元素的<code>key</code>，所以每个<code>key</code>可能对应一个值）。该值可以使用<code>update（T）</code>来更新，使用<code>T value（）</code>来检索。</li>
+<li><code>ListState &lt;T&gt;</code>：保存了一个元素列表。可以追加元素并检索当前存储的所有元素的<code>Iterable</code>。使用<code>add（T）</code>添加元素，可以使用<code>Iterable &lt;T&gt; get（）</code>来检索<code>Iterable</code>。</li>
+<li><code>ReducingState &lt;T&gt;</code>：保存一个单一的值，表示添加到状态所有值的聚合。接口与<code>ListState</code>相同，但使用<code>add（T）</code>添加的元素时需要指定<code>ReduceFunction</code>。</li>
+<li><code>AggregatingState &lt;IN，OUT&gt;</code>：保存一个单一的值，表示添加到状态所有值的聚合。与<code>ReducingState</code>不同，聚合后的类型可能与添加到状态的元素类型不同。接口与<code>ListState</code>相同，但使用<code>add（IN）</code>添加到状态的元素使用指定的<code>AggregateFunction</code>进行聚合。</li>
+<li><code>FoldingState &lt;T，ACC&gt;</code>：保存一个单一的值，表示添加到状态所有值的聚合。与<code>ReducingState</code>不同，聚合后类型可能与添加到状态的元素类型不同。接口与<code>ListState</code>相同，但使用<code>add（T）</code>添加到状态的元素使用指定<code>FoldFunction</code>。</li>
+<li>MapState <uk，uv>：保存了一个映射列表。可以将键值对放入状态，并检索当前存储的所有映射的<code>Iterable</code>。使用<code>put（UK，UV）</code>或<code>putAll（Map &lt;UK，UV&gt;）</code>添加映射。与用户<code>key</code>相关的值可以使用<code>get（UK）</code>来检索。映射，键和值的迭代视图可分别使用<code>entries（）</code>，<code>keys（）</code>和<code>values（）</code>来检索。</uk，uv></li>
+</ul>
+<p>所有类型的状态都有一个<code>clear（）</code>方法，它清除了当前活跃<code>key</code>的状态，即输入元素的<code>key</code>。</p>
+<blockquote>
+<p>FoldingState和FoldingStateDescriptor已经在Flink 1.4中被弃用，将来会被彻底删除。请改用AggregatingState和AggregatingStateDescriptor。</p>
+</blockquote>
+<p>请记住，这些状态对象仅能用于状态接口。状态没有必要一定存储在内存中，也可以保存在磁盘或其他地方。第二件要记住的是，你从状态获取的值取决于输入元素的<code>key</code>。因此，如果所使用的<code>key</code>不同，那你在一次用户函数调用中获得的值可能与另一次调用的不同。</p>
+<p>为了得到一个状态句柄，你必须创建一个<code>StateDescriptor</code>。它包含了状态的名字（我们将在后面看到，你可以创建多个状态，必须有唯一的名称，以便引用它们），状态值的类型，以及用户自定义函数，如<code>ReduceFunction</code>。根据要检索的状态类型，你可以创建一个<code>ValueStateDescriptor</code>，<code>ListStateDescriptor</code>，<code>ReducingStateDescriptor</code>，<code>FoldingStateDescriptor</code>或<code>MapStateDescriptor</code>。</p>
+<p>使用<code>RuntimeContext</code>来访问状态，所以只能在<code>Rich</code>函数中使用。请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/api_concepts.html#rich-functions" target="_blank" rel="noopener">这里</a>了解有关信息，我们会很快看到一个例子。 在<code>RichFunction</code>中可用的<code>RuntimeContext</code>具有下面访问状态的方法：</p>
+<ul>
+<li>ValueState<t> getState(ValueStateDescriptor<t>)</t></t></li>
+<li>ReducingState<t> getReducingState(ReducingStateDescriptor<t>)</t></t></li>
+<li>ListState<t> getListState(ListStateDescriptor<t>)</t></t></li>
+<li>AggregatingState<in, out=""> getAggregatingState(AggregatingState<in, out="">)</in,></in,></li>
+<li>FoldingState<t, acc=""> getFoldingState(FoldingStateDescriptor<t, acc="">)</t,></t,></li>
+<li>MapState<uk, uv=""> getMapState(MapStateDescriptor<uk, uv="">)</uk,></uk,></li>
+</ul>
+<p>下面是<code>FlatMapFunction</code>的一个例子：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CountWindowAverage</span> <span class="keyword">extends</span> <span class="title">RichFlatMapFunction</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">Long</span>, <span class="title">Long</span>&gt;, <span class="title">Tuple2</span>&lt;<span class="title">Long</span>, <span class="title">Long</span>&gt;&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * The ValueState handle. The first field is the count, the second field a running sum.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> ValueState&lt;Tuple2&lt;Long, Long&gt;&gt; sum;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(Tuple2&lt;Long, Long&gt; input, Collector&lt;Tuple2&lt;Long, Long&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// access the state value</span></span><br><span class="line">        Tuple2&lt;Long, Long&gt; currentSum = sum.value();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// update the count 个数</span></span><br><span class="line">        currentSum.f0 += <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// add the second field of the input value 总和</span></span><br><span class="line">        currentSum.f1 += input.f1;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// update the state</span></span><br><span class="line">        sum.update(currentSum);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// if the count reaches 2, emit the average and clear the state</span></span><br><span class="line">        <span class="keyword">if</span> (currentSum.f0 &gt;= <span class="number">2</span>) &#123;</span><br><span class="line">            out.collect(<span class="keyword">new</span> Tuple2&lt;&gt;(input.f0, currentSum.f1 / currentSum.f0));</span><br><span class="line">            sum.clear();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">open</span><span class="params">(Configuration config)</span> </span>&#123;</span><br><span class="line">        ValueStateDescriptor&lt;Tuple2&lt;Long, Long&gt;&gt; descriptor =</span><br><span class="line">                <span class="keyword">new</span> ValueStateDescriptor&lt;&gt;(</span><br><span class="line">                        <span class="string">"average"</span>, <span class="comment">// the state name</span></span><br><span class="line">                        TypeInformation.of(<span class="keyword">new</span> TypeHint&lt;Tuple2&lt;Long, Long&gt;&gt;() &#123;&#125;), <span class="comment">// type information</span></span><br><span class="line">                        Tuple2.of(<span class="number">0L</span>, <span class="number">0L</span>)); <span class="comment">// default value of the state, if nothing was set</span></span><br><span class="line">        sum = getRuntimeContext().getState(descriptor);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// this can be used in a streaming program like this (assuming we have a StreamExecutionEnvironment env)</span></span><br><span class="line">env.fromElements(Tuple2.of(<span class="number">1L</span>, <span class="number">3L</span>), Tuple2.of(<span class="number">1L</span>, <span class="number">5L</span>), Tuple2.of(<span class="number">1L</span>, <span class="number">7L</span>), Tuple2.of(<span class="number">1L</span>, <span class="number">4L</span>), Tuple2.of(<span class="number">1L</span>, <span class="number">2L</span>))</span><br><span class="line">        .keyBy(<span class="number">0</span>)</span><br><span class="line">        .flatMap(<span class="keyword">new</span> CountWindowAverage())</span><br><span class="line">        .print();</span><br><span class="line"></span><br><span class="line"><span class="comment">// the printed output will be (1,4) and (1,5)</span></span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CountWindowAverage extends RichFlatMapFunction[(Long, Long), (Long, Long)] &#123;</span><br><span class="line"></span><br><span class="line">  private var sum: ValueState[(Long, Long)] = _</span><br><span class="line"></span><br><span class="line">  override def flatMap(input: (Long, Long), out: Collector[(Long, Long)]): Unit = &#123;</span><br><span class="line"></span><br><span class="line">    // access the state value</span><br><span class="line">    val tmpCurrentSum = sum.value</span><br><span class="line"></span><br><span class="line">    // If it hasn&apos;t been used before, it will be null</span><br><span class="line">    val currentSum = if (tmpCurrentSum != null) &#123;</span><br><span class="line">      tmpCurrentSum</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      (0L, 0L)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // update the count</span><br><span class="line">    val newSum = (currentSum._1 + 1, currentSum._2 + input._2)</span><br><span class="line"></span><br><span class="line">    // update the state</span><br><span class="line">    sum.update(newSum)</span><br><span class="line"></span><br><span class="line">    // if the count reaches 2, emit the average and clear the state</span><br><span class="line">    if (newSum._1 &gt;= 2) &#123;</span><br><span class="line">      out.collect((input._1, newSum._2 / newSum._1))</span><br><span class="line">      sum.clear()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  override def open(parameters: Configuration): Unit = &#123;</span><br><span class="line">    sum = getRuntimeContext.getState(</span><br><span class="line">      new ValueStateDescriptor[(Long, Long)](&quot;average&quot;, createTypeInformation[(Long, Long)])</span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">object ExampleCountWindowAverage extends App &#123;</span><br><span class="line">  val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line"></span><br><span class="line">  env.fromCollection(List(</span><br><span class="line">    (1L, 3L),</span><br><span class="line">    (1L, 5L),</span><br><span class="line">    (1L, 7L),</span><br><span class="line">    (1L, 4L),</span><br><span class="line">    (1L, 2L)</span><br><span class="line">  )).keyBy(_._1)</span><br><span class="line">    .flatMap(new CountWindowAverage())</span><br><span class="line">    .print()</span><br><span class="line">  // the printed output will be (1,4) and (1,5)</span><br><span class="line"></span><br><span class="line">  env.execute(&quot;ExampleManagedState&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个例子实现了一个穷人的计数窗口。我们通过第一个字段键入元组（在这个例子中都有相同的<code>key</code>为<code>1</code>）。该函数将计数和总和存储在<code>ValueState</code>中。一旦计数达到2，就输出平均值并清除状态，以便我们从0开始。注意，如果我们元组第一个字段具有不同值，那将为每个不同的输入<code>key</code>保持不同的状态值。</p>
+<h4 id="3-1-Scala-DataStream-API中的状态"><a href="#3-1-Scala-DataStream-API中的状态" class="headerlink" title="3.1 Scala DataStream API中的状态"></a>3.1 Scala DataStream API中的状态</h4><p>除了上面介绍的接口之外，Scala API还具有在<code>KeyedStream</code>上使用单个<code>ValueState</code>的有状态<code>map（）</code>或<code>flatMap（）</code>函数的快捷方式。用户函数可以在<code>Option</code>获取<code>ValueState</code>的当前值，并且必须返回将用于更新状态的更新值。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val stream: DataStream[(String, Int)] = ...</span><br><span class="line"></span><br><span class="line">val counts: DataStream[(String, Int)] = stream</span><br><span class="line">  .keyBy(_._1)</span><br><span class="line">  .mapWithState((in: (String, Int), count: Option[Int]) =&gt;</span><br><span class="line">    count match &#123;</span><br><span class="line">      case Some(c) =&gt; ( (in._1, c), Some(c + in._2) )</span><br><span class="line">      case None =&gt; ( (in._1, 0), Some(in._2) )</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-使用Managed-Operator-State"><a href="#4-使用Managed-Operator-State" class="headerlink" title="4. 使用Managed Operator State"></a>4. 使用Managed Operator State</h3><p>要使用<code>Managed Operator State</code>，有状态函数可以实现更通用的<code>CheckpointedFunction</code>接口或<code>ListCheckpointed &lt;T extends Serializable&gt;</code>接口。</p>
+<h4 id="4-1-CheckpointedFunction"><a href="#4-1-CheckpointedFunction" class="headerlink" title="4.1 CheckpointedFunction"></a>4.1 CheckpointedFunction</h4><p><code>CheckpointedFunction</code>接口提供了对有不同的重分配方案的非<code>Keyed State</code>的访问。它需要实现一下两种方法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void snapshotState(FunctionSnapshotContext context) throws Exception;</span><br><span class="line"></span><br><span class="line">void initializeState(FunctionInitializationContext context) throws Exception;</span><br></pre></td></tr></table></figure></p>
+<p>每当执行 <code>Checkpoint</code> 时，会调用<code>snapshotState（）</code>方法。每当用户自定义函数被初始化时，或当函数第一次初始化时，或者当函数从之前的检查点恢复时，<code>initializeState（）</code>方法被调用。鉴于此，<code>initializeState（）</code>不仅是初始化不同类型的状态的地方，而且还包括状态恢复逻辑的地方。</p>
+<p>目前支持列表式的<code>Managed Operator State</code>。状态应该是一个可序列化的对象列表，相互间彼此独立，因此可以在扩展时重新分配。换句话说，这些对象可以在非<code>Keyed State</code>中重新分配比较细的粒度。根据状态访问方法，定义了以下重新分配方案：</p>
+<ul>
+<li><code>Even-split redistribution</code>: 每个算子都返回一个状态元素的列表。状态是逻辑上所有列表的连接。在恢复/重新分配时，列表被均分成与并行算子一样多的子列表。每个算子都可以得到一个可能为空或者包含一个或多个元素的子列表。例如，如果并行度为<code>1</code>，一个算子的检查点状态包含元素<code>element1</code>和<code>element2</code>，将并行度增加到<code>2</code>时，<code>element1</code>在算子实例0上运行，而<code>element2</code>将转至算子实例1。</li>
+<li><code>Union redistribution</code>: 每个算子都返回一个状态元素列表。状态是逻辑上所有列表的连接。在恢复/重新分配时，每个算子都可以获得全部的状态元素列表。</li>
+</ul>
+<p>下面是一个有状态的<code>SinkFunction</code>的例子，它使用<code>CheckpointedFunction</code>在将元素输出到外部之前进行缓冲元素。它演示了基本的均分再分配列表状态：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BufferingSink</span></span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">SinkFunction</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">String</span>, <span class="title">Integer</span>&gt;&gt;,</span></span><br><span class="line"><span class="class">                   <span class="title">CheckpointedFunction</span>,</span></span><br><span class="line"><span class="class">                   <span class="title">CheckpointedRestoring</span>&lt;<span class="title">ArrayList</span>&lt;<span class="title">Tuple2</span>&lt;<span class="title">String</span>, <span class="title">Integer</span>&gt;&gt;&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> threshold;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">transient</span> ListState&lt;Tuple2&lt;String, Integer&gt;&gt; checkpointedState;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;Tuple2&lt;String, Integer&gt;&gt; bufferedElements;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BufferingSink</span><span class="params">(<span class="keyword">int</span> threshold)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.threshold = threshold;</span><br><span class="line">        <span class="keyword">this</span>.bufferedElements = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">invoke</span><span class="params">(Tuple2&lt;String, Integer&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        bufferedElements.add(value);</span><br><span class="line">        <span class="keyword">if</span> (bufferedElements.size() == threshold) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Tuple2&lt;String, Integer&gt; element: bufferedElements) &#123;</span><br><span class="line">                <span class="comment">// send it to the sink</span></span><br><span class="line">            &#125;</span><br><span class="line">            bufferedElements.clear();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">snapshotState</span><span class="params">(FunctionSnapshotContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        checkpointedState.clear();</span><br><span class="line">        <span class="keyword">for</span> (Tuple2&lt;String, Integer&gt; element : bufferedElements) &#123;</span><br><span class="line">            checkpointedState.add(element);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initializeState</span><span class="params">(FunctionInitializationContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ListStateDescriptor&lt;Tuple2&lt;String, Integer&gt;&gt; descriptor =</span><br><span class="line">            <span class="keyword">new</span> ListStateDescriptor&lt;&gt;(</span><br><span class="line">                <span class="string">"buffered-elements"</span>,</span><br><span class="line">                TypeInformation.of(<span class="keyword">new</span> TypeHint&lt;Tuple2&lt;Long, Long&gt;&gt;() &#123;&#125;));</span><br><span class="line"></span><br><span class="line">        checkpointedState = context.getOperatorStateStore().getListState(descriptor);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (context.isRestored()) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Tuple2&lt;String, Integer&gt; element : checkpointedState.get()) &#123;</span><br><span class="line">                bufferedElements.add(element);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">restoreState</span><span class="params">(ArrayList&lt;Tuple2&lt;String, Integer&gt;&gt; state)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// this is from the CheckpointedRestoring interface.</span></span><br><span class="line">        <span class="keyword">this</span>.bufferedElements.addAll(state);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class BufferingSink(threshold: Int = 0)</span><br><span class="line">  extends SinkFunction[(String, Int)]</span><br><span class="line">    with CheckpointedFunction</span><br><span class="line">    with CheckpointedRestoring[List[(String, Int)]] &#123;</span><br><span class="line"></span><br><span class="line">  @transient</span><br><span class="line">  private var checkpointedState: ListState[(String, Int)] = _</span><br><span class="line"></span><br><span class="line">  private val bufferedElements = ListBuffer[(String, Int)]()</span><br><span class="line"></span><br><span class="line">  override def invoke(value: (String, Int)): Unit = &#123;</span><br><span class="line">    bufferedElements += value</span><br><span class="line">    if (bufferedElements.size == threshold) &#123;</span><br><span class="line">      for (element &lt;- bufferedElements) &#123;</span><br><span class="line">        // send it to the sink</span><br><span class="line">      &#125;</span><br><span class="line">      bufferedElements.clear()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  override def snapshotState(context: FunctionSnapshotContext): Unit = &#123;</span><br><span class="line">    checkpointedState.clear()</span><br><span class="line">    for (element &lt;- bufferedElements) &#123;</span><br><span class="line">      checkpointedState.add(element)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  override def initializeState(context: FunctionInitializationContext): Unit = &#123;</span><br><span class="line">    val descriptor = new ListStateDescriptor[(String, Int)](</span><br><span class="line">      &quot;buffered-elements&quot;,</span><br><span class="line">      TypeInformation.of(new TypeHint[(String, Int)]() &#123;&#125;)</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    checkpointedState = context.getOperatorStateStore.getListState(descriptor)</span><br><span class="line"></span><br><span class="line">    if(context.isRestored) &#123;</span><br><span class="line">      for(element &lt;- checkpointedState.get()) &#123;</span><br><span class="line">        bufferedElements += element</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  override def restoreState(state: List[(String, Int)]): Unit = &#123;</span><br><span class="line">    bufferedElements ++= state</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>initializeState</code>方法有一个<code>FunctionInitializationContext</code>参数。这用来初始化非<code>keyed state</code>“容器”。这是一个<code>ListState</code>类型的容器，非<code>keyed state</code>对象将在检查点时存储。</p>
+<p>注意一下状态是如何被初始化，类似于<code>keyed state</code>状态，使用包含状态名称和状态值类型相关信息的<code>StateDescriptor</code>：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ListStateDescriptor&lt;Tuple2&lt;String, Integer&gt;&gt; descriptor =</span><br><span class="line">    <span class="keyword">new</span> ListStateDescriptor&lt;&gt;(</span><br><span class="line">        <span class="string">"buffered-elements"</span>,</span><br><span class="line">        TypeInformation.of(<span class="keyword">new</span> TypeHint&lt;Tuple2&lt;Long, Long&gt;&gt;() &#123;&#125;));</span><br><span class="line"></span><br><span class="line">checkpointedState = context.getOperatorStateStore().getListState(descriptor);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val descriptor = new ListStateDescriptor[(String, Long)](</span><br><span class="line">    &quot;buffered-elements&quot;,</span><br><span class="line">    TypeInformation.of(new TypeHint[(String, Long)]() &#123;&#125;)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">checkpointedState = context.getOperatorStateStore.getListState(descriptor)</span><br></pre></td></tr></table></figure></p>
+<p>状态访问方法的命名约定包含其重新分配模式及其状态结构。 例如，要使用带有联合重新分配方案的列表状态进行恢复，请使用<code>getUnionListState（descriptor）</code>访问状态。如果方法名称不包含重新分配模式，例如 <code>getListState（descriptor）</code>，这表示使用基本的均分重分配方案。</p>
+<p>在初始化容器之后，我们使用上下文的<code>isRestored（）</code>方法来检查失败后是否正在恢复。如果是，即我们正在恢复，将会应用恢复逻辑。</p>
+<p>如修改后的<code>BufferingSink</code>的代码所示，在状态初始化期间恢复的这个<code>ListState</code>被保存在类变量中，以备将来在<code>snapshotState（）</code>中使用。 在那里<code>ListState</code>清除了前一个检查点包含的所有对象，然后用我们想要进行检查点的新对象填充。</p>
+<p><code>Keyed State</code>也可以在<code>initializeState（）</code>方法中初始化。这可以使用提供的<code>FunctionInitializationContext</code>完成。</p>
+<h4 id="4-2-ListCheckpointed"><a href="#4-2-ListCheckpointed" class="headerlink" title="4.2 ListCheckpointed"></a>4.2 ListCheckpointed</h4><p><code>ListCheckpointed</code>接口是<code>CheckpointedFunction</code>进行限制的一种变体，它只支持在恢复时使用均分再分配方案的列表样式状态。还需要实现以下两种方法：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">List&lt;T&gt; snapshotState(long checkpointId, long timestamp) throws Exception;</span><br><span class="line"></span><br><span class="line">void restoreState(List&lt;T&gt; state) throws Exception;</span><br></pre></td></tr></table></figure>
+<p><code>snapshotState()</code>方法应该返回一个对象列表来进行checkpoint，而<code>restoreState()</code>方法在恢复时必须处理这样一个列表。如果状态是不可重分区的，则可以在<code>snapshotState()</code>中返回一个<code>Collections.singletonList(MY_STATE)</code>。</p>
+<h4 id="4-2-1-Stateful-Source-Functions"><a href="#4-2-1-Stateful-Source-Functions" class="headerlink" title="4.2.1 Stateful Source Functions"></a>4.2.1 Stateful Source Functions</h4><p>与其他算子相比，有状态的数据源需要得到更多的关注。为了能更新状态以及输出集合的原子性（在失败/恢复时需要一次性语义），用户需要从数据源的上下文中获取锁。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">CounterSource</span></span></span><br><span class="line"><span class="class">        <span class="keyword">extends</span> <span class="title">RichParallelSourceFunction</span>&lt;<span class="title">Long</span>&gt;</span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">ListCheckpointed</span>&lt;<span class="title">Long</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**  current offset for exactly once semantics */</span></span><br><span class="line">    <span class="keyword">private</span> Long offset;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** flag for job cancellation */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> isRunning = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(SourceContext&lt;Long&gt; ctx)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> Object lock = ctx.getCheckpointLock();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (isRunning) &#123;</span><br><span class="line">            <span class="comment">// output and state update are atomic</span></span><br><span class="line">            <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">                ctx.collect(offset);</span><br><span class="line">                offset += <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        isRunning = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Long&gt; <span class="title">snapshotState</span><span class="params">(<span class="keyword">long</span> checkpointId, <span class="keyword">long</span> checkpointTimestamp)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Collections.singletonList(offset);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">restoreState</span><span class="params">(List&lt;Long&gt; state)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Long s : state)</span><br><span class="line">            offset = s;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CounterSource</span><br><span class="line">       extends RichParallelSourceFunction[Long]</span><br><span class="line">       with ListCheckpointed[Long] &#123;</span><br><span class="line"></span><br><span class="line">  @volatile</span><br><span class="line">  private var isRunning = true</span><br><span class="line"></span><br><span class="line">  private var offset = 0L</span><br><span class="line"></span><br><span class="line">  override def run(ctx: SourceFunction.SourceContext[Long]): Unit = &#123;</span><br><span class="line">    val lock = ctx.getCheckpointLock</span><br><span class="line"></span><br><span class="line">    while (isRunning) &#123;</span><br><span class="line">      // output and state update are atomic</span><br><span class="line">      lock.synchronized(&#123;</span><br><span class="line">        ctx.collect(offset)</span><br><span class="line"></span><br><span class="line">        offset += 1</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  override def cancel(): Unit = isRunning = false</span><br><span class="line"></span><br><span class="line">  override def restoreState(state: util.List[Long]): Unit =</span><br><span class="line">    for (s &lt;- state) &#123;</span><br><span class="line">      offset = s</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  override def snapshotState(checkpointId: Long, timestamp: Long): util.List[Long] =</span><br><span class="line">    Collections.singletonList(offset)</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/state.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-stream-working-with-state.html" title="Flink1.4 如何使用状态">http://smartsi.club/flink-stream-working-with-state.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-容错/" rel="tag"># Flink 容错</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-stream-state-overview.html" rel="next" title="Flink1.4 状态概述">
+                <i class="fa fa-chevron-left"></i> Flink1.4 状态概述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/flink-stream-state-backends.html" rel="prev" title="Flink1.4 状态终端">
+                Flink1.4 状态终端 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Keyed-State-与-Operator-State"><span class="nav-number">1.</span> <span class="nav-text">1. Keyed State 与 Operator State</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-Keyed-State"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Keyed State</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-Operator-State"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 Operator State</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Raw-State-与-Managed-State"><span class="nav-number">2.</span> <span class="nav-text">2. Raw State 与 Managed State</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用Managed-Keyed-State"><span class="nav-number">3.</span> <span class="nav-text">3. 使用Managed Keyed State</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Scala-DataStream-API中的状态"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Scala DataStream API中的状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-使用Managed-Operator-State"><span class="nav-number">4.</span> <span class="nav-text">4. 使用Managed Operator State</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-CheckpointedFunction"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 CheckpointedFunction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-ListCheckpointed"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 ListCheckpointed</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-1-Stateful-Source-Functions"><span class="nav-number">4.3.</span> <span class="nav-text">4.2.1 Stateful Source Functions</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

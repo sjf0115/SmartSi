@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink Stream," />
+
+
+<meta name="description" content="算子(Operator)将一个或多个 DataStream 转换为新的 DataStream。程序可以将多个转换组合成复杂的数据流拓扑。 本节将介绍基本转换(transformations)操作，应用这些转换后的有效物理分区以及深入了解 Flink 算子链。 1. DataStream Transformations1.1 MapDataStream → DataStream 输入一个元素并生成一">
+<meta name="keywords" content="Flink,Flink Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink1.4 Operator概述">
+<meta property="og:url" content="http://smartsi.club/flink-stream-operators-overall.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="算子(Operator)将一个或多个 DataStream 转换为新的 DataStream。程序可以将多个转换组合成复杂的数据流拓扑。 本节将介绍基本转换(transformations)操作，应用这些转换后的有效物理分区以及深入了解 Flink 算子链。 1. DataStream Transformations1.1 MapDataStream → DataStream 输入一个元素并生成一">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-operators-overall.png?raw=true">
+<meta property="og:updated_time" content="2018-02-28T09:12:35.139Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink1.4 Operator概述">
+<meta name="twitter:description" content="算子(Operator)将一个或多个 DataStream 转换为新的 DataStream。程序可以将多个转换组合成复杂的数据流拓扑。 本节将介绍基本转换(transformations)操作，应用这些转换后的有效物理分区以及深入了解 Flink 算子链。 1. DataStream Transformations1.1 MapDataStream → DataStream 输入一个元素并生成一">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-operators-overall.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-stream-operators-overall.html"/>
+
+
+  <title>Flink1.4 Operator概述 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-operators-overall.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink1.4 Operator概述</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-28T10:25:17+08:00">2018-02-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-stream-operators-overall.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-operators-overall.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-stream-operators-overall.html" class="leancloud_visitors" data-flag-title="Flink1.4 Operator概述">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>算子(<code>Operator</code>)将一个或多个 <code>DataStream</code> 转换为新的 <code>DataStream</code>。程序可以将多个转换组合成复杂的数据流拓扑。</p>
+<p>本节将介绍基本转换(<code>transformations</code>)操作，应用这些转换后的有效物理分区以及深入了解 Flink 算子链。</p>
+<h3 id="1-DataStream-Transformations"><a href="#1-DataStream-Transformations" class="headerlink" title="1. DataStream Transformations"></a>1. DataStream Transformations</h3><h4 id="1-1-Map"><a href="#1-1-Map" class="headerlink" title="1.1 Map"></a>1.1 Map</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>输入一个元素并生成一个对应的元素。下面是一个将输入流的值加倍的 <code>map</code> 函数：</p>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Integer&gt; dataStream = <span class="comment">//...</span></span><br><span class="line">dataStream.map(<span class="keyword">new</span> MapFunction&lt;Integer, Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">map</span><span class="params">(Integer value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span> * value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>scala版本：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.map &#123; x =&gt; x * <span class="number">2</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-2-FlatMap"><a href="#1-2-FlatMap" class="headerlink" title="1.2 FlatMap"></a>1.2 FlatMap</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>输入一个元素并生成零个，一个或多个元素。下面是个将句子拆分为单词的 <code>flatMap</code> 函数：</p>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.flatMap(<span class="keyword">new</span> FlatMapFunction&lt;String, String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(String value, Collector&lt;String&gt; out)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span>(String word: value.split(<span class="string">" "</span>))&#123;</span><br><span class="line">            out.collect(word);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.flatMap &#123; str =&gt; str.split(<span class="string">" "</span>) &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-3-Filter"><a href="#1-3-Filter" class="headerlink" title="1.3 Filter"></a>1.3 Filter</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>为每个元素计算一个布尔值的函数并保留函数返回 <code>true</code> 的那些元素。下面是一个筛选出零值的 <code>filter</code> 函数：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.filter(<span class="keyword">new</span> FilterFunction&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">filter</span><span class="params">(Integer value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value != <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.filter &#123; _ != <span class="number">0</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-4-KeyBy"><a href="#1-4-KeyBy" class="headerlink" title="1.4 KeyBy"></a>1.4 KeyBy</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → KeyedStream</span><br></pre></td></tr></table></figure>
+<p>逻辑上将一个流分成不相交的分区，每个分区包含相同键的元素。在内部，这是通过哈希分区实现的。参阅博文<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/">Flink1.4 定义keys的几种方法</a>来了解如何指定键。这个转换返回一个 <code>KeyedStream</code>。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="string">"someKey"</span>) <span class="comment">// Key by field "someKey"</span></span><br><span class="line">dataStream.keyBy(<span class="number">0</span>) <span class="comment">// Key by the first element of a Tuple</span></span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="string">"someKey"</span>) <span class="comment">// Key by field "someKey"</span></span><br><span class="line">dataStream.keyBy(<span class="number">0</span>) <span class="comment">// Key by the first element of a Tuple</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注</p>
+<p>在以下情况，不能指定为key：</p>
+<ul>
+<li>POJO类型，但没有覆盖hashCode()方法并依赖于Object.hashCode()实现。</li>
+<li>任意类型的数组。</li>
+</ul>
+</blockquote>
+<h4 id="1-5-Reduce"><a href="#1-5-Reduce" class="headerlink" title="1.5 Reduce"></a>1.5 Reduce</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">KeyedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>键控数据流的”滚动” <code>reduce</code>。将当前元素与上一个 <code>reduce</code> 后的值组合，并生成一个新值。下面是一个创建局部求和流的 <code>reduce</code> 函数：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">keyedStream.reduce(<span class="keyword">new</span> ReduceFunction&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">reduce</span><span class="params">(Integer value1, Integer value2)</span></span></span><br><span class="line"><span class="function">    <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value1 + value2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">keyedStream.reduce &#123; _ + _ &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-6-Fold"><a href="#1-6-Fold" class="headerlink" title="1.6 Fold"></a>1.6 Fold</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">KeyedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>在具有初始值的键控数据流上”滚动” <code>fold</code>。将当前元素与上一个 <code>fold</code> 后的值组合，并生成一个新值。下面是 <code>fold</code> 函数在在序列（1,2,3,4,5）的演示，生成序列 “start-1”，”start-1-2”，”start-1-2-3”，… :</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result =</span><br><span class="line">  keyedStream.fold(<span class="string">"start"</span>, <span class="keyword">new</span> FoldFunction&lt;Integer, String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">fold</span><span class="params">(String current, Integer value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> current + <span class="string">"-"</span> + value;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result: <span class="type">DataStream</span>[<span class="type">String</span>] =</span><br><span class="line">    keyedStream.fold(<span class="string">"start"</span>)((str, i) =&gt; &#123; str + <span class="string">"-"</span> + i &#125;)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-7-Aggregations"><a href="#1-7-Aggregations" class="headerlink" title="1.7 Aggregations"></a>1.7 Aggregations</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">KeyedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>在键控数据流上滚动聚合。<code>min</code> 和 <code>minBy</code> 之间的差别是 <code>min</code> 返回最小值，而 <code>minBy</code> 返回在该字段上具有最小值的元素（<code>max</code> 和 <code>maxBy</code> 相同）。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">keyedStream.sum(<span class="number">0</span>);</span><br><span class="line">keyedStream.sum(<span class="string">"key"</span>);</span><br><span class="line">keyedStream.min(<span class="number">0</span>);</span><br><span class="line">keyedStream.min(<span class="string">"key"</span>);</span><br><span class="line">keyedStream.max(<span class="number">0</span>);</span><br><span class="line">keyedStream.max(<span class="string">"key"</span>);</span><br><span class="line">keyedStream.minBy(<span class="number">0</span>);</span><br><span class="line">keyedStream.minBy(<span class="string">"key"</span>);</span><br><span class="line">keyedStream.maxBy(<span class="number">0</span>);</span><br><span class="line">keyedStream.maxBy(<span class="string">"key"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">keyedStream.sum(<span class="number">0</span>)</span><br><span class="line">keyedStream.sum(<span class="string">"key"</span>)</span><br><span class="line">keyedStream.min(<span class="number">0</span>)</span><br><span class="line">keyedStream.min(<span class="string">"key"</span>)</span><br><span class="line">keyedStream.max(<span class="number">0</span>)</span><br><span class="line">keyedStream.max(<span class="string">"key"</span>)</span><br><span class="line">keyedStream.minBy(<span class="number">0</span>)</span><br><span class="line">keyedStream.minBy(<span class="string">"key"</span>)</span><br><span class="line">keyedStream.maxBy(<span class="number">0</span>)</span><br><span class="line">keyedStream.maxBy(<span class="string">"key"</span>)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-8-Window"><a href="#1-8-Window" class="headerlink" title="1.8 Window"></a>1.8 Window</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">KeyedStream → WindowedStream</span><br></pre></td></tr></table></figure>
+<p>可以在已分区的 <code>KeyedStream</code> 上定义窗口。窗口根据某些特性（例如，在最近5秒内到达的数据）对每个键的数据进行分组。请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html" target="_blank" rel="noopener">窗口</a>以获取窗口的详细说明。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="number">0</span>).window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">5</span>))); <span class="comment">// Last 5 seconds of data</span></span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="number">0</span>).window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>))) <span class="comment">// Last 5 seconds of data</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="1-9-WindowAll"><a href="#1-9-WindowAll" class="headerlink" title="1.9 WindowAll"></a>1.9 WindowAll</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → AllWindowedStream</span><br></pre></td></tr></table></figure>
+<p>可以在常规的 <code>DataStream</code> 上定义窗口。窗口根据某些特征（例如，在最近5秒内到达的数据）对所有流事件进行分组。请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html" target="_blank" rel="noopener">窗口</a>以获取窗口的详细说明。</p>
+<blockquote>
+<p>警告</p>
+<p>在很多情况下是非并行转换。所有记录将被收集到windowAll算子的一个任务中。</p>
+</blockquote>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.windowAll(TumblingEventTimeWindows.of(Time.seconds(<span class="number">5</span>))); <span class="comment">// Last 5 seconds of data</span></span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.windowAll(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>))) <span class="comment">// Last 5 seconds of data</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="1-10-Window-Apply"><a href="#1-10-Window-Apply" class="headerlink" title="1.10 Window Apply"></a>1.10 Window Apply</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">WindowedStream → DataStream</span><br><span class="line">AllWindowedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>将常规函数应用于整个窗口。以下是手动对窗口元素求和的函数。</p>
+<blockquote>
+<p>注意</p>
+<p>如果你使用的是windowAll转换，则需要使用AllWindowFunction。</p>
+</blockquote>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">windowedStream.apply (<span class="keyword">new</span> WindowFunction&lt;Tuple2&lt;String,Integer&gt;, Integer, Tuple, Window&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">apply</span> <span class="params">(Tuple tuple,</span></span></span><br><span class="line"><span class="function"><span class="params">            Window window,</span></span></span><br><span class="line"><span class="function"><span class="params">            Iterable&lt;Tuple2&lt;String, Integer&gt;&gt; values,</span></span></span><br><span class="line"><span class="function"><span class="params">            Collector&lt;Integer&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (value t: values) &#123;</span><br><span class="line">            sum += t.f1;</span><br><span class="line">        &#125;</span><br><span class="line">        out.collect (<span class="keyword">new</span> Integer(sum));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// applying an AllWindowFunction on non-keyed window stream</span></span><br><span class="line">allWindowedStream.apply (<span class="keyword">new</span> AllWindowFunction&lt;Tuple2&lt;String,Integer&gt;, Integer, Window&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">apply</span> <span class="params">(Window window,</span></span></span><br><span class="line"><span class="function"><span class="params">            Iterable&lt;Tuple2&lt;String, Integer&gt;&gt; values,</span></span></span><br><span class="line"><span class="function"><span class="params">            Collector&lt;Integer&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (value t: values) &#123;</span><br><span class="line">            sum += t.f1;</span><br><span class="line">        &#125;</span><br><span class="line">        out.collect (<span class="keyword">new</span> Integer(sum));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">windowedStream.apply &#123; <span class="type">WindowFunction</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// applying an AllWindowFunction on non-keyed window stream</span></span><br><span class="line">allWindowedStream.apply &#123; <span class="type">AllWindowFunction</span> &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-11-Window-Reduce"><a href="#1-11-Window-Reduce" class="headerlink" title="1.11 Window Reduce"></a>1.11 Window Reduce</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">WindowedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>在窗口中应用功能性 <code>reduce</code> 函数并返回 <code>reduce</code> 后的值。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">windowedStream.reduce (<span class="keyword">new</span> ReduceFunction&lt;Tuple2&lt;String,Integer&gt;&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple2&lt;String, Integer&gt; <span class="title">reduce</span><span class="params">(Tuple2&lt;String, Integer&gt; value1, Tuple2&lt;String, Integer&gt; value2)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple2&lt;String,Integer&gt;(value1.f0, value1.f1 + value2.f1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">windowedStream.reduce &#123; _ + _ &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-12-Window-Fold"><a href="#1-12-Window-Fold" class="headerlink" title="1.12 Window Fold"></a>1.12 Window Fold</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">WindowedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>将功能性 <code>fold</code> 函数应用于窗口并返回 <code>fold</code> 后值。例如，应用于序列（1,2,3,4,5）时，将序列 <code>fold</code> 为字符串 <code>start-1-2-3-4-5</code>：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">windowedStream.fold(<span class="string">"start"</span>, <span class="keyword">new</span> FoldFunction&lt;Integer, String&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">fold</span><span class="params">(String current, Integer value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> current + <span class="string">"-"</span> + value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result: <span class="type">DataStream</span>[<span class="type">String</span>] =</span><br><span class="line">    windowedStream.fold(<span class="string">"start"</span>, (str, i) =&gt; &#123; str + <span class="string">"-"</span> + i &#125;)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-13-Aggregations-on-windows"><a href="#1-13-Aggregations-on-windows" class="headerlink" title="1.13 Aggregations on windows"></a>1.13 Aggregations on windows</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">WindowedStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>聚合一个窗口的内容。<code>min</code> 和 <code>minBy</code> 之间的差别是 <code>min</code> 返回最小值，而 <code>minBy</code> 返回该字段中具有最小值的元素（<code>max</code> 和 <code>maxBy</code> 相同）。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">windowedStream.sum(<span class="number">0</span>);</span><br><span class="line">windowedStream.sum(<span class="string">"key"</span>);</span><br><span class="line">windowedStream.min(<span class="number">0</span>);</span><br><span class="line">windowedStream.min(<span class="string">"key"</span>);</span><br><span class="line">windowedStream.max(<span class="number">0</span>);</span><br><span class="line">windowedStream.max(<span class="string">"key"</span>);</span><br><span class="line">windowedStream.minBy(<span class="number">0</span>);</span><br><span class="line">windowedStream.minBy(<span class="string">"key"</span>);</span><br><span class="line">windowedStream.maxBy(<span class="number">0</span>);</span><br><span class="line">windowedStream.maxBy(<span class="string">"key"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">windowedStream.sum(<span class="number">0</span>)</span><br><span class="line">windowedStream.sum(<span class="string">"key"</span>)</span><br><span class="line">windowedStream.min(<span class="number">0</span>)</span><br><span class="line">windowedStream.min(<span class="string">"key"</span>)</span><br><span class="line">windowedStream.max(<span class="number">0</span>)</span><br><span class="line">windowedStream.max(<span class="string">"key"</span>)</span><br><span class="line">windowedStream.minBy(<span class="number">0</span>)</span><br><span class="line">windowedStream.minBy(<span class="string">"key"</span>)</span><br><span class="line">windowedStream.maxBy(<span class="number">0</span>)</span><br><span class="line">windowedStream.maxBy(<span class="string">"key"</span>)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-14-Union"><a href="#1-14-Union" class="headerlink" title="1.14 Union"></a>1.14 Union</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream* → DataStream</span><br></pre></td></tr></table></figure>
+<p>合并两个或更多数据流，创建一个包含所有流中所有元素的新流。</p>
+<blockquote>
+<p>注意</p>
+<p>如果你与自己进行合并，你将在结果流中获取每个元素两次。</p>
+</blockquote>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.union(otherStream1, otherStream2, ...);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.union(otherStream1, otherStream2, ...)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-15-Window-Join"><a href="#1-15-Window-Join" class="headerlink" title="1.15 Window Join"></a>1.15 Window Join</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream,DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>在给定的键和公共窗口上对两个数据流进行 <code>join</code>。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.join(otherStream)</span><br><span class="line">    .where(&lt;key selector&gt;).equalTo(&lt;key selector&gt;)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply (<span class="keyword">new</span> JoinFunction () &#123;...&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.join(otherStream)</span><br><span class="line">    .where(&lt;key selector&gt;).equalTo(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply &#123; ... &#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-16-Window-CoGroup"><a href="#1-16-Window-CoGroup" class="headerlink" title="1.16 Window CoGroup"></a>1.16 Window CoGroup</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream,DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>在给定键和公共窗口上对两个数据流进行组合。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.coGroup(otherStream)</span><br><span class="line">    .where(<span class="number">0</span>).equalTo(<span class="number">1</span>)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply (<span class="keyword">new</span> CoGroupFunction () &#123;...&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.coGroup(otherStream)</span><br><span class="line">    .where(<span class="number">0</span>).equalTo(<span class="number">1</span>)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">3</span>)))</span><br><span class="line">    .apply &#123;&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-17-Split"><a href="#1-17-Split" class="headerlink" title="1.17 Split"></a>1.17 Split</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → SplitStream</span><br></pre></td></tr></table></figure>
+<p>根据一些标准将流分成两个或更多流。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">SplitStream&lt;Integer&gt; split = someDataStream.split(<span class="keyword">new</span> OutputSelector&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Iterable&lt;String&gt; <span class="title">select</span><span class="params">(Integer value)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; output = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">        <span class="keyword">if</span> (value % <span class="number">2</span> == <span class="number">0</span>) &#123;</span><br><span class="line">            output.add(<span class="string">"even"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            output.add(<span class="string">"odd"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> output;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> split = someDataStream.split(</span><br><span class="line">  (num: <span class="type">Int</span>) =&gt;</span><br><span class="line">    (num % <span class="number">2</span>) <span class="keyword">match</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">0</span> =&gt; <span class="type">List</span>(<span class="string">"even"</span>)</span><br><span class="line">      <span class="keyword">case</span> <span class="number">1</span> =&gt; <span class="type">List</span>(<span class="string">"odd"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-18-Select"><a href="#1-18-Select" class="headerlink" title="1.18 Select"></a>1.18 Select</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SplitStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>从分流中选择一个或多个流。</p>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">SplitStream&lt;Integer&gt; split;</span><br><span class="line">DataStream&lt;Integer&gt; even = split.select(<span class="string">"even"</span>);</span><br><span class="line">DataStream&lt;Integer&gt; odd = split.select(<span class="string">"odd"</span>);</span><br><span class="line">DataStream&lt;Integer&gt; all = split.select(<span class="string">"even"</span>,<span class="string">"odd"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> even = split select <span class="string">"even"</span></span><br><span class="line"><span class="keyword">val</span> odd = split select <span class="string">"odd"</span></span><br><span class="line"><span class="keyword">val</span> all = split.select(<span class="string">"even"</span>,<span class="string">"odd"</span>)</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-19-Extract-Timestamps"><a href="#1-19-Extract-Timestamps" class="headerlink" title="1.19 Extract Timestamps"></a>1.19 Extract Timestamps</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>从记录中提取时间戳，以便与使用事件时间语义的窗口一起工作。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.assignTimestamps (<span class="keyword">new</span> TimeStampExtractor() &#123;...&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">stream.assignTimestamps &#123; timestampExtractor &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-Physical-partitioning"><a href="#2-Physical-partitioning" class="headerlink" title="2. Physical partitioning"></a>2. Physical partitioning</h3><p>通过以下功能，Flink 还可以在转换后的确切流分区上进行低层次的控制（如果需要）。</p>
+<h4 id="2-1-Custom-partitioning"><a href="#2-1-Custom-partitioning" class="headerlink" title="2.1 Custom partitioning"></a>2.1 Custom partitioning</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>使用用户自定义的分区器为每个元素选择指定的任务。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.partitionCustom(partitioner, <span class="string">"someKey"</span>);</span><br><span class="line">dataStream.partitionCustom(partitioner, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="2-2-Random-partitioning"><a href="#2-2-Random-partitioning" class="headerlink" title="2.2 Random partitioning"></a>2.2 Random partitioning</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>根据均匀分布随机分配元素。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.shuffle();</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-Rebalancing-Round-robin-partitioning"><a href="#2-3-Rebalancing-Round-robin-partitioning" class="headerlink" title="2.3 Rebalancing (Round-robin partitioning)"></a>2.3 Rebalancing (Round-robin partitioning)</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>对元素循环分区，为每个分区创建相同的负载。在在数据倾斜时用于性能优化。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.rebalance();</span><br></pre></td></tr></table></figure>
+<h4 id="2-4-Rescaling"><a href="#2-4-Rescaling" class="headerlink" title="2.4 Rescaling"></a>2.4 Rescaling</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>为下游操作的子集循环分配元素。这非常有用，如果你想要在管道中使用，例如，从一个数据源的每个并行实例中输出到几个映射器的子集上来分配负载，但不希望发生 <code>rebalance()</code> 的完全重新平衡。这只需要本地数据传输，而不是通过网络传输数据，具体取决于其他配置值，例如 <code>TaskManager</code> 的插槽数。</p>
+<p>上游操作向其发送元素的下游操作的子集取决于上游和下游操作的并行度。例如，如果上游操作并行度为2并且下游操作并行度为4，则一个上游操作将向两个下游操作分配元素，而另一个上游操作将分配给另外两个下游操作。另一方面，如果下游操作并行度为2而上游操作并行度为4，则两个上游操作将分配给一个下游操作，而另外两个上游操作将分配给另一个下游操作。</p>
+<p>存在不同并行度不是成倍数关系，或者多个下游操作具有来自上游操作的不同数量的输入的情况。</p>
+<p>这个图显示了在上面的例子中的连接模式：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-operators-overall.png?raw=true" alt=""></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.rescale();</span><br></pre></td></tr></table></figure>
+<h4 id="2-5-Broadcasting"><a href="#2-5-Broadcasting" class="headerlink" title="2.5 Broadcasting"></a>2.5 Broadcasting</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → DataStream</span><br></pre></td></tr></table></figure>
+<p>将元素广播到每个分区。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dataStream.broadcast()</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-任务链-和-资源组"><a href="#3-任务链-和-资源组" class="headerlink" title="3. 任务链 和 资源组"></a>3. 任务链 和 资源组</h3><p>链接两个连续的转换操作意味着将它们共同定位在同一个线程中以获得更好的性能。如果可能的话，Flink默认链接算子（例如，两个连续的 <code>map</code> 转换）。如果需要，API可以对链接进行精细控制。</p>
+<p>如果要禁用整个作业中的链接，请使用 <code>StreamExecutionEnvironment.disableOperatorChaining（）</code>。对于更细粒度的控制，可用使用以下函数。请注意，这些函数只能在 <code>DataStream</code> 转换操作之后使用，因为它们引用上一个转换。例如，你可以使用 <code>someStream.map（...）.startNewChain（）</code>，但不能使用 <code>someStream.startNewChain（）</code>。</p>
+<p>资源组是 Flink 中的插槽，请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/config.html#configuring-taskmanager-processing-slots" target="_blank" rel="noopener">插槽</a>。如果需要，你可以在不同的插槽中手动隔离算子。</p>
+<h4 id="3-1-开始一个新链"><a href="#3-1-开始一个新链" class="headerlink" title="3.1 开始一个新链"></a>3.1 开始一个新链</h4><p>从这个算子开始，开始一个新的链。将这两个 <code>mapper</code> 链接，并且 <code>filter</code> 不会链接到第一个 <code>mapper</code>。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">someStream.filter(...).map(...).startNewChain().map(...);</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-2-取消链"><a href="#3-2-取消链" class="headerlink" title="3.2 取消链"></a>3.2 取消链</h4><p>不会将<code>map</code>算子链接到链上：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">someStream.map(...).disableChaining();</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-3-设置插槽共享组"><a href="#3-3-设置插槽共享组" class="headerlink" title="3.3 设置插槽共享组"></a>3.3 设置插槽共享组</h4><p>设置操作的插槽共享组。Flink会将使用相同插槽共享组的操作放入同一插槽，同时保持在其他插槽中没有插槽共享组的操作。这可以用来隔离插槽。如果所有输入操作位于同一个插槽共享组中，则插槽共享组将继承自输入操作。缺省插槽共享组的名称为 <code>default</code>，可通过调用 <code>slotSharingGroup（“default”）</code>将操作显式放入此组。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">someStream.filter(...).slotSharingGroup(<span class="string">"name"</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注：</p>
+<p>Flink 版本： 1.4</p>
+</blockquote>
+<p>原文： <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/index.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/index.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-stream-operators-overall.html" title="Flink1.4 Operator概述">http://smartsi.club/flink-stream-operators-overall.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/scala-notes-apply-update.html" rel="next" title="Scala 学习笔记之提取器">
+                <i class="fa fa-chevron-left"></i> Scala 学习笔记之提取器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/flink-stream-windows-overall.html" rel="prev" title="Flink1.4 窗口概述">
+                Flink1.4 窗口概述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-DataStream-Transformations"><span class="nav-number">1.</span> <span class="nav-text">1. DataStream Transformations</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-Map"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Map</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-FlatMap"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 FlatMap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-Filter"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 Filter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-KeyBy"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 KeyBy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-Reduce"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 Reduce</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-6-Fold"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 Fold</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-7-Aggregations"><span class="nav-number">1.7.</span> <span class="nav-text">1.7 Aggregations</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-8-Window"><span class="nav-number">1.8.</span> <span class="nav-text">1.8 Window</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-9-WindowAll"><span class="nav-number">1.9.</span> <span class="nav-text">1.9 WindowAll</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-10-Window-Apply"><span class="nav-number">1.10.</span> <span class="nav-text">1.10 Window Apply</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-11-Window-Reduce"><span class="nav-number">1.11.</span> <span class="nav-text">1.11 Window Reduce</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-12-Window-Fold"><span class="nav-number">1.12.</span> <span class="nav-text">1.12 Window Fold</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-13-Aggregations-on-windows"><span class="nav-number">1.13.</span> <span class="nav-text">1.13 Aggregations on windows</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-14-Union"><span class="nav-number">1.14.</span> <span class="nav-text">1.14 Union</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-15-Window-Join"><span class="nav-number">1.15.</span> <span class="nav-text">1.15 Window Join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-16-Window-CoGroup"><span class="nav-number">1.16.</span> <span class="nav-text">1.16 Window CoGroup</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-17-Split"><span class="nav-number">1.17.</span> <span class="nav-text">1.17 Split</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-18-Select"><span class="nav-number">1.18.</span> <span class="nav-text">1.18 Select</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-19-Extract-Timestamps"><span class="nav-number">1.19.</span> <span class="nav-text">1.19 Extract Timestamps</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Physical-partitioning"><span class="nav-number">2.</span> <span class="nav-text">2. Physical partitioning</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Custom-partitioning"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Custom partitioning</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-Random-partitioning"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Random partitioning</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Rebalancing-Round-robin-partitioning"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Rebalancing (Round-robin partitioning)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-Rescaling"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 Rescaling</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-Broadcasting"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 Broadcasting</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-任务链-和-资源组"><span class="nav-number">3.</span> <span class="nav-text">3. 任务链 和 资源组</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-开始一个新链"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 开始一个新链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-取消链"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 取消链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-设置插槽共享组"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 设置插槽共享组</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

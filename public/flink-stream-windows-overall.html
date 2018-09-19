@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink Stream," />
+
+
+<meta name="description" content="Windows(窗口)是处理无限数据流的核心。窗口将流分解成有限大小的”桶”，在上面我们可以进行计算。本文将重点介绍 Flink 中的窗口，以及常见的窗口类型。 一个窗口化的 Flink 程序一般结构如下。第一个片段指的是指定 key 的数据流（keyed streams），而第二个未指定key的数据流。可以看出，唯一的区别是指定 key 的数据流调用了 keyBy() 以及 window() 方">
+<meta name="keywords" content="Flink,Flink Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink1.4 窗口概述">
+<meta property="og:url" content="http://smartsi.club/flink-stream-windows-overall.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Windows(窗口)是处理无限数据流的核心。窗口将流分解成有限大小的”桶”，在上面我们可以进行计算。本文将重点介绍 Flink 中的窗口，以及常见的窗口类型。 一个窗口化的 Flink 程序一般结构如下。第一个片段指的是指定 key 的数据流（keyed streams），而第二个未指定key的数据流。可以看出，唯一的区别是指定 key 的数据流调用了 keyBy() 以及 window() 方">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-4.png?raw=true">
+<meta property="og:updated_time" content="2018-03-01T01:39:29.741Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink1.4 窗口概述">
+<meta name="twitter:description" content="Windows(窗口)是处理无限数据流的核心。窗口将流分解成有限大小的”桶”，在上面我们可以进行计算。本文将重点介绍 Flink 中的窗口，以及常见的窗口类型。 一个窗口化的 Flink 程序一般结构如下。第一个片段指的是指定 key 的数据流（keyed streams），而第二个未指定key的数据流。可以看出，唯一的区别是指定 key 的数据流调用了 keyBy() 以及 window() 方">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-stream-windows-overall.html"/>
+
+
+  <title>Flink1.4 窗口概述 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-windows-overall.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink1.4 窗口概述</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-28T17:17:17+08:00">2018-02-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-stream-windows-overall.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-windows-overall.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-stream-windows-overall.html" class="leancloud_visitors" data-flag-title="Flink1.4 窗口概述">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Windows(窗口)是处理无限数据流的核心。窗口将流分解成有限大小的”桶”，在上面我们可以进行计算。本文将重点介绍 Flink 中的窗口，以及常见的窗口类型。</p>
+<p>一个窗口化的 Flink 程序一般结构如下。第一个片段指的是指定 key 的数据流（<code>keyed streams</code>），而第二个未指定key的数据流。可以看出，唯一的区别是指定 key 的数据流调用了 <code>keyBy()</code> 以及 <code>window()</code> 方法变为未指定 key 数据流下的 <code>windowAll()</code> 方法。</p>
+<p>Keyed Windows：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">       .keyBy(...)          &lt;-  keyed versus non-keyed windows</span><br><span class="line">       .window(...)         &lt;-  required: &quot;assigner&quot;</span><br><span class="line">      [.trigger(...)]       &lt;-  optional: &quot;trigger&quot; (else default trigger)</span><br><span class="line">      [.evictor(...)]       &lt;-  optional: &quot;evictor&quot; (else no evictor)</span><br><span class="line">      [.allowedLateness()]  &lt;-  optional, else zero</span><br><span class="line">       .reduce/fold/apply() &lt;-  required: &quot;function&quot;</span><br></pre></td></tr></table></figure></p>
+<p>Non-Keyed Windows：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">stream</span><br><span class="line">       .windowAll(...)      &lt;-  required: &quot;assigner&quot;</span><br><span class="line">      [.trigger(...)]       &lt;-  optional: &quot;trigger&quot; (else default trigger)</span><br><span class="line">      [.evictor(...)]       &lt;-  optional: &quot;evictor&quot; (else no evictor)</span><br><span class="line">      [.allowedLateness()]  &lt;-  optional, else zero</span><br><span class="line">       .reduce/fold/apply() &lt;-  required: &quot;function&quot;</span><br></pre></td></tr></table></figure></p>
+<p>在上面，方括号 <code>[...]</code> 中的命令是可选的。这表明 Flink 允许你可以以多种不同的方式自定义你的窗口逻辑，以便更好的满足你的需求。</p>
+<h3 id="1-窗口生命周期"><a href="#1-窗口生命周期" class="headerlink" title="1. 窗口生命周期"></a>1. 窗口生命周期</h3><p>简而言之，一旦属于这个窗口的第一个元素到达，就会创建该窗口，当时间(事件时间或处理时间)到达其结束时间戳加上用户指定的可允许延迟的时间戳，窗口将被完全删除。Flink 保证仅对基于时间的窗口进行删除，并不适用于其他类型的窗口，例如，全局窗口（具体请参阅下面的窗口分配器）。举个例子，使用基于事件时间的窗口策略，每隔5分钟创建一个不重叠的窗口，并且允许可以有1分钟的延迟时间。当第一个带有时间戳的元素落入12:00至12:05时间间隔内时，Flink 创建一个新窗口，当时间戳到达 12:06 时，窗口将被删除。</p>
+<p>另外，每个窗口都将有一个触发器和一个函数(例如 <code>WindowFunction</code>， <code>ReduceFunction</code> 或 <code>FoldFunction</code>)。这个函数包含应用于窗口内容的计算，而触发器指定了窗口使用该函数的条件。触发策略可能是”当窗口中的元素个数大于4”，或”当 <code>watermark</code> 通过窗口末尾”。触发器还可以决定在创建窗口和删除窗口之间的任何时间内清除窗口内容。在这种情况下，清除仅指窗口中的元素，而不是窗口的元数据。这意味着新数据仍然可以添加到该窗口。</p>
+<p>除了上述之外，你还可以指定一个 <code>Evictor</code>，在触发器触发之后以及在应用该函数之前和/或之后从窗口中移除元素。</p>
+<h3 id="2-Keyed-vs-Non-Keyed-Windows"><a href="#2-Keyed-vs-Non-Keyed-Windows" class="headerlink" title="2. Keyed vs Non-Keyed Windows"></a>2. Keyed vs Non-Keyed Windows</h3><p>首先要指定的第一件事就是你的数据流是否应该指定 <code>key</code>。这必须在定义窗口之前完成。使用 <code>keyBy()</code> 可以将无限数据流分解成指定 key 的逻辑上的数据流。如果未调用 <code>keyBy()</code>，则你的数据流未指定 key。</p>
+<p>在指定 key 的数据流的情况下，你传入进来的事件的任何属性都可以用作 key(<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/">更多细节</a>)。指定 key 的数据流可以允许通过多个任务并行执行窗口计算，因为每个逻辑数据流可以独立于其余的进行处理。指向相同 key 的所有元素将被发送到相同的并行任务上。</p>
+<p>在未指定 key 的数据流的情况下，你的原始数据流不会被分割成多个逻辑数据流，并且所有窗口逻辑将由单个任务执行，即以1个的并行度执行。</p>
+<h3 id="3-窗口分配器"><a href="#3-窗口分配器" class="headerlink" title="3. 窗口分配器"></a>3. 窗口分配器</h3><p>在确定数据流是否指定 key 之后，下一步就是定义窗口分配器。窗口分配器定义了元素如何分配给窗口。这通过在 <code>window()</code>(指定key数据流)或 <code>windowAll()</code>(未指定key数据流)调用中指定你选择的窗口分配器来完成。</p>
+<p>窗口分配器负责将每个传入的元素分配给一个或多个窗口。Flink 内置了一些用于解决常见用例的窗口分配器，有滚动窗口，滑动窗口，会话窗口和全局窗口。你还可以通过继承 <code>WindowAssigner</code> 类实现自定义窗口分配器。所有内置窗口分配器(全局窗口除外)根据时间将元素分配给窗口，可以是处理时间或事件时间。请参阅<a href="http://smartsi.club/2018/01/04/flink-stream-event-time-and-processing-time/">事件时间</a>，了解处理时间和事件时间之间的差异以及如何生成时间戳和<code>watermarks</code>。</p>
+<p>在下文中，我们将展示 Flink 的内置窗口分配器的工作原理以及它们在 <code>DataStream</code> 程序中的使用方式。以下图形可视化每个分配器的运行。紫色圆圈表示数据流中的元素，它们被某些key（在我们这个例子下为用 <code>user1</code>，<code>user2</code> 和 <code>user3</code>）分区。x轴显示时间进度。</p>
+<h4 id="3-1-滚动窗口"><a href="#3-1-滚动窗口" class="headerlink" title="3.1 滚动窗口"></a>3.1 滚动窗口</h4><p>滚动窗口分配器将每个元素分配给固定大小的窗口。滚动窗口大小固定且不重叠。例如，如果指定大小为5分钟的滚动窗口，则将执行当前窗口，并且每五分钟将启动一个新窗口，如下图所示:</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-1.png?raw=true" alt=""></p>
+<p>以下代码显示如何使用滚动窗口：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;T&gt; input = ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 基于事件事件的滚动窗口</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 基于处理时间的滚动窗口</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(TumblingProcessingTimeWindows.of(Time.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// daily tumbling event-time windows offset by -8 hours.</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.days(<span class="number">1</span>), Time.hours(-<span class="number">8</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> input: <span class="type">DataStream</span>[<span class="type">T</span>] = ...</span><br><span class="line"></span><br><span class="line"><span class="comment">// tumbling event-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// tumbling processing-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">TumblingProcessingTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// daily tumbling event-time windows offset by -8 hours.</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">TumblingEventTimeWindows</span>.of(<span class="type">Time</span>.days(<span class="number">1</span>), <span class="type">Time</span>.hours(<span class="number">-8</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br></pre></td></tr></table></figure></p>
+<p>可以通过使用 <code>Time.milliseconds(x)</code>， <code>Time.seconds(x)</code>， <code>Time.minutes(x)</code> 来指定时间间隔。</p>
+<p>如上一个例子中所示，滚动窗口分配器还可以使用一个可选的偏移量参数，可以用来改变窗口的对齐方式。例如，没有偏移量的情况下，按小时滚动窗口与 <code>epoch</code> （指的是一个特定的时间：<code>1970-01-01 00:00:00 UTC</code>）对齐，那么你将获得如<code>1：00：00.000 - 1：59：59.999</code>，<code>2：00：00.000 - 2：59：59.999</code>等窗口。如果你想改变，你可以给一个偏移量。以15分钟的偏移量为例，那么你将获得<code>1：15：00.000 - 2：14：59.999</code>，<code>2：15：00.000 - 3：14：59.999</code>等。偏移量的一个重要用例是将窗口调整为时区而不是UTC-0。例如，在中国，你必须指定 <code>Time.hours(-8)</code> 的偏移量。</p>
+<h4 id="3-2-滑动窗口"><a href="#3-2-滑动窗口" class="headerlink" title="3.2 滑动窗口"></a>3.2 滑动窗口</h4><p>滑动窗口分配器将每个元素分配给固定窗口大小的窗口。类似于滚动窗口分配器，窗口的大小由窗口大小(<code>window size</code>)参数配置。另外一个窗口滑动参数控制滑动窗口的启动频率(译者注：滑动大小)。因此，如果滑动大小小于窗口大小，滑动窗口可以重叠。在这种情况下，元素可以被分配到多个窗口。</p>
+<p>例如，你可以使用窗口大小为10分钟的窗口，滑动大小为5分钟。这样，每5分钟会生成一个窗口，包含最后10分钟内到达的事件，如下图所示。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-2.png?raw=true" alt=""></p>
+<p>以下代码显示如何使用滑动窗口:</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;T&gt; input = ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding event-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(SlidingEventTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding processing-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(SlidingProcessingTimeWindows.of(Time.seconds(<span class="number">10</span>), Time.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding processing-time windows offset by -8 hours</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(SlidingProcessingTimeWindows.of(Time.hours(<span class="number">12</span>), Time.hours(<span class="number">1</span>), Time.hours(-<span class="number">8</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> input: <span class="type">DataStream</span>[<span class="type">T</span>] = ...</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding event-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">SlidingEventTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">10</span>), <span class="type">Time</span>.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding processing-time windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">SlidingProcessingTimeWindows</span>.of(<span class="type">Time</span>.seconds(<span class="number">10</span>), <span class="type">Time</span>.seconds(<span class="number">5</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// sliding processing-time windows offset by -8 hours</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">SlidingProcessingTimeWindows</span>.of(<span class="type">Time</span>.hours(<span class="number">12</span>), <span class="type">Time</span>.hours(<span class="number">1</span>), <span class="type">Time</span>.hours(<span class="number">-8</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br></pre></td></tr></table></figure></p>
+<p>可以通过使用 <code>Time.milliseconds(x)</code>，<code>Time.seconds(x)</code>，<code>Time.minutes(x)</code> 来指定时间间隔。</p>
+<p>如上一个例子所示，滑动窗口分配器也可以使用一个可选的偏移量参数，用来改变窗口的对齐方式。例如，没有偏移量的情况下，按小时滑动窗口大小为30分钟的例子下，你将获得如<code>1：00：00.000 - 1：59：59.999</code>，<code>1：30：00.000 - 2：29：59.999</code>等窗口。如果你想改变，你可以给一个偏移量。以15分钟的偏移量为例，那么你将获得<code>1：15：00.000 - 2：14：59.999</code>，<code>1：45：00.000 - 2：44：59.999</code>等。偏移量的一个重要用例是将窗口调整为时区而不是UTC-0。例如，在中国，你必须指定<code>Time.hours(-8)</code>的偏移量。</p>
+<h4 id="3-3-会话窗口"><a href="#3-3-会话窗口" class="headerlink" title="3.3 会话窗口"></a>3.3 会话窗口</h4><p>会话窗口分配器通过活动会话对元素进行分组。与滚动窗口和滑动窗口相比，会话窗口不会重叠，也没有固定的开始和结束时间。相反，当会话窗口在一段时间内没有接收到元素时会关闭，即当发生不活动的间隙时。会话窗口分配器配置一个会话间隙，定义了所需的不活动时长。当此时间段到期时，当前会话关闭，后续元素被分配到新的会话窗口。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-3.png?raw=true" alt=""></p>
+<p>以下代码显示如何使用会话窗口:</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;T&gt; input = ...;</span><br><span class="line"></span><br><span class="line"><span class="comment">// event-time session windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(EventTimeSessionWindows.withGap(Time.minutes(<span class="number">10</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// processing-time session windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(ProcessingTimeSessionWindows.withGap(Time.minutes(<span class="number">10</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> input: <span class="type">DataStream</span>[<span class="type">T</span>] = ...</span><br><span class="line"></span><br><span class="line"><span class="comment">// event-time session windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">EventTimeSessionWindows</span>.withGap(<span class="type">Time</span>.minutes(<span class="number">10</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// processing-time session windows</span></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">ProcessingTimeSessionWindows</span>.withGap(<span class="type">Time</span>.minutes(<span class="number">10</span>)))</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br></pre></td></tr></table></figure></p>
+<p>可以通过使用 <code>Time.milliseconds(x)</code>， <code>Time.seconds(x)</code>， <code>Time.minutes(x)</code> 来指定时间间隔。</p>
+<p>由于会话窗口没有固定的开始时间和结束时间，因此它们的执行与滚动窗口和滑动窗口不同。在内部，会话窗口算子为每个到达记录创建一个新窗口，如果它们之间的距离比定义的间隙更近，则将窗口合并在一起。为了可合并，会话窗口算子需要一个合并触发器和合并窗口函数，例如 <code>ReduceFunction</code> 或 <code>WindowFunction</code>（<code>FoldFunction</code>无法合并）。</p>
+<h4 id="3-4-全局窗口"><a href="#3-4-全局窗口" class="headerlink" title="3.4 全局窗口"></a>3.4 全局窗口</h4><p>全局窗口分配器将具有相同 key 的所有元素分配给同一个全局窗口。这个窗口规范是仅在你同时指定自定义触发器时有用。否则，不会执行计算，因为全局窗口没有我们可以处理聚合元素的自然结束的点（译者注：即本身自己不知道窗口的大小，计算多长时间的元素）。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-4.png?raw=true" alt=""></p>
+<p>以下代码显示如何使用会话窗口:</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;T&gt; input = ...;</span><br><span class="line"></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(GlobalWindows.create())</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> input: <span class="type">DataStream</span>[<span class="type">T</span>] = ...</span><br><span class="line"></span><br><span class="line">input</span><br><span class="line">    .keyBy(&lt;key selector&gt;)</span><br><span class="line">    .window(<span class="type">GlobalWindows</span>.create())</span><br><span class="line">    .&lt;windowed transformation&gt;(&lt;window function&gt;)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注:</p>
+<p>Flink版本:1.4</p>
+</blockquote>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-stream-windows-overall.html" title="Flink1.4 窗口概述">http://smartsi.club/flink-stream-windows-overall.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-stream-operators-overall.html" rel="next" title="Flink1.4 Operator概述">
+                <i class="fa fa-chevron-left"></i> Flink1.4 Operator概述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/flink-stream-asynchronous-io-for-external-data-access.html" rel="prev" title="Flink1.4 用于外部数据访问的异步IO">
+                Flink1.4 用于外部数据访问的异步IO <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-窗口生命周期"><span class="nav-number">1.</span> <span class="nav-text">1. 窗口生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Keyed-vs-Non-Keyed-Windows"><span class="nav-number">2.</span> <span class="nav-text">2. Keyed vs Non-Keyed Windows</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-窗口分配器"><span class="nav-number">3.</span> <span class="nav-text">3. 窗口分配器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-滚动窗口"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 滚动窗口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-滑动窗口"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 滑动窗口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-会话窗口"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 会话窗口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-全局窗口"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 全局窗口</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

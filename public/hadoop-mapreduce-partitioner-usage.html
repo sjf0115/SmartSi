@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hadoop,Hadoop 基础," />
+
+
+<meta name="description" content="partitioner在处理输入数据集时就像条件表达式(condition)一样工作。分区阶段发生在Map阶段之后，Reduce阶段之前。partitioner的个数等于reducer的个数(The number of partitioners is equal to the number of reducers)。这就意味着一个partitioner将根据reducer的个数来划分数据(That">
+<meta name="keywords" content="Hadoop,Hadoop 基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hadoop Partitioner使用教程">
+<meta property="og:url" content="http://smartsi.club/hadoop-mapreduce-partitioner-usage.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="partitioner在处理输入数据集时就像条件表达式(condition)一样工作。分区阶段发生在Map阶段之后，Reduce阶段之前。partitioner的个数等于reducer的个数(The number of partitioners is equal to the number of reducers)。这就意味着一个partitioner将根据reducer的个数来划分数据(That">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-05-04T05:41:38.113Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hadoop Partitioner使用教程">
+<meta name="twitter:description" content="partitioner在处理输入数据集时就像条件表达式(condition)一样工作。分区阶段发生在Map阶段之后，Reduce阶段之前。partitioner的个数等于reducer的个数(The number of partitioners is equal to the number of reducers)。这就意味着一个partitioner将根据reducer的个数来划分数据(That">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/hadoop-mapreduce-partitioner-usage.html"/>
+
+
+  <title>Hadoop Partitioner使用教程 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/hadoop-mapreduce-partitioner-usage.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Hadoop Partitioner使用教程</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-05T20:25:17+08:00">2017-12-05</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Hadoop/" itemprop="url" rel="index"><span itemprop="name">Hadoop</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/hadoop-mapreduce-partitioner-usage.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/hadoop-mapreduce-partitioner-usage.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/hadoop-mapreduce-partitioner-usage.html" class="leancloud_visitors" data-flag-title="Hadoop Partitioner使用教程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>partitioner</code>在处理输入数据集时就像条件表达式(condition)一样工作。分区阶段发生在<code>Map</code>阶段之后，<code>Reduce</code>阶段之前。<code>partitioner</code>的个数等于<code>reducer</code>的个数(The number of partitioners is equal to the number of reducers)。这就意味着一个<code>partitioner</code>将根据<code>reducer</code>的个数来划分数据(That means a partitioner will divide the data according to the number of reducers)。因此，从一个单独<code>partitioner</code>传递过来的数据将会交由一个单独的<code>reducer</code>处理(the data passed from a single partitioner is processed by a single Reducer)。</p>
+<h3 id="1-Partitioner"><a href="#1-Partitioner" class="headerlink" title="1. Partitioner"></a>1. Partitioner</h3><p><code>partitioner</code>对Map中间输出结果的键值对进行分区。使用用户自定义的分区条件来对数据进行分区，它的工作方式类似于hash函数。<code>partitioner</code>的总个数与作业的<code>reducer</code>任务的个数相同。下面我们以一个例子来说明<code>partitioner</code>是如何工作的。</p>
+<h3 id="2-MapReduce的Partitioner实现"><a href="#2-MapReduce的Partitioner实现" class="headerlink" title="2. MapReduce的Partitioner实现"></a>2. MapReduce的Partitioner实现</h3><p>为了方便，假设我们有一个Employee表，数据如下。我们使用下面样例数据作为输入数据集来验证<code>partitioner</code>是如何工作的。</p>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Name</th>
+<th>Age</th>
+<th>Gender</th>
+<th>Salary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1201</td>
+<td>gopal</td>
+<td>45</td>
+<td>Male</td>
+<td>50,000</td>
+</tr>
+<tr>
+<td>1202</td>
+<td>manisha</td>
+<td>40</td>
+<td>Female</td>
+<td>50,000</td>
+</tr>
+<tr>
+<td>1203</td>
+<td>khalil</td>
+<td>34</td>
+<td>Male</td>
+<td>30,000</td>
+</tr>
+<tr>
+<td>1204</td>
+<td>prasanth</td>
+<td>30</td>
+<td>Male</td>
+<td>30,000</td>
+</tr>
+<tr>
+<td>1205</td>
+<td>kiran</td>
+<td>20</td>
+<td>Male</td>
+<td>40,000</td>
+</tr>
+<tr>
+<td>1206</td>
+<td>laxmi</td>
+<td>25</td>
+<td>Female</td>
+<td>35,000</td>
+</tr>
+<tr>
+<td>1207</td>
+<td>bhavya</td>
+<td>20</td>
+<td>Female</td>
+<td>15,000</td>
+</tr>
+<tr>
+<td>1208</td>
+<td>reshma</td>
+<td>19</td>
+<td>Female</td>
+<td>15,000</td>
+</tr>
+<tr>
+<td>1209</td>
+<td>kranthi</td>
+<td>22</td>
+<td>Male</td>
+<td>22,000</td>
+</tr>
+<tr>
+<td>1210</td>
+<td>Satish</td>
+<td>24</td>
+<td>Male</td>
+<td>25,000</td>
+</tr>
+<tr>
+<td>1211</td>
+<td>Krishna</td>
+<td>25</td>
+<td>Male</td>
+<td>25,000</td>
+</tr>
+<tr>
+<td>1212</td>
+<td>Arshad</td>
+<td>28</td>
+<td>Male</td>
+<td>20,000</td>
+</tr>
+<tr>
+<td>1213</td>
+<td>lavanya</td>
+<td>18</td>
+<td>Female</td>
+<td>8,000</td>
+</tr>
+</tbody>
+</table>
+<p>我们写一个程序来处理输入数据集，对年龄进行分组(例如：小于20，21-30，大于30)，并找到每个分组中的最高工资的员工。</p>
+<h4 id="2-1-输入数据"><a href="#2-1-输入数据" class="headerlink" title="2.1 输入数据"></a>2.1 输入数据</h4><p>以上数据存储在<code>/home/xiaosi/tmp/partitionerExample/input/</code>目录中的<code>input.txt</code>文件中，数据存储格式如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1201	gopal	45	Male	50000</span><br><span class="line">1202	manisha	40	Female	51000</span><br><span class="line">1203	khaleel	34	Male	30000</span><br><span class="line">1204	prasanth	30	Male	31000</span><br><span class="line">1205	kiran	20	Male	40000</span><br><span class="line">1206	laxmi	25	Female	35000</span><br><span class="line">1207	bhavya	20	Female	15000</span><br><span class="line">1208	reshma	19	Female	14000</span><br><span class="line">1209	kranthi	22	Male	22000</span><br><span class="line">1210	Satish	24	Male	25000</span><br><span class="line">1211	Krishna	25	Male	26000</span><br><span class="line">1212	Arshad	28	Male	20000</span><br><span class="line">1213	lavanya	18	Female	8000</span><br></pre></td></tr></table></figure></p>
+<p>基于以上输入数据，下面是具体的算法描述。</p>
+<h4 id="2-2-Map任务"><a href="#2-2-Map任务" class="headerlink" title="2.2 Map任务"></a>2.2 Map任务</h4><p>Map任务以键值对作为输入，我们存储文本数据在text文件中。Map任务输入数据如下：</p>
+<h5 id="2-2-1-Input"><a href="#2-2-1-Input" class="headerlink" title="2.2.1 Input"></a>2.2.1 Input</h5><p>key以<code>特殊key+文件名+行号</code>的模式表示(例如，key = @input1)，value为一行中的数据(例如，value = 1201\tgopal\t45\tMale\t50000)。</p>
+<h5 id="2-2-2-Method"><a href="#2-2-2-Method" class="headerlink" title="2.2.2 Method"></a>2.2.2 Method</h5><p>读取一行中数据，使用split方法以<code>\t</code>进行分割，取出性别存储在变量中<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] str = value.toString().split(<span class="string">"\t"</span>, -<span class="number">3</span>);</span><br><span class="line">String gender = str[<span class="number">3</span>];</span><br></pre></td></tr></table></figure></p>
+<p>以性别为key，行记录数据为value作为输出键值对，从<code>Map</code>任务传递到<code>Partition</code>任务：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">context.write(<span class="keyword">new</span> Text(gender), <span class="keyword">new</span> Text(value));</span><br></pre></td></tr></table></figure></p>
+<p>对text文件中的所有记录重复以上所有步骤。</p>
+<h5 id="2-2-3-Output"><a href="#2-2-3-Output" class="headerlink" title="2.2.3 Output"></a>2.2.3 Output</h5><p>得到性别与记录数据组成的键值对</p>
+<h4 id="2-3-Partition任务"><a href="#2-3-Partition任务" class="headerlink" title="2.3 Partition任务"></a>2.3 Partition任务</h4><p><code>Partition</code>任务接受来自<code>Map</code>任务的键值对作为输入。<code>Partition</code>意味着将数据分成几个片段。根据给定分区条件规则，基于年龄标准将输入键值对数据划分为三部分。</p>
+<h4 id="2-3-1-Input"><a href="#2-3-1-Input" class="headerlink" title="2.3.1 Input"></a>2.3.1 Input</h4><p>键值对集合中的所有数据。key为记录中性别字段值，value为该性别对应的完整记录数据。</p>
+<h4 id="2-3-2-Method"><a href="#2-3-2-Method" class="headerlink" title="2.3.2 Method"></a>2.3.2 Method</h4><p>从键值对数据中读取年龄字段值<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] str = value.toString().split(<span class="string">"\t"</span>);</span><br><span class="line"><span class="keyword">int</span> age = Integer.parseInt(str[<span class="number">2</span>]);</span><br></pre></td></tr></table></figure></p>
+<p>根据如下条件校验age值：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// age 小于等于20</span></span><br><span class="line"><span class="keyword">if</span> (age &lt;= <span class="number">20</span>) &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// age 大于20 小于等于30</span></span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (age &gt; <span class="number">20</span> &amp;&amp; age &lt;= <span class="number">30</span>) &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">1</span> % numReduceTask;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// age 大于30</span></span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">2</span> % numReduceTask;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-3-3-Output"><a href="#2-3-3-Output" class="headerlink" title="2.3.3 Output"></a>2.3.3 Output</h4><p>键值对所有数据被分割成三个键值对集合。<code>Reducer</code>会处理每一个集合。</p>
+<h4 id="2-4-Reduce任务"><a href="#2-4-Reduce任务" class="headerlink" title="2.4 Reduce任务"></a>2.4 Reduce任务</h4><p><code>partitioner</code>任务的数量等于<code>reducer</code>任务的数量。这里我们有三个<code>partitioner</code>任务，因此我们有三个<code>reducer</code>任务要执行。</p>
+<h5 id="2-4-1-Input"><a href="#2-4-1-Input" class="headerlink" title="2.4.1 Input"></a>2.4.1 Input</h5><p><code>Reducer</code>将使用不同的键值对集合执行三次。key为记录中性别字段值，value为该性别对应的完整记录数据。</p>
+<h5 id="2-4-2-Method"><a href="#2-4-2-Method" class="headerlink" title="2.4.2 Method"></a>2.4.2 Method</h5><p>读取记录数据中的Salary字段值：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] str = value.toString().split(<span class="string">"\t"</span>, -<span class="number">3</span>);</span><br><span class="line"><span class="keyword">int</span> salary = Integer.parseInt(str[<span class="number">4</span>]);</span><br></pre></td></tr></table></figure></p>
+<p>获取salary最大值:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (salary &gt; max) &#123;</span><br><span class="line">   max = salary;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对于每个key集合（Male与Female为两个key集合）中的数据重复以上步骤。执行完这三个步骤之后，我们将会分别从女性集合中得到一个最高工资，从男性集合中得到一个最高工资。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">context.write(<span class="keyword">new</span> Text(key), <span class="keyword">new</span> IntWritable(max));</span><br></pre></td></tr></table></figure></p>
+<h5 id="2-4-3-Output"><a href="#2-4-3-Output" class="headerlink" title="2.4.3 Output"></a>2.4.3 Output</h5><p>最后，我们将在不同年龄段的三个集合中获得一组键值对数据。它分别包含每个年龄段的男性集合的最高工资和每个年龄段的女性集合的最高工资。</p>
+<p>执行Map，Partition和Reduce任务后，键值对数据的三个集合存储在三个不同的文件中作为输出。</p>
+<p>所有这三项任务都被视为MapReduce作业。这些作业的以下要求和规范应在配置中指定：</p>
+<ul>
+<li>作业名称</li>
+<li>keys和values的输入输出格式</li>
+<li>Map，Reduce和Partitioner任务的类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Configuration conf = getConf();</span><br><span class="line"></span><br><span class="line"><span class="comment">//Create Job</span></span><br><span class="line">Job job = <span class="keyword">new</span> Job(conf, <span class="string">"topsal"</span>);</span><br><span class="line">job.setJarByClass(PartitionerExample.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">// File Input and Output paths</span></span><br><span class="line">FileInputFormat.setInputPaths(job, <span class="keyword">new</span> Path(arg[<span class="number">0</span>]));</span><br><span class="line">FileOutputFormat.setOutputPath(job,<span class="keyword">new</span> Path(arg[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line"><span class="comment">//Set Mapper class and Output format for key-value pair.</span></span><br><span class="line">job.setMapperClass(MapClass.class);</span><br><span class="line">job.setMapOutputKeyClass(Text.class);</span><br><span class="line">job.setMapOutputValueClass(Text.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">//set partitioner statement</span></span><br><span class="line">job.setPartitionerClass(CaderPartitioner.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">//Set Reducer class and Input/Output format for key-value pair.</span></span><br><span class="line">job.setReducerClass(ReduceClass.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">//Number of Reducer tasks.</span></span><br><span class="line">job.setNumReduceTasks(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//Input and Output format for data</span></span><br><span class="line">job.setInputFormatClass(TextInputFormat.class);</span><br><span class="line">job.setOutputFormatClass(TextOutputFormat.class);</span><br><span class="line">job.setOutputKeyClass(Text.class);</span><br><span class="line">job.setOutputValueClass(Text.class);</span><br></pre></td></tr></table></figure>
+<h3 id="3-Example"><a href="#3-Example" class="headerlink" title="3. Example"></a>3. Example</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.sjf.open.test;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configured;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.fs.FileSystem;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.fs.Path;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.IntWritable;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.LongWritable;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.Text;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.compress.CompressionCodec;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.compress.GzipCodec;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapred.JobPriority;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.Job;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.Mapper;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.Partitioner;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.Reducer;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.util.Tool;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.util.ToolRunner;</span><br><span class="line"><span class="keyword">import</span> com.sjf.open.utils.FileSystemUtil;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PartitionerExample</span> <span class="keyword">extends</span> <span class="title">Configured</span> <span class="keyword">implements</span> <span class="title">Tool</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> status = ToolRunner.run(<span class="keyword">new</span> PartitionerExample(), args);</span><br><span class="line">        System.exit(status);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">mapper</span> <span class="keyword">extends</span> <span class="title">Mapper</span>&lt;<span class="title">LongWritable</span>, <span class="title">Text</span>, <span class="title">Text</span>, <span class="title">Text</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(LongWritable key, Text value, Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                String[] str = value.toString().split(<span class="string">"\t"</span>, -<span class="number">3</span>);</span><br><span class="line">                String gender = str[<span class="number">3</span>];</span><br><span class="line">                context.write(<span class="keyword">new</span> Text(gender), <span class="keyword">new</span> Text(value));</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                System.out.println(e.getMessage());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">reducer</span> <span class="keyword">extends</span> <span class="title">Reducer</span>&lt;<span class="title">Text</span>, <span class="title">Text</span>, <span class="title">Text</span>, <span class="title">IntWritable</span>&gt; </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">int</span> max = Integer.MIN_VALUE;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;Text&gt; values, Context context)</span></span></span><br><span class="line"><span class="function">                <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">            <span class="keyword">for</span> (Text value : values) &#123;</span><br><span class="line">                String[] str = value.toString().split(<span class="string">"\t"</span>, -<span class="number">3</span>);</span><br><span class="line">                <span class="keyword">int</span> salary = Integer.parseInt(str[<span class="number">4</span>]);</span><br><span class="line">                <span class="keyword">if</span> (salary &gt; max) &#123;</span><br><span class="line">                    max = salary;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            context.write(<span class="keyword">new</span> Text(key), <span class="keyword">new</span> IntWritable(max));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">partitioner</span> <span class="keyword">extends</span> <span class="title">Partitioner</span>&lt;<span class="title">Text</span>, <span class="title">Text</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getPartition</span><span class="params">(Text key, Text value, <span class="keyword">int</span> numReduceTask)</span> </span>&#123;</span><br><span class="line">            System.out.println(key.toString() + <span class="string">"------"</span> + value.toString());</span><br><span class="line">            String[] str = value.toString().split(<span class="string">"\t"</span>);</span><br><span class="line">            <span class="keyword">int</span> age = Integer.parseInt(str[<span class="number">2</span>]);</span><br><span class="line">            <span class="keyword">if</span> (numReduceTask == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (age &lt;= <span class="number">20</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (age &gt; <span class="number">20</span> &amp;&amp; age &lt;= <span class="number">30</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">1</span> % numReduceTask;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">2</span> % numReduceTask;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">run</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (args.length != <span class="number">2</span>) &#123;</span><br><span class="line">            System.err.println(<span class="string">"./run &lt;input&gt; &lt;output&gt;"</span>);</span><br><span class="line">            System.exit(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        String inputPath = args[<span class="number">0</span>];</span><br><span class="line">        String outputPath = args[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">int</span> numReduceTasks = <span class="number">3</span>;</span><br><span class="line">        Configuration conf = <span class="keyword">this</span>.getConf();</span><br><span class="line">        conf.set(<span class="string">"mapred.job.queue.name"</span>, <span class="string">"test"</span>);</span><br><span class="line">        conf.set(<span class="string">"mapreduce.map.memory.mb"</span>, <span class="string">"1024"</span>);</span><br><span class="line">        conf.set(<span class="string">"mapreduce.reduce.memory.mb"</span>, <span class="string">"1024"</span>);</span><br><span class="line">        conf.setBoolean(<span class="string">"mapred.output.compress"</span>, <span class="keyword">true</span>);</span><br><span class="line">        conf.setClass(<span class="string">"mapred.output.compression.codec"</span>, GzipCodec.class, CompressionCodec.class);</span><br><span class="line">        Job job = Job.getInstance(conf);</span><br><span class="line">        job.setJarByClass(PartitionerExample.class);</span><br><span class="line">        job.setPartitionerClass(partitioner.class);</span><br><span class="line">        job.setMapperClass(mapper.class);</span><br><span class="line">        job.setReducerClass(reducer.class);</span><br><span class="line">        job.setMapOutputKeyClass(Text.class);</span><br><span class="line">        job.setMapOutputValueClass(Text.class);</span><br><span class="line">        job.setOutputKeyClass(Text.class);</span><br><span class="line">        job.setOutputValueClass(IntWritable.class);</span><br><span class="line">        FileSystem fileSystem = FileSystem.get(conf);</span><br><span class="line">        fileSystem.delete(<span class="keyword">new</span> Path(outputPath), <span class="keyword">true</span>);</span><br><span class="line">        FileSystemUtil.filterNoExistsFile(conf, job, inputPath);</span><br><span class="line">        FileOutputFormat.setOutputPath(job, <span class="keyword">new</span> Path(outputPath));</span><br><span class="line">        job.setNumReduceTasks(numReduceTasks);</span><br><span class="line">        <span class="keyword">boolean</span> success = job.waitForCompletion(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">return</span> success ? <span class="number">0</span> : <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-集群上执行"><a href="#4-集群上执行" class="headerlink" title="4. 集群上执行"></a>4. 集群上执行</h3><p>运行结果:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">17/01/03 20:22:02 INFO mapreduce.Job: Running job: job_1472052053889_7059198</span><br><span class="line">17/01/03 20:22:21 INFO mapreduce.Job: Job job_1472052053889_7059198 running in uber mode : false</span><br><span class="line">17/01/03 20:22:21 INFO mapreduce.Job:  map 0% reduce 0%</span><br><span class="line">17/01/03 20:22:37 INFO mapreduce.Job:  map 100% reduce 0%</span><br><span class="line">17/01/03 20:22:55 INFO mapreduce.Job:  map 100% reduce 100%</span><br><span class="line">17/01/03 20:22:55 INFO mapreduce.Job: Job job_1472052053889_7059198 completed successfully</span><br><span class="line">17/01/03 20:22:56 INFO mapreduce.Job: Counters: 43</span><br><span class="line">        File System Counters</span><br><span class="line">                FILE: Number of bytes read=470</span><br><span class="line">                FILE: Number of bytes written=346003</span><br><span class="line">                FILE: Number of read operations=0</span><br><span class="line">                FILE: Number of large read operations=0</span><br><span class="line">                FILE: Number of write operations=0</span><br><span class="line">                HDFS: Number of bytes read=485</span><br><span class="line">                HDFS: Number of bytes written=109</span><br><span class="line">                HDFS: Number of read operations=12</span><br><span class="line">                HDFS: Number of large read operations=0</span><br><span class="line">                HDFS: Number of write operations=6</span><br><span class="line">        Job Counters</span><br><span class="line">                Launched map tasks=1</span><br><span class="line">                Launched reduce tasks=3</span><br><span class="line">                Rack-local map tasks=1</span><br><span class="line">                Total time spent by all maps in occupied slots (ms)=5559</span><br><span class="line">                Total time spent by all reduces in occupied slots (ms)=164768</span><br><span class="line">        Map-Reduce Framework</span><br><span class="line">                Map input records=13</span><br><span class="line">                Map output records=13</span><br><span class="line">                Map output bytes=426</span><br><span class="line">                Map output materialized bytes=470</span><br><span class="line">                Input split bytes=134</span><br><span class="line">                Combine input records=0</span><br><span class="line">                Combine output records=0</span><br><span class="line">                Reduce input groups=6</span><br><span class="line">                Reduce shuffle bytes=470</span><br><span class="line">                Reduce input records=13</span><br><span class="line">                Reduce output records=6</span><br><span class="line">                Spilled Records=26</span><br><span class="line">                Shuffled Maps =3</span><br><span class="line">                Failed Shuffles=0</span><br><span class="line">                Merged Map outputs=3</span><br><span class="line">                GC time elapsed (ms)=31</span><br><span class="line">                CPU time spent (ms)=2740</span><br><span class="line">                Physical memory (bytes) snapshot=1349193728</span><br><span class="line">                Virtual memory (bytes) snapshot=29673148416</span><br><span class="line">                Total committed heap usage (bytes)=6888620032</span><br><span class="line">        Shuffle Errors</span><br><span class="line">                BAD_ID=0</span><br><span class="line">                CONNECTION=0</span><br><span class="line">                IO_ERROR=0</span><br><span class="line">                WRONG_LENGTH=0</span><br><span class="line">                WRONG_MAP=0</span><br><span class="line">                WRONG_REDUCE=0</span><br><span class="line">        File Input Format Counters</span><br><span class="line">                Bytes Read=351</span><br><span class="line">        File Output Format Counters</span><br><span class="line">                Bytes Written=109</span><br></pre></td></tr></table></figure></p>
+<p>原文:<a href="https://www.tutorialspoint.com/map_reduce/map_reduce_partitioner.htm" target="_blank" rel="noopener">https://www.tutorialspoint.com/map_reduce/map_reduce_partitioner.htm</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/hadoop-mapreduce-partitioner-usage.html" title="Hadoop Partitioner使用教程">http://smartsi.club/hadoop-mapreduce-partitioner-usage.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Hadoop-基础/" rel="tag"># Hadoop 基础</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/Python/[Python] 爬虫使用Requests获取网页文本内容中文乱码.html" rel="next" title="Python 爬虫使用Requests获取网页文本内容中文乱码">
+                <i class="fa fa-chevron-left"></i> Python 爬虫使用Requests获取网页文本内容中文乱码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/hadoop-can-reducer-always-be-reused-for-combiner.html" rel="prev" title="Hadoop Reducer总是能复用为Combiner？">
+                Hadoop Reducer总是能复用为Combiner？ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Partitioner"><span class="nav-number">1.</span> <span class="nav-text">1. Partitioner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MapReduce的Partitioner实现"><span class="nav-number">2.</span> <span class="nav-text">2. MapReduce的Partitioner实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-输入数据"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 输入数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-Map任务"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Map任务</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-1-Input"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 Input</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-Method"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 Method</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-3-Output"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.2.3 Output</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Partition任务"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Partition任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-1-Input"><span class="nav-number">2.4.</span> <span class="nav-text">2.3.1 Input</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-Method"><span class="nav-number">2.5.</span> <span class="nav-text">2.3.2 Method</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-3-Output"><span class="nav-number">2.6.</span> <span class="nav-text">2.3.3 Output</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-Reduce任务"><span class="nav-number">2.7.</span> <span class="nav-text">2.4 Reduce任务</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-1-Input"><span class="nav-number">2.7.1.</span> <span class="nav-text">2.4.1 Input</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-2-Method"><span class="nav-number">2.7.2.</span> <span class="nav-text">2.4.2 Method</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-3-Output"><span class="nav-number">2.7.3.</span> <span class="nav-text">2.4.3 Output</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Example"><span class="nav-number">3.</span> <span class="nav-text">3. Example</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-集群上执行"><span class="nav-number">4.</span> <span class="nav-text">4. 集群上执行</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

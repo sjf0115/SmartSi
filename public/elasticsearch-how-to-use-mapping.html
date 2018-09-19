@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="ElasticSearch,ElasticSearch 基础," />
+
+
+<meta name="description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
+<meta name="keywords" content="ElasticSearch,ElasticSearch 基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch Mapping映射">
+<meta property="og:url" content="http://smartsi.club/elasticsearch-how-to-use-mapping.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-07-19T12:43:19.802Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ElasticSearch Mapping映射">
+<meta name="twitter:description" content="1. 概述为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。 索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/elasticsearch-how-to-use-mapping.html"/>
+
+
+  <title>ElasticSearch Mapping映射 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/elasticsearch-how-to-use-mapping.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ElasticSearch Mapping映射</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-19T19:15:17+08:00">2016-10-19</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ElasticSearch/" itemprop="url" rel="index"><span itemprop="name">ElasticSearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/elasticsearch-how-to-use-mapping.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/elasticsearch-how-to-use-mapping.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/elasticsearch-how-to-use-mapping.html" class="leancloud_visitors" data-flag-title="ElasticSearch Mapping映射">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>为了能够把日期字段处理成日期，把数字字段处理成数字，把字符串字段处理成全文本（Full-text）或精确（Exact-value）的字符串值，Elasticsearch需要知道每个字段里面都包含什么数据类型。这些类型和字段的信息都存储在映射（mapping）中。</p>
+<p>索引中的每个文档都有一个 Type。每个 Type 拥有自己的 Mapping 或者模式定义。Mapping 在 Type 中定义字段，每个字段的数据类型，以及字段被Elasticsearch处理的方式。Mapping 还可用于设置关联到 Type 上的元数据。</p>
+<p>例如下面的Mapping：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">"mppings":&#123;</span><br><span class="line">    "football-type": &#123;</span><br><span class="line">        "properties": &#123;</span><br><span class="line">            "country": &#123;</span><br><span class="line">                "index": "not_analyzed",</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "club": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "name": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-核心字段类型"><a href="#2-核心字段类型" class="headerlink" title="2. 核心字段类型"></a>2. 核心字段类型</h3><p>Elasticsearch支持以下简单字段类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td>string</td>
+</tr>
+<tr>
+<td>Whole number</td>
+<td>byte short integer long</td>
+</tr>
+<tr>
+<td>Floating point</td>
+<td>float double</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td>boolean</td>
+</tr>
+<tr>
+<td>Date</td>
+<td>date</td>
+</tr>
+</tbody>
+</table>
+<p>当你索引一个包含新字段的文档（之前没有这个字段），Elasticsearch将根据JSON中的基本数据类型使用<a href="https://www.elastic.co/guide/en/elasticsearch/guide/2.x/dynamic-mapping.html" target="_blank" rel="noopener">动态映射</a>猜测字段的类型，基于使用以下规则：</p>
+<table>
+<thead>
+<tr>
+<th>JsonType</th>
+<th>FieldType</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boolean: true 或者 false</td>
+<td>“boolean”</td>
+</tr>
+<tr>
+<td>Whole number: 123</td>
+<td>“long”</td>
+</tr>
+<tr>
+<td>Floating point:123.45</td>
+<td>“double”</td>
+</tr>
+<tr>
+<td>String, valid date: “2017-05-04”</td>
+<td>“date”</td>
+</tr>
+<tr>
+<td>String: “foo bar”</td>
+<td>“string”</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>这意味着，如果你索引一个带引号的数字，例如，<code>&quot;123&quot;</code>，会被映射为 <code>string</code> 类型，而不是 <code>long</code> 类型。然而，如果字段已经被映射为 <code>long</code> 类型，Elasticsearch尝试将字符串转换为 <code>long</code> 类型，如果强制转换失败则会抛出异常。</p>
+</blockquote>
+<p>举例，索引下面信息（之前没有mapping）：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, Object&gt; map = Maps.newHashMap();</span><br><span class="line">map.put(<span class="string">"name"</span>, <span class="string">"C罗"</span>);</span><br><span class="line">map.put(<span class="string">"sex"</span>, <span class="keyword">true</span>);</span><br><span class="line">map.put(<span class="string">"age"</span>, <span class="number">31</span>);</span><br><span class="line">map.put(<span class="string">"birthday"</span>, <span class="string">"1985-02-05"</span>);</span><br><span class="line">map.put(<span class="string">"club"</span>, <span class="string">"皇家马德里俱乐部"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>产生的mapping结果：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"properties"</span>: &#123;</span><br><span class="line">        <span class="attr">"birthday"</span>: &#123;</span><br><span class="line">            <span class="attr">"format"</span>: <span class="string">"strict_date_optional_time||epoch_millis"</span>,</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"date"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"sex"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"boolean"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"club"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"string"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"name"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"string"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">"age"</span>: &#123;</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"long"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-查看映射"><a href="#3-查看映射" class="headerlink" title="3. 查看映射"></a>3. 查看映射</h3><p>我们可以使用mapping API来查看Elasticsearch中的映射：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">IndicesAdminClient indicesAdminClient = client.admin().indices();</span><br><span class="line">GetMappingsRequestBuilder getMappingsRequestBuilder = indicesAdminClient.prepareGetMappings(index);</span><br><span class="line">GetMappingsResponse response = getMappingsRequestBuilder.get();</span><br><span class="line"><span class="comment">// 结果</span></span><br><span class="line"><span class="keyword">for</span>(ObjectCursor&lt;String&gt; key : response.getMappings().keys())&#123;</span><br><span class="line">    ImmutableOpenMap&lt;String, MappingMetaData&gt; mapping = response.getMappings().get(key.value);</span><br><span class="line">    <span class="keyword">for</span>(ObjectCursor&lt;String&gt; key2 : mapping.keys())&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            logger.info(<span class="string">"------------- &#123;&#125;"</span>, mapping.get(key2.value).sourceAsMap().toString());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>输出结果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">14:45:26.453 [main] INFO  com.sjf.open.api.indexAPI.IndexAPI - ------------- &#123;properties=&#123;age=&#123;type=long&#125;, birthday=&#123;type=date, format=strict_date_optional_time||epoch_millis&#125;, club=&#123;type=string&#125;, name=&#123;type=string&#125;, sex=&#123;type=boolean&#125;&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-自定义字段映射"><a href="#4-自定义字段映射" class="headerlink" title="4. 自定义字段映射"></a>4. 自定义字段映射</h3><p>虽然大多数情况下基本数据类型已经能够满足，但你也会经常自定义单个字段的映射，特别是字符串类型字段。自定义类型可以使你完成一下几点：</p>
+<ul>
+<li>区分全文（full text）字符串字段和准确字符串字段。比如字符串”北京”，全文字符串字段默认情况下会分成”北”和“京”两个词，但大多数情况下我们需要的是一个城市名称，不需要分词，所以它应该是一个确切的字符串字段，应该设置index属性为”not_analyzed”。</li>
+<li>使用特定语言的分析器（不同国家语言断词方式不一样，不同国家的人可能会使用不同的设置）</li>
+<li>优化部分匹配字段</li>
+<li>指定自定义日期格式</li>
+</ul>
+<h4 id="4-1-type"><a href="#4-1-type" class="headerlink" title="4.1 type"></a>4.1 type</h4><p>Mapping 中最重要的字段参数是type。对于不是 string 类型的字段，你可能很少需要映射除type之外的其他映射：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"number_of_clicks"</span>: &#123;</span><br><span class="line">        <span class="attr">"type"</span>: <span class="string">"integer"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>string 类型的字段，默认的，考虑到包含全文本，它们的值在索引前要经过分析器分析，并且在此字段上进行全文搜索前要把查询字符串经过分析器的处理。</p>
+<h4 id="4-2-index"><a href="#4-2-index" class="headerlink" title="4.2 index"></a>4.2 index</h4><p>对于 string 类型字段，其中最重要的一个映射参数是index，另一个是analyzer，下面会讲解到。</p>
+<p>index参数控制字符串以何种方式被索引。它包含三种方式：</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>analyzed</td>
+<td>首先分析这个字符串，然后索引。换言之，以全文形式索引此字段。</td>
+</tr>
+<tr>
+<td>not_analyzed</td>
+<td>索引这个字段，使之可以被索引，但是索引内容和指定值一样。不分析此字段。</td>
+</tr>
+<tr>
+<td>no</td>
+<td>不索引这个字段。这个字段不能被搜索到。</td>
+</tr>
+</tbody>
+</table>
+<p>对于 string 类型字段，index默认值为 <code>analyzed</code>。如果我们想把字段映射为确切值，我们需要设置为 <code>not_analyzed</code>：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"tag"</span>: &#123;</span><br><span class="line">        <span class="attr">"type"</span>:     <span class="string">"string"</span>,</span><br><span class="line">        <span class="attr">"index"</span>:    <span class="string">"not_analyzed"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>其他简单类型（long、double、date等等）也接受index参数，但相应的值只能是no和not_analyzed，它们的值不能是analyzed。</p>
+</blockquote>
+<h4 id="4-3-analyzer"><a href="#4-3-analyzer" class="headerlink" title="4.3 analyzer"></a>4.3 analyzer</h4><p>对于index为 <code>analyzed</code> 的字符串字段，使用 analyzer 参数来指定在搜索和索引的时候使用哪一种分析器。Elasticsearch默认使用 <code>standard</code> 分析器，但是你可以通过指定一个内建的分析器来更改它，例如可以指定 <code>whitespace</code>、<code>simple</code>或 <code>english</code> 等分析器。<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"tweet"</span>: &#123;</span><br><span class="line">        <span class="attr">"type"</span>:     <span class="string">"string"</span>,</span><br><span class="line">        <span class="attr">"analyzer"</span>: <span class="string">"english"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="5-更新映射"><a href="#5-更新映射" class="headerlink" title="5. 更新映射"></a>5. 更新映射</h3><p>你可以在第一次创建索引的时候为 Type 指定 Mapping。此外，之后你可以为一个新 Type 添加 Mapping（或者为已有的 Type 更新 Mapping）。</p>
+<blockquote>
+<p>你可以向已经存在的 Mapping 中增加字段，但是你不能修改已经存在的字段 Mapping。如果一个字段的映射已经存在，这可能意味着那个字段的数据已经被索引。如果你改变了字段映射，那已经被索引的数据可能会出现错误，不能被正确的搜索到。</p>
+</blockquote>
+<p>我们可以更新一个 Mapping 来增加一个新字段，但是不能把已有字段的index属性从 <code>analyzed</code> 改到 <code>not_analyzed</code>。</p>
+<p>在使用下面代码设置映射时，首先创建一个空的索引：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// mapping</span></span><br><span class="line">XContentBuilder mappingBuilder;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    mappingBuilder = XContentFactory.jsonBuilder()</span><br><span class="line">        .startObject()</span><br><span class="line">        .startObject(type)</span><br><span class="line">        .startObject(<span class="string">"properties"</span>)</span><br><span class="line">            .startObject(<span class="string">"name"</span>).field(<span class="string">"type"</span>, <span class="string">"string"</span>).field(<span class="string">"store"</span>, <span class="string">"yes"</span>).endObject()</span><br><span class="line">            .startObject(<span class="string">"sex"</span>).field(<span class="string">"type"</span>, <span class="string">"string"</span>).field(<span class="string">"store"</span>, <span class="string">"yes"</span>).endObject()</span><br><span class="line">            .startObject(<span class="string">"college"</span>).field(<span class="string">"type"</span>, <span class="string">"string"</span>).field(<span class="string">"store"</span>, <span class="string">"yes"</span>).endObject()</span><br><span class="line">            .startObject(<span class="string">"age"</span>).field(<span class="string">"type"</span>, <span class="string">"long"</span>).field(<span class="string">"store"</span>, <span class="string">"yes"</span>).endObject()</span><br><span class="line">            .startObject(<span class="string">"school"</span>).field(<span class="string">"type"</span>, <span class="string">"string"</span>).field(<span class="string">"store"</span>, <span class="string">"yes"</span>).field(<span class="string">"index"</span>, <span class="string">"not_analyzed"</span>).endObject()</span><br><span class="line">        .endObject()</span><br><span class="line">        .endObject()</span><br><span class="line">        .endObject();</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    logger.error(<span class="string">"--------- putIndexMapping 创建 mapping 失败："</span>, e);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">IndicesAdminClient indicesAdminClient = client.admin().indices();</span><br><span class="line">PutMappingRequestBuilder putMappingRequestBuilder = indicesAdminClient.preparePutMapping(index);</span><br><span class="line">putMappingRequestBuilder.setType(type);</span><br><span class="line">putMappingRequestBuilder.setSource(mappingBuilder);</span><br><span class="line"><span class="comment">// 结果</span></span><br><span class="line">PutMappingResponse response = putMappingRequestBuilder.get();</span><br></pre></td></tr></table></figure></p>
+<p>产生结果：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">"mappings":&#123;</span><br><span class="line">    "test-type": &#123;</span><br><span class="line">        "properties": &#123;</span><br><span class="line">            "college": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "school": &#123;</span><br><span class="line">                "index": "not_analyzed",</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "sex": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "name": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "string"</span><br><span class="line">            &#125;,</span><br><span class="line">            "age": &#123;</span><br><span class="line">                "store": true,</span><br><span class="line">                "type": "long"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下面我们再添加一个分析器为english的字段到上面映射中，我们新的字段会合并到上面已经存在的映射中。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// mapping</span></span><br><span class="line">XContentBuilder mappingBuilder;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    mappingBuilder = XContentFactory.jsonBuilder()</span><br><span class="line">            .startObject()</span><br><span class="line">            .startObject(type)</span><br><span class="line">            .startObject(<span class="string">"properties"</span>)</span><br><span class="line">            .startObject(<span class="string">"club"</span>).field(<span class="string">"type"</span>, <span class="string">"string"</span>).field(<span class="string">"index"</span>, <span class="string">"analyzed"</span>).field(<span class="string">"analyzer"</span>, <span class="string">"english"</span>).endObject()</span><br><span class="line">            .endObject()</span><br><span class="line">            .endObject()</span><br><span class="line">            .endObject();</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    logger.error(<span class="string">"--------- putIndexMapping 创建 mapping 失败："</span>, e);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line">```        </span><br><span class="line">产生结果：</span><br><span class="line">```json</span><br><span class="line"><span class="string">"mappings"</span>:&#123;</span><br><span class="line">    <span class="string">"test-type"</span>: &#123;</span><br><span class="line">        <span class="string">"properties"</span>: &#123;</span><br><span class="line">            <span class="string">"college"</span>: &#123;</span><br><span class="line">                <span class="string">"store"</span>: <span class="keyword">true</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"string"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"school"</span>: &#123;</span><br><span class="line">                <span class="string">"index"</span>: <span class="string">"not_analyzed"</span>,</span><br><span class="line">                <span class="string">"store"</span>: <span class="keyword">true</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"string"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"sex"</span>: &#123;</span><br><span class="line">                <span class="string">"store"</span>: <span class="keyword">true</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"string"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"club"</span>: &#123;</span><br><span class="line">                <span class="string">"analyzer"</span>: <span class="string">"english"</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"string"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"name"</span>: &#123;</span><br><span class="line">                <span class="string">"store"</span>: <span class="keyword">true</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"string"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"age"</span>: &#123;</span><br><span class="line">                <span class="string">"store"</span>: <span class="keyword">true</span>,</span><br><span class="line">                <span class="string">"type"</span>: <span class="string">"long"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Elasticsearch版本： 5.4</p>
+</blockquote>
+<p>参考：<a href="https://www.elastic.co/guide/en/elasticsearch/guide/2.x/mapping-intro.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/guide/2.x/mapping-intro.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/elasticsearch-how-to-use-mapping.html" title="ElasticSearch Mapping映射">http://smartsi.club/elasticsearch-how-to-use-mapping.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+          
+            <a href="/tags/ElasticSearch-基础/" rel="tag"># ElasticSearch 基础</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/elasticsearch-how-to-indexing.html" rel="next" title="ElasticSearch 索引">
+                <i class="fa fa-chevron-left"></i> ElasticSearch 索引
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/elasticsearch-how-to-use-analysis-and-analyser.html" rel="prev" title="ElasticSearch 分析与分析器">
+                ElasticSearch 分析与分析器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-核心字段类型"><span class="nav-number">2.</span> <span class="nav-text">2. 核心字段类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-查看映射"><span class="nav-number">3.</span> <span class="nav-text">3. 查看映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-自定义字段映射"><span class="nav-number">4.</span> <span class="nav-text">4. 自定义字段映射</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-type"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-index"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 index</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-analyzer"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 analyzer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-更新映射"><span class="nav-number">5.</span> <span class="nav-text">5. 更新映射</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

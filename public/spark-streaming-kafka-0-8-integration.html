@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Spark,Spark Stream," />
+
+
+<meta name="description" content="在这里我们解释如何配置 Spark Streaming 以接收来自 Kafka 的数据。有两种方法，一种为使用 Receivers 和 Kafka 高级API的旧方法，以及不使用 Receivers 的新方法（在 Spark 1.3 中引入）。它们具有不同的编程模型，性能特征和语义保证。就目前的 Spark 版本而言，这两种方法都被为稳定的API。  Kafka0.8 在 Spark2.3.0　版">
+<meta name="keywords" content="Spark,Spark Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark Streaming 与 Kafka0.8 整合">
+<meta property="og:url" content="http://smartsi.club/spark-streaming-kafka-0-8-integration.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="在这里我们解释如何配置 Spark Streaming 以接收来自 Kafka 的数据。有两种方法，一种为使用 Receivers 和 Kafka 高级API的旧方法，以及不使用 Receivers 的新方法（在 Spark 1.3 中引入）。它们具有不同的编程模型，性能特征和语义保证。就目前的 Spark 版本而言，这两种方法都被为稳定的API。  Kafka0.8 在 Spark2.3.0　版">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-10T11:46:52.290Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark Streaming 与 Kafka0.8 整合">
+<meta name="twitter:description" content="在这里我们解释如何配置 Spark Streaming 以接收来自 Kafka 的数据。有两种方法，一种为使用 Receivers 和 Kafka 高级API的旧方法，以及不使用 Receivers 的新方法（在 Spark 1.3 中引入）。它们具有不同的编程模型，性能特征和语义保证。就目前的 Spark 版本而言，这两种方法都被为稳定的API。  Kafka0.8 在 Spark2.3.0　版">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/spark-streaming-kafka-0-8-integration.html"/>
+
+
+  <title>Spark Streaming 与 Kafka0.8 整合 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/spark-streaming-kafka-0-8-integration.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Spark Streaming 与 Kafka0.8 整合</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-16T11:28:01+08:00">2018-03-16</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/spark-streaming-kafka-0-8-integration.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/spark-streaming-kafka-0-8-integration.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/spark-streaming-kafka-0-8-integration.html" class="leancloud_visitors" data-flag-title="Spark Streaming 与 Kafka0.8 整合">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在这里我们解释如何配置 Spark Streaming 以接收来自 Kafka 的数据。有两种方法，一种为使用 Receivers 和 Kafka 高级API的旧方法，以及不使用 Receivers 的新方法（在 Spark 1.3 中引入）。它们具有不同的编程模型，性能特征和语义保证。就目前的 Spark 版本而言，这两种方法都被为稳定的API。</p>
+<blockquote>
+<p>Kafka0.8 在 Spark2.3.0　版本中已经被弃用</p>
+</blockquote>
+<h3 id="1-基于Receiver的方法"><a href="#1-基于Receiver的方法" class="headerlink" title="1. 基于Receiver的方法"></a>1. 基于Receiver的方法</h3><p>这种方法使用 Receiver 来接收数据。Receiver 是使用 Kafka 高级消费者API实现的。与所有接收方一样，通过 Receiver 从 Kafka 接收的数据存储在 Spark executors 中，然后由 Spark Streaming 启动的作业处理数据。</p>
+<p>但是，在默认配置下，这种方法可能会在失败时丢失数据（请参阅<a href="http://spark.apache.org/docs/2.3.0/streaming-programming-guide.html#receiver-reliability" target="_blank" rel="noopener">接收器的可靠性</a>）。为确保零数据丢失，你不得不另外启用 Spark Streaming 中的 <code>Write Ahead Logs</code> （在 Spark 1.2 中引入），同时将所有收到的 Kafka 数据保存在分布式文件系统（例如HDFS）的 <code>Write Ahead Logs</code> 中，以便在发生故障时恢复所有数据。有关 <code>Write Ahead Logs</code> 的更多详细信息，请参阅流编程指南中的<a href="http://spark.apache.org/docs/2.3.0/streaming-programming-guide.html#deploying-applications" target="_blank" rel="noopener">部署</a>章节。</p>
+<p>接下来，我们将讨论如何在流应用程序中使用这种方法。</p>
+<h4 id="1-1-引入"><a href="#1-1-引入" class="headerlink" title="1.1 引入"></a>1.1 引入</h4><p>对于使用 SBT/Maven 项目定义的 Scala/Java 应用程序，请引入如下工件（请参阅主编程指南中的<a href="http://spark.apache.org/docs/2.3.0/streaming-programming-guide.html#linking" target="_blank" rel="noopener">Linking</a>部分以获取更多信息）。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">groupId = org.apache.spark</span><br><span class="line">artifactId = spark-streaming-kafka-0-8_2.11</span><br><span class="line">version = 2.3.0</span><br></pre></td></tr></table></figure></p>
+<p>对于Python应用程序，在部署应用程序时，必须添加上述库及其依赖项。请参阅下面的部署小节。</p>
+<h4 id="1-2-编程"><a href="#1-2-编程" class="headerlink" title="1.2 编程"></a>1.2 编程</h4><p>在流应用程序代码中，导入 KafkaUtils 并创建一个输入 DStream，如下所示。</p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.streaming.kafka._</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> kafkaStream = <span class="type">KafkaUtils</span>.createStream(streamingContext,</span><br><span class="line">    [<span class="type">ZK</span> quorum], [consumer group id], [per-topic number of <span class="type">Kafka</span> partitions to consume])</span><br></pre></td></tr></table></figure></p>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.streaming.kafka.*;</span><br><span class="line"></span><br><span class="line">JavaPairReceiverInputDStream&lt;String, String&gt; kafkaStream =</span><br><span class="line">    KafkaUtils.createStream(streamingContext,</span><br><span class="line">    [ZK quorum], [consumer group id], [per-topic number of Kafka partitions to consume]);</span><br></pre></td></tr></table></figure></p>
+<p>Python：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.streaming.kafka <span class="keyword">import</span> KafkaUtils</span><br><span class="line"></span><br><span class="line">kafkaStream = KafkaUtils.createStream(streamingContext, \</span><br><span class="line">    [ZK quorum], [consumer group id], [per-topic number of Kafka partitions to consume])</span><br></pre></td></tr></table></figure></p>
+<p>默认情况下，Python API会将 Kafka 数据解码为 UTF8 编码的字符串。你可以指定自定义解码函数，将 Kafka 记录中的字节数组解码为任意任意数据类型。 查看<a href="http://spark.apache.org/docs/2.3.0/api/python/pyspark.streaming.html#pyspark.streaming.kafka.KafkaUtils" target="_blank" rel="noopener">API文档</a>。</p>
+<p>请记住:</p>
+<ul>
+<li>Kafka 中的 topic partition 区与 Spark Streaming 中生成的 RDD partition 没有相关性。因此增加 KafkaUtils.createStream() 中特定 topic partition 的数量仅仅增加了在单个接收器中消费 topic 使用的线程数。但是这并没有增加 Spark 在处理数据的并行度。</li>
+<li>可以用不同的 groups 和 topics 来创建多个 Kafka 输入 DStream，用于使用多个接收器并行接收数据。之后可以利用 union 来合并成一个 Dstream。</li>
+<li>如果你使用 HDFS 等副本文件系统去启用 <code>Write Ahead Logs</code>，那么接收到的数据已经在日志中备份。因此，输入流的存储级别为 StorageLevel.MEMORY_AND_DISK_SER（即使用KafkaUtils.createStream（…，StorageLevel.MEMORY_AND_DISK_SER））。</li>
+</ul>
+<h4 id="1-3-部署"><a href="#1-3-部署" class="headerlink" title="1.3 部署"></a>1.3 部署</h4><p>与任何 Spark 应用程序一样，spark-submit 用于启动你的应用程序。但是，Scala/Java　应用程序和 Python 应用程序的细节略有不同。</p>
+<p>对于 Scala 和 Java 应用程序，如果你使用 SBT 或 Maven 进行项目管理，需要将 spark-streaming-kafka-0-8_2.11 及其依赖项打包到应用程序 JAR 中。同时确保 spark-core_2.11 和 spark-streaming_2.11 被标记为 provided 依赖关系，因为这些已经存在 Spark 的安装中。最后使用 spark-submit 启动你的应用程序。</p>
+<p>对于缺乏　SBT/Maven 项目管理的 Python 应用程序，可以使用 –packages 直接将 spark-streaming-kafka-0-8_2.11 及其依赖添加到 spark-submit 中（请参阅<a href="http://spark.apache.org/docs/2.3.0/submitting-applications.html" target="_blank" rel="noopener">应用程序提交指南</a>）。即，<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.3.0 ...</span><br></pre></td></tr></table></figure></p>
+<p>或者，你也可以从 Maven 仓库中下载 spark-streaming-kafka-0-8-assembly 的JAR，并将其添加到 <code>spark-submit -jars</code> 中。</p>
+<h3 id="2-不使用Receiver的方法"><a href="#2-不使用Receiver的方法" class="headerlink" title="2. 不使用Receiver的方法"></a>2. 不使用Receiver的方法</h3><p>这种新的没有接收器的 “直接” 方法已在 Spark 1.3 中引入，以确保更强大的端到端保证。这个方法不使用接收器接收数据，而是定期查询 Kafka 每个 topic+partition 中的最新偏移量，并相应地定义了要在每个批次中要处理的偏移量范围。当处理数据的作业启动后，Kafka 的简单消费者API用于从 Kafka 中读取定义的偏移量范围（类似于从文件系统读取文件）。请注意，此特征是在 Spark 1.3 中为 Scala 和 Java API 引入的，Python API 在 Spark 1.4 中引入。</p>
+<p>与基于 Receiver 的方法相比，该方法具有以下优点：</p>
+<ul>
+<li>简化并行：不需要创建多个 Kafka 输入 Stream 然后将其合并。使用 directStream ， Spark Streaming 将创建与可以消费的 Kafka partition 一样多的 RDD partition，这些 partition 将全部从 Kafka 并行读取数据。 因此，Kafka 和 RDD partition 之间有一对一的映射关系，这更易于理解和调整。</li>
+<li>效率：在第一种方法中实现零数据丢失需要将数据存储在 <code>Write Ahead Log</code> 中，这会进行数据的拷贝。这样效率比较低下，因为数据被有效地复制了两次 - 一次是 Kafka 进行的，另一次是通过 Write Ahead Log 进行的。因为没有　Receiver，所以第二种方法不存在这个问题，因此不需要 <code>Write Ahead Log</code>。只要我们 Kafka 的数据保留足够长的时间，就可以从 Kafka 恢复信息。</li>
+<li>Exactly-once 语义：第一种方法使用 Kafka 的高级API在 Zookeeper 中存储消费的偏移量。这是传统的从　Kafka　上消费数据的方式。尽管这种方法（结合 <code>Write Ahead Log</code> 使用）可以确保零数据丢失（即 at-least once 语义），但在某些失败情况下，有一些记录可能会消耗两次。发生这种情况是因为 Spark Streaming 可靠接收的数据与 Zookeeper 跟踪的偏移之间不一致。因此，在第二种方法中，我们使用不使用 Zookeeper 的简单 Kafka API。在其检查点内，Spark Streaming 跟踪偏移量。这消除了 Spark Streaming 和 Zookeeper/Kafka 之间的不一致性，因此 Spark Streaming 每条记录在即使发生故障时也可以确切地收到一次。为了实现输出结果的 exactly-once 语义，将数据保存到外部数据存储区的输出操作必须是幂等的，或者是保存结果和偏移量的原子事务（请参阅主程序中输出操作的语义指南获取更多信息）。</li>
+</ul>
+<p>请注意，这种方法的一个缺点是它不会更新 Zookeeper 中的偏移量，因此基于 Zookeeper 的 Kafka 监控工具不会显示进度。但是，你可以在每个批次中访问由此方法处理的偏移量，并自己更新　Zookeeper（请参见下文）。</p>
+<p>接下来，我们将讨论如何在流应用程序中使用这种方法。</p>
+<h4 id="２-1-引入"><a href="#２-1-引入" class="headerlink" title="２.1 引入"></a>２.1 引入</h4><p>对于使用 SBT/Maven 项目定义的 Scala/Java 应用程序，请引入如下工件（请参阅主编程指南中的<a href="http://spark.apache.org/docs/2.3.0/streaming-programming-guide.html#linking" target="_blank" rel="noopener">Linking</a>部分以获取更多信息）。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">groupId = org.apache.spark</span><br><span class="line">artifactId = spark-streaming-kafka-0-8_2.11</span><br><span class="line">version = 2.3.0</span><br></pre></td></tr></table></figure></p>
+<h4 id="２-2-编程"><a href="#２-2-编程" class="headerlink" title="２.2 编程"></a>２.2 编程</h4><p>在流应用程序代码中，导入 KafkaUtils 并创建一个输入 DStream，如下所示。</p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.streaming.kafka._</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> directKafkaStream = <span class="type">KafkaUtils</span>.createDirectStream[</span><br><span class="line">    [key <span class="class"><span class="keyword">class</span>], [value class], [key decoder class], [value decoder class] ](<span class="params"></span></span></span><br><span class="line"><span class="class"><span class="params">    streamingContext, [map of <span class="type">Kafka</span> parameters], [set of topics to consume]</span>)</span></span><br></pre></td></tr></table></figure></p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.spark.streaming.kafka.*;</span><br><span class="line"></span><br><span class="line">JavaPairInputDStream&lt;String, String&gt; directKafkaStream =</span><br><span class="line">    KafkaUtils.createDirectStream(streamingContext,</span><br><span class="line">        [key class], [value class], [key decoder class], [value decoder class],</span><br><span class="line">        [map of Kafka parameters], [set of topics to consume]);</span><br></pre></td></tr></table></figure></p>
+<p>Python版本:<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pyspark.streaming.kafka <span class="keyword">import</span> KafkaUtils</span><br><span class="line"> directKafkaStream = KafkaUtils.createDirectStream(ssc, [topic], &#123;<span class="string">"metadata.broker.list"</span>: brokers&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>你还可以将 messageHandler 传递给 createDirectStream 来访问 MessageAndMetadata，其包含了当前消息的元数据，并可以将其转换为任意所需的类型。</p>
+<p>在 Kafka 参数中，必须指定 metadata.broker.list 或 bootstrap.servers。默认情况下，它将从每个 Kafka 分区的最新偏移量开始消费。如果你将 Kafka 参数中的 <code>auto.offset.reset</code> 配置为 <code>smallest</code>，那么它将从最小偏移量开始消费。</p>
+<p>你也可以使用 KafkaUtils.createDirectStream 的其他变体从任意偏移量开始消费。此外，如果你想访问每个批次中消费的偏移量，你可以执行以下操作：</p>
+<p>Scala版本：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Hold a reference to the current offset ranges, so it can be used downstream</span></span><br><span class="line"><span class="keyword">var</span> offsetRanges = <span class="type">Array</span>.empty[<span class="type">OffsetRange</span>]</span><br><span class="line"></span><br><span class="line">directKafkaStream.transform &#123; rdd =&gt;</span><br><span class="line">  offsetRanges = rdd.asInstanceOf[<span class="type">HasOffsetRanges</span>].offsetRanges</span><br><span class="line">  rdd</span><br><span class="line">&#125;.map &#123;</span><br><span class="line">          ...</span><br><span class="line">&#125;.foreachRDD &#123; rdd =&gt;</span><br><span class="line">  <span class="keyword">for</span> (o &lt;- offsetRanges) &#123;</span><br><span class="line">    println(<span class="string">s"<span class="subst">$&#123;o.topic&#125;</span> <span class="subst">$&#123;o.partition&#125;</span> <span class="subst">$&#123;o.fromOffset&#125;</span> <span class="subst">$&#123;o.untilOffset&#125;</span>"</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Hold a reference to the current offset ranges, so it can be used downstream</span></span><br><span class="line">AtomicReference&lt;OffsetRange[]&gt; offsetRanges = <span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line"></span><br><span class="line">directKafkaStream.transformToPair(rdd -&gt; &#123;    OffsetRange[] offsets = ((HasOffsetRanges) rdd.rdd()).offsetRanges();    offsetRanges.set(offsets);    <span class="keyword">return</span> rdd;</span><br><span class="line">&#125;).map(</span><br><span class="line">  ...</span><br><span class="line">).foreachRDD(rdd -&gt; &#123;    <span class="keyword">for</span> (OffsetRange o : offsetRanges.get()) &#123;</span><br><span class="line">System.out.println(</span><br><span class="line">  o.topic() + <span class="string">" "</span> + o.partition() + <span class="string">" "</span> + o.fromOffset() + <span class="string">" "</span> + o.untilOffset()</span><br><span class="line">);    &#125;    ...</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Python版本:<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">offsetRanges = []</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">storeOffsetRanges</span><span class="params">(rdd)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> offsetRanges</span><br><span class="line">    offsetRanges = rdd.offsetRanges()</span><br><span class="line">    <span class="keyword">return</span> rdd</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">printOffsetRanges</span><span class="params">(rdd)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> o <span class="keyword">in</span> offsetRanges:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">"%s %s %s %s"</span> % (o.topic, o.partition, o.fromOffset, o.untilOffset)</span><br><span class="line"></span><br><span class="line">directKafkaStream \</span><br><span class="line">    .transform(storeOffsetRanges) \</span><br><span class="line">    .foreachRDD(printOffsetRanges)</span><br></pre></td></tr></table></figure></p>
+<p>如果你希望基于 Zookeeper 的 Kafka 监视工具显示流应用程序的进度，你可以使用上面来更新 Zookeeper。</p>
+<p>请注意，HasOffsetRanges 的类型转换只有在 directKafkaStream 的第一个方法调用中使用才会成功，而不是放在后面的方法链中。你可以使用 transform() 替换 foreachRDD() 作为调用的第一个方法来访问偏移量，然后再调用其他的Spark方法。但是，请注意，RDD partition 与 Kafka partition 之间的一对一映射经过任意 shuffle 或重新分区的方法（例如， reduceByKey（）或window（）之后不会保留。</p>
+<p>另外需要注意的是，由于此方法不使用 Receivers，因此与 receiver 相关的配置（即 <code>spark.streaming.receiver.*</code> 形式的配置）将不再适用于由此方法创建的输入DStream（将应用于其他输入DStreams）。相反，使用 <code>spark.streaming.kafka.*</code> 配置。一个重要的配置是 <code>spark.streaming.kafka.maxRatePerPartition</code>，每个 Kafka partition 使用 direct API 读取的最大速率（每秒消息数）。</p>
+<h4 id="2-3-部署"><a href="#2-3-部署" class="headerlink" title="2.3 部署"></a>2.3 部署</h4><p>这与第一种方法相同。</p>
+<blockquote>
+<p>Spark版本： 2.3.0<br>Kafka版本：0.8</p>
+</blockquote>
+<p>原文：<a href="http://spark.apache.org/docs/2.3.0/streaming-kafka-0-8-integration.html" target="_blank" rel="noopener">http://spark.apache.org/docs/2.3.0/streaming-kafka-0-8-integration.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/spark-streaming-kafka-0-8-integration.html" title="Spark Streaming 与 Kafka0.8 整合">http://smartsi.club/spark-streaming-kafka-0-8-integration.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+            <a href="/tags/Spark-Stream/" rel="tag"># Spark Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/spark-internal-operating-principle-one.html" rel="next" title="Spark内部原理之运行原理">
+                <i class="fa fa-chevron-left"></i> Spark内部原理之运行原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/spark-base-rdd-persistence.html" rel="prev" title="Spark2.3.0 持久化">
+                Spark2.3.0 持久化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">158</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-基于Receiver的方法"><span class="nav-number">1.</span> <span class="nav-text">1. 基于Receiver的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-引入"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-编程"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-部署"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 部署</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-不使用Receiver的方法"><span class="nav-number">2.</span> <span class="nav-text">2. 不使用Receiver的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#２-1-引入"><span class="nav-number">2.1.</span> <span class="nav-text">２.1 引入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#２-2-编程"><span class="nav-number">2.2.</span> <span class="nav-text">２.2 编程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-部署"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 部署</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
