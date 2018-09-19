@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 Operator概述">
-<meta property="og:url" content="http://sjf0115.github.io/2018/02/28/flink-stream-operators-overall/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/02/28/flink-stream-operators-overall/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="算子(Operator)将一个或多个 DataStream 转换为新的 DataStream。程序可以将多个转换组合成复杂的数据流拓扑。 本节将介绍基本转换(transformations)操作，应用这些转换后的有效物理分区以及深入了解 Flink 算子链。 1. DataStream Transformations1.1 MapDataStream → DataStream 输入一个元素并生成一">
 <meta property="og:locale" content="zh-Hans">
@@ -120,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/02/28/flink-stream-operators-overall/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/02/28/flink-stream-operators-overall/"/>
 
 
   <title>Flink1.4 Operator概述 | SmartSi</title>
@@ -304,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/28/flink-stream-operators-overall/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/02/28/flink-stream-operators-overall/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -423,7 +423,7 @@
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.filter(<span class="keyword">new</span> FilterFunction&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">filter</span><span class="params">(Integer value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value != <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.filter &#123; _ != <span class="number">0</span> &#125;</span><br></pre></td></tr></table></figure></p>
 <h4 id="1-4-KeyBy"><a href="#1-4-KeyBy" class="headerlink" title="1.4 KeyBy"></a>1.4 KeyBy</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">DataStream → KeyedStream</span><br></pre></td></tr></table></figure>
-<p>逻辑上将一个流分成不相交的分区，每个分区包含相同键的元素。在内部，这是通过哈希分区实现的。参阅博文<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/" target="_blank" rel="noopener">Flink1.4 定义keys的几种方法</a>来了解如何指定键。这个转换返回一个 <code>KeyedStream</code>。</p>
+<p>逻辑上将一个流分成不相交的分区，每个分区包含相同键的元素。在内部，这是通过哈希分区实现的。参阅博文<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/">Flink1.4 定义keys的几种方法</a>来了解如何指定键。这个转换返回一个 <code>KeyedStream</code>。</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="string">"someKey"</span>) <span class="comment">// Key by field "someKey"</span></span><br><span class="line">dataStream.keyBy(<span class="number">0</span>) <span class="comment">// Key by the first element of a Tuple</span></span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">dataStream.keyBy(<span class="string">"someKey"</span>) <span class="comment">// Key by field "someKey"</span></span><br><span class="line">dataStream.keyBy(<span class="number">0</span>) <span class="comment">// Key by the first element of a Tuple</span></span><br></pre></td></tr></table></figure></p>
 <blockquote>
@@ -624,8 +624,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/02/28/flink-stream-windows-overall/" rel="prev" title="Flink1.4 窗口概述">
-                Flink1.4 窗口概述 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/28/flink-stream-asynchronous-io-for-external-data-access/" rel="prev" title="Flink1.4 用于外部数据访问的异步IO">
+                Flink1.4 用于外部数据访问的异步IO <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

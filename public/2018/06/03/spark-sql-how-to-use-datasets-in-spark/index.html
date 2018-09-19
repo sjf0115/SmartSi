@@ -104,7 +104,7 @@
 <meta name="keywords" content="Spark,Spark SQL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark 如何使用DataSets">
-<meta property="og:url" content="http://sjf0115.github.io/2018/06/03/spark-sql-how-to-use-datasets-in-spark/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/06/03/spark-sql-how-to-use-datasets-in-spark/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="开发人员一直非常喜欢Apache Spark，它提供简单但功能强大的API，这些特性的组合使得用最少的代码就可以进行复杂的分析。我们通过引入 DataFrames 和 Spark SQL 继续推动 Spark 的可用性和性能。这些是用于处理结构化数据（例如数据库表，JSON文件）的高级API，这些 API 可让 Spark 自动优化存储和计算。在这些 API 背后，Catalyst 优化器和 Tu">
 <meta property="og:locale" content="zh-Hans">
@@ -122,7 +122,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/06/03/spark-sql-how-to-use-datasets-in-spark/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/06/03/spark-sql-how-to-use-datasets-in-spark/"/>
 
 
   <title>Spark 如何使用DataSets | SmartSi</title>
@@ -306,7 +306,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/06/03/spark-sql-how-to-use-datasets-in-spark/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/06/03/spark-sql-how-to-use-datasets-in-spark/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -416,7 +416,7 @@
 <h3 id="1-使用Datasets"><a href="#1-使用Datasets" class="headerlink" title="1. 使用Datasets"></a>1. 使用Datasets</h3><p>Datasets 是一种强类型，不可变的可以映射到关系性 schema 的对象集合。Datasets API 的核心是一个称为 Encoder 的新概念，它负责在 JVM 对象和表格表示(tabular representation)之间进行转换。表格表示使用 Spark 的内部 Tungsten 二进制格式存储，允许对序列化数据进行操作并提高内存利用率。Spark 1.6 支持自动生成各种类型的 Encoder，包括原始类型（例如String，Integer，Long），Scala Case 类和Java Beans。</p>
 <p>使用 RDD 的用户会发现 Dataset API 非常熟悉，因为它提供了许多相同的功能转换（例如map，flatMap，filter）。考虑下面的代码，该代码读取文本文件的行并将它们拆分为单词：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"># <span class="type">RDD</span></span><br><span class="line"><span class="keyword">val</span> lines = sc.textFile(<span class="string">"/wikipedia"</span>)</span><br><span class="line"><span class="keyword">val</span> words = lines</span><br><span class="line">  .flatMap(_.split(<span class="string">" "</span>))</span><br><span class="line">  .filter(_ != <span class="string">""</span>)</span><br><span class="line"></span><br><span class="line"># <span class="type">Datasets</span></span><br><span class="line"><span class="keyword">val</span> lines = sqlContext.read.text(<span class="string">"/wikipedia"</span>).as[<span class="type">String</span>]</span><br><span class="line"><span class="keyword">val</span> words = lines</span><br><span class="line">  .flatMap(_.split(<span class="string">" "</span>))</span><br><span class="line">  .filter(_ != <span class="string">""</span>)</span><br></pre></td></tr></table></figure></p>
 <blockquote>
-<p>Spark2.0以上版本，sqlContext 可以使用 SparkSeesion 替换。具体细节请参阅<a href="http://smartsi.club/2018/06/07/spark-sql-sparksession-new-entry-point/" target="_blank" rel="noopener">Spark SparkSession:一个新的入口</a></p>
+<p>Spark2.0以上版本，sqlContext 可以使用 SparkSeesion 替换。具体细节请参阅<a href="http://smartsi.club/2018/06/07/spark-sql-sparksession-new-entry-point/">Spark SparkSession:一个新的入口</a></p>
 </blockquote>
 <p>这两种API都可以很容易地使用lambda函数表达转换操作。编译器和IDE懂得你正在使用的类型，并且可以在你构建数据管道时提供有用的提示和错误信息。</p>
 <p>虽然这个高层次代码在语法上看起来类似，但使用 Datasets，你也可以访问完整关系执行引擎的所有功能。例如，如果你现在要执行聚合（例如计算每个词的出现次数），则可以简单有效地表达该操作，如下所示：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"># <span class="type">RDDs</span></span><br><span class="line"><span class="keyword">val</span> counts = words</span><br><span class="line">  .groupBy(_.toLowerCase)</span><br><span class="line">  .map(w =&gt; (w._1, w._2.size))</span><br><span class="line"></span><br><span class="line"># <span class="type">Datasets</span></span><br><span class="line"><span class="keyword">val</span> counts = words</span><br><span class="line">  .groupBy(_.toLowerCase)</span><br><span class="line">  .count()</span><br></pre></td></tr></table></figure></p>

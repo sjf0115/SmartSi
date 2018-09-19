@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 生成时间戳与Watermarks">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/15/flink-stream-event-timestamps-and-watermark/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/01/15/flink-stream-event-timestamps-and-watermark/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="本节适用于在事件时间上运行的程序。有关事件时间，处理时间和提取时间的介绍，请参阅Flink1.4 事件时间与处理时间。 为了处理事件时间，流处理程序需要相应地设置TimeCharacteristic。 Java版本:final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();">
 <meta property="og:locale" content="zh-Hans">
@@ -120,7 +120,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/15/flink-stream-event-timestamps-and-watermark/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/01/15/flink-stream-event-timestamps-and-watermark/"/>
 
 
   <title>Flink1.4 生成时间戳与Watermarks | SmartSi</title>
@@ -304,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/15/flink-stream-event-timestamps-and-watermark/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/01/15/flink-stream-event-timestamps-and-watermark/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -408,7 +408,7 @@
       
 
       
-        <p>本节适用于在事件时间上运行的程序。有关事件时间，处理时间和提取时间的介绍，请参阅<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4/" target="_blank" rel="noopener">Flink1.4 事件时间与处理时间</a>。</p>
+        <p>本节适用于在事件时间上运行的程序。有关事件时间，处理时间和提取时间的介绍，请参阅<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4/">Flink1.4 事件时间与处理时间</a>。</p>
 <p>为了处理事件时间，流处理程序需要相应地设置<code>TimeCharacteristic</code>。</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);</span><br></pre></td></tr></table></figure></p>

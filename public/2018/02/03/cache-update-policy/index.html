@@ -104,7 +104,7 @@
 <meta name="keywords" content="CaChe">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Cache 缓存更新策略">
-<meta property="og:url" content="http://sjf0115.github.io/2018/02/03/cache-update-policy/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/02/03/cache-update-policy/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="看到好些人在写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。然而，这个是逻辑是 错误 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。 我不知道为什么这么多人用的都是这个">
 <meta property="og:locale" content="zh-Hans">
@@ -122,7 +122,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/02/03/cache-update-policy/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/02/03/cache-update-policy/"/>
 
 
   <title>Cache 缓存更新策略 | SmartSi</title>
@@ -306,7 +306,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/03/cache-update-policy/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/02/03/cache-update-policy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -533,8 +533,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/02/04/java-on-off-heap-memory/" rel="prev" title="Java 堆内内存与堆外内存">
-                Java 堆内内存与堆外内存 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/02/04/jvm-garbage-collection-algorithm/" rel="prev" title="JVM 垃圾收集算法">
+                JVM 垃圾收集算法 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

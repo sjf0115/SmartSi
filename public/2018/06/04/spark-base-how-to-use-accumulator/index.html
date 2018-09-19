@@ -104,7 +104,7 @@
 <meta name="keywords" content="Spark,Spark 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark 如何使用累加器Accumulator">
-<meta property="og:url" content="http://sjf0115.github.io/2018/06/04/spark-base-how-to-use-accumulator/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/06/04/spark-base-how-to-use-accumulator/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="Accumulator 是 spark 提供的累加器，累加器可以用来实现计数器（如在 MapReduce 中）或者求和。Spark 本身支持数字类型的累加器，程序员可以添加对新类型的支持。 1. 内置累加器在 Spark2.0.0 版本之前，我们可以通过调用 SparkContext.intAccumulator() 或 SparkContext.doubleAccumulator() 来创建一个">
 <meta property="og:locale" content="zh-Hans">
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/06/04/spark-base-how-to-use-accumulator/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/06/04/spark-base-how-to-use-accumulator/"/>
 
 
   <title>Spark 如何使用累加器Accumulator | SmartSi</title>
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/06/04/spark-base-how-to-use-accumulator/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/06/04/spark-base-how-to-use-accumulator/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -434,7 +434,7 @@
 <p>其实这个时候又执行了一次 map 操作，所以累加器各自又增加了5，最终获得的结果变成了10。</p>
 <p>看了上面的分析以及输出结果，我们知道，那就是使用累加器的过程中只能使用一次 action 操作才能保证结果的准确性。事实上，这种情况是可以解决的，只要将任务之间的依赖关系切断就可以。我们可以调用 cache，persist 等方法将之前的依赖切断，后续的累加器就不会受之前的 transfrom 操作影响了：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Odd Num Count : 5</span><br><span class="line">Even Num Count : 5</span><br><span class="line">Odd Num Count : 5</span><br><span class="line">Even Num Count : 5</span><br></pre></td></tr></table></figure></p>
 <p>所以在使用累加器时，为了保证准确性，最好只使用一次 action 操作。如果需要使用多次，可以使用 cache 或 persist 操作切断依赖。</p>
-<p>参考：　<a href="http://smartsi.club/2018/04/10/spark-base-shared-variables/" target="_blank" rel="noopener">http://smartsi.club/2018/04/10/spark-base-shared-variables/</a></p>
+<p>参考：　<a href="http://smartsi.club/2018/04/10/spark-base-shared-variables/">http://smartsi.club/2018/04/10/spark-base-shared-variables/</a></p>
 <p><a href="https://blog.csdn.net/lsshlsw/article/details/50979579" target="_blank" rel="noopener">https://blog.csdn.net/lsshlsw/article/details/50979579</a></p>
 
       

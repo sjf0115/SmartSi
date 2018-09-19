@@ -104,7 +104,7 @@
 <meta name="keywords" content="ElasticSearch,ElasticSearch 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ElasticSearch Scroll游标搜索">
-<meta property="og:url" content="http://sjf0115.github.io/2016/10/28/elasticsearch-base-scroll-search/index.html">
+<meta property="og:url" content="http://smartsi.club/2016/10/28/elasticsearch-base-scroll-search/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 深分页在ElasticSearch 分页搜索一文中，我们了解到分布式系统中深度分页。在这里我们再具体的了解一下深度分页，可能带来的问题，以及 ElasticSearch 给出的解决方案。 在 ElasticSearch 内部原理之分布式文档搜索 一文中我们了解到分布式搜索的工作原理，分布式搜索这种先查后取的过程支持用 from 和 size 参数分页，但是这是有限制的。请记住，每个分片必须构">
 <meta property="og:locale" content="zh-Hans">
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2016/10/28/elasticsearch-base-scroll-search/"/>
+  <link rel="canonical" href="http://smartsi.club/2016/10/28/elasticsearch-base-scroll-search/"/>
 
 
   <title>ElasticSearch Scroll游标搜索 | SmartSi</title>
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2016/10/28/elasticsearch-base-scroll-search/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2016/10/28/elasticsearch-base-scroll-search/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -406,8 +406,8 @@
       
 
       
-        <h3 id="1-深分页"><a href="#1-深分页" class="headerlink" title="1. 深分页"></a>1. 深分页</h3><p>在<a href="http://smartsi.club/2016/10/25/elasticsearch-pagination-search/" target="_blank" rel="noopener">ElasticSearch 分页搜索</a>一文中，我们了解到分布式系统中深度分页。在这里我们再具体的了解一下深度分页，可能带来的问题，以及 ElasticSearch 给出的解决方案。</p>
-<p>在 <a href="http://smartsi.club/2016/10/26/elasticsearch-internal-distributed-document-search/" target="_blank" rel="noopener">ElasticSearch 内部原理之分布式文档搜索</a> 一文中我们了解到分布式搜索的工作原理，分布式搜索这种先查后取的过程支持用 <code>from</code> 和 <code>size</code> 参数分页，但是这是有限制的。请记住，每个分片必须构建一个长度为 <code>from+size</code> 的优先级队列，所有这些队列都需要传递回协调节点。协调节点需要对 <code>number_of_shards *（from + size）</code> 个文档进行排序，以便正确找到 <code>size</code> 个文档。</p>
+        <h3 id="1-深分页"><a href="#1-深分页" class="headerlink" title="1. 深分页"></a>1. 深分页</h3><p>在<a href="http://smartsi.club/2016/10/25/elasticsearch-pagination-search/">ElasticSearch 分页搜索</a>一文中，我们了解到分布式系统中深度分页。在这里我们再具体的了解一下深度分页，可能带来的问题，以及 ElasticSearch 给出的解决方案。</p>
+<p>在 <a href="http://smartsi.club/2016/10/26/elasticsearch-internal-distributed-document-search/">ElasticSearch 内部原理之分布式文档搜索</a> 一文中我们了解到分布式搜索的工作原理，分布式搜索这种先查后取的过程支持用 <code>from</code> 和 <code>size</code> 参数分页，但是这是有限制的。请记住，每个分片必须构建一个长度为 <code>from+size</code> 的优先级队列，所有这些队列都需要传递回协调节点。协调节点需要对 <code>number_of_shards *（from + size）</code> 个文档进行排序，以便正确找到 <code>size</code> 个文档。</p>
 <p>取决于你的文档的大小，分片的数量和你使用的硬件，给 10,000 到 50,000 的结果文档深分页（ 1,000 到 5,000 页）是完全可行的。但是使用足够大的 <code>from</code> 值，排序过程可能会变得非常沉重，使用大量的CPU、内存和带宽。因为这个原因，我们强烈建议你不要使用深分页。</p>
 <p>实际上，’深分页’很少符合我们的行为。当2到3页过去以后，我们会停止翻页，并且改变搜索条件。不知疲倦地一页一页的获取网页直到你的服务崩溃的罪魁祸首一般是机器人或者网络爬虫。</p>
 <p>如果你确实需要从集群里取回大量的文档，你可以通过使用<code>scroll</code>查询（禁用排序）来更有效率的取回文档，具体我们会在下面进行讨论。</p>

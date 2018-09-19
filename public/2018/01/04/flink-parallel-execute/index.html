@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 并发执行">
-<meta property="og:url" content="http://sjf0115.github.io/2018/01/04/flink-parallel-execute/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/01/04/flink-parallel-execute/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该考虑设置最大并发度。从保存点恢复时，可以更改特定算子或整个程序">
 <meta property="og:locale" content="zh-Hans">
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/01/04/flink-parallel-execute/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/01/04/flink-parallel-execute/"/>
 
 
   <title>Flink1.4 并发执行 | SmartSi</title>
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/01/04/flink-parallel-execute/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/01/04/flink-parallel-execute/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -412,7 +412,7 @@
 <h4 id="1-1-算子级别"><a href="#1-1-算子级别" class="headerlink" title="1.1 算子级别"></a>1.1 算子级别</h4><p>单个算子，数据源，sink可以通过调用<code>setParallelism()</code>方法来定义并发度。例如，像这样：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; text = [...]</span><br><span class="line">DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; wordCounts = text</span><br><span class="line">    .flatMap(<span class="keyword">new</span> LineSplitter())</span><br><span class="line">    .keyBy(<span class="number">0</span>)</span><br><span class="line">    .timeWindow(Time.seconds(<span class="number">5</span>))</span><br><span class="line">    .sum(<span class="number">1</span>).setParallelism(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">wordCounts.print();</span><br><span class="line"></span><br><span class="line">env.execute(<span class="string">"Word Count Example"</span>);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line"></span><br><span class="line">val text = [...]</span><br><span class="line">val wordCounts = text</span><br><span class="line">    .flatMap&#123; _.split(&quot; &quot;) map &#123; (_, 1) &#125; &#125;</span><br><span class="line">    .keyBy(0)</span><br><span class="line">    .timeWindow(Time.seconds(5))</span><br><span class="line">    .sum(1).setParallelism(5)</span><br><span class="line">wordCounts.print()</span><br><span class="line"></span><br><span class="line">env.execute(&quot;Word Count Example&quot;)</span><br></pre></td></tr></table></figure></p>
-<h4 id="1-2-执行环境级别"><a href="#1-2-执行环境级别" class="headerlink" title="1.2 执行环境级别"></a>1.2 执行环境级别</h4><p>如<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink%20Flink%E7%A8%8B%E5%BA%8F%E5%89%96%E6%9E%90/" target="_blank" rel="noopener">这</a>所述，<code>Flink</code>程序是在执行环境的上下文中执行的。执行环境为它执行的所有算子，数据源和数据<code>sink</code>提供了默认的并发度。执行环境的并发度可以通过显式配置一个算子的并发度来覆盖。</p>
+<h4 id="1-2-执行环境级别"><a href="#1-2-执行环境级别" class="headerlink" title="1.2 执行环境级别"></a>1.2 执行环境级别</h4><p>如<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink%20Flink%E7%A8%8B%E5%BA%8F%E5%89%96%E6%9E%90/">这</a>所述，<code>Flink</code>程序是在执行环境的上下文中执行的。执行环境为它执行的所有算子，数据源和数据<code>sink</code>提供了默认的并发度。执行环境的并发度可以通过显式配置一个算子的并发度来覆盖。</p>
 <p>执行环境的默认并发度可以通过调用<code>setParallelism()</code>方法来指定。要为执行的所有算子，数据源和<code>sink</code>设置并发度为3，请按如下方式设置执行环境的默认并发度：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setParallelism(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">DataStream&lt;String&gt; text = [...]</span><br><span class="line">DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; wordCounts = [...]</span><br><span class="line">wordCounts.print();</span><br><span class="line"></span><br><span class="line">env.execute(<span class="string">"Word Count Example"</span>);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line">env.setParallelism(3)</span><br><span class="line"></span><br><span class="line">val text = [...]</span><br><span class="line">val wordCounts = text</span><br><span class="line">    .flatMap&#123; _.split(&quot; &quot;) map &#123; (_, 1) &#125; &#125;</span><br><span class="line">    .keyBy(0)</span><br><span class="line">    .timeWindow(Time.seconds(5))</span><br><span class="line">    .sum(1)</span><br><span class="line">wordCounts.print()</span><br><span class="line"></span><br><span class="line">env.execute(&quot;Word Count Example&quot;)</span><br></pre></td></tr></table></figure></p>

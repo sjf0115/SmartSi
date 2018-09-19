@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 窗口概述">
-<meta property="og:url" content="http://sjf0115.github.io/2018/02/28/flink-stream-windows-overall/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/02/28/flink-stream-windows-overall/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="Windows(窗口)是处理无限数据流的核心。窗口将流分解成有限大小的”桶”，在上面我们可以进行计算。本文将重点介绍 Flink 中的窗口，以及常见的窗口类型。 一个窗口化的 Flink 程序一般结构如下。第一个片段指的是指定 key 的数据流（keyed streams），而第二个未指定key的数据流。可以看出，唯一的区别是指定 key 的数据流调用了 keyBy() 以及 window() 方">
 <meta property="og:locale" content="zh-Hans">
@@ -123,7 +123,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/02/28/flink-stream-windows-overall/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/02/28/flink-stream-windows-overall/"/>
 
 
   <title>Flink1.4 窗口概述 | SmartSi</title>
@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/02/28/flink-stream-windows-overall/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/02/28/flink-stream-windows-overall/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -420,10 +420,10 @@
 <p>另外，每个窗口都将有一个触发器和一个函数(例如 <code>WindowFunction</code>， <code>ReduceFunction</code> 或 <code>FoldFunction</code>)。这个函数包含应用于窗口内容的计算，而触发器指定了窗口使用该函数的条件。触发策略可能是”当窗口中的元素个数大于4”，或”当 <code>watermark</code> 通过窗口末尾”。触发器还可以决定在创建窗口和删除窗口之间的任何时间内清除窗口内容。在这种情况下，清除仅指窗口中的元素，而不是窗口的元数据。这意味着新数据仍然可以添加到该窗口。</p>
 <p>除了上述之外，你还可以指定一个 <code>Evictor</code>，在触发器触发之后以及在应用该函数之前和/或之后从窗口中移除元素。</p>
 <h3 id="2-Keyed-vs-Non-Keyed-Windows"><a href="#2-Keyed-vs-Non-Keyed-Windows" class="headerlink" title="2. Keyed vs Non-Keyed Windows"></a>2. Keyed vs Non-Keyed Windows</h3><p>首先要指定的第一件事就是你的数据流是否应该指定 <code>key</code>。这必须在定义窗口之前完成。使用 <code>keyBy()</code> 可以将无限数据流分解成指定 key 的逻辑上的数据流。如果未调用 <code>keyBy()</code>，则你的数据流未指定 key。</p>
-<p>在指定 key 的数据流的情况下，你传入进来的事件的任何属性都可以用作 key(<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/" target="_blank" rel="noopener">更多细节</a>)。指定 key 的数据流可以允许通过多个任务并行执行窗口计算，因为每个逻辑数据流可以独立于其余的进行处理。指向相同 key 的所有元素将被发送到相同的并行任务上。</p>
+<p>在指定 key 的数据流的情况下，你传入进来的事件的任何属性都可以用作 key(<a href="http://smartsi.club/2018/01/04/flink-how-to-specifying-keys/">更多细节</a>)。指定 key 的数据流可以允许通过多个任务并行执行窗口计算，因为每个逻辑数据流可以独立于其余的进行处理。指向相同 key 的所有元素将被发送到相同的并行任务上。</p>
 <p>在未指定 key 的数据流的情况下，你的原始数据流不会被分割成多个逻辑数据流，并且所有窗口逻辑将由单个任务执行，即以1个的并行度执行。</p>
 <h3 id="3-窗口分配器"><a href="#3-窗口分配器" class="headerlink" title="3. 窗口分配器"></a>3. 窗口分配器</h3><p>在确定数据流是否指定 key 之后，下一步就是定义窗口分配器。窗口分配器定义了元素如何分配给窗口。这通过在 <code>window()</code>(指定key数据流)或 <code>windowAll()</code>(未指定key数据流)调用中指定你选择的窗口分配器来完成。</p>
-<p>窗口分配器负责将每个传入的元素分配给一个或多个窗口。Flink 内置了一些用于解决常见用例的窗口分配器，有滚动窗口，滑动窗口，会话窗口和全局窗口。你还可以通过继承 <code>WindowAssigner</code> 类实现自定义窗口分配器。所有内置窗口分配器(全局窗口除外)根据时间将元素分配给窗口，可以是处理时间或事件时间。请参阅<a href="http://smartsi.club/2018/01/04/flink-stream-event-time-and-processing-time/" target="_blank" rel="noopener">事件时间</a>，了解处理时间和事件时间之间的差异以及如何生成时间戳和<code>watermarks</code>。</p>
+<p>窗口分配器负责将每个传入的元素分配给一个或多个窗口。Flink 内置了一些用于解决常见用例的窗口分配器，有滚动窗口，滑动窗口，会话窗口和全局窗口。你还可以通过继承 <code>WindowAssigner</code> 类实现自定义窗口分配器。所有内置窗口分配器(全局窗口除外)根据时间将元素分配给窗口，可以是处理时间或事件时间。请参阅<a href="http://smartsi.club/2018/01/04/flink-stream-event-time-and-processing-time/">事件时间</a>，了解处理时间和事件时间之间的差异以及如何生成时间戳和<code>watermarks</code>。</p>
 <p>在下文中，我们将展示 Flink 的内置窗口分配器的工作原理以及它们在 <code>DataStream</code> 程序中的使用方式。以下图形可视化每个分配器的运行。紫色圆圈表示数据流中的元素，它们被某些key（在我们这个例子下为用 <code>user1</code>，<code>user2</code> 和 <code>user3</code>）分区。x轴显示时间进度。</p>
 <h4 id="3-1-滚动窗口"><a href="#3-1-滚动窗口" class="headerlink" title="3.1 滚动窗口"></a>3.1 滚动窗口</h4><p>滚动窗口分配器将每个元素分配给固定大小的窗口。滚动窗口大小固定且不重叠。例如，如果指定大小为5分钟的滚动窗口，则将执行当前窗口，并且每五分钟将启动一个新窗口，如下图所示:</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink-stream-windows-overall-1.png?raw=true" alt=""></p>
@@ -536,8 +536,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/02/28/flink-stream-operators-overall/" rel="next" title="Flink1.4 Operator概述">
-                <i class="fa fa-chevron-left"></i> Flink1.4 Operator概述
+              <a href="/2018/02/28/introducing-apache-spark-2-3/" rel="next" title="Spark 2.3.0 重要特性介绍">
+                <i class="fa fa-chevron-left"></i> Spark 2.3.0 重要特性介绍
               </a>
             
           </div>
@@ -546,8 +546,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/02/28/introducing-apache-spark-2-3/" rel="prev" title="Spark 2.3.0 重要特性介绍">
-                Spark 2.3.0 重要特性介绍 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/03/01/flink-stream-windows-function/" rel="prev" title="Flink1.4 窗口函数">
+                Flink1.4 窗口函数 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

@@ -104,7 +104,7 @@
 <meta name="keywords" content="Spark,Spark Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark Streaming 2.2.0 DStreams">
-<meta property="og:url" content="http://sjf0115.github.io/2018/04/04/spark-streaming-discretized-streams-dstreams/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/04/04/spark-streaming-discretized-streams-dstreams/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="离散流或者 DStreams 是 Spark Streaming 提供的基本抽象，它代表一个连续的数据流。从 source 中获取输入流，或者是输入流通过转换算子处理后生成的数据流。在内部，DStreams 由一系列连续的 RDD 组成。它是 Spark 中一个不可改变的抽象，分布式数据集的抽象（更多细节参见Spark编程指南）。DStream 中的每个 RDD 包含来自特定间隔的数据，如下图所示">
 <meta property="og:locale" content="zh-Hans">
@@ -121,7 +121,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/04/04/spark-streaming-discretized-streams-dstreams/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/04/04/spark-streaming-discretized-streams-dstreams/"/>
 
 
   <title>Spark Streaming 2.2.0 DStreams | SmartSi</title>
@@ -305,7 +305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/04/04/spark-streaming-discretized-streams-dstreams/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/04/04/spark-streaming-discretized-streams-dstreams/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -411,7 +411,7 @@
       
         <p>离散流或者 DStreams 是 Spark Streaming 提供的基本抽象，它代表一个连续的数据流。从 source 中获取输入流，或者是输入流通过转换算子处理后生成的数据流。在内部，DStreams 由一系列连续的 RDD 组成。它是 Spark 中一个不可改变的抽象，分布式数据集的抽象（更多细节参见<a href="http://spark.apache.org/docs/2.2.0/rdd-programming-guide.html" target="_blank" rel="noopener">Spark编程指南</a>）。DStream 中的每个 RDD 包含来自特定间隔的数据，如下图所示：</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-discretized-streams-dstreams-1.png?raw=true" alt="image"></p>
-<p>对 DStream 应用的任何操作都会转换为对 DStream 底层的 RDD 操作。例如，在之前的<a href="http://smartsi.club/2018/04/02/spark-streaming-first-example/" target="_blank" rel="noopener">示例</a>中将行数据流转换单词数据流，flatMap 操作应用于 lines 这个 DStreams 中的每个 RDD，生成 words 这个 DStreams 的 RDD。过程如下图所示：</p>
+<p>对 DStream 应用的任何操作都会转换为对 DStream 底层的 RDD 操作。例如，在之前的<a href="http://smartsi.club/2018/04/02/spark-streaming-first-example/">示例</a>中将行数据流转换单词数据流，flatMap 操作应用于 lines 这个 DStreams 中的每个 RDD，生成 words 这个 DStreams 的 RDD。过程如下图所示：</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-streaming-discretized-streams-dstreams-2.png?raw=true" alt="image"></p>
 <p>这些底层的 RDD 转换操作由 Spark 引擎计算。DStream 操作隐藏了大部分细节，并为开发人员提供了更高级别的API以方便使用。这些操作将在后面的章节中详细讨论。</p>
 <blockquote>
@@ -507,8 +507,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/04/05/spark-performance-data-skew-tuning/" rel="prev" title="Spark 性能调优之数据倾斜调优">
-                Spark 性能调优之数据倾斜调优 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/04/05/spark-streaming-input-dstreams-and-receivers/" rel="prev" title="Spark Streaming 2.2.0 Input DStreams和Receivers">
+                Spark Streaming 2.2.0 Input DStreams和Receivers <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

@@ -104,7 +104,7 @@
 <meta name="keywords" content="Spark,Spark 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark 多文件输出">
-<meta property="og:url" content="http://sjf0115.github.io/2018/07/12/spark-base-multiple-output-format/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/07/12/spark-base-multiple-output-format/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 自定义MultipleOutputFormat在Hadoop 多文件输出MultipleOutputFormat中介绍了如何在Hadoop中根据Key或者Value的值将属于不同的类型的记录写到不同的文件中。在这里面用到了MultipleOutputFormat这个类。 因为Spark内部写文件方式其实调用的是Hadoop相关API，所以我们也可以通过Spark实现多文件输出。不过遗憾的是，">
 <meta property="og:locale" content="zh-Hans">
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/07/12/spark-base-multiple-output-format/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/07/12/spark-base-multiple-output-format/"/>
 
 
   <title>Spark 多文件输出 | SmartSi</title>
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/07/12/spark-base-multiple-output-format/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/07/12/spark-base-multiple-output-format/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -406,7 +406,7 @@
       
 
       
-        <h3 id="1-自定义MultipleOutputFormat"><a href="#1-自定义MultipleOutputFormat" class="headerlink" title="1. 自定义MultipleOutputFormat"></a>1. 自定义MultipleOutputFormat</h3><p>在<a href="http://smartsi.club/2017/03/15/hadoop-base-multiple-output-format/" target="_blank" rel="noopener">Hadoop 多文件输出MultipleOutputFormat</a>中介绍了如何在Hadoop中根据Key或者Value的值将属于不同的类型的记录写到不同的文件中。在这里面用到了MultipleOutputFormat这个类。</p>
+        <h3 id="1-自定义MultipleOutputFormat"><a href="#1-自定义MultipleOutputFormat" class="headerlink" title="1. 自定义MultipleOutputFormat"></a>1. 自定义MultipleOutputFormat</h3><p>在<a href="http://smartsi.club/2017/03/15/hadoop-base-multiple-output-format/">Hadoop 多文件输出MultipleOutputFormat</a>中介绍了如何在Hadoop中根据Key或者Value的值将属于不同的类型的记录写到不同的文件中。在这里面用到了MultipleOutputFormat这个类。</p>
 <p>因为Spark内部写文件方式其实调用的是Hadoop相关API，所以我们也可以通过Spark实现多文件输出。不过遗憾的是，Spark内部没有多文件输出的函数供我们直接使用。我们可以通过调用saveAsHadoopFile函数并自定义MultipleOutputFormat类来实现多文件输出，如下所示：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RDDMultipleTextOutputFormat</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; <span class="keyword">extends</span> <span class="title">MultipleTextOutputFormat</span>&lt;<span class="title">K</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> String <span class="title">generateFileNameForKeyValue</span><span class="params">(K key, V value, String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> key.toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>RDDMultipleTextOutputFormat类中的 <code>generateFileNameForKeyValue</code> 函数有三个参数，key和value是RDD对应的Key和Value，而name参数是每个Reduce的编号。上面例子中没有使用该参数，而是直接将同一个Key的数据输出到同一个文件中。我们来看看如何使用这个自定义的类：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String appName = <span class="string">"MultipleTextOutputExample"</span>;</span><br><span class="line">SparkConf conf = <span class="keyword">new</span> SparkConf().setAppName(appName);</span><br><span class="line">JavaSparkContext sc = <span class="keyword">new</span> JavaSparkContext(conf);</span><br><span class="line"></span><br><span class="line">JavaRDD&lt;String&gt; source = sc.textFile(inputPath);</span><br><span class="line"><span class="comment">// 以platform为key</span></span><br><span class="line">JavaPairRDD&lt;String, String&gt; result = source.mapToPair(<span class="keyword">new</span> PairFunction&lt;String, String, String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple2&lt;String, String&gt; <span class="title">call</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String[] params = str.split(<span class="string">"\t"</span>);</span><br><span class="line">        String platform = <span class="string">"other"</span>;</span><br><span class="line">        <span class="keyword">if</span>(params.length &gt; <span class="number">1</span> &amp;&amp; StringUtils.isNotBlank(params[<span class="number">1</span>]))&#123;</span><br><span class="line">            platform = params[<span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple2&lt;&gt;(platform, str);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 保存</span></span><br><span class="line">result.saveAsHadoopFile(outputPath, String.class, String.class, RDDMultipleTextOutputFormat.class);</span><br></pre></td></tr></table></figure></p>
 <p>上面示例中通过调用 <code>saveAsHadoopFile</code> 函数并自定义 <code>MultipleOutputFormat</code> 类来实现多文件输出，如下所示输出：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[xiaosi@ying ~]$  sudo -uxiaosi hadoop fs -ls tmp/data_group/example/output/price</span><br><span class="line">Found 3 items</span><br><span class="line">-rw-r--r--   3 xiaosi xiaosi          0 2018-07-12 16:24 tmp/data_group/example/output/price/_SUCCESS</span><br><span class="line">-rw-r--r--   3 xiaosi xiaosi     723754 2018-07-12 16:23 tmp/data_group/example/output/price/adr</span><br><span class="line">-rw-r--r--   3 xiaosi xiaosi     799216 2018-07-12 16:23 tmp/data_group/example/output/price/ios</span><br></pre></td></tr></table></figure></p>

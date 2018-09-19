@@ -33,6 +33,14 @@ post_copyright:
 
 不知道还有没有什么更好的方法解决这个问题，欢迎留言指教。
 
+最近发现一个解决办法，修改`_config.yml`文件，将url改为自定义域名：
+```
+url: http://smartsi.club
+```
+就不需要像上面那样麻烦了。
+
+> update:20180919
+
 ### 2. 自定义文章底部版权声明
 
 在目录 `next/layout/_macro/` 下添加 `my-copyright.swig`：

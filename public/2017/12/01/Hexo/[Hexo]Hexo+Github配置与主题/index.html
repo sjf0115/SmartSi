@@ -104,7 +104,7 @@
 <meta name="keywords" content="Hexo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hexo+Github配置与主题">
-<meta property="og:url" content="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/index.html">
+<meta property="og:url" content="http://smartsi.club/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 基本配置1.1 语言设置每个主题都会配置几种界面显示语言，修改语言只要编辑站点配置文件，找到 language 字段，并将其值更改为你所需要的语言(例如，简体中文)：language: zh-Hans 1.2 网站标题，作者打开站点配置文件，修改这些值：title: SmartSi #博客标题subtitle: #博客副标题description: #博客描述author: sjf0115">
 <meta property="og:locale" content="zh-Hans">
@@ -121,7 +121,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/"/>
+  <link rel="canonical" href="http://smartsi.club/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/"/>
 
 
   <title>Hexo+Github配置与主题 | SmartSi</title>
@@ -305,7 +305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2017/12/01/Hexo/[Hexo]Hexo+Github配置与主题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -425,7 +425,7 @@
 <p>Example:</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hexo/Hexo+Github%E9%85%8D%E7%BD%AE%E4%B8%8E%E4%B8%BB%E9%A2%98-2.png?raw=true" alt=""></p>
 <h3 id="9-站点建立时间"><a href="#9-站点建立时间" class="headerlink" title="9. 站点建立时间"></a>9. 站点建立时间</h3><p>这个时间将在站点的底部显示，例如 <code>© 2017 - 2018</code>。 编辑 <code>主题配置文件</code>，新增字段 <code>since</code>:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">配置示例</span><br><span class="line">since: 2017</span><br></pre></td></tr></table></figure></p>
-<h3 id="10-腾讯公益404页面"><a href="#10-腾讯公益404页面" class="headerlink" title="10. 腾讯公益404页面"></a>10. 腾讯公益404页面</h3><p>腾讯公益404页面，寻找丢失儿童，让大家一起关注此项公益事业！效果如下 <a href="http://smartsi.club/404.html" target="_blank" rel="noopener">http://smartsi.club/404.html</a></p>
+<h3 id="10-腾讯公益404页面"><a href="#10-腾讯公益404页面" class="headerlink" title="10. 腾讯公益404页面"></a>10. 腾讯公益404页面</h3><p>腾讯公益404页面，寻找丢失儿童，让大家一起关注此项公益事业！效果如下 <a href="http://smartsi.club/404.html">http://smartsi.club/404.html</a></p>
 <p>(1) 使用方法，新建 <code>404.html</code> 页面，放到主题的 <code>source</code> 目录下，内容如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE HTML&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">  &lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html;charset=utf-8;&quot;/&gt;</span><br><span class="line">  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge,chrome=1&quot; /&gt;</span><br><span class="line">  &lt;meta name=&quot;robots&quot; content=&quot;all&quot; /&gt;</span><br><span class="line">  &lt;meta name=&quot;robots&quot; content=&quot;index,follow&quot;/&gt;</span><br><span class="line">  &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://qzone.qq.com/gy/404/style/404style.css&quot;&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">  &lt;script type=&quot;text/plain&quot; src=&quot;http://www.qq.com/404/search_children.js&quot;</span><br><span class="line">          charset=&quot;utf-8&quot; homePageUrl=&quot;/&quot;</span><br><span class="line">          homePageName=&quot;回到我的主页&quot;&gt;</span><br><span class="line">  &lt;/script&gt;</span><br><span class="line">  &lt;script src=&quot;https://qzone.qq.com/gy/404/data.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;</span><br><span class="line">  &lt;script src=&quot;https://qzone.qq.com/gy/404/page.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure></p>
 <p>(2) 开启404页面功能</p>
 <p>在 <code>menu</code> 下添加 <code>commonweal: /404/ || heartbeat</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">menu:</span><br><span class="line">  home: / || home</span><br><span class="line">  about: /about/ || user</span><br><span class="line">  tags: /tags/ || tags</span><br><span class="line">  categories: /categories/ || th</span><br><span class="line">  archives: /archives/ || archive</span><br><span class="line">  #schedule: /schedule/ || calendar</span><br><span class="line">  #sitemap: /sitemap.xml || sitemap</span><br><span class="line">  commonweal: /404/ || heartbeat</span><br></pre></td></tr></table></figure></p>

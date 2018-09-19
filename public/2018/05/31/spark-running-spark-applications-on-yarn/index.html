@@ -104,7 +104,7 @@
 <meta name="keywords" content="Spark,Spark 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spark 在Yarn上运行Spark应用程序">
-<meta property="og:url" content="http://sjf0115.github.io/2018/05/31/spark-running-spark-applications-on-yarn/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/05/31/spark-running-spark-applications-on-yarn/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 部署模式在 YARN 中，每个应用程序实例都有一个 ApplicationMaster 进程，该进程是为该应用程序启动的第一个容器。应用程序负责从 ResourceManager 上请求资源。一旦分配了资源，应用程序将指示 NodeManagers 启动容器。ApplicationMasters 消除了对活跃客户端的依赖：启动应用程序的进程可以终止，并且从在集群上由 YARN 管理的进程继续">
 <meta property="og:locale" content="zh-Hans">
@@ -121,7 +121,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/05/31/spark-running-spark-applications-on-yarn/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/05/31/spark-running-spark-applications-on-yarn/"/>
 
 
   <title>Spark 在Yarn上运行Spark应用程序 | SmartSi</title>
@@ -305,7 +305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/05/31/spark-running-spark-applications-on-yarn/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/05/31/spark-running-spark-applications-on-yarn/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -410,7 +410,7 @@
 
       
         <h3 id="1-部署模式"><a href="#1-部署模式" class="headerlink" title="1. 部署模式"></a>1. 部署模式</h3><p>在 YARN 中，每个应用程序实例都有一个 ApplicationMaster 进程，该进程是为该应用程序启动的第一个容器。应用程序负责从 ResourceManager 上请求资源。一旦分配了资源，应用程序将指示 NodeManagers 启动容器。ApplicationMasters 消除了对活跃客户端的依赖：启动应用程序的进程可以终止，并且从在集群上由 YARN 管理的进程继续协作运行。</p>
-<p>有关指定部署模式的选项，请参阅<a href="http://smartsi.club/2018/04/07/spark-base-launching-applications-with-spark-submit/" target="_blank" rel="noopener">spark-submit选项</a>。</p>
+<p>有关指定部署模式的选项，请参阅<a href="http://smartsi.club/2018/04/07/spark-base-launching-applications-with-spark-submit/">spark-submit选项</a>。</p>
 <h4 id="1-1-Cluster部署模式"><a href="#1-1-Cluster部署模式" class="headerlink" title="1.1 Cluster部署模式"></a>1.1 Cluster部署模式</h4><p>在 Cluster 模式下，Spark Driver 在集群主机上的 ApplicationMaster 上运行，它负责向 YARN 申请资源，并监督作业的运行状况。当用户提交了作业之后，就可以关掉 Client，作业会继续在 YARN 上运行。</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Spark/spark-running-spark-applications-on-yarn-1.png?raw=true" alt=""></p>
 <p>Cluster 模式不太适合使用 Spark 进行交互式操作。需要用户输入的 Spark 应用程序（如spark-shell和pyspark）需要 Spark Driver 在启动 Spark 应用程序的 Client 进程内运行。</p>

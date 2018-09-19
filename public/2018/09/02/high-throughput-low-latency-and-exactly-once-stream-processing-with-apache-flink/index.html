@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink 内部原理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理">
-<meta property="og:url" content="http://sjf0115.github.io/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="在本文中，我们将深入探讨Flink新颖的检查点机制是如何工作的，以及它是如何取代旧架构以实现流容错和恢复。我们在各种类型的流处理应用程序上对Flink性能进行测试，并通过在Apache Storm（一种广泛使用的低延迟流处理器）上运行相同的实验来进行对比。 1. 流式架构的演变在流处理中保证高性能同时又要保证容错是比较困难的。在批处理中，当作业失败时，可以容易地重新运行作业的失败部分来重新计算丢失">
 <meta property="og:locale" content="zh-Hans">
@@ -127,7 +127,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/"/>
 
 
   <title>Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理 | SmartSi</title>
@@ -311,7 +311,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/09/02/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -441,7 +441,7 @@
 <li>延迟：微批处理显然将作业的延迟限制为微批处理的延迟。虽然亚秒级的批处理延迟对于简单应用程序是可以接受的，但是具有多个网络Shuffle的应用程序很容易将延迟时间延长到数秒。</li>
 </ul>
 <p>微批处理模型的最大局限可能是它连接了两个不应连接的概念：应用程序定义的窗口大小和系统内部恢复间隔。假设一个程序（下面示例是Flink代码）每5秒聚合一次记录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dataStream</span><br><span class="line">    .map(transformRecords)</span><br><span class="line">    .groupBy(&quot;sessionId&quot;)</span><br><span class="line">    .window(Time.of(5, TimeUnit.SECONDS))</span><br><span class="line">    .sum(&quot;price&quot;)</span><br></pre></td></tr></table></figure></p>
-<p>这些应用非常适合微批处理模型。系统累积5秒的数据，对它们求和，并在流上进行一些转换后进行聚合计算。下游应用程序可以直接消费上述5秒聚合后的结果，例如在仪表板上显示。但是，现在假设<a href="http://smartsi.club/2018/02/11/how-flink-handles-backpressure/" target="_blank" rel="noopener">背压</a>开始起作用（例如，由于计算密集型的 transformRecords 函数），或者 devops 团队决定通过将时间间隔增加到10秒来控制作业的吞吐量。然后，微批次大小变的不可控制（在出现背压情况下），或者直接变为10秒（第二种情况）。这意味着下游应用程序（例如，包含最近5秒统计的 Web 仪表板）读取的聚合结果是错误的，下游应用程序需要自己处理此问题。</p>
+<p>这些应用非常适合微批处理模型。系统累积5秒的数据，对它们求和，并在流上进行一些转换后进行聚合计算。下游应用程序可以直接消费上述5秒聚合后的结果，例如在仪表板上显示。但是，现在假设<a href="http://smartsi.club/2018/02/11/how-flink-handles-backpressure/">背压</a>开始起作用（例如，由于计算密集型的 transformRecords 函数），或者 devops 团队决定通过将时间间隔增加到10秒来控制作业的吞吐量。然后，微批次大小变的不可控制（在出现背压情况下），或者直接变为10秒（第二种情况）。这意味着下游应用程序（例如，包含最近5秒统计的 Web 仪表板）读取的聚合结果是错误的，下游应用程序需要自己处理此问题。</p>
 <p>微批处理可以实现高吞吐量和Exactly-Once语义保证，但是当前的实现是以抛弃低延迟，流量控制和纯流式编程模型为代价实现上述目标的。显而易见的问题是，是否有两全其美的办法：保持连续计算模型的所有优势，同时还能保证Exactly-Once语义并提供高吞吐量。后面讨论的后流式架构实现了这种组合，并将微批处理作为流式处理的基本模型。</p>
 <p>通常，微批处理被认为是一次处理一条记录的替代方法。这是一种错误的认识：连续算子不需要一次只处理一条记录。实际上，所有精心设计的流处理系统（包括下面讨论的Flink和Google Dataflow）在通过网络传输之前都会缓冲许多记录，同时又具备连续的处理能力。</p>
 <h3 id="4-事务更新-Google-Cloud-Dataflow"><a href="#4-事务更新-Google-Cloud-Dataflow" class="headerlink" title="4. 事务更新(Google Cloud Dataflow)"></a>4. 事务更新(Google Cloud Dataflow)</h3><p>在保留连续算子模型（低延迟，背压容错，可变状态等）的优势的同时又保证Exactly-Once处理语义的一种强大而又优雅的方法是原子性地记录需要处理的数据并更新到状态中。失败后，可以从日志中重新恢复状态以及需要处理的记录。</p>
@@ -457,7 +457,7 @@
 <p>这有点类似于微批处理方法，两个检查点之间的所有计算都作为一个原子整体，要么全部成功，要么全部失败。然而，只有这一点的相似之处。Chandy Lamport算法的一个重要特点是我们不必在流处理中按下’暂停’按钮（译者注：等待检查点完成之后）来调度下一个微批次。相反，常规数据处理一直运行，数据到达就会处理，而检查点发生在后台。引用原始论文：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">全局状态检测算法会被设计在基础计算上：它们必须同时运行，但不能改变基础计算。</span><br></pre></td></tr></table></figure></p>
 <p>因此，这种架构融合了连续算子模型（低延迟，流量控制和真正的流编程模型），高吞吐量，Chandy-Lamport算法提供的的Exactly-Once语义保证的优点。除了备份有状态计算的状态（其他容错机制也需要这样做）之外，这种容错机制几乎没有其他开销。对于小状态（例如，计数或其他统计），备份开销通常可以忽略不计，而对于大状态，检查点间隔会在吞吐量和恢复时间之间进行权衡。</p>
 <p>最重要的是，该架构将应用程序开发与流量控制和吞吐量控制分开。更改快照间隔对流作业的结果完全没有影响，因此下游应用程序可以放心地依赖于接收到的正确结果。</p>
-<p>Flink的检查点机制基于流经算子和渠道的 ‘barrier’（认为是Chandy Lamport算法中的一种’标记’）来实现。Flink的检查点的描述改编自<a href="http://smartsi.club/2018/01/24/flink-data-streaming-fault-tolerance/" target="_blank" rel="noopener">Flink文档</a>。</p>
+<p>Flink的检查点机制基于流经算子和渠道的 ‘barrier’（认为是Chandy Lamport算法中的一种’标记’）来实现。Flink的检查点的描述改编自<a href="http://smartsi.club/2018/01/24/flink-data-streaming-fault-tolerance/">Flink文档</a>。</p>
 <p>‘Barrier’ 在 Source 节点中被注入到普通流数据中（例如，如果使用Apache Kafka作为源，’barrier’ 与偏移量对齐），并且作为数据流的一部分与数据流一起流过DAG。’barrier’ 将记录分为两组：当前快照的一部分（’barrier’ 表示检查点的开始），以及属于下一个快照的那些组。</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink-2.png?raw=true" alt=""></p>
 <p>‘Barrier’ 流向下游并在通过算子时触发状态快照。算子首先将所有流入的流分区的 ‘barrier’ 对齐（如果算子具有多个输入），并会缓存较快的分区数据（上游来源较快的流分区将被缓冲数据以等待来源较慢的流分区）。当算子从每个输入流中都收到 ‘barrier’ 时，会检查其状态（如果有）并写到持久存储中。一旦完成状态写检查，算子就将 ‘barrier’ 向下游转发。请注意，在此机制中，如果算子支持，则状态写检查既可以是异步（在写入状态时继续处理），也可以是增量（仅写入更改）。</p>

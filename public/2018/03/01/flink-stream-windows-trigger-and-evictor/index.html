@@ -104,7 +104,7 @@
 <meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink1.4 窗口触发器与Evictors">
-<meta property="og:url" content="http://sjf0115.github.io/2018/03/01/flink-stream-windows-trigger-and-evictor/index.html">
+<meta property="og:url" content="http://smartsi.club/2018/03/01/flink-stream-windows-trigger-and-evictor/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 窗口触发器触发器(Trigger)决定了窗口(请参阅窗口概述)博文)什么时候准备好被窗口函数处理。每个窗口分配器都带有一个默认的 Trigger。如果默认触发器不能满足你的要求，可以使用 trigger(...) 指定自定义的触发器。 触发器接口有五个方法来对不同的事件做出响应：public abstract TriggerResult onElement(T element, long t">
 <meta property="og:locale" content="zh-Hans">
@@ -118,7 +118,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2018/03/01/flink-stream-windows-trigger-and-evictor/"/>
+  <link rel="canonical" href="http://smartsi.club/2018/03/01/flink-stream-windows-trigger-and-evictor/"/>
 
 
   <title>Flink1.4 窗口触发器与Evictors | SmartSi</title>
@@ -302,7 +302,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2018/03/01/flink-stream-windows-trigger-and-evictor/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2018/03/01/flink-stream-windows-trigger-and-evictor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -406,7 +406,7 @@
       
 
       
-        <h3 id="1-窗口触发器"><a href="#1-窗口触发器" class="headerlink" title="1. 窗口触发器"></a>1. 窗口触发器</h3><p>触发器(<code>Trigger</code>)决定了窗口(请参阅<a href="http://smartsi.club/2018/02/28/flink-stream-windows-overall/" target="_blank" rel="noopener">窗口概述</a>)博文)什么时候准备好被<a href="http://smartsi.club/2018/03/01/flink-stream-windows-function/" target="_blank" rel="noopener">窗口函数</a>处理。每个窗口分配器都带有一个默认的 <code>Trigger</code>。如果默认触发器不能满足你的要求，可以使用 <code>trigger(...)</code> 指定自定义的触发器。</p>
+        <h3 id="1-窗口触发器"><a href="#1-窗口触发器" class="headerlink" title="1. 窗口触发器"></a>1. 窗口触发器</h3><p>触发器(<code>Trigger</code>)决定了窗口(请参阅<a href="http://smartsi.club/2018/02/28/flink-stream-windows-overall/">窗口概述</a>)博文)什么时候准备好被<a href="http://smartsi.club/2018/03/01/flink-stream-windows-function/">窗口函数</a>处理。每个窗口分配器都带有一个默认的 <code>Trigger</code>。如果默认触发器不能满足你的要求，可以使用 <code>trigger(...)</code> 指定自定义的触发器。</p>
 <p>触发器接口有五个方法来对不同的事件做出响应：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> TriggerResult <span class="title">onElement</span><span class="params">(T element, <span class="keyword">long</span> timestamp, W window, TriggerContext ctx)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> TriggerResult <span class="title">onProcessingTime</span><span class="params">(<span class="keyword">long</span> time, W window, TriggerContext ctx)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> TriggerResult <span class="title">onEventTime</span><span class="params">(<span class="keyword">long</span> time, W window, TriggerContext ctx)</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMerge</span><span class="params">(W window, OnMergeContext ctx)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">	<span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(<span class="string">"This trigger does not support merging."</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">(W window, TriggerContext ctx)</span> <span class="keyword">throws</span> Exception</span>;</span><br></pre></td></tr></table></figure></p>
 <ul>
 <li><code>onElement()</code> 方法，当每个元素被添加窗口时调用。</li>

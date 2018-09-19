@@ -104,7 +104,7 @@
 <meta name="keywords" content="ElasticSearch,ElasticSearch 基础">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ElasticSearch 持久化变更">
-<meta property="og:url" content="http://sjf0115.github.io/2016/11/08/elasticsearch-base-making-changes-persistent/index.html">
+<meta property="og:url" content="http://smartsi.club/2016/11/08/elasticsearch-base-making-changes-persistent/index.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 持久化变更如果没有使用 fsync 将文件系统缓存中的数据刷（flush）到磁盘上，我们无法保证数据在断电后甚至在正常退出应用程序后仍然存在。为了使 Elasticsearch 具有可靠性，我们需要确保将更改持久化到磁盘上。 在ElasticSearch 动态更新索引中，我们说过一次完整提交会将段刷到磁盘，并写入到一个包含所有段列表的提交点 commit point。Elasticsearc">
 <meta property="og:locale" content="zh-Hans">
@@ -123,7 +123,7 @@
 
 
 
-  <link rel="canonical" href="http://sjf0115.github.io/2016/11/08/elasticsearch-base-making-changes-persistent/"/>
+  <link rel="canonical" href="http://smartsi.club/2016/11/08/elasticsearch-base-making-changes-persistent/"/>
 
 
   <title>ElasticSearch 持久化变更 | SmartSi</title>
@@ -307,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://sjf0115.github.io/2016/11/08/elasticsearch-base-making-changes-persistent/">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/2016/11/08/elasticsearch-base-making-changes-persistent/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -412,7 +412,7 @@
 
       
         <h3 id="1-持久化变更"><a href="#1-持久化变更" class="headerlink" title="1. 持久化变更"></a>1. 持久化变更</h3><p>如果没有使用 <code>fsync</code> 将文件系统缓存中的数据刷（flush）到磁盘上，我们无法保证数据在断电后甚至在正常退出应用程序后仍然存在。为了使 Elasticsearch 具有可靠性，我们需要确保将更改持久化到磁盘上。</p>
-<p>在<a href="http://smartsi.club/2016/10/30/elasticsearch-base-dynamically-updatable-indices/" target="_blank" rel="noopener">ElasticSearch 动态更新索引</a>中，我们说过一次完整提交会将段刷到磁盘，并写入到一个包含所有段列表的提交点 <code>commit point</code>。Elasticsearch 在启动或重新打开索引时使用此提交点来确定哪些段属于当前分片。</p>
+<p>在<a href="http://smartsi.club/2016/10/30/elasticsearch-base-dynamically-updatable-indices/">ElasticSearch 动态更新索引</a>中，我们说过一次完整提交会将段刷到磁盘，并写入到一个包含所有段列表的提交点 <code>commit point</code>。Elasticsearch 在启动或重新打开索引时使用此提交点来确定哪些段属于当前分片。</p>
 <p>当我们每秒刷新（refresh）一次即可实现近实时搜索，但是我们仍然需要定期进行全面的提交，以确保我们可以从故障中恢复。但发生在两次提交之间文件变化怎么办？ 我们也不想丢失。</p>
 <p>Elasticsearch添加了一个 <code>Translog</code> 或者叫事务日志，它记录了 Elasticsearch 中的每个操作。使用 <code>Translog</code>，处理过程现在如下所示：</p>
 <p>(1) 索引文档时，将其添加到内存索引缓冲区中，并追加到 <code>Translog</code> 中，如下图所示:</p>
