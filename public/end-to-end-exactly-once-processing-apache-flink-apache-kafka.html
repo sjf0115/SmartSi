@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink Stream," />
+
+
+<meta name="description" content="这篇文章改编自2017年柏林Flink Forward上Piotr Nowojski的演讲。你可以在Flink Forward Berlin网站上找到幻灯片和演示文稿。 2017年12月发布的Apache Flink 1.4.0为Flink的流处理引入了一个重要特性：TwoPhaseCommitSinkFunction 的新功能（此处为相关的Jira），提取了两阶段提交协议的通用逻辑，使得在Fli">
+<meta name="keywords" content="Flink,Flink Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink如何实现端到端的Exactly-Once处理语义">
+<meta property="og:url" content="http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="这篇文章改编自2017年柏林Flink Forward上Piotr Nowojski的演讲。你可以在Flink Forward Berlin网站上找到幻灯片和演示文稿。 2017年12月发布的Apache Flink 1.4.0为Flink的流处理引入了一个重要特性：TwoPhaseCommitSinkFunction 的新功能（此处为相关的Jira），提取了两阶段提交协议的通用逻辑，使得在Fli">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-5.png?raw=true">
+<meta property="og:updated_time" content="2019-04-10T02:02:36.884Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink如何实现端到端的Exactly-Once处理语义">
+<meta name="twitter:description" content="这篇文章改编自2017年柏林Flink Forward上Piotr Nowojski的演讲。你可以在Flink Forward Berlin网站上找到幻灯片和演示文稿。 2017年12月发布的Apache Flink 1.4.0为Flink的流处理引入了一个重要特性：TwoPhaseCommitSinkFunction 的新功能（此处为相关的Jira），提取了两阶段提交协议的通用逻辑，使得在Fli">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html"/>
+
+
+  <title>Flink如何实现端到端的Exactly-Once处理语义 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink如何实现端到端的Exactly-Once处理语义</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-10T16:05:01+08:00">2019-02-10</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html" class="leancloud_visitors" data-flag-title="Flink如何实现端到端的Exactly-Once处理语义">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这篇文章改编自2017年柏林Flink Forward上Piotr Nowojski的<a href="https://berlin.flink-forward.org/kb_sessions/hit-me-baby-just-one-time-building-end-to-end-exactly-once-applications-with-flink/" target="_blank" rel="noopener">演讲</a>。你可以在Flink Forward Berlin网站上找到幻灯片和演示文稿。</p>
+<p>2017年12月发布的Apache Flink 1.4.0为Flink的流处理引入了一个重要特性：<code>TwoPhaseCommitSinkFunction</code> 的新功能（此处为相关的<a href="https://issues.apache.org/jira/browse/FLINK-7210" target="_blank" rel="noopener">Jira</a>），提取了两阶段提交协议的通用逻辑，使得在Flink和一系列数据源和接收器（包括Apache Kafka 0.11 版本以及更高版本）之间构建端到端的 Exactly-Once 语义的应用程序成为可能。它提供了一个抽象层，用户只需实现几个方法就可以实现端到端的 Exactly-Once 语义。</p>
+<p>如果这就是你需要了解的全部内容，可以去这个<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/api/java/org/apache/flink/streaming/api/functions/sink/TwoPhaseCommitSinkFunction.html" target="_blank" rel="noopener">地方</a>了解如何使用 <code>TwoPhaseCommitSinkFunction</code>。或者你可以直接去看实现 Exactly-Once 语义的<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/connectors/kafka.html#kafka-011" target="_blank" rel="noopener">Kafka 0.11 producer</a>的文档，这也是在 <code>TwoPhaseCommitSinkFunction</code> 之上实现的。</p>
+<p>如果你想了解更多信息，我们将在这篇文章中去深入了解一下新特性以及在 Flink 幕后发生的事情。</p>
+<p>纵览全篇，有以下几点：</p>
+<ul>
+<li>描述一下 Flink 检查点在Flink应用程序保证 Exactly-Once 语义的作用。</li>
+<li>展现 Flink 如何通过两阶段提交协议与数据源（source）和数据接收器（sink）交互，以提供端到端的 Exactly-Once 语义保证。</li>
+<li>通过一个简单的示例，了解如何使用 <code>TwoPhaseCommitSinkFunction</code> 实现一个 Exactly-Once 语义的文件接收器。</li>
+</ul>
+<h3 id="1-Flink应用程序的Exactly-Once语义"><a href="#1-Flink应用程序的Exactly-Once语义" class="headerlink" title="1. Flink应用程序的Exactly-Once语义"></a>1. Flink应用程序的Exactly-Once语义</h3><p>当我们说<code>Exactly-Once语义</code>时，我们的意思是每个传入的事件只会影响最终结果一次。即使机器或软件出现故障，也没有重复数据，也没有丢失数据。</p>
+<p>Flink 在很久之前就提供了 Exactly-Once 语义。在过去几年中，我们已经深入探讨过 Flink 的<a href="http://smartsi.club/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink.html">检查点</a>，这是 Flink 提供 Exactly-Once 语义的核心。<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/state/checkpoints.html" target="_blank" rel="noopener">Flink文档</a>提供了这个功能的全面概述。</p>
+<p>在继续之前，我们先对检查点机制进行简要概述，这对我们理解检查点是有必要的。Flink 中的检查点是以下内容的一致快照：</p>
+<ul>
+<li>应用程序的当前状态</li>
+<li>输入流中的位置</li>
+</ul>
+<p>Flink 以固定的时间间隔（可配置）生成检查点，然后将检查点写入持久存储系统，例如S3或HDFS。将检查点数据写入持久存储是异步发生的，这意味着 Flink 应用程序在写检查点过程中可以继续处理数据。</p>
+<p>如果发生机器或软件故障重新启动后，Flink 应用程序从最近成功完成的检查点恢复。在处理开始之前，Flink 从检查点恢复应用程序状态并回滚到输入流中的正确位置。这意味着 Flink 的计算结果就好像从未发生过故障一样。</p>
+<p>在 Flink 1.4.0 之前，Exactly-Once 语义仅局限于 Flink 应用程序内部，不能扩展到 Flink 在数据处理完后发送的大多数外部系统。Flink 应用程序与各种数据输出端进行交互，开发人员需要有能力自己维护组件的上下文来保证 Exactly-Once 语义。</p>
+<p>为了提供端到端的 Exactly-Once 语义 - 也就是说，除了 Flink 应用程序之外，这些语义也同样适用于 Flink 写入的外部系统中 - 这些外部系统必须提供提交或回滚的方法，然后通过 Flink 的检查点机制来协调。</p>
+<p>在分布式系统中的协调提交和回滚的一种常用方法是<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>。下面我们会讨论 Flink 的 <code>TwoPhaseCommitSinkFunction</code> 是如何利用<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>提供端到端的 Exactly-Once 语义。</p>
+<h3 id="2-Flink的端到端Exactly-Once语义应用程序"><a href="#2-Flink的端到端Exactly-Once语义应用程序" class="headerlink" title="2. Flink的端到端Exactly-Once语义应用程序"></a>2. Flink的端到端Exactly-Once语义应用程序</h3><p>下面我们将介绍<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>以及它如何在一个读取和写入 Kafka 的 Flink 应用程序示例中实现端到端的 Exactly-Once 语义。Kafka 是一个流行的消息中间件系统，经常与 Flink 一起使用。Kafka 在 0.11 版本中添加了对事务的支持。这意味着当你通过 Flink 读写 Kafka时，有必要提供端到端的 Exactly-Once 语义的支持。</p>
+<p>Flink 对端到端 Exactly-Once 语义的支持不仅限于 Kafka，可以与任何提供协调机制的数据源/接收器一起使用。例如，来自Dell/EMC的开源流处理存储系统 Pravega 也可以通过 <code>TwoPhaseCommitSinkFunction</code> 提供 Flink 端到端 Exactly-Once 语义。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-1.png?raw=true" alt=""></p>
+<p>在我们今天要讨论的 Flink 应用程序示例中，我们有：</p>
+<ul>
+<li>从 Kafka 读取数据的数据源（在 Flink 为 KafkaConsumer）</li>
+<li>窗口聚合</li>
+<li>将数据写回 Kafka 的数据接收器（在 Flink 为 KafkaProducer）</li>
+</ul>
+<p>要使数据接收器提供 Exactly-Once 语义保证，必须在一个事务中将所有数据写入 Kafka。提交捆绑了两个检查点之间的所有写入数据。这可确保在发生故障时能回滚所有写入的数据。</p>
+<p>但是，在具有多个并发运行的接收器任务的分布式系统中，简单的提交或回滚是远远不够的，因为必须确保所有组件在提交或回滚时<code>一致</code>才能确保一致的结果。Flink 使用<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>及预提交阶段来解决这一问题。</p>
+<p>检查点的启动表示我们的<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>的<code>预提交</code>阶段。当检查点启动时，Flink JobManager 会将检查点 <code>Barrier</code> 注入数据流中（将数据流中的记录分为进入当前检查点的集合与进入下一个检查点的集合）。</p>
+<p><code>Barrier</code> 在算子之间传递。对于每个算子，它会触发算子状态后端生成状态的快照。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-2.png?raw=true" alt=""></p>
+<p>数据源存储 Kafka 的偏移量，完成此操作后将检查点 <code>Barrier</code> 传递给下一个算子。</p>
+<p>这种方法只适用于算子只有内部状态（Internal state）的情况。内部状态是 Flink 状态可以存储和管理的所有内容 - 例如，第二个算子中的窗口总和。当一个进程只有内部状态时，除了写入到已定义的状态变量之外，不需要在预提交阶段执行任何其他操作。Flink 负责在检查点成功的情况下正确提交这些写入，或者在出现故障时中止这些写入。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-3.png?raw=true" alt=""></p>
+<p>但是，当一个进程具有外部状态（External state）时，状态处理会有所不同。外部状态通常以写入外部系统（如Kafka）的形式出现。在这种情况下，为了提供 Exactly-Once 语义保证，外部系统必须支持事务，这样才能和两阶段提交协议集成。</p>
+<p>我们示例中的数据接收器具有外部状态，因为它正在向 Kafka 写入数据。在这种情况下，在预提交阶段，除了将其状态写入状态后端之外，数据接收器还必须预先提交其外部事务。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-4.png?raw=true" alt=""></p>
+<p>当检查点 <code>Barrier</code> 通过所有算子并且触发的快照回调成功完成时，预提交阶段结束。所有触发的状态快照都被视为该检查点的一部分。检查点是整个应用程序状态的快照，包括预先提交的外部状态。如果发生故障，我们可以回滚到上次成功完成快照的时间点。</p>
+<p>下一步是通知所有算子检查点已成功完成。这是两阶段提交协议的提交阶段，JobManager 为应用程序中的每个算子发出检查点完成的回调。</p>
+<p>数据源和窗口算子没有外部状态，因此在提交阶段，这些算子不用执行任何操作。但是，数据接收器有外部状态，因此此时应该提交外部事务：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/end-to-end-exactly-once-processing-apache-flink-apache-kafka-5.png?raw=true" alt=""></p>
+<p>我们总结一下：</p>
+<ul>
+<li>一旦所有算子完成预提交，就会发出一个提交。</li>
+<li>如果至少有一个预提交失败，那么所有其他的提交也都会中止，并将回滚到上一个成功完成的检查点。</li>
+<li>在预提交成功之后，必须保证提交最终成功 - 我们的算子和外部系统都需要保证这点。如果一个提交失败（例如，由于间歇性网络问题），整个 Flink 应用程序将会失败，应用程序将根据用户的重启策略重新启动，并且还会尝试一次提交。这个过程至关重要，因为如果提交最终失败，将会发生数据丢失。</li>
+</ul>
+<p>因此，我们要确定所有算子都同意检查点的最终结果：所有算子都同意数据提交或中止提交并回滚。</p>
+<h3 id="3-在Flink中实现两阶段提交算子"><a href="#3-在Flink中实现两阶段提交算子" class="headerlink" title="3. 在Flink中实现两阶段提交算子"></a>3. 在Flink中实现两阶段提交算子</h3><p>实现完整的<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>可能有点复杂，这就是 Flink 为什么将两阶段提交协议的通用逻辑提取到 <code>TwoPhaseCommitSinkFunction</code> 抽象类中。</p>
+<p>下面我们讨论一下如何在一个简单的基于文件的示例上实现 <code>TwoPhaseCommitSinkFunction</code>。我们只需实现四个函数就能为文件接收器提供 Exactly-Once 语义：</p>
+<ul>
+<li>beginTransaction：在开启事务之前，我们在目标文件系统的临时目录中创建一个临时文件。后面我们在处理数据时将数据写入此文件。</li>
+<li>preCommit：在预提交阶段，刷写（flush）文件，然后关闭文件，之后就不能写入到文件了。我们还将为属于下一个检查点的任何后续写入启动新事务。</li>
+<li>commit：在提交阶段，我们将预提交的文件原子性地移动到真正的目标目录中。请注意，这会增加输出数据可见性的延迟。</li>
+<li>abort：在中止阶段，我们删除临时文件。</li>
+</ul>
+<p>我们知道，如果发生故障时，Flink 会将应用程序的状态恢复到最新的成功检查点。有一种极端情况，在成功预提交之后但在提交通知到算子之前发生故障。在这种情况下，Flink 会将我们的算子恢复到已经预提交但尚未提交的状态。</p>
+<p>我们必须在检查点状态下保存有关预提交事务的足够信息，以便能够在重新启动后正确中止或提交事务。在我们的示例中，这些信息是临时文件和目标目录的路径。</p>
+<p><code>TwoPhaseCommitSinkFunction</code> 已经将这种情况考虑在内了，当从检查点恢复状态时优先发出一个提交。我们需要以幂等方式实现提交。一般来说，这应该不难。在我们的示例中，我们可以识别出这样的情况：临时文件不在临时目录中，已经移到目标目录中。还有一些其他边缘情况，<code>TwoPhaseCommitSinkFunction</code> 也考虑到了。</p>
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3><p>下面是我们这篇文章的一些要点：</p>
+<ul>
+<li>Flink 检查点是支持<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>并提供端到端的 Exactly-Once 语义的基础。</li>
+<li>这个方案的一个优点是: Flink 不像其他一些系统那样，通过网络传输存储（materialize）数据 - 不需要像大多数批处理程序那样将计算的每个阶段写入磁盘。</li>
+<li>Flink 新的 <code>TwoPhaseCommitSinkFunction</code> 提取了<a href="http://smartsi.club/two-phase-commit-of-distributed-transaction.html">两阶段提交协议</a>的通用逻辑，并使构建端到端的 Exactly-Once 语义的应用程序（使用 Flink 和支持事务的外部系统）成为可能。</li>
+<li>从 Flink 1.4.0 开始，Pravega 和 Kafka 0.11 producer 都提供了 Exactly-Once 语义；在 Kafka 0.11 中首次引入了事务，这使得 Kafka 在 Flink 实现 Exactly-Once producer 成为可能。</li>
+<li><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/connectors/kafka.html#kafka-011" target="_blank" rel="noopener">Kafka 0.11 producer</a> 是在 <code>TwoPhaseCommitSinkFunction</code> 基础之上实现的，与 At-Least-Once 语义的 Kafka producer 相比，它的开销非常低。</li>
+</ul>
+<p>原文：<a href="https://data-artisans.com/blog/end-to-end-exactly-once-processing-apache-flink-apache-kafka" target="_blank" rel="noopener">An Overview of End-to-End Exactly-Once Processing in Apache Flink</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html" title="Flink如何实现端到端的Exactly-Once处理语义">http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/tick-tuple-in-storm.html" rel="next" title="Storm Tick 元组">
+                <i class="fa fa-chevron-left"></i> Storm Tick 元组
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/flink-introduction-to-state-management-and-fault-tolerance.html" rel="prev" title="Flink 状态管理和容错机制介绍">
+                Flink 状态管理和容错机制介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">166</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Flink应用程序的Exactly-Once语义"><span class="nav-number">1.</span> <span class="nav-text">1. Flink应用程序的Exactly-Once语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Flink的端到端Exactly-Once语义应用程序"><span class="nav-number">2.</span> <span class="nav-text">2. Flink的端到端Exactly-Once语义应用程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-在Flink中实现两阶段提交算子"><span class="nav-number">3.</span> <span class="nav-text">3. 在Flink中实现两阶段提交算子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-总结"><span class="nav-number">4.</span> <span class="nav-text">4. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
