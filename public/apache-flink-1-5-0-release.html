@@ -97,30 +97,33 @@
 
 
   
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Flink,Flink Realease," />
 
 
-<meta name="description" content="测试">
+<meta name="description" content="Flink 1.5.0 是 1.x.y 系列的第六个主要版本。与往常一样，它兼容之前 1.x.y 版本中使用 @Public 注解标注过的 API。 最新版本已经可以下载，开发者可以通过 Flink 邮件列表或 JIRA 进行反馈。以下将列出最新版本的主要特性和改进。 1. 流式处理进一步演化Flink 正在给流式处理领域带来另一次重大飞跃。流式处理不仅意味着更加快速的分析，更是一种构建快速连续数">
+<meta name="keywords" content="Flink,Flink Realease">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SmartSi">
-<meta property="og:url" content="http://smartsi.club/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html">
+<meta property="og:title" content="Flink1.5发布中的新功能">
+<meta property="og:url" content="http://smartsi.club/apache-flink-1-5-0-release.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="测试">
+<meta property="og:description" content="Flink 1.5.0 是 1.x.y 系列的第六个主要版本。与往常一样，它兼容之前 1.x.y 版本中使用 @Public 注解标注过的 API。 最新版本已经可以下载，开发者可以通过 Flink 邮件列表或 JIRA 进行反馈。以下将列出最新版本的主要特性和改进。 1. 流式处理进一步演化Flink 正在给流式处理领域带来另一次重大飞跃。流式处理不仅意味着更加快速的分析，更是一种构建快速连续数">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-04-21T05:41:06.112Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/%E5%85%AC%E4%BC%97%E5%8F%B7.jpg?raw=true">
+<meta property="og:updated_time" content="2019-04-21T08:08:48.084Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="SmartSi">
-<meta name="twitter:description" content="测试">
+<meta name="twitter:title" content="Flink1.5发布中的新功能">
+<meta name="twitter:description" content="Flink 1.5.0 是 1.x.y 系列的第六个主要版本。与往常一样，它兼容之前 1.x.y 版本中使用 @Public 注解标注过的 API。 最新版本已经可以下载，开发者可以通过 Flink 邮件列表或 JIRA 进行反馈。以下将列出最新版本的主要特性和改进。 1. 流式处理进一步演化Flink 正在给流式处理领域带来另一次重大飞跃。流式处理不仅意味着更加快速的分析，更是一种构建快速连续数">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/%E5%85%AC%E4%BC%97%E5%8F%B7.jpg?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://smartsi.club/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html"/>
+  <link rel="canonical" href="http://smartsi.club/apache-flink-1-5-0-release.html"/>
 
 
-  <title> | SmartSi</title>
+  <title>Flink1.5发布中的新功能 | SmartSi</title>
   
 
 
@@ -301,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/apache-flink-1-5-0-release.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -318,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline"></h2>
+          <h2 class="post-title" itemprop="name headline">Flink1.5发布中的新功能</h2>
         
 
         <div class="post-meta">
@@ -330,7 +333,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-21T00:01:07+08:00">2019-04-21</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-26T20:08:12+08:00">2018-05-26</time>
             
 
             
@@ -338,6 +341,24 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -347,8 +368,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html" itemprop="commentCount"></span>
+                <a href="/apache-flink-1-5-0-release.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/apache-flink-1-5-0-release.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -356,7 +377,7 @@
 
           
           
-             <span id="/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html" class="leancloud_visitors" data-flag-title="">
+             <span id="/apache-flink-1-5-0-release.html" class="leancloud_visitors" data-flag-title="Flink1.5发布中的新功能">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -387,7 +408,43 @@
       
 
       
-        <p>测试</p>
+        <p>Flink 1.5.0 是 1.x.y 系列的第六个主要版本。与往常一样，它兼容之前 1.x.y 版本中使用 @Public 注解标注过的 API。</p>
+<p>最新版本已经可以下载，开发者可以通过 Flink 邮件列表或 JIRA 进行反馈。以下将列出最新版本的主要特性和改进。</p>
+<h3 id="1-流式处理进一步演化"><a href="#1-流式处理进一步演化" class="headerlink" title="1. 流式处理进一步演化"></a>1. 流式处理进一步演化</h3><p>Flink 正在给流式处理领域带来另一次重大飞跃。流式处理不仅意味着更加快速的分析，更是一种构建快速连续数据处理管道的原则性方法。流式处理正在成为构建数据驱动型和数据密集型应用程序的典范——它将数据处理逻辑和应用程序及业务逻辑汇集在了一起。</p>
+<p>新版本对底层的一些基础组件进行了改进，包括：</p>
+<ul>
+<li>重新设计并实现了 Flink 的大部分处理模型（FLIP-6）。尽管此项工作尚未全部完工，但 Flink 1.5 已经可以支持更为顺畅的 Kubernetes 部署，并可以将与外部系统的通信（与外部服务代理的交互）切换到 HTTP/REST。同时，Flink 1.5 简化了在常见集群管理器（如 YARN、Mesos）上进行的部署，并提供动态资源分配功能。</li>
+<li>流式广播状态（FLINK-4940）。可以将广播流（如上下文数据、机器学习模型、规则 / 模式、触发器等）与可能带有键控状态（KeyedState）的流（如特征向量、状态机等）连接在一起。而在 Flink 1.5 之前，很难做到这一点。</li>
+<li>为了改善对实时应用程序的支持，Flink 团队对 Flink 的 网络栈（FLINK-7315）进行了重大改进。Flink 1.5 在保持高吞吐量的同时实现了更低的延迟。另外，新版本还改进了回压情况下检查点的稳定性。</li>
+<li>流式 SQL 越来越被认为是一种简单而强大的方式，用于执行流式分析、构建数据管道、进行特征工程或基于变更数据增量更新应用程序状态。新版本 添加了用于流式 SQL 查询的 SQL CLI（FLIP-24），让流式 SQL 更易于使用。</li>
+</ul>
+<h3 id="2-新特性和改进"><a href="#2-新特性和改进" class="headerlink" title="2. 新特性和改进"></a>2. 新特性和改进</h3><h4 id="2-1-重写-Flink-部署和处理模型"><a href="#2-1-重写-Flink-部署和处理模型" class="headerlink" title="2.1 重写 Flink 部署和处理模型"></a>2.1 重写 Flink 部署和处理模型</h4><p>重写 Flink 部署和处理模型的工作已经进行了一年多，来自多个组织的贡献者（如 Artisans、阿里巴巴和 Dell EMC）合作设计和实现了该特性，这是 Flink 项目启动以来对核心组件做出的最重大的一项改进。</p>
+<p>简单地说，这些改进增加了对 YARN 和 Mesos 调度器动态资源分配和动态资源释放的支持，以更好的利用资源、进行故障恢复和动态扩展。此外，新版本还简化了在容器管理基础设施（如 Kubernetes）上进行的部署，所有对 JobManager 的请求都通过 REST 发起，包括提交和取消作业、请求作业状态，获取保存点等。</p>
+<p>此次改进也为 Flink 将来与 Kubernetes 更好的集成奠定了基础。在稍后的版本中，有可能在不先启动 Flink 集群的情况下，将作业塞进 Docker，并作为容器部署的一部分。此外，此次改进向支持应用程序的并行性自动调整卖出了一大步。</p>
+<p>需要注意的是，这些改进对 Flink API 没有任何影响。</p>
+<h4 id="2-2-广播状态"><a href="#2-2-广播状态" class="headerlink" title="2.2 广播状态"></a>2.2 广播状态</h4><p>对广播状态的支持（即在某个函数的所有并行实例中复制状态）是一直广受开发者期待的特性。广播状态的典型应用场景包括两个流，一个是控制或配置流，负责管理规则、模式或其他配置消息，另一个是常规的数据流。常规数据流的处理是通过控制流的消息来配置的，规则或模式被广播到函数的所有并行实例中，并应用于常规流的所有事件上。</p>
+<p>当然，广播状态也可以有保存点或进行保存点恢复，就像 Flink 的其他状态一样，也具有一次性（exactly once）状态一致性保证。此外，广播状态为实现 Flink CEP 库的“动态模式”特性带来了可能性。</p>
+<h4 id="2-3-Flink-网络栈的改进"><a href="#2-3-Flink-网络栈的改进" class="headerlink" title="2.3 Flink 网络栈的改进"></a>2.3 Flink 网络栈的改进</h4><p>分布式流式应用程序的性能在很大程度上取决于通过网络连接传输事件的组件。在流式处理环境中，延迟和吞吐量是最为重要的两个性能指标。</p>
+<p>Flink 1.5 从两个方面对 Flink 的网络栈进行了改进，即使用基于信用（credit based）的流量控制和改善传输延迟。基于信用的流量控制在最大程度上减少“线上”数据量，同时保持了高吞吐量。这显著减少了在回压情况下用于完成检查点的时间。此外，Flink 现在能够在不降低吞吐量的情况下实现更低的延迟。</p>
+<h4 id="2-4-任务本地状态恢复"><a href="#2-4-任务本地状态恢复" class="headerlink" title="2.4 任务本地状态恢复"></a>2.4 任务本地状态恢复</h4><p>Flink 的检查点机制将应用程序状态的副本写入到远程的持久化存储中，并在发生故障时将其加载回去。这种机制确保应用程序在发生故障时不会丢失状态。不过如果真的发生故障，可能需要一段时间才能从远程存储中加载状态以恢复应用程序。</p>
+<p>Flink 社区正在不断努力提高检查点和恢复效率。以前版本使用了异步和增量检查点，在新版本中，主要提高了故障恢复的效率。</p>
+<p>任务本地状态恢复主要利用了这样的一个事实——作业的失败通常是由单个操作、任务管理器或机器失效引起的。在将操作状态写入远程存储时，Flink 也会在每台机器的本地磁盘上保留一份副本。在进行失效备援时，调度程序会尝试将任务重新分配给以前的机器，并从本地磁盘而不是远程存储加载状态，从而加快恢复速度。</p>
+<h4 id="2-5-扩展对-SQL-和-Table-API-的-Join-支持"><a href="#2-5-扩展对-SQL-和-Table-API-的-Join-支持" class="headerlink" title="2.5 扩展对 SQL 和 Table API 的 Join 支持"></a>2.5 扩展对 SQL 和 Table API 的 Join 支持</h4><p>在 1.5.0 版本中，Flink 增加对基于窗口的外连接的支持。如下查询允许对有限时间范围内的基于事件时间或处理时间的表进行连接。<br><img src="" alt=""></p>
+<p>对于不应该在有限时间间隔内连接两个流式表的情况，Flink SQL 提供了非窗口内部连接支持。这样可以实现完全匹配，而这在许多标准 SQL 语句中是很常见的。<br><img src="" alt=""></p>
+<h4 id="2-6-SQL-CLI-客户端"><a href="#2-6-SQL-CLI-客户端" class="headerlink" title="2.6 SQL CLI 客户端"></a>2.6 SQL CLI 客户端</h4><p>几个月前，Flink 社区开始致力于添加一项服务，用于执行流和批处理 SQL 查询（FLIP-24）。新的 SQL CLI 客户端就是这项工作的第一个成果，并提供了一个 SQL shell 用于查询数据流。</p>
+<h3 id="3-其他特性和改进"><a href="#3-其他特性和改进" class="headerlink" title="3. 其他特性和改进"></a>3. 其他特性和改进</h3><ul>
+<li>OpenStack 提供了用于在资源池上创建公共和私有云的软件。Flink 现在支持 OpenStack 的类 S3 文件系统 Swift，用于保存检查点和保存点。Swift 可以在没有 Hadoop 依赖的情况下使用。</li>
+<li>改进从连接器读取或向连接器写入 JSON 消息。现在可以通过解析一个标准的 JSON 模式来配置序列化器和反序列化器。SQL CLI 客户端能够读取来自 Kafka 的 JSON 记录。</li>
+<li>应用程序可以在无需手动触发保存点的情况下进行伸缩。实际上，Flink 仍然会保存一个保存点，然后停止应用程序并重新调整并行度。</li>
+<li>改进了 watermark 和延迟的度量标准，Flink 现在捕获所有操作器（包括数据源在内）的最小化 watermark。此外，为了更好地与常用指标系统集成，延迟度量指标进行了重新设计。</li>
+<li>FileInputFormat（和其他多种输入格式）现在支持从多个路径读取文件。</li>
+<li>BucketingSink 支持自定义扩展规范。</li>
+<li>CassandraOutputFormat 可用于发送 Row 对象。</li>
+<li>Kinesis 消费者客户端允许更大程度的定制化。</li>
+</ul>
+<p>欢迎关注我的公众号：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/%E5%85%AC%E4%BC%97%E5%8F%B7.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://mp.weixin.qq.com/s?__biz=MzU1NDA4NjU2MA==&amp;mid=2247490595&amp;idx=1&amp;sn=a12fb6046443d721df1bb49494178f5d&amp;chksm=fbe9a5eccc9e2cfa58a56a45ea60528dd9742266857572a8900f4cdfede13f22cce18022e55a&amp;scene=27#wechat_redirect" target="_blank" rel="noopener">Flink 1.5重磅发布：处理模型重构，延迟更低！</a></p>
 
       
     </div>
@@ -433,11 +490,11 @@
         <ul class="post-copyright">
   <li class="post-copyright-author">
     <strong>本文作者：</strong>
-    sjf0115
+    AI前线-无明
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html" title="">http://smartsi.club/Flink/[20190420]Flink如何现实新的流处理应用第一部分.html</a>
+    <a href="http://smartsi.club/apache-flink-1-5-0-release.html" title="Flink1.5发布中的新功能">http://smartsi.club/apache-flink-1-5-0-release.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -450,6 +507,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Realease/" rel="tag"># Flink Realease</a>
+          
+        </div>
+      
 
       
       
@@ -459,8 +524,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/4-steps-flink-application-production-ready.html" rel="next" title="4个步骤让Flink应用程序达到生产状态">
-                <i class="fa fa-chevron-left"></i> 4个步骤让Flink应用程序达到生产状态
+              <a href="/spark-base-java-home-no-such-file.html" rel="next" title="Spark Spark {{JAVA_HOME}}找不到">
+                <i class="fa fa-chevron-left"></i> Spark Spark {{JAVA_HOME}}找不到
               </a>
             
           </div>
@@ -469,8 +534,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/how-apache-flink-enables-new-streaming-applications-part-2.html" rel="prev" title="Flink如何实现新的流处理应用第二部分:版本化状态">
-                Flink如何实现新的流处理应用第二部分:版本化状态 <i class="fa fa-chevron-right"></i>
+              <a href="/spark-running-spark-applications-on-yarn.html" rel="prev" title="Spark 在Yarn上运行Spark应用程序">
+                Spark 在Yarn上运行Spark应用程序 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -563,8 +628,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -605,7 +679,7 @@
                 
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
-                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-count">39</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -668,6 +742,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-流式处理进一步演化"><span class="nav-number">1.</span> <span class="nav-text">1. 流式处理进一步演化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-新特性和改进"><span class="nav-number">2.</span> <span class="nav-text">2. 新特性和改进</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-重写-Flink-部署和处理模型"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 重写 Flink 部署和处理模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-广播状态"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 广播状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Flink-网络栈的改进"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 Flink 网络栈的改进</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-任务本地状态恢复"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 任务本地状态恢复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-扩展对-SQL-和-Table-API-的-Join-支持"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 扩展对 SQL 和 Table API 的 Join 支持</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6-SQL-CLI-客户端"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 SQL CLI 客户端</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-其他特性和改进"><span class="nav-number">3.</span> <span class="nav-text">3. 其他特性和改进</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
