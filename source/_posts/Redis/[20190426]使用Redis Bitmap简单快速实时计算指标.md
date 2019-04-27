@@ -1,7 +1,7 @@
 ---
 layout: post
 author: sjf0115
-title: 使用Redis Bitamp简单快速实时计算指标
+title: 使用Redis Bitmap简单快速实时计算指标
 date: 2019-04-27 10:21:06
 tags:
   - Redis
