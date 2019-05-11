@@ -225,7 +225,7 @@ override def onTimer(timestamp: Long, ctx: OnTimerContext, out: Collector[OUT]):
 
 TimerService 在内部维护两种类型的定时器（处理时间和事件时间定时器）并排队执行。
 
-TimerService 会删除每个键和时间戳重复的定时器，即每个键和时间戳最多有一个定时器。如果为同一时间戳注册了多个定时器，则只会调用一次 `onTimer（）` 方法。
+TimerService 会删除每个键和时间戳重复的定时器，即每个键在每个时间戳上最多有一个定时器。如果为同一时间戳注册了多个定时器，则只会调用一次 `onTimer（）` 方法。
 
 > Flink同步调用 `onTimer()` 和 `processElement()` 方法。因此，用户不必担心状态的并发修改。
 

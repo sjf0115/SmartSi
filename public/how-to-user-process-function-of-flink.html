@@ -109,7 +109,7 @@
 <meta property="og:description" content="1. ProcessFunctionProcessFunction 函数是低阶流处理算子，可以访问流应用程序所有（非循环）基本构建块：  事件 (数据流元素) 状态 (容错和一致性) 定时器 (事件时间和处理时间)  ProcessFunction 可以被认为是一种提供了对 KeyedState 和定时器访问的 FlatMapFunction。每在输入流中接收到一个事件，就会调用来此函数来处理。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2019-05-11T13:43:32.099Z">
+<meta property="og:updated_time" content="2019-05-11T13:53:49.812Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 如何使用ProcessFunction">
 <meta name="twitter:description" content="1. ProcessFunctionProcessFunction 函数是低阶流处理算子，可以访问流应用程序所有（非循环）基本构建块：  事件 (数据流元素) 状态 (容错和一致性) 定时器 (事件时间和处理时间)  ProcessFunction 可以被认为是一种提供了对 KeyedState 和定时器访问的 FlatMapFunction。每在输入流中接收到一个事件，就会调用来此函数来处理。">
@@ -448,7 +448,7 @@
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onTimer</span><span class="params">(<span class="keyword">long</span> timestamp, OnTimerContext ctx, Collector&lt;OUT&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    K key = ctx.getCurrentKey();</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">onTimer</span></span>(timestamp: <span class="type">Long</span>, ctx: <span class="type">OnTimerContext</span>, out: <span class="type">Collector</span>[<span class="type">OUT</span>]): <span class="type">Unit</span> = &#123;</span><br><span class="line">  <span class="keyword">var</span> key = ctx.getCurrentKey</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h3 id="5-定时器"><a href="#5-定时器" class="headerlink" title="5. 定时器"></a>5. 定时器</h3><p>TimerService 在内部维护两种类型的定时器（处理时间和事件时间定时器）并排队执行。</p>
-<p>TimerService 会删除每个键和时间戳重复的定时器，即每个键和时间戳最多有一个定时器。如果为同一时间戳注册了多个定时器，则只会调用一次 <code>onTimer（）</code> 方法。</p>
+<p>TimerService 会删除每个键和时间戳重复的定时器，即每个键在每个时间戳上最多有一个定时器。如果为同一时间戳注册了多个定时器，则只会调用一次 <code>onTimer（）</code> 方法。</p>
 <blockquote>
 <p>Flink同步调用 <code>onTimer()</code> 和 <code>processElement()</code> 方法。因此，用户不必担心状态的并发修改。</p>
 </blockquote>

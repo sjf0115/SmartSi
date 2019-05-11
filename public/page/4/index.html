@@ -301,7 +301,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/java-on-off-heap-memory.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/jvm-garbage-collection-algorithm.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -320,7 +320,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/java-on-off-heap-memory.html" itemprop="url">Java 堆内内存与堆外内存</a></h2>
+                <a class="post-title-link" href="/jvm-garbage-collection-algorithm.html" itemprop="url">JVM 垃圾收集算法</a></h2>
         
 
         <div class="post-meta">
@@ -367,8 +367,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/java-on-off-heap-memory.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/java-on-off-heap-memory.html" itemprop="commentCount"></span>
+                <a href="/jvm-garbage-collection-algorithm.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/jvm-garbage-collection-algorithm.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -376,7 +376,7 @@
 
           
           
-             <span id="/java-on-off-heap-memory.html" class="leancloud_visitors" data-flag-title="Java 堆内内存与堆外内存">
+             <span id="/jvm-garbage-collection-algorithm.html" class="leancloud_visitors" data-flag-title="JVM 垃圾收集算法">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -409,11 +409,13 @@
       
         
           
-          一般情况下，Java 中分配的非空对象都是由 Java 虚拟机的垃圾收集器管理的，也称为堆内内存（on-heap memory）。虚拟机会定期对垃圾内存进行回收，在某些特定的时间点，它会进行一次彻底的回收（full gc）。彻底回收时，垃圾收集器会对所有分配的堆内内存进行完整的扫描，这意味着一个重要
+          本文“垃圾收集算法”节选自《深入理解Java虚拟机:JVM高级特性与最佳实践》【作者：周志明】
+由于垃圾收集算法的实现涉及大量的程序细节，而且各个平台的虚拟机操作内存的方法又各不相同，因此本节不打算过多地讨论算法的实现，只是介绍几种算法的思想及其发展过程。
+1. 标记-清除算法最基础的收集算法是 标
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/java-on-off-heap-memory.html#more" rel="contents">
+            <a class="btn" href="/jvm-garbage-collection-algorithm.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
