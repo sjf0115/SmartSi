@@ -1,7 +1,7 @@
 ---
 layout: post
 author: AI前线-陈星
-title: [案例]ClickHouse在头条的技术演进
+title: 案例-ClickHouse在头条的技术演进
 date: 2019-06-16 17:36:01
 tags:
   - ClickHouse
