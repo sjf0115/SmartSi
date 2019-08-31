@@ -104,7 +104,7 @@ public class ZooKeeperConnection {
 String create(String path, byte[] data, List<ACL> acl, CreateMode createMode) throws KeeperException, InterruptedException
 // 异步方式
 void create(String path, byte[] data, List<ACL> acl, CreateMode createMode, StringCallback cb, Object ctx)
-```  
+```
 
 同步 `create()` 方法一共有四个参数:
 - `path`: 第一个参数是要创建的节点路径。
