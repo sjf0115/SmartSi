@@ -99,13 +99,13 @@ public class ZooKeeperConnection {
 #### 3.1 语法
 
 `ZooKeeper` 类提供了 `create` 方法，用于在 `ZooKeeper` 集群中创建新的 `Znode`。`create` 方法如下所示:
+
 ```java
 // 同步方式
 String create(String path, byte[] data, List<ACL> acl, CreateMode createMode) throws KeeperException, InterruptedException
 // 异步方式
 void create(String path, byte[] data, List<ACL> acl, CreateMode createMode, StringCallback cb, Object ctx)
 ```
-
 同步 `create()` 方法一共有四个参数:
 - `path`: 第一个参数是要创建的节点路径。
 - `data`: 第二个参数是存储在指定创建节点中的数据。参数类型是字节数组。
