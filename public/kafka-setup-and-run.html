@@ -109,7 +109,7 @@
 <meta property="og:description" content="1. 下载代码下载 2.3.0 版本并解压缩:tar -zxvf kafka_2.12-2.3.0.tgz -C . 创建软连接便于升级:ln -s kafka_2.12-2.3.0/ kafka 配置环境变量:export KAFKA_HOME=/Users/smartsi/opt/kafkaexport PATH=$&amp;#123;KAFKA_HOME&amp;#125;/bin:$PATH 2. 安装Z">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2019-09-06T11:14:51.420Z">
+<meta property="og:updated_time" content="2019-09-06T11:21:11.937Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kafka 安装与启动">
 <meta name="twitter:description" content="1. 下载代码下载 2.3.0 版本并解压缩:tar -zxvf kafka_2.12-2.3.0.tgz -C . 创建软连接便于升级:ln -s kafka_2.12-2.3.0/ kafka 配置环境变量:export KAFKA_HOME=/Users/smartsi/opt/kafkaexport PATH=$&amp;#123;KAFKA_HOME&amp;#125;/bin:$PATH 2. 安装Z">
@@ -415,15 +415,15 @@
 <p>你也可以通过与 kafka 打包在一起的便捷脚本来快速简单地创建一个单节点 ZooKeeper 实例:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt; bin/zookeeper-server-start.sh config/zookeeper.properties</span><br><span class="line">[2013-04-22 15:01:37,495] INFO Reading configuration from: config/zookeeper.properties (org.apache.zookeeper.server.quorum.QuorumPeerConfig)</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
 <h3 id="3-配置Kafka"><a href="#3-配置Kafka" class="headerlink" title="3. 配置Kafka"></a>3. 配置Kafka</h3><p>第一个 broker 配置 <code>server-9092.properties</code> 如下:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">broker.id=0</span><br><span class="line">listeners=PLAINTEXT://127.0.0.1:9092</span><br><span class="line">log.dirs=/Users/smartsi/opt/kafka/logs/log1-9092</span><br><span class="line">zookeeper.connect=localhost:2181/kafka-2.3.0</span><br><span class="line">zookeeper.connection.timeout.ms=6000</span><br></pre></td></tr></table></figure></p>
 <blockquote>
-<p>最少运行起来至少要配置四项。上面的前四项。</p>
+<p>运行起来至少要配置四项。上面的前四项。</p>
 </blockquote>
 <p>第二个 broker 配置 <code>server-9093.properties</code> 如下:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">broker.id=1</span><br><span class="line">listeners=PLAINTEXT://127.0.0.1:9093</span><br><span class="line">log.dirs=/Users/smartsi/opt/kafka/logs/log-9093</span><br><span class="line">zookeeper.connect=localhost:2181/kafka-2.3.0</span><br><span class="line">zookeeper.connection.timeout.ms=6000</span><br></pre></td></tr></table></figure></p>
 <p>第三个 broker 配置 <code>server-9094.properties</code> 如下:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">broker.id=2</span><br><span class="line">listeners=PLAINTEXT://127.0.0.1:9094</span><br><span class="line">log.dirs=/Users/smartsi/opt/kafka/logs/log-9094</span><br><span class="line">zookeeper.connect=localhost:2181/kafka-2.3.0</span><br><span class="line">zookeeper.connection.timeout.ms=6000</span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>我们必须重写端口和日志目录，因为我们在同一台机器上运行这些，我们不希望所有都在同一个端口注册，或者覆盖彼此的数据。所以用端口号9092、9093、9094分别代表三个 broker。</p>
 </blockquote>
-<p>下面具体解释一下我们要配置项:</p>
-<p>(1) 服务器相关:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">broker.id=0</span><br></pre></td></tr></table></figure></p>
+<p>下面具体解释一下我们的配置项:</p>
+<p>(1) Broker相关:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">broker.id=0</span><br></pre></td></tr></table></figure></p>
 <p>broker 的 Id。每一个 broker 在集群中的唯一标示，要求是正数。每个 broker 都不相同。</p>
 <p>(2) Socket服务设置:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">listeners=PLAINTEXT://127.0.0.1:9092</span><br></pre></td></tr></table></figure></p>
 <p>Socket服务器监听的地址，如果没有设置，则监听 <code>java.net.InetAddress.getCanonicalHostName()</code> 返回的地址。</p>
