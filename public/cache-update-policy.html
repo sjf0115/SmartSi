@@ -111,7 +111,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-1.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-2.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/cache-update-policy-3.png?raw=true">
-<meta property="og:updated_time" content="2018-10-20T09:57:08.890Z">
+<meta property="og:updated_time" content="2018-10-20T09:57:08.889Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Cache 缓存更新策略">
 <meta name="twitter:description" content="看到好些人在写更新缓存数据代码时，先删除缓存，然后再更新数据库，而后续的操作会把数据再装载的缓存中。然而，这个是逻辑是 错误 的。试想，两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。 我不知道为什么这么多人用的都是这个">
@@ -533,8 +533,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/java-on-off-heap-memory.html" rel="prev" title="Java 堆内内存与堆外内存">
-                Java 堆内内存与堆外内存 <i class="fa fa-chevron-right"></i>
+              <a href="/jvm-garbage-collection-algorithm.html" rel="prev" title="JVM 垃圾收集算法">
+                JVM 垃圾收集算法 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -656,7 +656,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">190</span>
+                    <span class="site-state-item-count">191</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
