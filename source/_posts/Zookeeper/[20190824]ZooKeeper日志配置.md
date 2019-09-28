@@ -133,7 +133,7 @@ fi
 # 以下是修改后配置
 if [ "x${ZOO_LOG_DIR}" = "x" ]
 then
-    ZOO_LOG_DIR="../logs"
+    ZOO_LOG_DIR="/Users/smartsi/opt/zookeeper/logs"
 fi
 
 if [ "x${ZOO_LOG4J_PROP}" = "x" ]
@@ -141,7 +141,7 @@ then
     ZOO_LOG4J_PROP="INFO,ROLLINGFILE"
 fi
 ```
-> `ZOO_LOG_DIR="${ZOOKEEPER_HOME}/logs"`，日志会输出都 `/Users/xxx/opt/zookeeper/bin/~/opt/zookeeper/logs` 目录下。需要设置为 `../logs` 目录，才会正确输出到 `/Users/xxx/opt/zookeeper/logs` 目录下。
+> `ZOO_LOG_DIR="${ZOOKEEPER_HOME}/logs"`，日志会输出都 `/Users/xxx/opt/zookeeper/bin/~/opt/zookeeper/logs` 目录下。需要设置为 `/Users/smartsi/opt/zookeeper/logs` 目录，才会正确输出到 `/Users/xxx/opt/zookeeper/logs` 目录下。
 
 #### 3.2 修改log4j.properties
 

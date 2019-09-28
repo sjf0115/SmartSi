@@ -100,19 +100,19 @@
   <meta name="keywords" content="ZooKeeper," />
 
 
-<meta name="description" content="1. 安装要在你的计算机上安装ZooKeeper框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd /home/q/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zooke">
+<meta name="description" content="1. 安装要在你的计算机上安装 ZooKeeper 框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的 ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd ~/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zookeepe">
 <meta name="keywords" content="ZooKeeper">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ZooKeeper 安装与启动">
+<meta property="og:title" content="ZooKeeper 集群模式安装与启动">
 <meta property="og:url" content="http://smartsi.club/zookeeper-setup-and-run.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 安装要在你的计算机上安装ZooKeeper框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd /home/q/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zooke">
+<meta property="og:description" content="1. 安装要在你的计算机上安装 ZooKeeper 框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的 ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd ~/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zookeepe">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2019-07-30T05:14:39.092Z">
+<meta property="og:updated_time" content="2019-09-28T05:13:29.433Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ZooKeeper 安装与启动">
-<meta name="twitter:description" content="1. 安装要在你的计算机上安装ZooKeeper框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd /home/q/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zooke">
+<meta name="twitter:title" content="ZooKeeper 集群模式安装与启动">
+<meta name="twitter:description" content="1. 安装要在你的计算机上安装 ZooKeeper 框架，请访问该链接并下载最新版本的ZooKeeper。到目前为止，最新稳定版本的 ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。 使用以下命令提取tar文件：cd ~/opt/$ tar -zxf zookeeper-3.4.12.tar.gz 创建软连接，便于升级：$ sudo ln -s zookeepe">
 <meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
 
 
@@ -123,7 +123,7 @@
   <link rel="canonical" href="http://smartsi.club/zookeeper-setup-and-run.html"/>
 
 
-  <title>ZooKeeper 安装与启动 | SmartSi</title>
+  <title>ZooKeeper 集群模式安装与启动 | SmartSi</title>
   
 
 
@@ -321,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">ZooKeeper 安装与启动</h2>
+          <h2 class="post-title" itemprop="name headline">ZooKeeper 集群模式安装与启动</h2>
         
 
         <div class="post-meta">
@@ -377,7 +377,7 @@
 
           
           
-             <span id="/zookeeper-setup-and-run.html" class="leancloud_visitors" data-flag-title="ZooKeeper 安装与启动">
+             <span id="/zookeeper-setup-and-run.html" class="leancloud_visitors" data-flag-title="ZooKeeper 集群模式安装与启动">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -408,11 +408,11 @@
       
 
       
-        <h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>要在你的计算机上安装ZooKeeper框架，请访问该<a href="http://zookeeper.apache.org/releases.html" target="_blank" rel="noopener">链接</a>并下载最新版本的ZooKeeper。<br>到目前为止，最新稳定版本的ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。</p>
-<p>使用以下命令提取tar文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd /home/q/opt/</span><br><span class="line">$ tar -zxf zookeeper-3.4.12.tar.gz</span><br></pre></td></tr></table></figure></p>
+        <h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>要在你的计算机上安装 ZooKeeper 框架，请访问该<a href="http://zookeeper.apache.org/releases.html" target="_blank" rel="noopener">链接</a>并下载最新版本的ZooKeeper。<br>到目前为止，最新稳定版本的 ZooKeeper是3.4.12(ZooKeeper-3.4.12.tar.gz)。</p>
+<p>使用以下命令提取tar文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd ~/opt/</span><br><span class="line">$ tar -zxf zookeeper-3.4.12.tar.gz</span><br></pre></td></tr></table></figure></p>
 <p>创建软连接，便于升级：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ sudo ln -s zookeeper-3.4.12/ zookeeper</span><br></pre></td></tr></table></figure></p>
 <p>创建数据目录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ cd zookeeper</span><br><span class="line">$ mkdir data</span><br></pre></td></tr></table></figure></p>
-<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h3><p>修改 <code>conf/zoo.cfg</code> 配置文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tickTime = 2000</span><br><span class="line">dataDir = /home/q/opt/zookeeper/data</span><br><span class="line">clientPort = 2181</span><br><span class="line">initLimit = 10</span><br><span class="line">syncLimit = 5</span><br><span class="line">server.1=101.34.82.15:2888:3888  </span><br><span class="line">server.2=101.34.82.16:2888:3888</span><br><span class="line">server.3=101.34.82.17:2888:3888</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h3><p>修改 <code>conf/zoo.cfg</code> 配置文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tickTime = 2000</span><br><span class="line">dataDir = /Users/smartsi/opt/zookeeper/data</span><br><span class="line">clientPort = 2181</span><br><span class="line">initLimit = 10</span><br><span class="line">syncLimit = 5</span><br><span class="line">server.1=101.34.82.15:2888:3888  </span><br><span class="line">server.2=101.34.82.16:2888:3888</span><br><span class="line">server.3=101.34.82.17:2888:3888</span><br></pre></td></tr></table></figure></p>
 <blockquote>
 <p>我们在三台机器上搭建 ZooKeeper 集群：101.34.82.15，10.43.28.1６，10.43.28.1７</p>
 </blockquote>
@@ -458,7 +458,7 @@
 <li>在 101.34.82.17 机器上输入3</li>
 </ul>
 <blockquote>
-<p>这里的1,2,3是与server1,2,3相对应。</p>
+<p>需要确保每台服务器的 myid 文件中数字不同，并且和自己所在机器的 zoo.cfg 中 server.id=host:port:port 的id值一样。另外，id的范围是1～255。</p>
 </blockquote>
 <h3 id="4-配置环境变量"><a href="#4-配置环境变量" class="headerlink" title="4. 配置环境变量"></a>4. 配置环境变量</h3><p>分别在三台机器的上修改 <code>/etc/profile</code> 配置环境变量：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># ZOOKEEPER</span><br><span class="line">export ZOOKEEPER_HOME=/home/q/opt/zookeeper</span><br><span class="line">export PATH=$&#123;ZOOKEEPER_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></p>
 <p>运行命令 <code>source /etc/profile</code> 使环境变量生效。</p>
@@ -521,7 +521,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/zookeeper-setup-and-run.html" title="ZooKeeper 安装与启动">http://smartsi.club/zookeeper-setup-and-run.html</a>
+    <a href="http://smartsi.club/zookeeper-setup-and-run.html" title="ZooKeeper 集群模式安装与启动">http://smartsi.club/zookeeper-setup-and-run.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
