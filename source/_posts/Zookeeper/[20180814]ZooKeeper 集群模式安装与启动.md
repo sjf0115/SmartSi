@@ -70,7 +70,7 @@ clientPort | 2181 |表示客户端所连接的服务器所监听的端口号，�
 分别在三台机器的上修改 `/etc/profile` 配置环境变量：
 ```
 # ZOOKEEPER
-export ZOOKEEPER_HOME=/home/q/opt/zookeeper
+export ZOOKEEPER_HOME=/Users/smartsi/opt/zookeeper
 export PATH=${ZOOKEEPER_HOME}/bin:$PATH
 ```
 运行命令 `source /etc/profile` 使环境变量生效。
@@ -79,26 +79,26 @@ export PATH=${ZOOKEEPER_HOME}/bin:$PATH
 
 分别在三台机器的上启动ZooKeeper，进入bin目录下执行：
 ```
-[sjf0115@ying /home/q/opt/zookeeper/bin]$ sudo zkServer.sh start
+[sjf0115@ying /Users/smartsi/opt/zookeeper/bin]$ sudo zkServer.sh start
 ZooKeeper JMX enabled by default
-Using config: /home/q/opt/zookeeper/bin/../conf/zoo.cfg
+Using config: /Users/smartsi/opt/zookeeper/bin/../conf/zoo.cfg
 Starting zookeeper ... STARTED
 ```
 当对三台机器启动后，我们用 `zkServer.sh status` 命令来查看启动状态：
 ```
 # 101.34.82.16
 ZooKeeper JMX enabled by default
-Using config: /home/q/opt/zookeeper/bin/../conf/zoo.cfg
+Using config: /Users/smartsi/opt/zookeeper/bin/../conf/zoo.cfg
 Mode: leader
 
 # 101.34.82.15
 ZooKeeper JMX enabled by default
-Using config: /home/q/opt/zookeeper/bin/../conf/zoo.cfg
+Using config: /Users/smartsi/opt/zookeeper/bin/../conf/zoo.cfg
 Mode: follower
 
 # 101.34.82.17
 ZooKeeper JMX enabled by default
-Using config: /home/q/opt/zookeeper/bin/../conf/zoo.cfg
+Using config: /Users/smartsi/opt/zookeeper/bin/../conf/zoo.cfg
 Mode: follower
 ```
 
