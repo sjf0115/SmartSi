@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="ZooKeeper," />
+
+
+<meta name="description" content="ZooKeeper 的 ACL 权限控制和 Unix/Linux 操作系统的ACL有一些区别，我们可以从三个方面来理解 ACL 机制，分别是：权限模式(Scheme)、授权对象(ID)和权限(Permission)，通常使用 scheme:id:perm 来标识一个有效的ACL信息。 需要注意的是，ACL仅与指定 ZNode 有关，不适用于子节点。例如，如果 /app 节点仅可由 ip:172.1">
+<meta name="keywords" content="ZooKeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper ACL权限控制机制">
+<meta property="og:url" content="http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="ZooKeeper 的 ACL 权限控制和 Unix/Linux 操作系统的ACL有一些区别，我们可以从三个方面来理解 ACL 机制，分别是：权限模式(Scheme)、授权对象(ID)和权限(Permission)，通常使用 scheme:id:perm 来标识一个有效的ACL信息。 需要注意的是，ACL仅与指定 ZNode 有关，不适用于子节点。例如，如果 /app 节点仅可由 ip:172.1">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-2.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-4.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-3.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-5.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-6.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-7.jpg?raw=true">
+<meta property="og:updated_time" content="2019-09-28T11:26:46.623Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ZooKeeper ACL权限控制机制">
+<meta name="twitter:description" content="ZooKeeper 的 ACL 权限控制和 Unix/Linux 操作系统的ACL有一些区别，我们可以从三个方面来理解 ACL 机制，分别是：权限模式(Scheme)、授权对象(ID)和权限(Permission)，通常使用 scheme:id:perm 来标识一个有效的ACL信息。 需要注意的是，ACL仅与指定 ZNode 有关，不适用于子节点。例如，如果 /app 节点仅可由 ip:172.1">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-1.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html"/>
+
+
+  <title>ZooKeeper ACL权限控制机制 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ZooKeeper ACL权限控制机制</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-28T19:12:45+08:00">2019-09-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ZooKeeper/" itemprop="url" rel="index"><span itemprop="name">ZooKeeper</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/zookeeper-acl-access-permission-control-mechanism.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/zookeeper-acl-access-permission-control-mechanism.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/zookeeper-acl-access-permission-control-mechanism.html" class="leancloud_visitors" data-flag-title="ZooKeeper ACL权限控制机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>ZooKeeper 的 ACL 权限控制和 Unix/Linux 操作系统的ACL有一些区别，我们可以从三个方面来理解 ACL 机制，分别是：权限模式(Scheme)、授权对象(ID)和权限(Permission)，通常使用 <code>scheme:id:perm</code> 来标识一个有效的ACL信息。</p>
+<p>需要注意的是，ACL仅与指定 <code>ZNode</code> 有关，不适用于子节点。例如，如果 <code>/app</code> 节点仅可由 <code>ip:172.16.16.1</code> 读取，而 <code>/app/status</code> 设置为 world 模式，那么任何人都可以读取 <code>/app/status</code>。不跟我们想象一样，ACL不是递归的。</p>
+<h2 id="1-权限"><a href="#1-权限" class="headerlink" title="1. 权限"></a>1. 权限</h2><p>权限(perm)就是指那些通过权限检查后可以被允许执行的操作。在 ZooKeeper 中，所有对数据的操作权限分为以下五大类：</p>
+<table>
+<thead>
+<tr>
+<th>权限</th>
+<th>ACL简写</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CREATE</td>
+<td>C</td>
+<td>子节点的创建权限，允许授权对象在该数据节点下创建子节点。</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>D</td>
+<td>子节点的删除权限，允许授权对象删除该数据节点的子节点。</td>
+</tr>
+<tr>
+<td>READ</td>
+<td>R</td>
+<td>数据节点的读取权限，允许授权对象访问该数据节点并读取其数据内容或子节点列表等。</td>
+</tr>
+<tr>
+<td>WRITE</td>
+<td>W</td>
+<td>数据节点的更新权限，允许授权对象对该数据节点进行更新操作。</td>
+</tr>
+<tr>
+<td>ADMIN</td>
+<td>A</td>
+<td>数据节点的管理权限，允许授权对象对该数据节点进行ACL相关的设置操作。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-授权对象"><a href="#2-授权对象" class="headerlink" title="2. 授权对象"></a>2. 授权对象</h2><p>授权对象(id)指的是权限赋予的用户或一个指定实体，例如IP地址或是机器等。在不同的权限模式下，授权对象是不同的，下表中列出了各个权限模式和授权对象之间的对应关系。</p>
+<table>
+<thead>
+<tr>
+<th>权限模式</th>
+<th>授权对象Id</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP</td>
+<td>通常是一个IP地址或是IP段，例如 ‘192.168.0.110”或“192.168.0.1/24’</td>
+</tr>
+<tr>
+<td>Digest</td>
+<td>自定义，通常是 ‘username:BASE64(SHA-1(username:password))’，例如 ‘user2:lo/iTtNMP+gEZlpUNaCqLYO3i5U=’</td>
+</tr>
+<tr>
+<td>World</td>
+<td>只有一个ID：’anyone’</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>该模式不关注授权对象，但必须有</td>
+</tr>
+<tr>
+<td>Super</td>
+<td>与Digest模式一致</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-ACL管理"><a href="#3-ACL管理" class="headerlink" title="3. ACL管理"></a>3. ACL管理</h2><p>权限相关命令:</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>使用方式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>getAcl</td>
+<td>getAcl <path></path></td>
+<td>读取 ACL 权限</td>
+</tr>
+<tr>
+<td>setAcl</td>
+<td>setAcl <path></path> <acl></acl></td>
+<td>设置 ACL 权限</td>
+</tr>
+<tr>
+<td>addauth</td>
+<td>addauth <scheme> <auth></auth></scheme></td>
+<td>添加认证用户</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-1-设置ACL"><a href="#3-1-设置ACL" class="headerlink" title="3.1 设置ACL"></a>3.1 设置ACL</h3><p>通过 zkCli 脚本登录 ZooKeeper 服务器后，可以通过两种方式进行 ACL 的设置。一种是在数据节点创建的同时进行 ACL 权限的设置，命名格式如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">create [-s] [-e] path data acl</span><br></pre></td></tr></table></figure></p>
+<p>具体使用如下所示:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 1] create -e /test/auth-node &apos;auth scheme node&apos; digest:user1:XDkd2dsEuhc9ImU3q8pa8UOdtpI=:cwrda</span><br><span class="line">Created /test/auth-node</span><br></pre></td></tr></table></figure></p>
+<p>另一种方式则是使用 <code>setAcl</code> 命名单独对已经存在的数据节点进行 ACL 设置：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl path acl</span><br></pre></td></tr></table></figure></p>
+<p>具体使用如下所示:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 2] setAcl /test/auth-node auth:id:crdwa</span><br><span class="line">cZxid = 0x202d</span><br><span class="line">ctime = Sun Sep 22 20:31:31 CST 2019</span><br><span class="line">mZxid = 0x202d</span><br><span class="line">mtime = Sun Sep 22 20:31:31 CST 2019</span><br><span class="line">pZxid = 0x202d</span><br><span class="line">cversion = 0</span><br><span class="line">dataVersion = 0</span><br><span class="line">aclVersion = 1</span><br><span class="line">ephemeralOwner = 0x100009088560218</span><br><span class="line">dataLength = 16</span><br><span class="line">numChildren = 0</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-获取ACL"><a href="#3-2-获取ACL" class="headerlink" title="3.2 获取ACL"></a>3.2 获取ACL</h3><p>适用如下方式获取ACL信息：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">getAcl &lt;path&gt;</span><br></pre></td></tr></table></figure></p>
+<p>具体使用如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 3] getAcl /test/auth-node</span><br><span class="line">&apos;digest,&apos;user1:XDkd2dsEuhc9ImU3q8pa8UOdtpI=</span><br><span class="line">: cdrwa</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-权限模式"><a href="#4-权限模式" class="headerlink" title="4. 权限模式"></a>4. 权限模式</h2><p>权限模式用来确定权限验证中的校验策略。在 ZooKeeper 中，开发人员使用最多的就是以下五种权限模式。</p>
+<h3 id="4-1-World模式"><a href="#4-1-World模式" class="headerlink" title="4.1 World模式"></a>4.1 World模式</h3><p>World 是一种最开放的权限控制模式，从其名字中也可以看出，事实上这种权限控制方式几乎没有任何作用，数据节点的访问权限对所有用户开放，即所有用户都可以在不进行任何权限校验的情况下操作 ZooKeeper 上的数据。另外，World 模式也可以看作是一种特殊的 Digest 模式，它只有一个权限标识，即 <code>world:anyone</code>。World 模式只有一个授权对象(<code>anyone</code>)，表示世界上任意用户。</p>
+<p>我们使用如下命令来设置任何人都可以访问的节点：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /&lt;node-name&gt; world:anyone:crdwa</span><br></pre></td></tr></table></figure></p>
+<p>通过正确执行上述操作，我们可以得到如下所示输出：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-1.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>world模式创建节点的默认模式。</p>
+</blockquote>
+<h3 id="4-2-IP模式"><a href="#4-2-IP模式" class="headerlink" title="4.2 IP模式"></a>4.2 IP模式</h3><p>IP 模式表示有相同 IP 地址的任何用户，通过 IP 地址粒度来进行权限控制，例如配置了<code>ip:192.168.0.110</code>，即表示权限控制都是针对这个IP地址的。同时，IP 模式也支持按照网段的方式进行配置，例如<code>ip:192.168.0.1/24</code>表示针对<code>192.168.0.*</code>这个IP段进行权限控制。以下是使用 IP 模式的 <code>setAcl</code> 的语法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /&lt;node-name&gt; ip:&lt;IPv4-address&gt;:&lt;permission-set&gt;</span><br></pre></td></tr></table></figure></p>
+<p>使用上面的语法，下面是使用 <code>127.0.0.1</code> IP地址的示例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /test/ip-node ip:127.0.0.1:crdwa</span><br></pre></td></tr></table></figure></p>
+<p>通过正确执行上述操作，我们可以得到如下所示输出：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-2.jpg?raw=true" alt=""></p>
+<h3 id="4-3-Digest模式"><a href="#4-3-Digest模式" class="headerlink" title="4.3 Digest模式"></a>4.3 Digest模式</h3><p>Digest 是最常用的权限控制模式，也更符合我们对于权限控制的认识，其类似于 <code>username:password</code> 形式的权限标识来进行权限配置，便于区分不同应用来进行权限控制。</p>
+<p>当我们通过 <code>username:password</code> 形式配置了权限标识。这里的密码是密文，ZooKeeper 会对其先后进行两次编码处理，分别是SHA-1算法加密和BASE64编码，在 SHELL 中可以通过以下命令计算：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">echo -n &lt;user&gt;:&lt;password&gt; | openssl dgst -binary -sha1 | openssl base64</span><br></pre></td></tr></table></figure></p>
+<p>先来算一个密文密码：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">smartsi:SmartSi smartsi$ echo -n user-1:password-1 | openssl dgst -binary -sha1 | openssl base64</span><br><span class="line">1g4T1B5w+se9ntA6Ckp90uPaJ30=</span><br></pre></td></tr></table></figure></p>
+<p>以下是使用 Digest 模式的 <code>setAcl</code> 的语法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /&lt;node-name&gt; digest:&lt;user-name&gt;:&lt;password&gt;:&lt;permission&gt;</span><br></pre></td></tr></table></figure></p>
+<p>使用上面的语法，下面是使用 <code>user-1:password-1</code> 示例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /test/digest-node-1 digest:user-1:1g4T1B5w+se9ntA6Ckp90uPaJ30=:crdwa</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p><code>1g4T1B5w+se9ntA6Ckp90uPaJ30=</code> 为 <code>password-1</code> 对应的密文。</p>
+</blockquote>
+<p>通过正确执行上述操作，我们可以得到如下所示输出：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-4.jpg?raw=true" alt=""></p>
+<p>注意的是虽然可以使用明文密码 <code>user-1:password-1</code> 设置 ACL(实际上 ZooKeeper 认为 <code>password-1</code> 是两次编码处理的密文)，但是获取内容时会没有权限：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-3.jpg?raw=true" alt=""></p>
+<h3 id="4-4-Auth模式"><a href="#4-4-Auth模式" class="headerlink" title="4.4 Auth模式"></a>4.4 Auth模式</h3><p>Auth 是一种特殊模式，不会对任何授权对象ID进行授权，而是对所有已经添加认证的用户进行授权。持久化 ACL 信息时，ZooKeeper 服务器会忽略 <code>scheme:id:perm</code> 中提供的任何授权对象表达式。但是仍必须在 ACL 中提供表达式，可以是一个空串’’，或者其他任意字符串，因为 ACL 必须与 <code>scheme:id:permission</code> 格式匹配:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 9] setAcl /test/auth-node auth:crdwa</span><br><span class="line">auth:crdwa does not have the form scheme:id:perm</span><br></pre></td></tr></table></figure></p>
+<p>如果没有添加身份认证的用户，那么使用 Auth 模式设置 ACL 会报错。如下所示在我没有提供任何认证用户的情况下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[zk: 127.0.0.1:2181(CONNECTED) 3] setAcl /test/auth-node auth::crdwa</span><br><span class="line">Acl is not valid : /test/auth-node</span><br></pre></td></tr></table></figure></p>
+<p>使用此模式的正确用法如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">setAcl /&lt;node-name&gt; auth:&lt;id&gt;:&lt;permission&gt;</span><br></pre></td></tr></table></figure></p>
+<p>使用此模式我们可以给多个授权用户使用不同的用户名和密码访问 <code>ZNode</code>。假设我们有3个用户：</p>
+<ul>
+<li>user-1:password-1</li>
+<li>user-2:password-2</li>
+<li>user-3:password-3</li>
+</ul>
+<p>要注意的一件事是，必须先使用 <code>addauth</code> 命令，然后才能继续使用 Auth 模式设置 ACL。如果我们在执行 <code>addauth</code> 命令之前设置ACL，就会像上述所示抛出异常：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Acl is not valid : /test/auth-node</span><br></pre></td></tr></table></figure></p>
+<p>正确的方法是先执行 <code>addauth</code> 命令，然后再执行 <code>setAcl</code> 命令。以下是 <code>addauth</code> 的命令执行语法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">addauth digest &lt;username&gt;:&lt;password&gt;</span><br></pre></td></tr></table></figure></p>
+<p>通过添加认证用户并相应地设置ACL，可以确保正确设置ACL：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-5.jpg?raw=true" alt=""></p>
+<p>在其他窗口使用对其用户名和密码组合重复上述步骤如下所示：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-6.jpg?raw=true" alt=""></p>
+<h3 id="5-Super模式"><a href="#5-Super模式" class="headerlink" title="5. Super模式"></a>5. Super模式</h3><p>Super模式，顾名思义就是超级用户的意思，为管理员所使用，这也是一种特殊的 Digest 模式。在 Super 模式下，超级用户可以对任意 ZooKeeper 上的数据节点进行任何操作，不会被任何节点的 ACL 所限制。</p>
+<p>根据ACL权限控制的原理，一旦对一个数据节点设置了 ACL 权限控制，那么其他没有被授权的 ZooKeeper 客户端将无法访问该数据节点，这的确很好的保证了 ZooKeeper 的数据安全。但同时，ACL 权限控制也给 ZooKeeper 的运维人员带来了一个困扰：如果一个持久数据节点包含了 ACL 权限控制，而其创建者客户端已经退出或已不再使用，那么这些数据节点该如何清理呢？这个时候，就需要在 ACL 的 Super 模式下，使用超级管理员权限来进行处理了。要使用超级管理员权限，首先需要在 ZooKeeper 服务器上开启 Super 模式，方法是在 ZooKeeper 服务器启动的时候，添加如下系统属性：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-Dzookeeper.DigestAuthenticationProvider.superDigest=super:zUZ0bpqYS7FucDXsnUgxOWTto1s=</span><br></pre></td></tr></table></figure></p>
+<p>其中，super 代表了一个超级管理员的用户名；<code>zUZ0bpqYS7FucDXsnUgxOWTto1s=</code> 是由 ZooKeeper 的系统管理员自主配置密码的两次编码处理后的密文，此例中使用的是 <code>super:root</code> 的编码。</p>
+<p>打开 ZooKeeper 目录下的 <code>/bin/zkServer.sh</code> 服务器脚本，找到如下一行：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nohup $JAVA &quot;-Dzookeeper.log.dir=$&#123;ZOO_LOG_DIR&#125;&quot; &quot;-Dzookeeper.root.logger=$&#123;ZOO_LOG4J_PROP&#125;&quot;</span><br></pre></td></tr></table></figure></p>
+<p>默认只有以上两个配置项，我们需要把上述配置项加到服务器脚本中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">nohup &quot;$JAVA&quot; &quot;-Dzookeeper.log.dir=$&#123;ZOO_LOG_DIR&#125;&quot; &quot;-Dzookeeper.DigestAuthenticationProvider.superDigest=admin:0sxEug2Dpm/NpzMPieOlFREd9Ao=&quot; \</span><br><span class="line">    -cp &quot;$CLASSPATH&quot; $JVMFLAGS $ZOOMAIN &quot;$ZOOCFG&quot; &gt; &quot;$_ZOO_DAEMON_OUT&quot; 2&gt;&amp;1 &lt; /dev/null &amp;</span><br></pre></td></tr></table></figure></p>
+<p>完成对 ZooKeeper 服务器的 Super 模式的开启后，重新启动服务器后就可以在应用程序中使用了，下面是一个使用超级管理员权限操作 ZooKeeper 数据节点的示例程序：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/ZooKeeper/zookeeper-acl-access-permission-control-mechanism-7.jpg?raw=true" alt=""></p>
+<p>从上面输出结果中，我们可以看出，由于 <code>super:root</code> 是一个超级管理员，因此能够对一个受权限控制的数据节点 <code>/test/auth-node</code> 随意进行操作。但是 <code>user-3:password-3</code> 这个普通用户，就无法通过权限验证了。</p>
+<p>参考:</p>
+<ul>
+<li><a href="https://ihong5.wordpress.com/2014/07/24/apache-zookeeper-setting-acl-in-zookeeper-client/" target="_blank" rel="noopener">Apache ZooKeeper – Setting ACL in ZooKeeper Client</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html" title="ZooKeeper ACL权限控制机制">http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ZooKeeper/" rel="tag"># ZooKeeper</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/zookeeper-standalone-setup-and-run.html" rel="next" title="ZooKeeper 伪集群模式安装与启动">
+                <i class="fa fa-chevron-left"></i> ZooKeeper 伪集群模式安装与启动
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">197</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">49</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-权限"><span class="nav-number">1.</span> <span class="nav-text">1. 权限</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-授权对象"><span class="nav-number">2.</span> <span class="nav-text">2. 授权对象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ACL管理"><span class="nav-number">3.</span> <span class="nav-text">3. ACL管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-设置ACL"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 设置ACL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-获取ACL"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 获取ACL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-权限模式"><span class="nav-number">4.</span> <span class="nav-text">4. 权限模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-World模式"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 World模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-IP模式"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 IP模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-Digest模式"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 Digest模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-Auth模式"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 Auth模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Super模式"><span class="nav-number">4.5.</span> <span class="nav-text">5. Super模式</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
