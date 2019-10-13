@@ -301,7 +301,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/spark-base-build-resilient-distributed-datasets.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/spark-base-rdd-operations.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -320,7 +320,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/spark-base-build-resilient-distributed-datasets.html" itemprop="url">Spark2.3.0 创建RDD</a></h2>
+                <a class="post-title-link" href="/spark-base-rdd-operations.html" itemprop="url">Spark2.3.0 RDD操作</a></h2>
         
 
         <div class="post-meta">
@@ -367,8 +367,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/spark-base-build-resilient-distributed-datasets.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/spark-base-build-resilient-distributed-datasets.html" itemprop="commentCount"></span>
+                <a href="/spark-base-rdd-operations.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/spark-base-rdd-operations.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -376,7 +376,7 @@
 
           
           
-             <span id="/spark-base-build-resilient-distributed-datasets.html" class="leancloud_visitors" data-flag-title="Spark2.3.0 创建RDD">
+             <span id="/spark-base-rdd-operations.html" class="leancloud_visitors" data-flag-title="Spark2.3.0 RDD操作">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -409,16 +409,16 @@
       
         
           
-          Spark的核心概念是弹性分布式数据集（RDD），RDD 是一个可容错、并行操作的分布式元素集合。有两种方法可以创建 RDD 对象：
+          RDD支持两种类型的操作：
 
-在驱动程序中并行化操作已存在集合来创建 RDD
-从外部存储系统中引用数据集（如：共享文件系统、HDFS、HBase 或者其他 Hadoop 支持的数据源）。
+转换操作(transformations): 从现有数据集创建一个新数据集
+动作操作(actions): 在数据集上进行计算后将值返回给驱动程序
 
-1.
+例如，map 是一个转换操作，传递给每个数据集元素一个函数并返回一个新 RDD 表示返回结果。另一方面，reduce 是一
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/spark-base-build-resilient-distributed-datasets.html#more" rel="contents">
+            <a class="btn" href="/spark-base-rdd-operations.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
