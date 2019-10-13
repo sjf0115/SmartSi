@@ -7,7 +7,7 @@ tags:
   - HBase
 
 categories: HBase
-permalink: understanding-HBase-and-bigtable
+permalink: understanding-hbase-and-bigtable
 ---
 
 在学习HBase（Google BigTable 的开源实现）的时候，我们面临的最为困难的地方就是需要你重构你的思路来理解 BigTable 的概念。
