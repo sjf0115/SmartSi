@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="HBase," />
+
+
+<meta name="description" content="HBase 与传统关系数据库（例如MySQL，PostgreSQL，Oracle等）在架构的设计以及为应用程序提供的功能方面有很大的不同。HBase 权衡了其中一些功能，以实现更好的可扩展性以及更灵活的模式。与关系数据库相比，HBase 表的设计有很大的不同。下面将通过解释数据模型向您介绍 HBase 表设计的基础知识，并通过一个例子深入探讨 HBase 表的设计。 1. HBase数据模型HBa">
+<meta name="keywords" content="HBase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase Schema 设计">
+<meta property="og:url" content="http://smartsi.club/introduction-to-hbase-schema-design.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="HBase 与传统关系数据库（例如MySQL，PostgreSQL，Oracle等）在架构的设计以及为应用程序提供的功能方面有很大的不同。HBase 权衡了其中一些功能，以实现更好的可扩展性以及更灵活的模式。与关系数据库相比，HBase 表的设计有很大的不同。下面将通过解释数据模型向您介绍 HBase 表设计的基础知识，并通过一个例子深入探讨 HBase 表的设计。 1. HBase数据模型HBa">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-2.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-3.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-4.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-5.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-6.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-7.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-8.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-9.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-10.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-11.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2019-10-19T08:04:30.706Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HBase Schema 设计">
+<meta name="twitter:description" content="HBase 与传统关系数据库（例如MySQL，PostgreSQL，Oracle等）在架构的设计以及为应用程序提供的功能方面有很大的不同。HBase 权衡了其中一些功能，以实现更好的可扩展性以及更灵活的模式。与关系数据库相比，HBase 表的设计有很大的不同。下面将通过解释数据模型向您介绍 HBase 表设计的基础知识，并通过一个例子深入探讨 HBase 表的设计。 1. HBase数据模型HBa">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-1.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/introduction-to-hbase-schema-design.html"/>
+
+
+  <title>HBase Schema 设计 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/introduction-to-hbase-schema-design.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">HBase Schema 设计</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-19T11:15:07+08:00">2019-10-19</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/introduction-to-hbase-schema-design.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/introduction-to-hbase-schema-design.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/introduction-to-hbase-schema-design.html" class="leancloud_visitors" data-flag-title="HBase Schema 设计">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>HBase 与传统关系数据库（例如MySQL，PostgreSQL，Oracle等）在架构的设计以及为应用程序提供的功能方面有很大的不同。HBase 权衡了其中一些功能，以实现更好的可扩展性以及更灵活的模式。与关系数据库相比，HBase 表的设计有很大的不同。下面将通过解释数据模型向您介绍 HBase 表设计的基础知识，并通过一个例子深入探讨 HBase 表的设计。</p>
+<h3 id="1-HBase数据模型"><a href="#1-HBase数据模型" class="headerlink" title="1. HBase数据模型"></a>1. HBase数据模型</h3><p>HBase 数据模型与我们在关系数据库中使用或了解的数据模型有很大不同。如 BigTable 原始论文所述，它是一个稀疏，分布式，持久的多维有序 Map，由行键，列以及时间戳进行索引。我们可能会听到人们将其称为键值存储，面向列族的数据库，有时甚至是存储版本化 Map 的数据库，这些描述都是正确的。HBase 数据模型的最简单描述是表，由行和列组成。这与关系数据库中比较相像，但也就是这点与 RDBMS 数据模型相似。实际上，甚至行和列的概念也略有不同。首先，我们定义一些概念，供后面使用：</p>
+<ul>
+<li>表(Table)：HBase 以表的形式组织数据。表名必须由可以在文件系统路径中可以使用的字符组成。</li>
+<li>行(Row)：通过行键进行唯一标识。行键没有数据类型，以字节数组来存储。</li>
+<li>列族(Column Family)：行中数据按列族分组。列族还影响数据在 HBase 中的物理存储，必须预先定义列族并且不能随便对其进行修改。表中每一行都具有相同的列族，但列族中不一定都有相同列。</li>
+<li>列限定符(Column Qualifier)：列族中的数据通过列限定符（或简称为列）进行寻址查询。列限定符不需要预先制定，不同行的列限定符不必保持一致。与行键一样，列限定符也没有数据类型，以字节数组来存储。</li>
+<li>单元(Cell)：行键，列族和列限定符唯一标识一个单元。存储在单元中的数据称为该单元的值，同样也没有数据类型，以字节数组来存储。</li>
+<li>时间戳：单元中的值会进行版本化控制。版本由版本号进行标识，默认情况下，版本号是写入单元的时间戳。如果在写入时未指定时间戳，则使用当前时间戳。如果读取时未指定时间戳，则返回最新时间戳的单元值。每个列族的单元值版本数量由 HBse 分别维护，默认保留三个版本数据。</li>
+</ul>
+<p>HBase 中的表如下图所示:<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-1.jpg?raw=true" alt=""></p>
+<p>上表由两个列族（<code>Personal</code> 和 <code>Office</code>）组成。每个列族都有两列，<code>Personal</code> 列族的两列为 <code>Name</code>、<code>ResidencePhone</code>，<code>Office</code> 列族的两列为 <code>Phone</code>、<code>Address</code>。</p>
+<p>HBase 用于数据处理的API包含三种主要方法：Get，Put和Scan。Get 和 Put 方法针对特定行，并且需要提供行键。Scan 方法作用在一定范围的行上。该范围可以由开始行键和终止行键定义，如果没有指定开始行键和终止行键，则遍历整个表。</p>
+<p>你也可以把 HBase 看成一个多维度的 Map 模型去理解它的数据模型。上表第一行表示为多维 Map 如下所示:<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-2.jpg?raw=true" alt=""></p>
+<p>一个行键映射一个列族数组，列族数组中的每个列族又映射一个列限定符数组，列限定符数组中的每一个列限定符又映射到一个时间戳数组，每个时间戳映射到不同版本的值，即单元本身。如果我们要查询行键映射的条目，则可以从所有列中获取数据。如果我们要查询指定列族映射的条目，则可以从该列族下所有列中获取数据。如果我们要查询指定列限定符映射的条目，则可以获取所有时间戳以及相关的值。默认情况下仅返回最新版本的数据，我们可以在查询中请求多个版本的数据。可以认为行键等价于关系数据库表中的主键。在表创建后，我们不能选择其他列将作为行键。换句话说，在将数据放入表之后，我们不能选择 <code>Personal</code> 列族中的 <code>Name</code> 列作为行键。</p>
+<p>我们也可以将 HBase 视为键值存储（如下图所示），可以理解行键，列族，列限定符，时间戳的组合作为键，存储在单元中的实际数据为值。稍后，当我们深入了解底层存储的细节时，我们会发现，如果要从给定的行中读取特定单元数据时，HBase 会去读取一个数据块，里面除了有要查询的单元数据，可能同时也会获取到其它单元数据：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-3.jpg?raw=true" alt=""></p>
+<p>如果 HBase 表作为键值存储来看，主键可以只是行键，或者是行键，列族，列限定符，时间戳的组合，具体取决于我们要寻址的单元。如果我们对一行中的所有单元都感兴趣，则主键是行键。如果我们只关注指定单元，则需要将对应的列族和列限定符作为主键的一部分。</p>
+<h3 id="2-HBase表设计基础"><a href="#2-HBase表设计基础" class="headerlink" title="2. HBase表设计基础"></a>2. HBase表设计基础</h3><p>正如上面强调的那样，HBase 数据模型与关系数据库系统完全不同。因此，设计 HBase 表的方法与关系数据库系统的方法不同。在设计 HBase 表时需要考虑以下问题：</p>
+<ul>
+<li>行键的结构是什么样，应该包含什么信息。</li>
+<li>表应该有多少列族。</li>
+<li>列族中应该存储什么样的数据。</li>
+<li>每个列族应该有多少列。</li>
+<li>列名是什么，尽管无需在创建表时定义列名，但是在写入或读取数据时需要知道它们。</li>
+<li>单元中应该存储什么样的数据。</li>
+<li>每个单元中存储多少个时间版本。</li>
+</ul>
+<p>HBase 表设计的最重要的是定义行键结构。定义行键结构，重要的是预先定义访问模式（读和写）。除此之外，还需要考虑 HBase 表的一些特性：</p>
+<ul>
+<li>仅对行键进行索引。</li>
+<li>表是根据行键存储的。表中的行根据行键的字典序来进行排序，表中每一块区域的划分都是基于开始行键以及终止行键来决定的。</li>
+<li>HBase 表中的所有内容都以字节数组存储，没有数据类型。</li>
+<li>仅保证行级别的原子性。跨行不会保证原子性，这意味着不存在多行事务。</li>
+<li>列族必须在创建表时预先定义。</li>
+<li>列限定符是动态的，可以在表创建之后写入数据时定义。列限定符以字节数组的形式存储，因此我们甚至可以将真实数据存储其中。</li>
+</ul>
+<p>学习这些概念的一种最好方法是通过示例来演示。我们以 Twitter 上用户相关注为例进行说明。关注者与关注的本质上是一个图，存储在专门的图数据库可以更有效地使用此类数据集。但是，这个特殊的用例为在 HBase 表中建模提供了一个很好的示例。</p>
+<p>在对表进行建模之前第一步是定义应用程序的访问模式。在 Twitter 用户关注下访问模式可以定义如下。</p>
+<p>读取模式：</p>
+<ul>
+<li>用户关注了谁？</li>
+<li>用户A是否关注了用户B？</li>
+<li>谁关注了用户A？</li>
+</ul>
+<p>写模式：</p>
+<ul>
+<li>用户关注一个新用户。</li>
+<li>用户取消关注了某个人。</li>
+</ul>
+<h4 id="2-1-方案一"><a href="#2-1-方案一" class="headerlink" title="2.1 方案一"></a>2.1 方案一</h4><p>下面我们开始考虑表的，并探讨其优缺点。如下图所示的表设计，该表每一行代表着某个用户以及他所关注的所有用户，行键是关注者的用户ID，列名为关注用户序号，单元值为关注用户Id：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-4.jpg?raw=true" alt=""></p>
+<p>带有数据的表设计如下图所示：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-5.jpg?raw=true" alt=""></p>
+<p>在这种表结构的设计下，第一个问题’用户关注了谁’很好解决，但对于第二个问题’用户A是否关注了用户B’这个问题在列很多(关注的用户很多)的时候，需要遍历所有列去找到用户B，这样的代价会比较大。并且当添加新的关注用户时，因为不知道给这个新用户分配什么样的列序号，因此需要遍历列族中的所有列找出最后一个列，并将最后一列的序号+1给新的关注用户作为列序号，这样的代价会很大。一种可能的解决方案是保留一个计数器，记录当前列序号，如下图所示：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-6.jpg?raw=true" alt=""></p>
+<p>表中的数据跟之前一样，只是添加了一个计数器，用于记录用户所关注的用户数量。根据上图表的设计，将新关注用户添加到关注用户列表中所需的步骤如下：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-7.jpg?raw=true" alt=""></p>
+<ul>
+<li>第一步获取当前计数器表示的列序号(<code>count:4</code>)。</li>
+<li>第二步更新列序号值，加1(<code>count:5</code>)。</li>
+<li>第三步添加一个新条目。</li>
+<li>第四步将新数据(<code>5:Lui,count:5</code>)写回HBase。</li>
+</ul>
+<p>如你所看到的，保持计数器会让客户端代码变的很复杂。每次往A的关注用户列表中增加一个用户，必须先从 HBase 表里读出计数，增加一个用户，更新计数器。这个过程看起来有点像关系型数据库里的事务。</p>
+<h4 id="2-2-方案二"><a href="#2-2-方案二" class="headerlink" title="2.2 方案二"></a>2.2 方案二</h4><p>上面的设计在使用计数器后有所改进，但还是不能解决所有问题。取消关注用户仍然很棘手，我们必须遍历所有列以找出我们需要删除的列。最大的问题是，因为 HBase 不会对跨行或跨RPC调用进行事务保证，在添加关注用户时我们必须在客户端代码中实现某种事务逻辑。</p>
+<blockquote>
+<p>读取计数器以及更新计数器需要有事务的支持，这样会让客户端变的比较复杂。解决这个问题的唯一办法是去掉计数器。</p>
+</blockquote>
+<p>我们之前提到的一个特性是列限定符是动态的，并且像单元一样以字节数组存储。这样一来，我们便可以将任意数据放入列限定符中，基于这个特性我们再改进表的设计。如下图所示，在这种设计中，不再需要计数器，列限定符使用被关注的用户名称，而不在是他们在关注用户列表中的位置。在这种设计下添加关注用户变得不那么复杂(直接添加，不需要计数器获取列序号)。取消关注也得到了简化(直接找到对应列，不需要遍历)：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-8.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>现在，表中使用用户名作为列限定符，单元值可以是任意内容，因为单元不能是空的，需要我们存储点东西，所以输入数字1。</p>
+</blockquote>
+<p>这种设计几乎解决了所有问题。在读取访问模式中，只剩下第三个问题’谁关注了用户A？’。在当前设计中，由于仅对行键进行索引，因此我们需要进行全表扫描才能知道谁关注了用户A。这就告诉我们，关注的用户也应该以某种方式进行索引。</p>
+<h4 id="2-3-方案三"><a href="#2-3-方案三" class="headerlink" title="2.3 方案三"></a>2.3 方案三</h4><p>有两种方法可以解决这个问题。第一种方法是新建一张表，里面保存用户以及所有关注他的用户。第二种方法是在同一张表中使用不同的行键信息，存储用户以及所有关注他的用户的信息，并能从行键上区分是关注还是被关注，例如，行键为 <code>A_following</code> 的这行保存着用户A关注的所有用户，而行键为 <code>A_followed</code> 的这行保存着所有关注用户A的用户。这样我们的第三个问题只需要查询行键为 <code>A_followed</code> 就能知道谁关注了用户A。</p>
+<p>当前表结构还可以进一步的优化。如下图所示的表：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-9.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>方案一和方案二都是使用的宽表形式。也就是说一行包括很多列。同样的信息可以使用高表形式存储。每行代表一个’关注与被关注’关系。行键里使用了<code>+</code>串联了两个值，你也可以使用你喜欢的任意字符。</p>
+</blockquote>
+<p>在此设计中，有两点需要注意：行键现在由关注用户和被关注用户组成，同时列族的名字被设计成只有一个字母f。列族名称这样的设计可以通过减少从 HBase 读取/写入的数据来减少I/O负载（磁盘和网络），因为列族名称也是返回给客户端的 KeyValue 对象的一部分。</p>
+<p>保存了一些样例数据的表如下图所示：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-10.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>按高表而不是宽表进行设计。把用户名放进列限定符可以节省为了得到用户名到用户表中查询的时间。其负面影响就是，如果用户在用户表里更新他们的名字，你不得不在本表的所有单元里更新用户名字。</p>
+</blockquote>
+<p>表的这种新设计在回答读模式第二个问题’用户A是否关注了用户B？’时会比以前方案快，基于行键使用 Get 操作得到一行也就得到答案了，不用再像早期表设计中那样遍历该行的所有列。获取关注的所有用户从 Get 操作变成简短的 Scan。取消关注变为简单的删除操作。</p>
+<p>高表并不总是表设计的最好选择，为了获取高表的性能好处，会在某些操作上放弃了原子性原则。在前面方案中我们可以在一行上用单个 Put 操作更新任何用户的关注列表。Put 运算在行级别是原子不可分的。在这个方案里，我们放弃了这样做的能力</p>
+<p>注意，在表中不同的行键可能其长度也不一样。由于每次对表的调用要传输的数据都是不一样的，因此这对性能也会由影响。解决此问题的方法是对行键进行散列。为了在表中有相同长度的行键，我们可以对不同用户ID进行散列并将其拼接在一起。如下图所示我们使用 MD5 对用户Id以及其所关注的用户Id进行散列并拼接 <code>md5(follower)md5(followed)</code>。这样我们就有固定长度的行键，每个用户ID为16个字节。如果我们要要查询某个用户，我们可以计算对应的散列值来查询表：<br><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/introduction-to-hbase-schema-design-11.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>使用MD5作为行键的一部分可以得到固定长度和更好的分布。</p>
+</blockquote>
+<h3 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h3><p>本文介绍了HBase模式设计的基础知识。首先介绍了数据模型，然后讨论了设计 HBase 表时要考虑的一些因素。下面是HBase一些关键特性的总结：</p>
+<ul>
+<li>行键是 HBase 表设计中最重要的一环，决定了应用程序如何与 HBase 表进行交互，还会影响从 HBase 中读取的性能。</li>
+<li>HBase 表很灵活，我们可以以字节数组的形式存储任何内容。</li>
+<li>将具有相似访问模式的所有内容存储在同一列族中。</li>
+<li>仅对行键进行索引。</li>
+<li>高表使操作更快，更简单，但是失去了原子性。宽表，其中每一行都有很多列，允许行级别的原子性。</li>
+<li>HBase并不支持事务，所有操作尽量在一次API请求中完成。</li>
+<li>哈希可以使固定长度的键有更好的分布，但会失去字符串暗含的有序性。</li>
+<li>列限定符可用于存储数据，就像单元一样。</li>
+<li>列限定符的长度会影响存储空间，因为可以将数据放入其中。长度也会影响访问数据时的磁盘和网络I/O代价。</li>
+<li>列族名称的长度会影响通过网络发送到客户端的数据大小（在KeyValue对象中）。</li>
+</ul>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文：<a href="http://0b4af6cdc2f0c5998459-c0245c5c937c5dedcca3f1764ecc9b2f.r43.cf2.rackcdn.com/9353-login1210_khurana.pdf" target="_blank" rel="noopener">Introduction to HBase Schema Design</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/introduction-to-hbase-schema-design.html" title="HBase Schema 设计">http://smartsi.club/introduction-to-hbase-schema-design.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HBase/" rel="tag"># HBase</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/understanding-hbase-and-bigtable.html" rel="next" title="了解HBase与BigTable">
+                <i class="fa fa-chevron-left"></i> 了解HBase与BigTable
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">200</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">49</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-HBase数据模型"><span class="nav-number">1.</span> <span class="nav-text">1. HBase数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-HBase表设计基础"><span class="nav-number">2.</span> <span class="nav-text">2. HBase表设计基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-方案一"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 方案一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-方案二"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 方案二</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-方案三"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 方案三</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-总结"><span class="nav-number">3.</span> <span class="nav-text">3. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
