@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="HBase," />
+
+
+<meta name="description" content="在这篇博客文章中，我们主要深入看一下H Base 的体系结构以及在 NoSQL 数据存储解决方案主要优势。 1. HBase架构组件从物理上来说 HBase 由主从模式架构的三种服务组成：  RegionServer：负责为读写提供数据。访问数据时，客户端可直接与 RegionServer 进行通信。 HBase Master：也称之为 HMaster，负责 Region 的分配，DDL（创建、删">
+<meta name="keywords" content="HBase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解HBase架构">
+<meta property="og:url" content="http://smartsi.club/in-depth-look-hbase-architecture.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="在这篇博客文章中，我们主要深入看一下H Base 的体系结构以及在 NoSQL 数据存储解决方案主要优势。 1. HBase架构组件从物理上来说 HBase 由主从模式架构的三种服务组成：  RegionServer：负责为读写提供数据。访问数据时，客户端可直接与 RegionServer 进行通信。 HBase Master：也称之为 HMaster，负责 Region 的分配，DDL（创建、删">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-8.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-9.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-10.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-11.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-12.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-13.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-14.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-15.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-16.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-17.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-18.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-19.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-20.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-21.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-22.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-23.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-24.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-25.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-26.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2019-11-10T07:15:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解HBase架构">
+<meta name="twitter:description" content="在这篇博客文章中，我们主要深入看一下H Base 的体系结构以及在 NoSQL 数据存储解决方案主要优势。 1. HBase架构组件从物理上来说 HBase 由主从模式架构的三种服务组成：  RegionServer：负责为读写提供数据。访问数据时，客户端可直接与 RegionServer 进行通信。 HBase Master：也称之为 HMaster，负责 Region 的分配，DDL（创建、删">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/in-depth-look-hbase-architecture.html"/>
+
+
+  <title>深入理解HBase架构 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/in-depth-look-hbase-architecture.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">深入理解HBase架构</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-09T15:22:07+08:00">2019-11-09</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/in-depth-look-hbase-architecture.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/in-depth-look-hbase-architecture.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/in-depth-look-hbase-architecture.html" class="leancloud_visitors" data-flag-title="深入理解HBase架构">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在这篇博客文章中，我们主要深入看一下H Base 的体系结构以及在 NoSQL 数据存储解决方案主要优势。</p>
+<h3 id="1-HBase架构组件"><a href="#1-HBase架构组件" class="headerlink" title="1. HBase架构组件"></a>1. HBase架构组件</h3><p>从物理上来说 HBase 由主从模式架构的三种服务组成：</p>
+<ul>
+<li>RegionServer：负责为读写提供数据。访问数据时，客户端可直接与 RegionServer 进行通信。</li>
+<li>HBase Master：也称之为 HMaster，负责 Region 的分配，DDL（创建、删除表）操作等。</li>
+<li>Zookeeper：作为 HDFS 一部分的，负责维护活跃集群的状态。</li>
+</ul>
+<p>Hadoop DataNode 负责存储 RegionServer 管理的数据。所有 HBase 的数据都存储在 HDFS 文件中。RegionServer 和 HDFS DataNode 往往会部署在一起，这样 RegionServer 就能够实现数据本地化（即数据放在离需要尽可能近的地方）。在数据写入 HBase 时满足数据本地性，但是随着 Region 的迁移(由于故障恢复或者负载均衡等原因)可能不再满足本地性了(数据还在原先的 RegionServer 上，只是 Region 交给新的 RegionServer 管理)，等到完成数据压缩才能恢复本地性。</p>
+<p>NameNode 维护所有构成文件的物理数据块的元数据信息。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-1.png?raw=true" alt=""></p>
+<h4 id="1-1-RegionServer与Region"><a href="#1-1-RegionServer与Region" class="headerlink" title="1.1 RegionServer与Region"></a>1.1 RegionServer与Region</h4><p>HBase 表根据 RowKey 的开始和结束范围水平拆分为多个 Region。每个 Region 都包含了 StartKey 和 EndKey 之间的所有行。每个 Region 都会分配到集群的一个节点上，即 RegionServer，由它们为读写提供数。RegionServer 大约可以管理 1000 多个 Region。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-2.png?raw=true" alt=""></p>
+<h4 id="1-2-HMaster"><a href="#1-2-HMaster" class="headerlink" title="1.2 HMaster"></a>1.2 HMaster</h4><p>Region 的分配，DDL（创建，删除表）操作均由 HMaster 负责处理。</p>
+<p>HMaster具体负责：</p>
+<ul>
+<li>协调 RegionServer：(1)在启动时分配 Region、在故障恢复或者负载均衡时重新分配 Region。(2)监视集群中的所有 RegionServer 实例（侦听来自 Zookeeper 的通知）。</li>
+<li>管理员功能：创建，删除，更新表的接口。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-3.png?raw=true" alt=""></p>
+<h4 id="1-3-ZooKeeper"><a href="#1-3-ZooKeeper" class="headerlink" title="1.3 ZooKeeper"></a>1.3 ZooKeeper</h4><p>HBase 使用 ZooKeeper 作为分布式协调服务来维护集群中的服务状态。Zookeeper 维护哪些服务处于活跃状态并且是可用的，并提供服务故障通知。Zookeeper 使用一致性协议来保证分布式状态的一致性。请注意，需要有三到五台机器来保证一致性协议。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-4.png?raw=true" alt=""></p>
+<h3 id="2-组件如何协同工作"><a href="#2-组件如何协同工作" class="headerlink" title="2. 组件如何协同工作"></a>2. 组件如何协同工作</h3><p>Zookeeper 用于协调分布式系统成员的共享状态信息。RegionServer 与 Active HMaster 通过会话与 Zookeeper 进行连接。Zookeeper 通过心跳为活跃会话维护一个临时节点。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-5.png?raw=true" alt=""></p>
+<p>每个 RegionServer 都会创建一个临时节点。HMaster 监视这些节点以发现可用的 RegionServer，并且还监视这些节点是否出现故障。Zookeeper 使用第一个发现的 HMaster，通创建一个临时节点来确保只有它处于 Active 状态。Active HMaster 将心跳发送到 Zookeeper，非 Active HMaster 则侦听 Active HMaster 的故障通知。</p>
+<p>如果 RegionServer 或 Active HMaster 无法发送心跳，则会导致会话过期，并会删除相应的临时节点。Active HMaster 侦听 RegionServer，并恢复发生故障的 RegionServer。非 Active HMaster 侦听 Active HMaster 是否出现故障，如果 Active HMaster 发生故障，那么一个非 Active HMaster 会变为 Active 状态。</p>
+<h3 id="3-HBase首次读写"><a href="#3-HBase首次读写" class="headerlink" title="3. HBase首次读写"></a>3. HBase首次读写</h3><p>HBase 中有一个特殊的目录表(META表)，保存了集群中所有 Region 的位置。META 表的位置存储在 Zookeeper 中。</p>
+<p>如下是客户端第一次读写时发生的情况：</p>
+<ul>
+<li>客户端从 ZooKeeper 中获取负责管理 META 表的 RegionServer。</li>
+<li>客户端查询 META 服务来获取我们要访问的 RowKey 所对应的 RegionServer。客户端会将该信息与 META 表位置进行缓存。</li>
+<li>客户端查询 RowKey 所在的 RegionServer 并从中获取行。</li>
+</ul>
+<p>为了以后的读请求，客户端会缓存检索的 META 表位置以及之前读取的 RowKey。在后面，我们一般不再需要查询 META 表，除非由于 Region 迁移导致缓存失效，然后会重新查询并更新缓存。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-6.png?raw=true" alt=""></p>
+<h3 id="4-HBase-Meta表"><a href="#4-HBase-Meta表" class="headerlink" title="4. HBase Meta表"></a>4. HBase Meta表</h3><blockquote>
+<p>元数据表</p>
+</blockquote>
+<p>META 表是一个 HBase 表，保存了系统中所有的 Region。META 表类似一棵 B 树。META 表结构如下所示：</p>
+<ul>
+<li>Key：Region 开始键，Region ID</li>
+<li>Value：RegionServer</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-7.png?raw=true" alt=""></p>
+<h3 id="5-RegionServer组成"><a href="#5-RegionServer组成" class="headerlink" title="5. RegionServer组成"></a>5. RegionServer组成</h3><p>RegionServer 在 HDFS 数据节点上运行，并包含如下组件：</p>
+<ul>
+<li>WAL：预写日志是分布式文件系统上的一个文件。用于存储还没持久化存储的新数据，并在出现故障时可以进行恢复。</li>
+<li>BlockCache：读缓存，将经常读取的数据存储在内存中。内存不足时删除最近最少使用的数据。</li>
+<li>MemStore：写缓存，存储还没写入磁盘的新数据。在写入磁盘之前先对其进行排序。每个 Region 的每个列族都有一个 MemStore。</li>
+<li>HFile：将行以有序的 KeyValue 形式存储在磁盘上。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-8.png?raw=true" alt=""></p>
+<h4 id="5-1-HBase写入步骤"><a href="#5-1-HBase写入步骤" class="headerlink" title="5.1 HBase写入步骤"></a>5.1 HBase写入步骤</h4><p>当客户端发出 Put 请求时，第一步是将数据写入预写日志 WAL 中：</p>
+<ul>
+<li>新内容将追加到 WAL 文件(存储在磁盘上)末尾。</li>
+<li>WAL 用于恢复服务器崩溃时还没持久化的数据。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-9.png?raw=true" alt=""></p>
+<p>第二步是将数据写入 WAL 后，将其存储在 MemoryStore 中(写缓存)。然后将 Put 请求的确认返回给客户端。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-10.png?raw=true" alt=""></p>
+<h4 id="5-2-MemStore"><a href="#5-2-MemStore" class="headerlink" title="5.2 MemStore"></a>5.2 MemStore</h4><p>MemStore 将更新以有序的 KeyValue 形式存储在内存中(与存储在 HFile 中相同)。每个列族只有一个 MemStore。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-11.png?raw=true" alt=""></p>
+<h4 id="5-3-Region-Flush"><a href="#5-3-Region-Flush" class="headerlink" title="5.3 Region Flush"></a>5.3 Region Flush</h4><p>当 MemStore 累积足够多的数据时，整个有序集都会被写入到一个新的 HFile。随着时间的流逝，每个 MemStore 会有多个 HFile，因为存储在 MemStore  中的 KeyValue 会不断地刷写到磁盘上。HFile 是存储实际的单元值或 KeyValue 实例的地方。</p>
+<p>请注意，这也是为什么 HBase 中的列族数量受到限制的一个原因。每个列族都有一个 MemStore。当 MemStore 满之后就会刷写到磁盘。同时还会保存最后写入的序列号，以便系统知道到目前为止所持久化的内容。</p>
+<p>最大序列号存储为每个 HFile 中的一个 meta 字段，以反映持久化在何处结束以及在何处继续。当 Region 启动时，会读取序列号，并将最大的序列号用作新编辑内容的序列号。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-12.png?raw=true" alt=""></p>
+<h4 id="5-4-HFile"><a href="#5-4-HFile" class="headerlink" title="5.4 HFile"></a>5.4 HFile</h4><p>数据以有序的 key/values 形式存储在 HFile 中。当 MemStore 累积足够多的数据时，就会将整个有序 KeyValue 集顺序写入到一个新的 HFile 中。顺序写入的方式会非常快，因为它避免了移动磁盘驱动器磁头。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-13.png?raw=true" alt=""></p>
+<h5 id="5-4-1-HFile索引"><a href="#5-4-1-HFile索引" class="headerlink" title="5.4.1 HFile索引"></a>5.4.1 HFile索引</h5><p>HFile 包含多层索引，从而使 HBase 无需读取整个文件即可查找数据。多级索引类似一个 B+ 树：</p>
+<ul>
+<li>键值对以升序存储</li>
+<li>Rowkey 对应索引指向 64KB 大小的数据块</li>
+<li>每个数据块都有自己的叶子索引</li>
+<li>每个数据块的最后一个键放在中间索引中</li>
+<li>根索引指向中间索引</li>
+</ul>
+<blockquote>
+<p>三种索引类型：(1) Root Index：根索引 (2) Intermediate Index：中间索引 (3) Leaf Index：叶子索引</p>
+</blockquote>
+<p>Trailer 指向 meta 数据块，并将数据写入到持久化文件的末尾。Trailer 还包含诸如布隆过滤器和时间范围之类的信息。布隆过滤器可以帮助我们跳过不包含在特定行键的文件。时间范围信息可以帮助我们跳过不在读取的时间范围内的文件。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-14.png?raw=true" alt=""></p>
+<p>刚才我们讨论的索引，在 HFile 被打开时会被载入内存，这样数据查询只要一次磁盘查询。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-15.png?raw=true" alt=""></p>
+<h3 id="6-读取合并"><a href="#6-读取合并" class="headerlink" title="6. 读取合并"></a>6. 读取合并</h3><p>我们已经看到，对应于一行的 KeyValue 单元可以存储在多个位置，已经持久化的行单元位于 HFiles 中，最近更新的单元位于 MemStore 中，而最近读取的单元位于 BlockCache 中。因此，当我们读取一行时，系统如何获取对应的单元返回？读取操作需要通过以下步骤合并来 BlockCache、MemStore 以及 HFiles 中的键值：</p>
+<ul>
+<li>首先，扫描程序在 BlockCache(读缓存) 中查找行单元。最近读取过的键值存储在这里，并且当内存不足时需要删除最近最少使用的数据。</li>
+<li>接下来，扫描程序在 MemStore(写缓存) 中查找，这里包含最近的写入。</li>
+<li>如果扫描程序在 MemStore 和 BlockCache 中没有找到所有行单元，那么 HBase 将使用 BlockCache 索引和布隆过滤器将 HFiles 加载到内存中，这里可能包含目标行单元。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-16.png?raw=true" alt=""></p>
+<p>如前所述，每个 MemStore 可能有多个 HFile，这意味着对于读操作而言，可能必须查找多个文件，这可能会影响性能。这称为读取放大。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-17.png?raw=true" alt=""></p>
+<h3 id="7-HBase压缩"><a href="#7-HBase压缩" class="headerlink" title="7. HBase压缩"></a>7. HBase压缩</h3><h4 id="7-1-Minor压缩"><a href="#7-1-Minor压缩" class="headerlink" title="7.1 Minor压缩"></a>7.1 Minor压缩</h4><p>HBase 会自动选择一些较小的 HFile，将它们重写合并为一些较大的 HFile。 此过程称为 Minor 压缩。这样通过将比较多且较小的文件重写为比较少但较大的文件可以减少存储文件的数量。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-18.png?raw=true" alt=""></p>
+<h4 id="7-2-Major压缩"><a href="#7-2-Major压缩" class="headerlink" title="7.2 Major压缩"></a>7.2 Major压缩</h4><p>Major 压缩会将一个 Region 中的所有 HFile 合并重写为每个列族一个 HFile，在此过程中会删除已删除或已过期的单元。这样可以提高读取性能，但是由于 Major 压缩会重写所有文件，因此这个过程可能会发生大量磁盘 I/O 和网络流量。这称为写放大。</p>
+<p>Major 压缩可以调整为自动运行。由于写放大，通常需要在周末或晚上进行 Major 压缩。Major 压缩还可以使由于服务器故障或负载均衡而变成远程文件重新回到 RegionServer 数据本地性。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-19.png?raw=true" alt=""></p>
+<h3 id="8-Region拆分"><a href="#8-Region拆分" class="headerlink" title="8. Region拆分"></a>8. Region拆分</h3><p>让我们快速了解一下 Region：</p>
+<ul>
+<li>一个表可以水平拆分为一个或多个 Region。Region 在开始键和结束键之间包含连续的，有序的行</li>
+<li>每个 Region 默认大小为1GB</li>
+<li>表的 Region 由 RegionServer 提供给客户端</li>
+<li>RegionServer 大约可以管理 1,000个 Region（可能属于同一表或不同表）</li>
+</ul>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-20.png?raw=true" alt=""></p>
+<p>最初，每个表只有一个 Region。当 Region 过大时，会分为两个子 Region。两个子 Region（代表原始 Region 的一半）可以在同一 RegionServer 上并行打开，拆分时会报告给 HMaster。出于负载均衡的原因，HMaster 可能会将新 Region 迁移到其他服务器。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-21.png?raw=true" alt=""></p>
+<h4 id="8-1-读取负载均衡"><a href="#8-1-读取负载均衡" class="headerlink" title="8.1 读取负载均衡"></a>8.1 读取负载均衡</h4><p>拆分最初发生在同一个 RegionServer 上，但是出于负载均衡的考虑，HMaster 可能会将新 Region 迁移至其他 RegionServer。这会导致新的 RegionServer 从远程 HDFS 节点上访问数据，需要等到 Major 压缩时才将数据文件移动到新的 RegionServer 的本地节点上。HBase 数据在写入时是在本地节点的，但是在迁移 Region 时(用于负载均衡或故障恢复)，会丢失数据本地性。</p>
+<blockquote>
+<p>Region 迁移只是逻辑上的迁移，数据还在原先的 RegionServer 上，只是 Region 交给新的 RegionServer 管理。</p>
+</blockquote>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-22.png?raw=true" alt=""></p>
+<h3 id="9-HDFS数据备份"><a href="#9-HDFS数据备份" class="headerlink" title="9. HDFS数据备份"></a>9. HDFS数据备份</h3><p>所有读写请求都来自/发往主节点。HDFS 会备份 WAL 和 HFile 数据块。HFile 数据块备份会自动进行。HBase 依赖 HDFS 来保证存储文件的数据安全。当数据写入 HDFS 时，一个副本写入本地，然后将其备份到辅助节点，而第三个副本被写入第三节点。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-23.png?raw=true" alt=""></p>
+<p>WAL 文件和 HFiles 被持久化到磁盘上并被备份，那么 HBase 如何恢复在 MemStore 中更新但未持久化到 HFiles 中的数据？答案请参见下一部分。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-24.png?raw=true" alt=""></p>
+<h3 id="10-故障恢复"><a href="#10-故障恢复" class="headerlink" title="10. 故障恢复"></a>10. 故障恢复</h3><p>当 RegionServer 发生故障时，崩溃的 Region 会不可用，直到执行检测和恢复步骤时才可以使用。当失去 RegionServer 心跳信号时，Zookeeper 认定为节点发生故障。然后，HMaster 将被告知 RegionServer 发生故障。</p>
+<p>当 HMaster 检测到 RegionServer 崩溃时，HMaster 将发生崩溃的 RegionServer 中的 Region 重新分配给 Active RegionServer。为了恢复崩溃的 RegionServer 中的 MemStore 内容(还未刷写到磁盘)。HMaster 将属于崩溃 RegionServer 的 WAL 拆分为不同的文件，并将这些文件存储在新 RegionServer 的数据节点中。然后每个 RegionServer 回放各自拿到的拆分的 WAL，以重建该 MemStore。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-25.png?raw=true" alt=""></p>
+<h3 id="11-数据恢复"><a href="#11-数据恢复" class="headerlink" title="11. 数据恢复"></a>11. 数据恢复</h3><p>WAL 文件包含一系列编辑，其中每一个编辑都表示一个 Put 或 Delete 操作。编辑是按时间顺序写入的，因此，持久化时将内容追加到存储在磁盘上的 WAL 文件的末尾。</p>
+<p>如果数据仍在内存中但未持久化保存到 HFile 时发生故障，该怎么办？重放 WAL。通过读取 WAL，将包含的编辑内容写入到当前的 MemStore 并对其进行排序来完成 WAL 的重放。最后，刷写 MemStore 以将更改写入 HFile。</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/HBase/in-depth-look-hbase-architecture-26.png?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://mapr.com/blog/in-depth-look-hbase-architecture/" target="_blank" rel="noopener">An In-Depth Look at the HBase Architecture</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/in-depth-look-hbase-architecture.html" title="深入理解HBase架构">http://smartsi.club/in-depth-look-hbase-architecture.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HBase/" rel="tag"># HBase</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/introduction-to-hbase-rowkey-design.html" rel="next" title="HBase RowKey 设计">
+                <i class="fa fa-chevron-left"></i> HBase RowKey 设计
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">205</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">49</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-HBase架构组件"><span class="nav-number">1.</span> <span class="nav-text">1. HBase架构组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-RegionServer与Region"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 RegionServer与Region</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-HMaster"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 HMaster</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-ZooKeeper"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 ZooKeeper</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-组件如何协同工作"><span class="nav-number">2.</span> <span class="nav-text">2. 组件如何协同工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-HBase首次读写"><span class="nav-number">3.</span> <span class="nav-text">3. HBase首次读写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-HBase-Meta表"><span class="nav-number">4.</span> <span class="nav-text">4. HBase Meta表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-RegionServer组成"><span class="nav-number">5.</span> <span class="nav-text">5. RegionServer组成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-HBase写入步骤"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 HBase写入步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-MemStore"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 MemStore</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-Region-Flush"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 Region Flush</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-4-HFile"><span class="nav-number">5.4.</span> <span class="nav-text">5.4 HFile</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-4-1-HFile索引"><span class="nav-number">5.4.1.</span> <span class="nav-text">5.4.1 HFile索引</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-读取合并"><span class="nav-number">6.</span> <span class="nav-text">6. 读取合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-HBase压缩"><span class="nav-number">7.</span> <span class="nav-text">7. HBase压缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-Minor压缩"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 Minor压缩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-Major压缩"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 Major压缩</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Region拆分"><span class="nav-number">8.</span> <span class="nav-text">8. Region拆分</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#8-1-读取负载均衡"><span class="nav-number">8.1.</span> <span class="nav-text">8.1 读取负载均衡</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-HDFS数据备份"><span class="nav-number">9.</span> <span class="nav-text">9. HDFS数据备份</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-故障恢复"><span class="nav-number">10.</span> <span class="nav-text">10. 故障恢复</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-数据恢复"><span class="nav-number">11.</span> <span class="nav-text">11. 数据恢复</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
