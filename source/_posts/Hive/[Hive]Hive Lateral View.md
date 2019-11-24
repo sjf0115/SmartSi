@@ -121,6 +121,7 @@ LATERAL VIEW explode(adid_list) ad_table AS ad_id;
 ```
 
 执行结果如下所示：
+
 | page_id |	ad_id |
 | --- | --- |
 | 1	| a |

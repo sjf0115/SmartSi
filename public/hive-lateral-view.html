@@ -109,7 +109,7 @@
 <meta property="og:description" content="1. 语法lateralView: LATERAL VIEW udtf(expression) tableAlias AS columnAlias (&amp;apos;,&amp;apos; columnAlias)*fromClause: FROM baseTable (lateralView)* 2. 描述Lateral View 一般与用户自定义表生成函数(split、explode等UDTF)一起使用，">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2019-11-24T05:54:41.000Z">
+<meta property="og:updated_time" content="2019-11-24T06:02:03.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Hive Lateral View">
 <meta name="twitter:description" content="1. 语法lateralView: LATERAL VIEW udtf(expression) tableAlias AS columnAlias (&amp;apos;,&amp;apos; columnAlias)*fromClause: FROM baseTable (lateralView)* 2. 描述Lateral View 一般与用户自定义表生成函数(split、explode等UDTF)一起使用，">
@@ -573,7 +573,65 @@
 </tbody>
 </table>
 <p>(2) 再加上一个 Lateral View 语句，如下所示：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> page_id, ad_id</span><br><span class="line"><span class="keyword">FROM</span> pageAds</span><br><span class="line">LATERAL <span class="keyword">VIEW</span> explode(pageid_list) page_table <span class="keyword">AS</span> page_id</span><br><span class="line">LATERAL <span class="keyword">VIEW</span> explode(adid_list) ad_table <span class="keyword">AS</span> ad_id;</span><br></pre></td></tr></table></figure></p>
-<p>执行结果如下所示：<br>| page_id |    ad_id |<br>| — | — |<br>| 1    | a |<br>| 1    | b |<br>| 1    | c |<br>| 2    | a |<br>| 2    | b |<br>| 2 |    c |<br>| 3    | d |<br>| 3 |    e |<br>| 3    | f |<br>| 4    | d |<br>| 4    | e |<br>| 4 |    f |</p>
+<p>执行结果如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>page_id</th>
+<th>ad_id</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>a</td>
+</tr>
+<tr>
+<td>1</td>
+<td>b</td>
+</tr>
+<tr>
+<td>1</td>
+<td>c</td>
+</tr>
+<tr>
+<td>2</td>
+<td>a</td>
+</tr>
+<tr>
+<td>2</td>
+<td>b</td>
+</tr>
+<tr>
+<td>2</td>
+<td>c</td>
+</tr>
+<tr>
+<td>3</td>
+<td>d</td>
+</tr>
+<tr>
+<td>3</td>
+<td>e</td>
+</tr>
+<tr>
+<td>3</td>
+<td>f</td>
+</tr>
+<tr>
+<td>4</td>
+<td>d</td>
+</tr>
+<tr>
+<td>4</td>
+<td>e</td>
+</tr>
+<tr>
+<td>4</td>
+<td>f</td>
+</tr>
+</tbody>
+</table>
 <h3 id="5-Outer-Lateral-Views"><a href="#5-Outer-Lateral-Views" class="headerlink" title="5. Outer Lateral Views"></a>5. Outer Lateral Views</h3><blockquote>
 <p>在 Hive 0.12.0 版本后引入。</p>
 </blockquote>
