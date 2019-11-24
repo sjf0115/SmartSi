@@ -148,7 +148,7 @@ LATERAL VIEW explode(adid_list) ad_table AS ad_id;
 | page_id |	adid_list |
 | --- | --- |
 | bottom_page	| [] |
-| front_page	[1, 2, 3] |
+| front_page | [1, 2, 3] |
 
 例如，如下 `LATERAL VIEW` 查询：
 ```sql
