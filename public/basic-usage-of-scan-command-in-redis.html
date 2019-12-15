@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Redis," />
+
+
+<meta name="description" content="1. 概述SCAN 命令以及比较相近的 SSCAN、HSCAN 和 ZSCAN 命令都用于增量迭代数据集元素：  SCAN 命令用于迭代当前数据库中的数据库键。 SSCAN 命令用于迭代集合(Set)中的元素。 HSCAN 命令用于迭代哈希(Hash)中的字段以及对应的值。 ZSCAN 命令用于迭代有序集合(Sorted Set)中的元素以及对应的得分。  由于这些命令都可以增量迭代，每次调用都只">
+<meta name="keywords" content="Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis中Scan命令的基本用法">
+<meta property="og:url" content="http://smartsi.club/basic-usage-of-scan-command-in-redis.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 概述SCAN 命令以及比较相近的 SSCAN、HSCAN 和 ZSCAN 命令都用于增量迭代数据集元素：  SCAN 命令用于迭代当前数据库中的数据库键。 SSCAN 命令用于迭代集合(Set)中的元素。 HSCAN 命令用于迭代哈希(Hash)中的字段以及对应的值。 ZSCAN 命令用于迭代有序集合(Sorted Set)中的元素以及对应的得分。  由于这些命令都可以增量迭代，每次调用都只">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2019-12-15T09:49:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis中Scan命令的基本用法">
+<meta name="twitter:description" content="1. 概述SCAN 命令以及比较相近的 SSCAN、HSCAN 和 ZSCAN 命令都用于增量迭代数据集元素：  SCAN 命令用于迭代当前数据库中的数据库键。 SSCAN 命令用于迭代集合(Set)中的元素。 HSCAN 命令用于迭代哈希(Hash)中的字段以及对应的值。 ZSCAN 命令用于迭代有序集合(Sorted Set)中的元素以及对应的得分。  由于这些命令都可以增量迭代，每次调用都只">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/basic-usage-of-scan-command-in-redis.html"/>
+
+
+  <title>Redis中Scan命令的基本用法 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/basic-usage-of-scan-command-in-redis.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Redis中Scan命令的基本用法</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-15T17:28:06+08:00">2019-12-15</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/basic-usage-of-scan-command-in-redis.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/basic-usage-of-scan-command-in-redis.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/basic-usage-of-scan-command-in-redis.html" class="leancloud_visitors" data-flag-title="Redis中Scan命令的基本用法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p><code>SCAN</code> 命令以及比较相近的 <code>SSCAN</code>、<code>HSCAN</code> 和 <code>ZSCAN</code> 命令都用于增量迭代数据集元素：</p>
+<ul>
+<li><code>SCAN</code> 命令用于迭代当前数据库中的数据库键。</li>
+<li><code>SSCAN</code> 命令用于迭代集合(Set)中的元素。</li>
+<li><code>HSCAN</code> 命令用于迭代哈希(Hash)中的字段以及对应的值。</li>
+<li><code>ZSCAN</code> 命令用于迭代有序集合(Sorted Set)中的元素以及对应的得分。</li>
+</ul>
+<p>由于这些命令都可以增量迭代，每次调用都只会返回少量元素，所以这些命令可以用于生产环境中，不用担心像使用 <code>KEYS</code>、<code>SMEMBERS</code> 命令带来的问题。在键或元素的大数据集上调用这些命令可能会长时间（甚至几秒钟）阻塞服务器。像 <code>SMEMBERS</code> 这样的阻塞命令能够在给定的时间内提供数据集中所有的元素，但 <code>SCAN</code> 系列命令仅对返回的元素提供有限的保证，因为数据集在我们增量迭代时可能会发生改变。</p>
+<blockquote>
+<p><code>SCAN</code>，<code>SSCAN</code>，<code>HSCAN</code> 以及 <code>ZSCAN</code> 命令工作原理都非常类似，因此这篇文章会涵盖这四个命令。区别在于 <code>SSCAN</code>，<code>HSCAN</code> 以及 <code>ZSCAN</code> 命令，第一个参数是保存 Set，Hash或 Sorted Set 值的键的名称。<code>SCAN</code>命令不需要任何键名参数，因为它会迭代当前数据库中所有的键，因此迭代的对象是数据库本身。</p>
+</blockquote>
+<h3 id="2-基本用法"><a href="#2-基本用法" class="headerlink" title="2. 基本用法"></a>2. 基本用法</h3><p><code>SCAN</code> 是基于游标的迭代器。这意味着在每次调用该命令时，服务器都会返回一个更新后的新游标，用户需要在下一次调用中将这个新游标作为 <code>SCAN</code> 命令的游标参数。当 <code>SCAN</code> 命令的游标参数被设置为 0 时， 服务器将开始一次新的迭代，而当服务器向用户返回的新游标为 0 时会终止迭代。以下是 <code>SCAN</code> 迭代的示例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; scan 0</span><br><span class="line">1) &quot;17&quot;</span><br><span class="line">2)  1) &quot;key:12&quot;</span><br><span class="line">    2) &quot;key:8&quot;</span><br><span class="line">    3) &quot;key:4&quot;</span><br><span class="line">    4) &quot;key:14&quot;</span><br><span class="line">    5) &quot;key:16&quot;</span><br><span class="line">    6) &quot;key:17&quot;</span><br><span class="line">    7) &quot;key:15&quot;</span><br><span class="line">    8) &quot;key:10&quot;</span><br><span class="line">    9) &quot;key:3&quot;</span><br><span class="line">   10) &quot;key:7&quot;</span><br><span class="line">   11) &quot;key:1&quot;</span><br><span class="line">redis 127.0.0.1:6379&gt; scan 17</span><br><span class="line">1) &quot;0&quot;</span><br><span class="line">2) 1) &quot;key:5&quot;</span><br><span class="line">   2) &quot;key:18&quot;</span><br><span class="line">   3) &quot;key:0&quot;</span><br><span class="line">   4) &quot;key:2&quot;</span><br><span class="line">   5) &quot;key:19&quot;</span><br><span class="line">   6) &quot;key:13&quot;</span><br><span class="line">   7) &quot;key:6&quot;</span><br><span class="line">   8) &quot;key:9&quot;</span><br><span class="line">   9) &quot;key:11&quot;</span><br></pre></td></tr></table></figure></p>
+<p>在上面的示例中，第一次调用使用 0 作为游标来开始一次新的迭代。第二次调用时使用上一次调用返回的游标，即命令回复的第一个元素值，即17。从上面的示例可以看到，<code>SCAN</code> 命令返回值是两个值的数组：第一个值是下一次调用中将要使用的新游标，第二个值是包含返回元素的数组。</p>
+<p>由于在第二次调用中返回的游标为 0，因此服务器向调用者发送信号，告知迭代已完成，并且遍历完数据集。从游标值 0 开始迭代，然后调用 <code>SCAN</code> 直到返回的游标再次为 0，表示一个完整迭代。</p>
+<h3 id="3-保证"><a href="#3-保证" class="headerlink" title="3. 保证"></a>3. 保证</h3><p>SCAN 命令，以及其他增量迭代命令，在整个完整迭代过程中可以为用户提供一系列的保证：</p>
+<ul>
+<li>在完整迭代开始直到完整迭代结束期间内的所有元素都会被遍历返回；这意味着，如果某个给定元素在开始迭代时位于数据集内，并且在终止迭代时仍然存在，那么 <code>SCAN</code> 会在某次迭代时返回给用户。</li>
+<li>在完整迭代开始直到完整迭代结束期间内不存在的元素永远都不会被返回；因此，如果某个元素在迭代开始之前就被删除，并且在后续的迭代过程中从未添加回数据集中，那么 <code>SCAN</code> 永远都不会返回该元素 。</li>
+</ul>
+<p>但是，由于 <code>SCAN</code> 只有很少的关联状态（仅有游标），因此具有以下缺点：</p>
+<ul>
+<li>同一个元素可能会被返回多次。重复元素的问题需要我们自己的应用程序处理， 例如，可以考虑将迭代返回的元素用于幂等操作(可以重复执行多次操作)上。</li>
+<li>如果一个元素是在迭代过程中被添加到数据集的，又或者是在迭代过程中从数据集中被删除的，那么这个元素可能会被返回，也可能不会。</li>
+</ul>
+<h3 id="4-每次执行返回数量"><a href="#4-每次执行返回数量" class="headerlink" title="4. 每次执行返回数量"></a>4. 每次执行返回数量</h3><p><code>SCAN</code> 系列的函数不能保证每次调用返回的元素数量会在给定范围内。每次调用可能会返回 0 个元素，但只要返回的游标不为 0，客户端就认为迭代没有结束(即使返回了 0 个元素也不能表示迭代的结束)。返回的元素数量会符合一定的规则：</p>
+<ul>
+<li>在迭代大型数据集时，<code>SCAN</code> 最多可能会返回几十个元素。</li>
+<li>在迭代小的数据集并且内部为编码数据结构时(小的 Set、Hashe 以及 Sorted Set)，单次调用就可以返回数据集的所有元素。</li>
+</ul>
+<p>但是，用户可以使用 <code>COUNT</code> 参数来调整每次调用返回的元素的数量级。</p>
+<h3 id="5-COUNT参数"><a href="#5-COUNT参数" class="headerlink" title="5. COUNT参数"></a>5. COUNT参数</h3><p>虽然 <code>SCAN</code> 不能保证每次迭代返回的元素数量，但是可以使用 <code>COUNT</code> 参数根据经验进行调整。基本上，<code>COUNT</code> 参数的作用就是让用户告知迭代命令，在每次迭代中应该从数据集里返回多少元素。虽然 <code>COUNT</code> 参数只是迭代命令实现上的一种提示（hint），但是在大多数情况下，这种提示是能满足我们的预期：</p>
+<ul>
+<li><code>COUNT</code> 默认值为 10。</li>
+<li>在迭代一个足够大、由哈希表实现的数据库、Set、Hash 或者 Sorted Set 时，如果用户没有使用 <code>MATCH</code> 参数，那么每次调用返回 COUNT 个元素，或者比 COUNT 稍多的元素。</li>
+<li>在迭代一个编码为 IntSet (一个只由整数值构成的小数据集) 或 Hash 的 Set 以及编码为 ZipList (由不同值构成的小的 Hash 或者 Set) 的 Sorted Set 时，通常会无视 COUNT 参数指定的值，并在第一次调用时就将数据集包含的所有元素都返回给用户。</li>
+</ul>
+<blockquote>
+<p>没有必要每次迭代都要使用相同的 COUNT 值。用户可以在每次迭代中按自己的需要随意改变 COUNT 值，只要记得将上次迭代返回的游标用到下次迭代里面就可以了。</p>
+</blockquote>
+<h3 id="6-MATCH参数"><a href="#6-MATCH参数" class="headerlink" title="6. MATCH参数"></a>6. MATCH参数</h3><p>我们也可以通过匹配一个 Glob 风格的模式来迭代元素，类似于 KEYS 命令。我们只需要在 <code>SCAN</code> 命令后面追加 <code>MATCH &lt;pattern&gt;</code> 参数即可实现。</p>
+<p>以下是一个使用 <code>MATCH</code> 参数进行迭代的示例：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; sadd myset 1 2 3 foo foobar feelsgood</span><br><span class="line">(integer) 6</span><br><span class="line">redis 127.0.0.1:6379&gt; sscan myset 0 match f*</span><br><span class="line">1) &quot;0&quot;</span><br><span class="line">2) 1) &quot;foo&quot;</span><br><span class="line">   2) &quot;feelsgood&quot;</span><br><span class="line">   3) &quot;foobar&quot;</span><br><span class="line">redis 127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p>我们需要注意的是 <code>MATCH</code> 过滤器是在从数据集中检索出元素之后，在将数据返回给客户端之前应用的。这意味着，如果模式匹配到数据集中很少的元素，则 <code>SCAN</code> 命令在很多次迭代中可能不返回元素。一个例子如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; scan 0 MATCH *11*</span><br><span class="line">1) &quot;288&quot;</span><br><span class="line">2) 1) &quot;key:911&quot;</span><br><span class="line">redis 127.0.0.1:6379&gt; scan 288 MATCH *11*</span><br><span class="line">1) &quot;224&quot;</span><br><span class="line">2) (empty list or set)</span><br><span class="line">redis 127.0.0.1:6379&gt; scan 224 MATCH *11*</span><br><span class="line">1) &quot;80&quot;</span><br><span class="line">2) (empty list or set)</span><br><span class="line">redis 127.0.0.1:6379&gt; scan 80 MATCH *11*</span><br><span class="line">1) &quot;176&quot;</span><br><span class="line">2) (empty list or set)</span><br><span class="line">redis 127.0.0.1:6379&gt; scan 176 MATCH *11* COUNT 1000</span><br><span class="line">1) &quot;0&quot;</span><br><span class="line">2)  1) &quot;key:611&quot;</span><br><span class="line">    2) &quot;key:711&quot;</span><br><span class="line">    3) &quot;key:118&quot;</span><br><span class="line">    4) &quot;key:117&quot;</span><br><span class="line">    5) &quot;key:311&quot;</span><br><span class="line">    6) &quot;key:112&quot;</span><br><span class="line">    7) &quot;key:111&quot;</span><br><span class="line">    8) &quot;key:110&quot;</span><br><span class="line">    9) &quot;key:113&quot;</span><br><span class="line">   10) &quot;key:211&quot;</span><br><span class="line">   11) &quot;key:411&quot;</span><br><span class="line">   12) &quot;key:115&quot;</span><br><span class="line">   13) &quot;key:116&quot;</span><br><span class="line">   14) &quot;key:114&quot;</span><br><span class="line">   15) &quot;key:119&quot;</span><br><span class="line">   16) &quot;key:811&quot;</span><br><span class="line">   17) &quot;key:511&quot;</span><br><span class="line">   18) &quot;key:11&quot;</span><br><span class="line">redis 127.0.0.1:6379&gt;</span><br></pre></td></tr></table></figure></p>
+<p>如上述所述，大多数调用没有返回元素，而最后一次调用使用 <code>COUNT</code> 为1000，强制命令对该迭代进行更多扫描，从而使得命令返回的元素也变多了。</p>
+<h3 id="7-TYPE参数"><a href="#7-TYPE参数" class="headerlink" title="7. TYPE参数"></a>7. TYPE参数</h3><p>从 6.0 版开始，我们可以使用此参数要求 <code>SCAN</code> 命令仅返回与给定类型匹配的对象，从而允许我们遍历数据库以查找特定类型的键。<code>SCAN</code> 可以使用 <code>TYPE</code> 参数，但 <code>HSCAN</code> 或 <code>ZSCAN</code> 等不可用。</p>
+<p><code>type</code> 参数与 <code>TYPE</code> 命令返回的字符串名称相同。需要我们注意的是某些 Redis 类型（例如GeoHashes、HyperLogLogs、Bitmap 以及 Bitfields 等）其内部是使用其他 Redis 类型（例如 String 或 Zset）来实现的，因此 <code>SCAN</code> 命令无法将其与相同类型的其他键区分开。例如，<code>ZSET</code> 和 <code>GEOHASH</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; GEOADD geokey 0 0 value</span><br><span class="line">(integer) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD zkey 1000 value</span><br><span class="line">(integer) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; TYPE geokey</span><br><span class="line">zset</span><br><span class="line">redis 127.0.0.1:6379&gt; TYPE zkey</span><br><span class="line">zset</span><br><span class="line">redis 127.0.0.1:6379&gt; SCAN 0 TYPE zset</span><br><span class="line">1) &quot;0&quot;</span><br><span class="line">2) 1) &quot;geokey&quot;</span><br><span class="line">   2) &quot;zkey&quot;</span><br></pre></td></tr></table></figure></p>
+<p>重要的是，<code>TYPE</code> 过滤器是在从数据库中检索元素之后应用的，因此该参数不会降低服务器完成完整迭代所需的负载，对于稀有类型，我们可能不会收到任何元素。</p>
+<h3 id="8-多次并行迭代"><a href="#8-多次并行迭代" class="headerlink" title="8. 多次并行迭代"></a>8. 多次并行迭代</h3><p>不同客户端可能在同一时间迭代同一数据集，客户端每次执行迭代都需要传入一个游标，并在迭代结束之后获得一个新的游标，而这个游标就包含了迭代的所有状态，因此，服务器无须为迭代记录任何状态。</p>
+<h3 id="9-在中间终止迭代"><a href="#9-在中间终止迭代" class="headerlink" title="9. 在中间终止迭代"></a>9. 在中间终止迭代</h3><p>由于服务器端不会记录状态，迭代的所有状态都保存在游标中，因此调用方可以自由地中途终止迭代，不用向服务器发送通知。An infinite number of iterations can be started and never terminated without any issue.</p>
+<h3 id="10-使用错误的游标调用SCAN"><a href="#10-使用错误的游标调用SCAN" class="headerlink" title="10. 使用错误的游标调用SCAN"></a>10. 使用错误的游标调用SCAN</h3><p>使用错误的，负数的，超出范围的游标或其他无效的游标来调用 <code>SCAN</code>，会导致未定义的行为，但绝不会导致崩溃。未定义的是指 <code>SCAN</code> 将不再确保返回元素的保证。</p>
+<p>唯一有效的游标是：</p>
+<ul>
+<li>开始迭代时的游标值为0。</li>
+<li>上一次调用 <code>SCAN</code> 返回的游标，以便继续迭代。</li>
+</ul>
+<h3 id="11-终止保证"><a href="#11-终止保证" class="headerlink" title="11. 终止保证"></a>11. 终止保证</h3><p>只有在保证迭代的数据集大小始终保持在给定的最大上限内时(大小恒定)，才能保证 <code>SCAN</code> 算法能终止；否则，对一直增长的数据集进行迭代可能会导致 <code>SCAN</code> 永远不会终止迭代(死循环)。</p>
+<p>这很容易直观地看出：如果数据集不断增长，为了访问所有可能出现的元素，将需要做越来越多的工作，而能否结束一个迭代取决于对 <code>SCAN</code> 的调用次数、<code>COUNT</code> 参数值以及数据集的增长速度。</p>
+<h3 id="12-返回值"><a href="#12-返回值" class="headerlink" title="12. 返回值"></a>12. 返回值</h3><p><code>SCAN</code>，<code>SSCAN</code>，<code>HSCAN</code> 以及 <code>ZSCAN</code> 命令都返回一个包含两个元素的回复，第一个元素表示游标的无符号64位整数，第二个元素是迭代出的元素数组：</p>
+<ul>
+<li><code>SCAN</code> 元素数组是键的列表。</li>
+<li><code>SSCAN</code> 元素数组是 Set 成员的列表。</li>
+<li><code>HSCAN</code> 元素数组包含两个元素，即字段和值，对应 Hash 的每个返回元素。</li>
+<li><code>ZSCAN</code> 元素数组包含两个元素，即一个成员及其关联的分数，对应 Sorted Set 中的每个返回元素。</li>
+</ul>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文：<a href="https://redis.io/commands/scan" target="_blank" rel="noopener">SCAN</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/basic-usage-of-scan-command-in-redis.html" title="Redis中Scan命令的基本用法">http://smartsi.club/basic-usage-of-scan-command-in-redis.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-to-use-hyperloglog-in-redis.html" rel="next" title="Redis 如何使用HyperLogLog">
+                <i class="fa fa-chevron-left"></i> Redis 如何使用HyperLogLog
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">210</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基本用法"><span class="nav-number">2.</span> <span class="nav-text">2. 基本用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-保证"><span class="nav-number">3.</span> <span class="nav-text">3. 保证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-每次执行返回数量"><span class="nav-number">4.</span> <span class="nav-text">4. 每次执行返回数量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-COUNT参数"><span class="nav-number">5.</span> <span class="nav-text">5. COUNT参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-MATCH参数"><span class="nav-number">6.</span> <span class="nav-text">6. MATCH参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-TYPE参数"><span class="nav-number">7.</span> <span class="nav-text">7. TYPE参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-多次并行迭代"><span class="nav-number">8.</span> <span class="nav-text">8. 多次并行迭代</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-在中间终止迭代"><span class="nav-number">9.</span> <span class="nav-text">9. 在中间终止迭代</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-使用错误的游标调用SCAN"><span class="nav-number">10.</span> <span class="nav-text">10. 使用错误的游标调用SCAN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-终止保证"><span class="nav-number">11.</span> <span class="nav-text">11. 终止保证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-返回值"><span class="nav-number">12.</span> <span class="nav-text">12. 返回值</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
