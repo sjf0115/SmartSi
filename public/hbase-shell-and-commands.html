@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="HBase," />
+
+
+<meta name="description" content="HBase 提供了一个非常方便的命令行交互工具 HBase Shell。通过 HBase Shell 可以创建表，也可以增删查数据，同时集群的管理、状态查看等也可以通过 HBase shell 实现。 HBase Shell 用法：  确保用 HBase Shell 对所有名称使用双引号，例如表名和列名。 逗号分隔命令参数。 在输入要运行的命令之后，键入。 在表的创建和更改中，我们使用配置字典，它">
+<meta name="keywords" content="HBase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HBase Shell 命令">
+<meta property="og:url" content="http://smartsi.club/hbase-shell-and-commands.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="HBase 提供了一个非常方便的命令行交互工具 HBase Shell。通过 HBase Shell 可以创建表，也可以增删查数据，同时集群的管理、状态查看等也可以通过 HBase shell 实现。 HBase Shell 用法：  确保用 HBase Shell 对所有名称使用双引号，例如表名和列名。 逗号分隔命令参数。 在输入要运行的命令之后，键入。 在表的创建和更改中，我们使用配置字典，它">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2019-12-28T13:16:45.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HBase Shell 命令">
+<meta name="twitter:description" content="HBase 提供了一个非常方便的命令行交互工具 HBase Shell。通过 HBase Shell 可以创建表，也可以增删查数据，同时集群的管理、状态查看等也可以通过 HBase shell 实现。 HBase Shell 用法：  确保用 HBase Shell 对所有名称使用双引号，例如表名和列名。 逗号分隔命令参数。 在输入要运行的命令之后，键入。 在表的创建和更改中，我们使用配置字典，它">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/hbase-shell-and-commands.html"/>
+
+
+  <title>HBase Shell 命令 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/hbase-shell-and-commands.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">HBase Shell 命令</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-28T20:49:21+08:00">2019-12-28</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/HBase/" itemprop="url" rel="index"><span itemprop="name">HBase</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/hbase-shell-and-commands.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/hbase-shell-and-commands.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/hbase-shell-and-commands.html" class="leancloud_visitors" data-flag-title="HBase Shell 命令">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>HBase 提供了一个非常方便的命令行交互工具 HBase Shell。通过 HBase Shell 可以创建表，也可以增删查数据，同时集群的管理、状态查看等也可以通过 HBase shell 实现。</p>
+<p>HBase Shell 用法：</p>
+<ul>
+<li>确保用 HBase Shell 对所有名称使用双引号，例如表名和列名。</li>
+<li>逗号分隔命令参数。</li>
+<li>在输入要运行的命令之后，键入<return>。</return></li>
+<li>在表的创建和更改中，我们使用配置字典，它们是Ruby哈希。看起来像：<code>{‘key1’ =&gt; ‘value1’, ‘key2’ =&gt; ‘value2’, …}</code>。</li>
+</ul>
+<h3 id="1-连接HBase-Shell"><a href="#1-连接HBase-Shell" class="headerlink" title="1. 连接HBase Shell"></a>1. 连接HBase Shell</h3><p>通过使用以下命令，我们可以通过 Shell 连接到正在运行的 HBase：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/hbase shell</span><br></pre></td></tr></table></figure></p>
+<p>键入 help 然后回车可以查看 Shell 命令以及参数列表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):001:0&gt; help</span><br><span class="line">HBase Shell, version 2.1.6, rba26a3e1fd5bda8a84f99111d9471f62bb29ed1d, Mon Aug 26 20:40:38 CST 2019</span><br><span class="line">Type &apos;help &quot;COMMAND&quot;&apos;, (e.g. &apos;help &quot;get&quot;&apos; -- the quotes are necessary) for help on a specific command.</span><br><span class="line">Commands are grouped. Type &apos;help &quot;COMMAND_GROUP&quot;&apos;, (e.g. &apos;help &quot;general&quot;&apos;) for help on a command group.</span><br><span class="line"></span><br><span class="line">COMMAND GROUPS:</span><br><span class="line">  Group name: general</span><br><span class="line">  Commands: processlist, status, table_help, version, whoami</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>如果想退出 Shell，可以通过键入 exit 退出：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):002:0&gt; exit</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-常规命令"><a href="#2-常规命令" class="headerlink" title="2. 常规命令"></a>2. 常规命令</h3><p>在 Hbase 中，有如下常规命令：</p>
+<ul>
+<li>status</li>
+<li>version</li>
+<li>whoami</li>
+</ul>
+<h4 id="2-1-status"><a href="#2-1-status" class="headerlink" title="2.1 status"></a>2.1 status</h4><p>可以使用 <code>status</code> 命令展示 HBase 集群的系统状态的详细，例如服务器数量：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):001:0&gt; status</span><br><span class="line">1 active master, 0 backup masters, 1 servers, 0 dead, 3.0000 average load</span><br><span class="line">Took 0.3686 seconds</span><br></pre></td></tr></table></figure></p>
+<p>我们还可以传递特定参数，具体取决于我们想了解系统的哪些详细状态。参数可以为 <code>summary</code>，<code>simple</code>，<code>detailed</code> 或 <code>replication</code>。默认不填为 <code>summary</code>。下面我们展示了如何将不同的参数传递给 <code>status</code> 命令：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; status</span><br><span class="line">hbase&gt; status &apos;simple&apos;</span><br><span class="line">hbase&gt; status &apos;summary&apos;</span><br><span class="line">hbase&gt; status &apos;detailed&apos;</span><br><span class="line">hbase&gt; status &apos;replication&apos;</span><br><span class="line">hbase&gt; status &apos;replication&apos;, &apos;source&apos;</span><br><span class="line">hbase&gt; status &apos;replication&apos;, &apos;sink&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-2-version"><a href="#2-2-version" class="headerlink" title="2.2 version"></a>2.2 version</h4><p>可以使用 <code>version</code> 命令展示当前使用的 HBase 版本：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):005:0&gt; version</span><br><span class="line">2.1.6, rba26a3e1fd5bda8a84f99111d9471f62bb29ed1d, Mon Aug 26 20:40:38 CST 2019</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-3-whoami"><a href="#2-3-whoami" class="headerlink" title="2.3 whoami"></a>2.3 whoami</h4><p>可以使用 <code>whoami</code> 命令展示当前 HBase 用户：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):010:0&gt; whoami</span><br><span class="line">smartsi (auth:SIMPLE)</span><br><span class="line">    groups: staff, everyone, localaccounts, _appserverusr, admin, _appserveradm, _lpadmin, com.apple.sharepoint.group.1, _appstore, _lpoperator, _developer, _analyticsusers, com.apple.access_ftp, com.apple.access_screensharing, com.apple.access_ssh</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-DDL命令"><a href="#3-DDL命令" class="headerlink" title="3. DDL命令"></a>3. DDL命令</h3><p>数据定义语言(Data Definition Language, DDL)，包括数据库表的创建、修改、删除等语句。</p>
+<p>在 Hbase 中，有如下数据定义命令：</p>
+<ul>
+<li>Create</li>
+<li>Exists</li>
+<li>Describe</li>
+<li>List</li>
+<li>Disable</li>
+<li>Disable_all</li>
+<li>Is_disabled</li>
+<li>Enable</li>
+<li>Enable_all</li>
+<li>Is_enabled</li>
+<li>Alter</li>
+<li>Drop</li>
+</ul>
+<h4 id="3-1-Create"><a href="#3-1-Create" class="headerlink" title="3.1 Create"></a>3.1 Create</h4><p>可以使用 <code>create</code> 命令创建表，必须指定表名和列族名，以及可选的命名空间参数。列族名可以是一个简单的字符串，也可以是包含 <code>NAME</code> 属性的字典：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):002:0&gt; create &apos;t1&apos;, &apos;f1&apos;, &apos;f2&apos;, &apos;f3&apos;</span><br><span class="line">Created table t1</span><br><span class="line">Took 2.7450 seconds</span><br><span class="line">=&gt; Hbase::Table - t1</span><br></pre></td></tr></table></figure></p>
+<p>上述命令也可以通过字典方式创建：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">create &apos;t1&apos;, &#123;NAME =&gt; &apos;f1&apos;&#125;, &#123;NAME =&gt; &apos;f2&apos;&#125;, &#123;NAME =&gt; &apos;f3&apos;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面命令均没有指定命名空间，默认为 <code>default</code>。使用如下命令在 <code>ns1</code> 命名空间下创建 <code>t1</code> 表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):026:0&gt; create &apos;ns1:t1&apos;, &apos;f1&apos;, &apos;f2&apos;, &apos;f3&apos;</span><br><span class="line">Created table ns1:t1</span><br><span class="line">Took 2.4030 seconds</span><br><span class="line">=&gt; Hbase::Table - ns1:t1</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>命名空间是表的逻辑分组，类似于关系数据库系统中的数据库。这种抽象为多租户相关功能奠定了基础。具体使用可以查阅<a href="http://smartsi.club/hbase-namespace-commands-examples">HBase 命名空间 Namespace</a></p>
+</blockquote>
+<h4 id="3-2-Exists"><a href="#3-2-Exists" class="headerlink" title="3.2 Exists"></a>3.2 Exists</h4><p>可以使用 <code>exists</code> 命令判断表是否存在：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; exists &apos;t1&apos;</span><br><span class="line">hbase&gt; exists &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令查看表 <code>t1</code> 是否存在：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):003:0&gt; exists &apos;t1&apos;</span><br><span class="line">Table t1 does exist</span><br><span class="line">Took 0.0914 seconds</span><br><span class="line">=&gt; true</span><br><span class="line">hbase(main):029:0&gt; exists &apos;ns1:t1&apos;</span><br><span class="line">Table ns1:t1 does exist</span><br><span class="line">Took 0.1863 seconds</span><br><span class="line">=&gt; true</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-3-Describe"><a href="#3-3-Describe" class="headerlink" title="3.3 Describe"></a>3.3 Describe</h4><p>可以使用 <code>describe</code> 命令查看表信息：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; describe &apos;t1&apos;</span><br><span class="line">hbase&gt; describe &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<p>或者简写为：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; desc &apos;t1&apos;</span><br><span class="line">hbase&gt; desc &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令查看表 <code>t1</code> 的具体信息：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):043:0&gt; describe &apos;t1&apos;</span><br><span class="line">Table t1 is ENABLED</span><br><span class="line">t1</span><br><span class="line">COLUMN FAMILIES DESCRIPTION</span><br><span class="line">&#123;NAME =&gt; &apos;f1&apos;, VERSIONS =&gt; &apos;1&apos;, EVICT_BLOCKS_ON_CLOSE =&gt; &apos;false&apos;, NEW_VERSION_BEHAVIOR =&gt; &apos;false&apos;, KEEP_DELETED_CELLS =&gt; &apos;FALSE&apos;, CACHE_DATA_ON_WRITE =&gt; &apos;false&apos;, DATA_BLOCK_ENCODING =&gt; &apos;NONE&apos;, TTL =&gt; &apos;FOREVER&apos;, MIN_VERS</span><br><span class="line">IONS =&gt; &apos;0&apos;, REPLICATION_SCOPE =&gt; &apos;0&apos;, BLOOMFILTER =&gt; &apos;ROW&apos;, CACHE_INDEX_ON_WRITE =&gt; &apos;false&apos;, IN_MEMORY =&gt; &apos;false&apos;, CACHE_BLOOMS_ON_WRITE =&gt; &apos;false&apos;, PREFETCH_BLOCKS_ON_OPEN =&gt; &apos;false&apos;, COMPRESSION =&gt; &apos;NONE&apos;, BLOCKCACHE</span><br><span class="line"> =&gt; &apos;true&apos;, BLOCKSIZE =&gt; &apos;65536&apos;&#125;</span><br><span class="line">...</span><br><span class="line">Took 0.0319 seconds</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在建表的时候没有指定任何属性，但是 HBase 默认会给表设置一些属性：</p>
+<ul>
+<li><code>VERSIONS</code>：HBase 对表的数据行可以保留多个数据版本，以时间戳来区分。<code>VERSIONS</code> 表示对该表应该保留多少个数据版本。</li>
+<li><code>KEEP_DELETED_CELLS</code>：保留删除的数据。这意味着可以通过 Get 或 Scan 操作获取已经被删除的数据（如果数据删除后经过了一次主压缩，那么这些删除的数据也会被清理）。需要注意的是，如果开启了集群间复制，则这个属性必须设置为 true，否则可能导致数据复制失败。</li>
+<li><code>DATA_BLOCK_ENCODING</code>：数据块编码。用类似压缩算法的编码形式来节省存储空间，主要是针对行键。默认情况下不启用数据块编码。</li>
+<li><code>TTL</code>：数据有效时长。超过有效时长的数据在主压缩的时候会被删除。</li>
+<li><code>BLOOMFILTER</code>：布隆过滤器。数据查询 Scan 操作的时候用来排除待扫描的 StoreFile 文件。</li>
+<li><code>REPLICATION_SCOPE</code>：集群间数据复制开关。当集群间数据复制配置好之后 <code>REPLICATION_SCOPE</code> = 1 的表会开启复制。默认为 0，表示不开启复制。</li>
+<li><code>COMPRESSION</code>：压缩方式。HBase 提供了多种压缩方式来在数据存储到磁盘之前压缩以减少存储空间。</li>
+<li><code>BLOCKSIZE</code>：HBase 读取数据的最小单元。设置过大会导致读取很多不需要的数据，过小则会产生过多的索引文件，默认为 64 KB。</li>
+</ul>
+<h4 id="3-4-List"><a href="#3-4-List" class="headerlink" title="3.4 List"></a>3.4 List</h4><p>可以使用 <code>list</code> 命令查看 HBase 中用户自定义的表，也可以使用正则表达式查询：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; list</span><br><span class="line">hbase&gt; list &apos;abc.*&apos;</span><br><span class="line">hbase&gt; list &apos;ns:abc.*&apos;</span><br><span class="line">hbase&gt; list &apos;ns:.*&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令查看所有的表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):045:0&gt; list</span><br><span class="line">TABLE</span><br><span class="line">ns1:t1</span><br><span class="line">ns1:test</span><br><span class="line">t1</span><br><span class="line">test</span><br><span class="line">4 row(s)</span><br><span class="line">Took 0.0075 seconds</span><br><span class="line">=&gt; [&quot;ns1:t1&quot;, &quot;ns1:test&quot;, &quot;t1&quot;, &quot;test&quot;]</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-5-Disable"><a href="#3-5-Disable" class="headerlink" title="3.5 Disable"></a>3.5 Disable</h4><p>可以使用 <code>disable</code> 命令禁用表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):050:0&gt; disable &apos;test&apos;</span><br><span class="line">Took 0.7409 seconds</span><br><span class="line">hbase(main):051:0&gt; disable &apos;ns1:test&apos;</span><br><span class="line">Took 0.4331 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-6-Disable-all"><a href="#3-6-Disable-all" class="headerlink" title="3.6 Disable_all"></a>3.6 Disable_all</h4><p>可以使用 <code>disable_all</code> 命令禁用满足正则表达式条件的表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; disable_all &apos;t.*&apos;</span><br><span class="line">hbase&gt; disable_all &apos;ns:t.*&apos;</span><br><span class="line">hbase&gt; disable_all &apos;ns:.*&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-7-Is-disabled"><a href="#3-7-Is-disabled" class="headerlink" title="3.7 Is_disabled"></a>3.7 Is_disabled</h4><p>可以使用 <code>is_disabled</code> 命令查看表是否被禁用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; is_disabled &apos;t1&apos;</span><br><span class="line">hbase&gt; is_disabled &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令查看表 <code>t1</code> 是否被禁用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):009:0&gt; is_disabled &apos;t1&apos;</span><br><span class="line">true</span><br><span class="line">Took 0.0269 seconds</span><br><span class="line">=&gt; 1</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-8-Enable"><a href="#3-8-Enable" class="headerlink" title="3.8 Enable"></a>3.8 Enable</h4><p>可以使用 <code>enable</code> 命令启用表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; enable &apos;t1&apos;</span><br><span class="line">hbase&gt; enable &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-9-Enable-all"><a href="#3-9-Enable-all" class="headerlink" title="3.9 Enable_all"></a>3.9 Enable_all</h4><p>可以使用 <code>enable_all</code> 命令启用满足正则表达式条件的表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; enable_all &apos;t.*&apos;</span><br><span class="line">hbase&gt; enable_all &apos;ns:t.*&apos;</span><br><span class="line">hbase&gt; enable_all &apos;ns:.*&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-10-Is-enabled"><a href="#3-10-Is-enabled" class="headerlink" title="3.10 Is_enabled"></a>3.10 Is_enabled</h4><p>可以使用 <code>is_enabled</code> 命令查看表是否启用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; is_enabled &apos;t1&apos;</span><br><span class="line">hbase&gt; is_enabled &apos;ns1:t1&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令查看表 <code>t1</code> 是否启用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):004:0&gt; is_enabled &apos;t1&apos;</span><br><span class="line">false</span><br><span class="line">Took 0.0242 seconds</span><br><span class="line">=&gt; false</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-11-Alter"><a href="#3-11-Alter" class="headerlink" title="3.11 Alter"></a>3.11 Alter</h4><p>可以使用 <code>alter</code> 命令对 Hbase 的表以及列族进行修改，如新增一个列族、修改表属性，增加协处理器等等。修改表的模式之前需要先将表下线（禁用），然后执行修改命令，再上线（启用）。例如，使用如下命令修改表列族 <code>f1</code> 可以最多保留5个版本的数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):012:0&gt; alter &apos;t1&apos;, NAME =&gt; &apos;f1&apos;, VERSIONS =&gt; 5</span><br><span class="line">Updating all regions with the new schema...</span><br><span class="line">All regions updated.</span><br><span class="line">Done.</span><br><span class="line">Took 1.3834 seconds</span><br></pre></td></tr></table></figure></p>
+<p>我们也可以同时操作多个列族：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; alter &apos;t1&apos;, &apos;f1&apos;, &#123;NAME =&gt; &apos;f2&apos;, IN_MEMORY =&gt; true&#125;, &#123;NAME =&gt; &apos;f3&apos;, VERSIONS =&gt; 5&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们可以使用如下方法删除表 <code>ns1:t1</code> 中的 <code>f3</code> 列族：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; alter &apos;ns1:t1&apos;, NAME =&gt; &apos;f3&apos;, METHOD =&gt; &apos;delete&apos;</span><br><span class="line">hbase&gt; alter &apos;ns1:t1&apos;, &apos;delete&apos; =&gt; &apos;f3&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-12-drop"><a href="#3-12-drop" class="headerlink" title="3.12 drop"></a>3.12 drop</h4><p>可以使用 <code>drop</code> 命令删除表，但是表必须首先要禁用表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):052:0&gt; drop &apos;t1&apos;</span><br><span class="line">Took 0.2300 seconds</span><br><span class="line">hbase(main):053:0&gt; drop &apos;ns1:t1&apos;</span><br><span class="line">Took 0.2357 seconds</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-DML命令"><a href="#4-DML命令" class="headerlink" title="4. DML命令"></a>4. DML命令</h3><p>数据操纵语言(Data Manipulation Language, DML)，包括数据的修改、查询、删除等语句。</p>
+<p>在 Hbase 中，有如下数据操纵命令：</p>
+<ul>
+<li>Put</li>
+<li>Get</li>
+<li>Scan</li>
+<li>Count</li>
+<li>Append</li>
+<li>Delete</li>
+<li>Deleteall</li>
+<li>Truncate</li>
+</ul>
+<h4 id="4-1-Put"><a href="#4-1-Put" class="headerlink" title="4.1 Put"></a>4.1 Put</h4><p>可以使用 <code>put</code> 命令将一行数据插入到 HBase 表中：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put &lt;table&gt;, &lt;rowkey&gt;, &lt;列族:列标示符&gt;, &lt;值&gt;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令分别在表 <code>t1</code>、<code>ns1:t1</code> 插入一行数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;this is first value&apos;</span><br><span class="line">put &apos;ns1:t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;this is first value of ns1&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-2-Get"><a href="#4-2-Get" class="headerlink" title="4.2 Get"></a>4.2 Get</h4><p>可以使用 <code>get</code> 命令获取 HBase 表的一行或者一个单元的内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; get &apos;ns1:t1&apos;, &apos;r1&apos;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;TIMERANGE =&gt; [ts1, ts2]&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; [&apos;c1&apos;, &apos;c2&apos;, &apos;c3&apos;]&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;, TIMESTAMP =&gt; ts1&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;, TIMERANGE =&gt; [ts1, ts2], VERSIONS =&gt; 4&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;, TIMESTAMP =&gt; ts1, VERSIONS =&gt; 4&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;FILTER =&gt; &quot;ValueFilter(=, &apos;binary:abc&apos;)&quot;&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &apos;c1&apos;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &apos;c1&apos;, &apos;c2&apos;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, [&apos;c1&apos;, &apos;c2&apos;]</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;, ATTRIBUTES =&gt; &#123;&apos;mykey&apos;=&gt;&apos;myvalue&apos;&#125;&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;c1&apos;, AUTHORIZATIONS =&gt; [&apos;PRIVATE&apos;,&apos;SECRET&apos;]&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;CONSISTENCY =&gt; &apos;TIMELINE&apos;&#125;</span><br><span class="line">hbase&gt; get &apos;t1&apos;, &apos;r1&apos;, &#123;CONSISTENCY =&gt; &apos;TIMELINE&apos;, REGION_REPLICA_ID =&gt; 1&#125;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令可以获取表 <code>t1</code> 的一条记录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):028:0&gt; get &apos;ns1:t1&apos;, &apos;r1&apos;</span><br><span class="line">COLUMN                                              CELL</span><br><span class="line"> f1:c1                                              timestamp=1573986505024, value=this is third value of ns1</span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0299 seconds</span><br></pre></td></tr></table></figure></p>
+<p><code>Get</code> 也可以支持获取多个版本的数据，但是需要修改表的 <code>VERSIONS</code> 属性以支持多版本：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):019:0&gt; alter &apos;ns1:t1&apos;, NAME =&gt; &apos;f1&apos;, VERSIONS =&gt; 3</span><br><span class="line">Updating all regions with the new schema...</span><br><span class="line">1/1 regions updated.</span><br><span class="line">Done.</span><br><span class="line">Took 1.8057 seconds</span><br><span class="line"></span><br><span class="line">hbase(main):027:0&gt; get &apos;ns1:t1&apos;, &apos;r1&apos;, &#123;COLUMN =&gt; &apos;f1:c1&apos;, VERSIONS =&gt; 3&#125;</span><br><span class="line">COLUMN                                              CELL</span><br><span class="line"> f1:c1                                              timestamp=1573986505024, value=this is third value of ns1</span><br><span class="line"> f1:c1                                              timestamp=1573986499590, value=this is second value of ns1</span><br><span class="line"> f1:c1                                              timestamp=1573986493844, value=this is first value of ns1</span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0070 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-3-Scan"><a href="#4-3-Scan" class="headerlink" title="4.3 Scan"></a>4.3 Scan</h4><p>可以使用 <code>scan</code> 命令来扫描表的数据。该命令是 HBase 数据查询命令中最复杂的命令，需要特别注意查询的数据量，以免由于扫描数据过大导致 HBase 集群出现响应延迟：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):042:0&gt; scan &apos;ns1:t1&apos;</span><br><span class="line">ROW                                                 COLUMN+CELL</span><br><span class="line"> r1                                                 column=f1:c1, timestamp=1573994164276, value=this is first value of r1</span><br><span class="line"> r2                                                 column=f1:c1, timestamp=1573994095092, value=this is first value of r2</span><br><span class="line"> r3                                                 column=f1:c1, timestamp=1573994102776, value=this is first value of r3</span><br><span class="line"> r4                                                 column=f1:c1, timestamp=1573994109851, value=this is first value of r4</span><br><span class="line"> r5                                                 column=f1:c1, timestamp=1573994116959, value=this is first value of r5</span><br><span class="line"> r6                                                 column=f1:c1, timestamp=1573994123621, value=this is first value of r6</span><br><span class="line"> r7                                                 column=f1:c1, timestamp=1573994130600, value=this is first value of r7</span><br><span class="line"> r8                                                 column=f1:c1, timestamp=1573994138110, value=this is first value of r8</span><br><span class="line">8 row(s)</span><br><span class="line">Took 0.0137 seconds</span><br></pre></td></tr></table></figure></p>
+<p>我们也可以通过指定时间区间获取某个时刻的数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):043:0&gt; scan &apos;ns1:t1&apos;, &#123;TIMERANGE =&gt; [1573994102776, 1573994130600]&#125;</span><br><span class="line">ROW                                                 COLUMN+CELL</span><br><span class="line"> r3                                                 column=f1:c1, timestamp=1573994102776, value=this is first value of r3</span><br><span class="line"> r4                                                 column=f1:c1, timestamp=1573994109851, value=this is first value of r4</span><br><span class="line"> r5                                                 column=f1:c1, timestamp=1573994116959, value=this is first value of r5</span><br><span class="line"> r6                                                 column=f1:c1, timestamp=1573994123621, value=this is first value of r6</span><br><span class="line">4 row(s)</span><br><span class="line">Took 0.0786 seconds</span><br></pre></td></tr></table></figure></p>
+<p>我们也可以从 <code>r6</code> 行键开始获取 2 条记录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):002:0&gt; scan &apos;ns1:t1&apos;, &#123;COLUMNS =&gt; &apos;f1:c1&apos;, LIMIT =&gt; 2, STARTROW =&gt; &apos;r6&apos;&#125;</span><br><span class="line">ROW                                                 COLUMN+CELL</span><br><span class="line"> r6                                                 column=f1:c1, timestamp=1573994123621, value=this is first value of r6</span><br><span class="line"> r7                                                 column=f1:c1, timestamp=1573994130600, value=this is first value of r7</span><br><span class="line">2 row(s)</span><br><span class="line">Took 0.4751 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-4-Count"><a href="#4-4-Count" class="headerlink" title="4.4 Count"></a>4.4 Count</h4><p>可以使用 <code>count</code> 命令统计表的行数：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):005:0&gt; count &apos;ns1:t1&apos;</span><br><span class="line">8 row(s)</span><br><span class="line">Took 0.0726 seconds</span><br><span class="line">=&gt; 8</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>此操作可能需要花费很长的时间，因为会使用 <code>$HADOOP_HOME/bin/hadoop/jarhbase.jar rowcount</code> 命令来运行计数 MapReduce 作业。</p>
+</blockquote>
+<p>默认情况下每 1000 行展示当前统计的计数，也可以通过 <code>INTERVAL</code> 属性重新指定计数间隔，如下每 2 行展示一次计数：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):007:0&gt; count &apos;ns1:t1&apos;, INTERVAL =&gt; 2</span><br><span class="line">Current count: 2, row: r2</span><br><span class="line">Current count: 4, row: r4</span><br><span class="line">Current count: 6, row: r6</span><br><span class="line">Current count: 8, row: r8</span><br><span class="line">8 row(s)</span><br><span class="line">Took 0.0200 seconds</span><br><span class="line">=&gt; 8</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-5-Append"><a href="#4-5-Append" class="headerlink" title="4.5 Append"></a>4.5 Append</h4><p>可以使用 <code>append</code> 命令向指定的单元上在原先值上追加新值：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase&gt; append &apos;t1&apos;, &apos;r1&apos;, &apos;c1&apos;, &apos;value&apos;</span><br></pre></td></tr></table></figure></p>
+<p>例如，使用如下命令在原先的值后面追加<code>, append a new value</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):047:0&gt; get &apos;ns1:t1&apos;, &apos;r1&apos;</span><br><span class="line">COLUMN                                              CELL</span><br><span class="line"> f1:c1                                              timestamp=1573994164276, value=this is first value of r1</span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0475 seconds</span><br><span class="line">hbase(main):049:0&gt; append &apos;ns1:t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;, append a new value&apos;</span><br><span class="line">CURRENT VALUE = this is first value of r1, append a new value</span><br><span class="line">Took 0.0119 seconds</span><br><span class="line">hbase(main):050:0&gt; get &apos;ns1:t1&apos;, &apos;r1&apos;</span><br><span class="line">COLUMN                                              CELL</span><br><span class="line"> f1:c1                                              timestamp=1573996248316, value=this is first value of r1, append a new value</span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0171 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-6-Delete"><a href="#4-6-Delete" class="headerlink" title="4.6 Delete"></a>4.6 Delete</h4><p>可以使用 <code>delete</code> 命令删除某列数据。如果我们指定了时间戳，那么我们只会删除对应版本的单元数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):027:0&gt; put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;f1:c1:value1&apos;</span><br><span class="line">Took 0.0029 seconds</span><br><span class="line">hbase(main):028:0&gt; put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c2&apos;, &apos;f1:c2:value1&apos;</span><br><span class="line">Took 0.0032 seconds</span><br><span class="line">hbase(main):029:0&gt; delete &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;</span><br><span class="line">Took 0.0040 seconds</span><br><span class="line">hbase(main):030:0&gt; scan &apos;t1&apos;</span><br><span class="line">ROW                                         COLUMN+CELL</span><br><span class="line"> r1                                         column=f1:c2, timestamp=1577537013630, value=f1:c2:value1</span><br><span class="line">1 row(s)</span><br><span class="line">Took 0.0097 seconds</span><br><span class="line">hbase(main):031:0&gt; delete &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c2&apos;</span><br><span class="line">Took 0.0056 seconds</span><br><span class="line">hbase(main):032:0&gt; scan &apos;t1&apos;</span><br><span class="line">ROW                                         COLUMN+CELL</span><br><span class="line">0 row(s)</span><br><span class="line">Took 0.0035 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-7-Deleteall"><a href="#4-7-Deleteall" class="headerlink" title="4.7 Deleteall"></a>4.7 Deleteall</h4><p>可以使用 <code>deleteall</code> 命令删除整行数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):033:0&gt; put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;f1:c1:value1&apos;</span><br><span class="line">Took 0.0030 seconds</span><br><span class="line">hbase(main):034:0&gt; put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c2&apos;, &apos;f1:c2:value1&apos;</span><br><span class="line">Took 0.0044 seconds</span><br><span class="line">hbase(main):035:0&gt; deleteall &apos;t1&apos;, &apos;r1&apos;</span><br><span class="line">Took 0.0038 seconds</span><br><span class="line">hbase(main):036:0&gt; scan &apos;t1&apos;</span><br><span class="line">ROW                                         COLUMN+CELL</span><br><span class="line">0 row(s)</span><br><span class="line">Took 0.0036 seconds</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-8-Truncate"><a href="#4-8-Truncate" class="headerlink" title="4.8 Truncate"></a>4.8 Truncate</h4><p>可以使用 <code>truncate</code> 命令清空整个表的数据：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hbase(main):037:0&gt; put &apos;t1&apos;, &apos;r1&apos;, &apos;f1:c1&apos;, &apos;f1:c1:value1&apos;</span><br><span class="line">Took 0.0053 seconds</span><br><span class="line">hbase(main):038:0&gt; put &apos;t1&apos;, &apos;r2&apos;, &apos;f1:c1&apos;, &apos;f1:c1:value2&apos;</span><br><span class="line">Took 0.0031 seconds</span><br><span class="line">hbase(main):039:0&gt; put &apos;t1&apos;, &apos;r3&apos;, &apos;f1:c1&apos;, &apos;f1:c1:value3&apos;</span><br><span class="line">Took 0.0037 seconds</span><br><span class="line">hbase(main):040:0&gt; scan &apos;t1&apos;</span><br><span class="line">ROW                                         COLUMN+CELL</span><br><span class="line"> r1                                         column=f1:c1, timestamp=1577537153001, value=f1:c1:value1</span><br><span class="line"> r2                                         column=f1:c1, timestamp=1577537167747, value=f1:c1:value2</span><br><span class="line"> r3                                         column=f1:c1, timestamp=1577537173985, value=f1:c1:value3</span><br><span class="line">3 row(s)</span><br><span class="line">Took 0.0072 seconds</span><br><span class="line">hbase(main):041:0&gt; truncate &apos;t1&apos;</span><br><span class="line">Truncating &apos;t1&apos; table (it may take a while):</span><br><span class="line">Disabling table...</span><br><span class="line">Truncating table...</span><br><span class="line">Took 2.6141 seconds</span><br><span class="line">hbase(main):042:0&gt; scan &apos;t1&apos;</span><br><span class="line">ROW                                         COLUMN+CELL</span><br><span class="line">0 row(s)</span><br><span class="line">Took 0.7199 seconds</span><br></pre></td></tr></table></figure></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://data-flair.training/blogs/hbase-shell-commands/" target="_blank" rel="noopener">HBase Shell &amp; Commands – Usage &amp; Starting HBase Shell</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/hbase-shell-and-commands.html" title="HBase Shell 命令">http://smartsi.club/hbase-shell-and-commands.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HBase/" rel="tag"># HBase</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/basic-usage-of-scan-command-in-redis.html" rel="next" title="Redis中Scan命令的基本用法">
+                <i class="fa fa-chevron-left"></i> Redis中Scan命令的基本用法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">211</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">27</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-连接HBase-Shell"><span class="nav-number">1.</span> <span class="nav-text">1. 连接HBase Shell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-常规命令"><span class="nav-number">2.</span> <span class="nav-text">2. 常规命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-status"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 status</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-version"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 version</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-whoami"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 whoami</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-DDL命令"><span class="nav-number">3.</span> <span class="nav-text">3. DDL命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Create"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Create</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-Exists"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 Exists</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-Describe"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Describe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-List"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 List</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-Disable"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 Disable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-Disable-all"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 Disable_all</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-7-Is-disabled"><span class="nav-number">3.7.</span> <span class="nav-text">3.7 Is_disabled</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-8-Enable"><span class="nav-number">3.8.</span> <span class="nav-text">3.8 Enable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-9-Enable-all"><span class="nav-number">3.9.</span> <span class="nav-text">3.9 Enable_all</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-10-Is-enabled"><span class="nav-number">3.10.</span> <span class="nav-text">3.10 Is_enabled</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-11-Alter"><span class="nav-number">3.11.</span> <span class="nav-text">3.11 Alter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-12-drop"><span class="nav-number">3.12.</span> <span class="nav-text">3.12 drop</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-DML命令"><span class="nav-number">4.</span> <span class="nav-text">4. DML命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-Put"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 Put</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-Get"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 Get</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-Scan"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 Scan</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-4-Count"><span class="nav-number">4.4.</span> <span class="nav-text">4.4 Count</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-5-Append"><span class="nav-number">4.5.</span> <span class="nav-text">4.5 Append</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-6-Delete"><span class="nav-number">4.6.</span> <span class="nav-text">4.6 Delete</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-7-Deleteall"><span class="nav-number">4.7.</span> <span class="nav-text">4.7 Deleteall</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-8-Truncate"><span class="nav-number">4.8.</span> <span class="nav-text">4.8 Truncate</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
