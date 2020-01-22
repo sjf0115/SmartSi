@@ -109,7 +109,7 @@
 <meta property="og:description" content="1. HivePresto 在访问 Hive 中的数据时需要得到 Hive 中的所有元数据信息，因此需要部署一个 HiveMetaStore 服务提供 Hive 的元数据信息。 启动 HiveMetaStore 服务的命令如下：nohup hive --service metastore -p 9083 &amp;gt; /Users/smartsi/opt/hive/logs/metastore.log">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_jpg/nKovjAe6LrqPP36RWGmwXAHAUPcg48ibQzRb82UubkaEj0K8CANwdefia4cJZK3B0jiavicU35I08Z8lbgeFzibJofw/0?wx_fmt=jpeg">
-<meta property="og:updated_time" content="2020-01-22T13:28:29.000Z">
+<meta property="og:updated_time" content="2020-01-22T13:39:39.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Presto 安装与部署">
 <meta name="twitter:description" content="1. HivePresto 在访问 Hive 中的数据时需要得到 Hive 中的所有元数据信息，因此需要部署一个 HiveMetaStore 服务提供 Hive 的元数据信息。 启动 HiveMetaStore 服务的命令如下：nohup hive --service metastore -p 9083 &amp;gt; /Users/smartsi/opt/hive/logs/metastore.log">
@@ -414,7 +414,10 @@
 <blockquote>
 <p>Hive版本：2.3.6<br>Hadoop版本：2.7.7</p>
 </blockquote>
-<h2 id="2-Presto"><a href="#2-Presto" class="headerlink" title="2. Presto"></a>2. Presto</h2><h3 id="2-1-安装"><a href="#2-1-安装" class="headerlink" title="2.1 安装"></a>2.1 安装</h3><p>运行如下命令将 Presto 解压到工作目录 <code>~/opt</code> 下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf presto-server-0.231.1.tar.gz -C ~/opt/</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-Presto"><a href="#2-Presto" class="headerlink" title="2. Presto"></a>2. Presto</h2><blockquote>
+<p>Presto版本：0.231.1</p>
+</blockquote>
+<h3 id="2-1-安装"><a href="#2-1-安装" class="headerlink" title="2.1 安装"></a>2.1 安装</h3><p>运行如下命令将 Presto 解压到工作目录 <code>~/opt</code> 下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">tar -zxvf presto-server-0.231.1.tar.gz -C ~/opt/</span><br></pre></td></tr></table></figure></p>
 <p>创建软连接便于升级：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">ln -s presto-server-0.231.1/ presto</span><br></pre></td></tr></table></figure></p>
 <p>这样我们就安装完成了，看一下 Presto 目录内容：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">smartsi:opt smartsi$ cd presto</span><br><span class="line">smartsi:presto smartsi$ ll</span><br><span class="line">total 384</span><br><span class="line">drwxr-xr-x    7 smartsi  staff     224  2 16 11:20 ./</span><br><span class="line">drwxrwxrwx   40 smartsi  staff    1280  2 16 11:24 ../</span><br><span class="line">-rw-r--r--    1 smartsi  staff  191539  4  9  2019 NOTICE</span><br><span class="line">-rw-r--r--    1 smartsi  staff     126  4 17  2019 README.txt</span><br><span class="line">drwxr-xr-x    6 smartsi  staff     192  2  5 11:59 bin/</span><br><span class="line">drwxr-xr-x  149 smartsi  staff    4768  2 16 11:20 lib/</span><br><span class="line">drwxr-xr-x   31 smartsi  staff     992  2 16 11:20 plugin/</span><br></pre></td></tr></table></figure></p>
 <h3 id="2-2-配置"><a href="#2-2-配置" class="headerlink" title="2.2 配置"></a>2.2 配置</h3><p>在安装目录中创建一个 <code>etc</code> 目录。在这个 <code>etc</code> 目录中放入以下配置信息：</p>
