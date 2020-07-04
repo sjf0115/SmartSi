@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>http://smartsi.club/presto-core-data-structures-slice-block-and-page.html</loc>
+    <lastmod>2020-07-04T06:16:54.000Z</lastmod>
+    <data>
+        <display>
+        <title>Presto 核心数据结构：Slice、Page、Block</title>
+        <pubTime>2020-02-26T15:09:01.000Z</pubTime>
+        
+        <tag>Presto</tag>
+         
+         
+           
+             
+              <breadCrumb title="Presto" url="http://smartsi.club/categories/Presto/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/how-install-and-startup-presto.html</loc>
     <lastmod>2020-01-22T13:39:39.000Z</lastmod>
     <data>
@@ -277,28 +297,6 @@
            
              
               <breadCrumb title="Hive" url="http://smartsi.club/categories/Hive/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-search.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ElasticSearch 内部原理之分布式文档搜索</title>
-        <pubTime>2016-10-26T13:15:17.000Z</pubTime>
-        
-        <tag>ElasticSearch</tag>
-         
-        <tag>ElasticSearch 内部原理</tag>
-         
-         
-           
-             
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
           
         </display>
     </data>
@@ -1052,14 +1050,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-flink-handles-backpressure.html</loc>
+    <loc>http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink1.4 处理背压</title>
-        <pubTime>2018-02-11T02:39:01.000Z</pubTime>
+        <title>Flink1.4 外部检查点</title>
+        <pubTime>2018-01-30T06:22:17.000Z</pubTime>
         
         <tag>Flink</tag>
+         
+        <tag>Flink 容错</tag>
          
          
            
@@ -1072,16 +1072,14 @@
 
     
   <url>
-    <loc>http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html</loc>
+    <loc>http://smartsi.club/how-flink-handles-backpressure.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink1.4 外部检查点</title>
-        <pubTime>2018-01-30T06:22:17.000Z</pubTime>
+        <title>Flink1.4 处理背压</title>
+        <pubTime>2018-02-11T02:39:01.000Z</pubTime>
         
         <tag>Flink</tag>
-         
-        <tag>Flink 容错</tag>
          
          
            
@@ -1516,12 +1514,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/better-bitmap-performance-with-roaring-bitmaps.html</loc>
+    <loc>http://smartsi.club/algorithm-quick-sort.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Roaring Bitmap更好的位图压缩算法</title>
-        <pubTime>2019-07-14T08:08:24.000Z</pubTime>
+        <title>算法一 快速排序</title>
+        <pubTime>2017-12-03T15:15:17.000Z</pubTime>
         
         <tag>Algorithm</tag>
          
@@ -1562,28 +1560,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-2.x-hdfs-architecture.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop 2.x HDFS架构</title>
-        <pubTime>2017-12-20T12:29:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 内部原理</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/technology-evolution-of-clickHouse-in-toutiao.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -1599,6 +1575,28 @@
            
              
               <breadCrumb title="ClickHouse" url="http://smartsi.club/categories/ClickHouse/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-2.x-hdfs-architecture.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 2.x HDFS架构</title>
+        <pubTime>2017-12-20T12:29:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 内部原理</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
           
         </display>
     </data>
@@ -1848,16 +1846,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-illustrate-how-hdfs-works.html</loc>
+    <loc>http://smartsi.club/trouble-shooting-cannot-access-port-50070-in-hadoop.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop 图解HDFS工作原理</title>
-        <pubTime>2017-12-19T02:03:01.000Z</pubTime>
+        <title>Hadoop无法访问50070端口</title>
+        <pubTime>2019-06-16T09:36:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
-        <tag>Hadoop 内部原理</tag>
+        <tag>TroubleShooting</tag>
          
          
            
@@ -1870,16 +1868,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/trouble-shooting-cannot-access-port-50070-in-hadoop.html</loc>
+    <loc>http://smartsi.club/hadoop-illustrate-how-hdfs-works.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop无法访问50070端口</title>
-        <pubTime>2019-06-16T09:36:01.000Z</pubTime>
+        <title>Hadoop 图解HDFS工作原理</title>
+        <pubTime>2017-12-19T02:03:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
-        <tag>TroubleShooting</tag>
+        <tag>Hadoop 内部原理</tag>
          
          
            
@@ -2024,6 +2022,28 @@
 
     
   <url>
+    <loc>http://smartsi.club/hadoop-setup-and-start.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 安装与启动</title>
+        <pubTime>2016-12-29T03:01:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/hadoop-small-files-problem.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2056,28 +2076,6 @@
         <tag>Hadoop</tag>
          
         <tag>Hadoop 优化</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-setup-and-start.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop 安装与启动</title>
-        <pubTime>2016-12-29T03:01:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
          
          
            
@@ -2154,6 +2152,26 @@
 
     
   <url>
+    <loc>http://smartsi.club/hadoop-ecosystem-break-away-jvm.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 脱离JVM？ Hadoop生态圈的挣扎与演化</title>
+        <pubTime>2018-02-02T01:50:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/Hexo/Hexo+Github%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E6%9B%B4%E6%8D%A2%E7%9A%AE%E8%82%A4.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2182,26 +2200,6 @@
          
          
            
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-ecosystem-break-away-jvm.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop 脱离JVM？ Hadoop生态圈的挣扎与演化</title>
-        <pubTime>2018-02-02T01:50:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
         </display>
     </data>
     </url>
@@ -2348,12 +2346,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/algorithm-quick-sort.html</loc>
+    <loc>http://smartsi.club/better-bitmap-performance-with-roaring-bitmaps.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>算法一 快速排序</title>
-        <pubTime>2017-12-03T15:15:17.000Z</pubTime>
+        <title>Roaring Bitmap更好的位图压缩算法</title>
+        <pubTime>2019-07-14T08:08:24.000Z</pubTime>
         
         <tag>Algorithm</tag>
          
@@ -2763,24 +2761,48 @@
     </url>
 
     
+  <url>
+    <loc>http://smartsi.club/elasticsearch-how-to-use-mapping.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ElasticSearch Mapping映射</title>
+        <pubTime>2016-10-19T11:15:17.000Z</pubTime>
+        
+        <tag>ElasticSearch</tag>
+         
+        <tag>ElasticSearch 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
     
     
     
     
   <url>
-    <loc>http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html</loc>
+    <loc>http://smartsi.club/elasticsearch-base-scroll-search.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>使用Redis Bitmap简单快速实时计算指标</title>
-        <pubTime>2019-04-27T02:21:06.000Z</pubTime>
+        <title>ElasticSearch Scroll游标搜索</title>
+        <pubTime>2016-10-28T11:20:17.000Z</pubTime>
         
-        <tag>Redis</tag>
+        <tag>ElasticSearch</tag>
+         
+        <tag>ElasticSearch 基础</tag>
          
          
            
              
-              <breadCrumb title="Redis" url="http://smartsi.club/categories/Redis/"/>
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
           
         </display>
     </data>
@@ -2808,12 +2830,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-base-scroll-search.html</loc>
+    <loc>http://smartsi.club/elasticsearch-built-in-analyzer.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch Scroll游标搜索</title>
-        <pubTime>2016-10-28T11:20:17.000Z</pubTime>
+        <title>ElasticSearch 内置分析器</title>
+        <pubTime>2016-10-21T12:15:17.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
@@ -3118,12 +3140,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-streaming-discretized-streams-dstreams.html</loc>
+    <loc>http://smartsi.club/spark-streaming-kafka-0-8-integration.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark Streaming 2.2.0 DStreams</title>
-        <pubTime>2018-04-04T03:28:01.000Z</pubTime>
+        <title>Spark Streaming 与 Kafka0.8 整合</title>
+        <pubTime>2018-03-16T03:28:01.000Z</pubTime>
         
         <tag>Spark Stream</tag>
          
@@ -3140,12 +3162,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-streaming-kafka-0-8-integration.html</loc>
+    <loc>http://smartsi.club/spark-streaming-discretized-streams-dstreams.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark Streaming 与 Kafka0.8 整合</title>
-        <pubTime>2018-03-16T03:28:01.000Z</pubTime>
+        <title>Spark Streaming 2.2.0 DStreams</title>
+        <pubTime>2018-04-04T03:28:01.000Z</pubTime>
         
         <tag>Spark Stream</tag>
          
@@ -3492,12 +3514,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-performance-resources-tuning.html</loc>
+    <loc>http://smartsi.club/spark-performance-data-skew-tuning.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark 性能调优之资源调优</title>
-        <pubTime>2018-02-02T01:32:17.000Z</pubTime>
+        <title>Spark 性能调优之数据倾斜调优</title>
+        <pubTime>2018-04-05T03:28:01.000Z</pubTime>
         
         <tag>Spark</tag>
          
@@ -3514,12 +3536,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-performance-data-skew-tuning.html</loc>
+    <loc>http://smartsi.club/spark-performance-resources-tuning.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark 性能调优之数据倾斜调优</title>
-        <pubTime>2018-04-05T03:28:01.000Z</pubTime>
+        <title>Spark 性能调优之资源调优</title>
+        <pubTime>2018-02-02T01:32:17.000Z</pubTime>
         
         <tag>Spark</tag>
          
@@ -3822,21 +3844,19 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-how-to-use-mapping.html</loc>
+    <loc>http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch Mapping映射</title>
-        <pubTime>2016-10-19T11:15:17.000Z</pubTime>
+        <title>使用Redis Bitmap简单快速实时计算指标</title>
+        <pubTime>2019-04-27T02:21:06.000Z</pubTime>
         
-        <tag>ElasticSearch</tag>
-         
-        <tag>ElasticSearch 基础</tag>
+        <tag>Redis</tag>
          
          
            
              
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+              <breadCrumb title="Redis" url="http://smartsi.club/categories/Redis/"/>
           
         </display>
     </data>
@@ -3859,26 +3879,6 @@
            
              
               <breadCrumb title="Storm" url="http://smartsi.club/categories/Storm/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/two-phase-commit-of-distributed-transaction.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>分布式事务之两阶段提交(2PC)</title>
-        <pubTime>2018-09-14T12:16:01.000Z</pubTime>
-        
-        <tag>分布式</tag>
-         
-         
-           
-             
-              <breadCrumb title="分布式" url="http://smartsi.club/categories/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
           
         </display>
     </data>
@@ -3921,6 +3921,26 @@
            
              
               <breadCrumb title="Storm" url="http://smartsi.club/categories/Storm/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/two-phase-commit-of-distributed-transaction.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>分布式事务之两阶段提交(2PC)</title>
+        <pubTime>2018-09-14T12:16:01.000Z</pubTime>
+        
+        <tag>分布式</tag>
+         
+         
+           
+             
+              <breadCrumb title="分布式" url="http://smartsi.club/categories/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
           
         </display>
     </data>
@@ -4168,28 +4188,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/apache-flink-1-7-0-release.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Flink1.7发布中的新功能</title>
-        <pubTime>2019-02-18T12:08:12.000Z</pubTime>
-        
-        <tag>Flink</tag>
-         
-        <tag>Flink Realease</tag>
-         
-         
-           
-             
-              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/apache-flink-1-5-0-release.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -4212,16 +4210,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html</loc>
+    <loc>http://smartsi.club/apache-flink-1-7-0-release.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink如何实现端到端的Exactly-Once处理语义</title>
-        <pubTime>2019-02-10T08:05:01.000Z</pubTime>
+        <title>Flink1.7发布中的新功能</title>
+        <pubTime>2019-02-18T12:08:12.000Z</pubTime>
         
         <tag>Flink</tag>
          
-        <tag>Flink Stream</tag>
+        <tag>Flink Realease</tag>
          
          
            
@@ -4242,6 +4240,28 @@
         <pubTime>2019-04-07T12:17:21.000Z</pubTime>
         
         <tag>Flink</tag>
+         
+         
+           
+             
+              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Flink如何实现端到端的Exactly-Once处理语义</title>
+        <pubTime>2019-02-10T08:05:01.000Z</pubTime>
+        
+        <tag>Flink</tag>
+         
+        <tag>Flink Stream</tag>
          
          
            
@@ -4298,14 +4318,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/performance-factors-stateful-functions-operators-flink.html</loc>
+    <loc>http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-2.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>影响Flink有状态函数和算子性能的3个重要因素</title>
-        <pubTime>2019-04-22T04:32:01.000Z</pubTime>
+        <title>Flink如何实现新的流处理应用第二部分:版本化状态</title>
+        <pubTime>2019-04-21T05:04:21.000Z</pubTime>
         
         <tag>Flink</tag>
+         
+        <tag>Flink Stream</tag>
          
          
            
@@ -4318,16 +4340,14 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-2.html</loc>
+    <loc>http://smartsi.club/performance-factors-stateful-functions-operators-flink.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink如何实现新的流处理应用第二部分:版本化状态</title>
-        <pubTime>2019-04-21T05:04:21.000Z</pubTime>
+        <title>影响Flink有状态函数和算子性能的3个重要因素</title>
+        <pubTime>2019-04-22T04:32:01.000Z</pubTime>
         
         <tag>Flink</tag>
-         
-        <tag>Flink Stream</tag>
          
          
            
@@ -4400,16 +4420,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-built-in-analyzer.html</loc>
+    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-search.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch 内置分析器</title>
-        <pubTime>2016-10-21T12:15:17.000Z</pubTime>
+        <title>ElasticSearch 内部原理之分布式文档搜索</title>
+        <pubTime>2016-10-26T13:15:17.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
-        <tag>ElasticSearch 基础</tag>
+        <tag>ElasticSearch 内部原理</tag>
          
          
            
