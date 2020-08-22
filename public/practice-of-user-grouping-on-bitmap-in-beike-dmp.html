@@ -116,9 +116,9 @@
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-6.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-7.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-8.jpg?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-2.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-9.jpeg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/%E5%85%AC%E4%BC%97%E5%8F%B7.jpg?raw=true">
-<meta property="og:updated_time" content="2020-08-22T15:48:12.000Z">
+<meta property="og:updated_time" content="2020-08-22T15:54:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Bitmap用户分群在贝壳DMP的实践和应用">
 <meta name="twitter:description" content="1. 背景介绍DMP数据管理平台是实现用户精细化运营和和全生命周期运营的的基础平台之一。贝壳找房从2018年5月开始建设自己的DMP平台，提供了用户分群、消息推送、人群洞察等能力。关于贝壳DMP架构的介绍可参考文章：DMP平台在贝壳的实践和应用。 目前，贝壳DMP数据覆盖了贝壳和链家的数亿用户，用户偏好和行为数据量达到数十亿，拥有上千维画像标签。在海量用户画像数据基础上实现用户分群，同时满足业务方">
@@ -497,7 +497,7 @@
 <p>在这个过程中，我们还使用了bitmap的循环构建、spark任务调优、异常重试机制、bitmap构建后的数据验证等方法来提高任务的运行速度和稳定性。</p>
 <h3 id="3-5-bitmap-SQL的生成"><a href="#3-5-bitmap-SQL的生成" class="headerlink" title="3.5 bitmap SQL的生成"></a>3.5 bitmap SQL的生成</h3><p>在2019年7-8月的优化迭代中，DMP建设了自己的标签后台系统，设计了用于存储人群包标签组合的存储格式，本次的生成bitmap SQL的过程也是完全兼容了之前的标签组合存储格式。</p>
 <p>通过处理人群包的标签组合，确定所需要的bitmap以及这些bitmap之间的逻辑关系（下图红线标识），最终生成的bitmap SQL 示例如下图所示。同时通过使用GLOBAL IN代替比较耗时的GLOBAL ANY INNER JOIN，CH SQL运行效率也有了大幅度的提升。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-2.jpeg?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-9.jpeg?raw=true" alt=""></p>
 <h2 id="4-总结和展望"><a href="#4-总结和展望" class="headerlink" title="4. 总结和展望"></a>4. 总结和展望</h2><p>在整个方案的实现过程中，除解决上述技术问题外，我们还对bitmap方案的数据准确性验证、考虑到前后两种方案数据产出时间的差异，对两种SQL方案的选择切换、bitmap方案不适用的少数场景、bitmap SQL生成过程中全量bitmap的选择等问题进行了考虑。我们也对该方案中的核心技术申请了专利。</p>
 <p>目前基于bitmap 的用户分群方案已经上线运行超过3个月，支持秒级别的人群包数量预估，分钟级别的复杂人群包逻辑运算，日均支持500+周期性人群包的运行，保障了消息推送任务的正常发送，日均触达用户数千万。</p>
 <p>在下一步的工作中，我们将从覆盖全部用户画像标签、提升bitmap数据产出和构建速度、完善标签上线流程、丰富bitmap数据应用场景等方面对DMP平台进行持续的迭代优化。</p>

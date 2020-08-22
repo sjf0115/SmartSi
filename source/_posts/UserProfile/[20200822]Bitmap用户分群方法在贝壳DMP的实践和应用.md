@@ -159,7 +159,7 @@ Spark任务中，先通过spark SQL将所需hive数据读取，保存在DataSet<
 
 通过处理人群包的标签组合，确定所需要的bitmap以及这些bitmap之间的逻辑关系（下图红线标识），最终生成的bitmap SQL 示例如下图所示。同时通过使用GLOBAL IN代替比较耗时的GLOBAL ANY INNER JOIN，CH SQL运行效率也有了大幅度的提升。
 
-![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-2.jpeg?raw=true)
+![](https://github.com/sjf0115/PubLearnNotes/blob/master/image/UserProfile/practice-of-user-grouping-on-bitmap-in-beike-dmp-9.jpeg?raw=true)
 
 ## 4. 总结和展望
 

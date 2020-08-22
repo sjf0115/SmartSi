@@ -5112,7 +5112,7 @@ Hive仅在FROM子句中支持子查
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/hadoop-small-files-problem.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/hadoop-how-to-use-compression.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -5131,7 +5131,7 @@ Hive仅在FROM子句中支持子查
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/hadoop-small-files-problem.html" itemprop="url">Hadoop 大量小文件问题的优化</a></h2>
+                <a class="post-title-link" href="/hadoop-how-to-use-compression.html" itemprop="url">Hadoop 如何使用压缩</a></h2>
         
 
         <div class="post-meta">
@@ -5178,8 +5178,8 @@ Hive仅在FROM子句中支持子查
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/hadoop-small-files-problem.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/hadoop-small-files-problem.html" itemprop="commentCount"></span>
+                <a href="/hadoop-how-to-use-compression.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/hadoop-how-to-use-compression.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -5187,7 +5187,7 @@ Hive仅在FROM子句中支持子查
 
           
           
-             <span id="/hadoop-small-files-problem.html" class="leancloud_visitors" data-flag-title="Hadoop 大量小文件问题的优化">
+             <span id="/hadoop-how-to-use-compression.html" class="leancloud_visitors" data-flag-title="Hadoop 如何使用压缩">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -5220,11 +5220,13 @@ Hive仅在FROM子句中支持子查
       
         
           
-          1. HDFS上的小文件问题小文件是指文件大小明显小于 HDFS 上块（block）大小（默认64MB，在Hadoop2.x中默认为128MB）的文件。如果存储小文件，必定会有大量这样的小文件，否则你也不会使用 Hadoop，这样的文件给 Hadoop 的扩展性和性能带来严重问题。当一个文件的大小小
+          就如上一篇文章介绍的那样，如果输入文件是压缩文件，当 MapReduce 程序读取压缩文件时，根据文件名的后缀来选择 codes，输入文件自动解压缩（我们不需要指定压缩文件是哪一种压缩格式）。
+下面我们列出了一些代码，为 Hadoop 中常用的压缩格式设置输出压缩。
+1. 常用压缩格式1.1 Gzi
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-small-files-problem.html#more" rel="contents">
+            <a class="btn" href="/hadoop-how-to-use-compression.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
