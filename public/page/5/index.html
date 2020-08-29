@@ -5107,7 +5107,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-state-backends.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-development-checkpointing-enable-config.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -5126,7 +5126,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/flink-stream-state-backends.html" itemprop="url">Flink1.4 状态终端</a></h2>
+                <a class="post-title-link" href="/flink-stream-development-checkpointing-enable-config.html" itemprop="url">Flink1.4 检查点启用与配置</a></h2>
         
 
         <div class="post-meta">
@@ -5173,8 +5173,8 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/flink-stream-state-backends.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-state-backends.html" itemprop="commentCount"></span>
+                <a href="/flink-stream-development-checkpointing-enable-config.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-development-checkpointing-enable-config.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -5182,7 +5182,7 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
 
           
           
-             <span id="/flink-stream-state-backends.html" class="leancloud_visitors" data-flag-title="Flink1.4 状态终端">
+             <span id="/flink-stream-development-checkpointing-enable-config.html" class="leancloud_visitors" data-flag-title="Flink1.4 检查点启用与配置">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -5215,12 +5215,13 @@ Apache Flink 非常适用于流分析应用程序，因为它支持事件时间�
       
         
           
-          1. 概述Flink 提供了不同的状态终端，可以指定状态的存储方式和位置。
-状态可以存储在Java的堆内或堆外。根据你的状态终端，Flink 也可以管理应用程序的状态，这意味着 Flink 可以处理内存管理（可能会溢出到磁盘，如果有必要），以允许应用程序存储非常大的状态。默认情况下，配置文件 fli
+          Flink 中的每个函数和操作符都可以是有状态的（请参阅使用状态了解详细信息）。有状态函数在处理单个元素/事件时存储数据。
+为了能够状态容错，Flink 需要对状态进行 checkpoint。检查点允许 Flink 在流中恢复状态和位置，为应用程序提供与无故障执行相同的语义。
+关于 Flink 流式
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/flink-stream-state-backends.html#more" rel="contents">
+            <a class="btn" href="/flink-stream-development-checkpointing-enable-config.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
