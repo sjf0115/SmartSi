@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink Stream," />
+
+
+<meta name="description" content="1. 依赖 Flink版本：1.11.2  Apache Flink 内置了多个 Kafka Connector：通用、0.10、0.11等。这个通用的 Kafka Connector 会尝试追踪最新版本的 Kafka 客户端。不同 Flink 发行版之间其使用的客户端版本可能会发生改变。现在的 Kafka 客户端可以向后兼容 0.10.0 或更高版本的 Broker。对于大多数用户使用通用的 K">
+<meta name="keywords" content="Flink,Flink Stream">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink Kafka Connector">
+<meta property="og:url" content="http://smartsi.club/flink-kafka-connector.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 依赖 Flink版本：1.11.2  Apache Flink 内置了多个 Kafka Connector：通用、0.10、0.11等。这个通用的 Kafka Connector 会尝试追踪最新版本的 Kafka 客户端。不同 Flink 发行版之间其使用的客户端版本可能会发生改变。现在的 Kafka 客户端可以向后兼容 0.10.0 或更高版本的 Broker。对于大多数用户使用通用的 K">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2020-11-01T08:33:30.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink Kafka Connector">
+<meta name="twitter:description" content="1. 依赖 Flink版本：1.11.2  Apache Flink 内置了多个 Kafka Connector：通用、0.10、0.11等。这个通用的 Kafka Connector 会尝试追踪最新版本的 Kafka 客户端。不同 Flink 发行版之间其使用的客户端版本可能会发生改变。现在的 Kafka 客户端可以向后兼容 0.10.0 或更高版本的 Broker。对于大多数用户使用通用的 K">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-kafka-connector.html"/>
+
+
+  <title>Flink Kafka Connector | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-kafka-connector.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink Kafka Connector</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-01T16:19:17+08:00">2020-11-01</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-kafka-connector.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-kafka-connector.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-kafka-connector.html" class="leancloud_visitors" data-flag-title="Flink Kafka Connector">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-依赖"><a href="#1-依赖" class="headerlink" title="1. 依赖"></a>1. 依赖</h2><blockquote>
+<p>Flink版本：1.11.2</p>
+</blockquote>
+<p>Apache Flink 内置了多个 Kafka Connector：通用、0.10、0.11等。这个通用的 Kafka Connector 会尝试追踪最新版本的 Kafka 客户端。不同 Flink 发行版之间其使用的客户端版本可能会发生改变。现在的 Kafka 客户端可以向后兼容 0.10.0 或更高版本的 Broker。对于大多数用户使用通用的 Kafka Connector 就可以了。但对于 0.11.x 和 0.10.x 版本的 Kafka 用户，我们建议分别使用专用的 0.11 和 0.10 Connector。有关 Kafka 兼容性的详细信息，请参阅 <a href="https://kafka.apache.org/protocol.html#protocol_compatibility" target="_blank" rel="noopener">Kafka官方文档</a>。</p>
+<p>通用 Connector：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka_2.11<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.11.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>0.11 Connector：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka-011_2.11<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.11.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>0.10 Connector：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka-010_2.11<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.11.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>0.10 Connector 不支持对 Kafka 的 Exactly-once 写入。</p>
+</blockquote>
+<p>下面是老版本的 Connector 介绍：</p>
+<table>
+<thead>
+<tr>
+<th>Maven</th>
+<th>开始支持版本</th>
+<th>消费者与生产者类名</th>
+<th>Kafka版本</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>flink-connector-kafka-0.8_2.11</td>
+<td>1.0.0</td>
+<td>FlinkKafkaConsumer08、FlinkKafkaProducer08</td>
+<td>0.8.x</td>
+<td>使用 <a href="https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example" target="_blank" rel="noopener">SimpleConsumer</a> API。偏移量被提交到ZooKeeper上。</td>
+</tr>
+<tr>
+<td>flink-connector-kafka-0.9_2.11</td>
+<td>1.0.0</td>
+<td>FlinkKafkaConsumer09、FlinkKafkaProducer09</td>
+<td>0.9.x</td>
+<td>使用新版 <a href="http://kafka.apache.org/documentation.html#newconsumerapi" target="_blank" rel="noopener">Consumer</a> API。</td>
+</tr>
+<tr>
+<td>flink-connector-kafka-0.10_2.11</td>
+<td>1.2.0</td>
+<td>FlinkKafkaConsumer010、FlinkKafkaProducer010</td>
+<td>0.10.x</td>
+<td>这个连接器支持生产与消费的<a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-32+-+Add+timestamps+to+Kafka+message" target="_blank" rel="noopener">带时间戳的Kafka消息</a>。</td>
+</tr>
+<tr>
+<td>flink-connector-kafka-0.11_2.11</td>
+<td>1.4.0</td>
+<td>FlinkKafkaConsumer011、FlinkKafkaProducer011</td>
+<td>0.11.x</td>
+<td>Kafka 0.11.x 版本不支持 scala 2.10 版本。此连接器支持 <a href="https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging" target="_blank" rel="noopener">Kafka 事务消息</a> 可以为生产者提供 Exactly-Once 语义。</td>
+</tr>
+<tr>
+<td>flink-connector-kafka_2.11</td>
+<td>1.7.0</td>
+<td>FlinkKafkaConsumer、FlinkKafkaProducer</td>
+<td>&gt;= 1.0.0</td>
+<td>这是一个通用的 Kafka 连接器，会追踪最新版本的 Kafka 客户端。</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-Kafka消费者"><a href="#2-Kafka消费者" class="headerlink" title="2. Kafka消费者"></a>2. Kafka消费者</h2><p>Flink 的 Kafka 消费者：FlinkKafkaConsumer（对于 Kafka 0.11.x 版本为 FlinkKafkaConsumer011，对于 Kafka 0.10.x 版本为 FlinkKafkaConsumer010) 提供了可以访问一个或多个 Kafka Topic 的功能。</p>
+<p>Kafka 消费者的构造函数接受如下参数:</p>
+<ul>
+<li>Kafka Topic 名称或者 Kafka Topic 名称列表</li>
+<li>用于反序列化 Kafka 数据的 DeserializationSchema / KafkaDeserializationSchema</li>
+<li>Kafka 消费者的配置。需要以下属性：<code>bootstrap.servers</code>(逗号分隔的 Kafka broker 列表、<code>zookeeper.connect</code>(逗号分隔的 Zookeeper 服务器)(对于 Kafka 0.8 是必需的)、<code>group.id</code>(消费组的Id)。</li>
+</ul>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"localhost:9092"</span>);</span><br><span class="line"><span class="comment">// 根据版本判断是否使用</span></span><br><span class="line">properties.setProperty(<span class="string">"zookeeper.connect"</span>, <span class="string">"localhost:2181"</span>);</span><br><span class="line">properties.setProperty(<span class="string">"group.id"</span>, <span class="string">"test"</span>);</span><br><span class="line">properties.put(<span class="string">"key.deserializer"</span>, <span class="string">"org.apache.kafka.common.serialization.StringDeserializer"</span>);</span><br><span class="line">properties.put(<span class="string">"value.deserializer"</span>, <span class="string">"org.apache.kafka.common.serialization.StringDeserializer"</span>);</span><br><span class="line">FlinkKafkaConsumer consumer = <span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(<span class="string">"topic"</span>, <span class="keyword">new</span> SimpleStringSchema(), properties);</span><br><span class="line">DataStream&lt;String&gt; stream = env.addSource(consumer);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val properties = new Properties()</span><br><span class="line">properties.setProperty(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line">properties.setProperty(&quot;group.id&quot;, &quot;test&quot;)</span><br><span class="line">properties.put(&quot;key.deserializer&quot;, &quot;org.apache.kafka.common.serialization.StringDeserializer&quot;);</span><br><span class="line">properties.put(&quot;value.deserializer&quot;, &quot;org.apache.kafka.common.serialization.StringDeserializer&quot;);</span><br><span class="line">stream = env</span><br><span class="line">    .addSource(new FlinkKafkaConsumer[String](&quot;topic&quot;, new SimpleStringSchema(), properties))</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-1-DeserializationSchema"><a href="#2-1-DeserializationSchema" class="headerlink" title="2.1 DeserializationSchema"></a>2.1 DeserializationSchema</h3><p>Flink Kafka 消费者需要知道如何将 Kafka 中的二进制数据转换为 Java/Scala 对象。DeserializationSchema 可以允许用户指定这样的一个 Schema。每个 Kafka 消息都会调用 <code>T deserialize(ConsumerRecord&lt;byte[], byte[]&gt; record)</code> 方法。</p>
+<p>为了使用方便，Flink 提供如下开箱即用的 Schema：</p>
+<ul>
+<li>TypeInformationSerializationSchema(以及 TypeInformationKeyValueSerializationSchema) 会基于 Flink 的 TypeInformation 创建 Schema。对 Flink 读写数据会非常有用。这个 Schema 是其他通用序列化方法的高性能替代方案。</li>
+<li>JsonDeserializationSchema(以及 JSONKeyValueDeserializationSchema)将序列化的 JSON 转换为 ObjectNode 对象，可以使用 <code>objectNode.get(&quot;field&quot;).as(Int/String/...)()</code> 方法访问某个字段。KeyValue objectNode 包含一个”key”和”value”字段，这包含了所有字段，以及一个可选的”metadata”字段，可以用来查询此消息的偏移量/分区/主题。</li>
+<li>AvroDeserializationSchema 使用静态 Schema 读取 Avro 格式的序列化的数据。可以从 Avro 生成的类(<code>AvroDeserializationSchema.forSpecific(...)</code>) 中推断出 Schema，也可以使用 GenericRecords 手动提供 Schema（<code>AvroDeserializationSchema.forGeneric(...)</code>）。这个反序列化 Schema 要求序列化记录不能包含嵌套 Schema。</li>
+</ul>
+<p>如果要使用 Avro 这种 Schema，必须添加如下依赖：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-avro<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.11.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>当遇到由于某种原因无法反序列化某个损坏消息时，反序列化 Schema 会返回 null，这会导致这条记录被跳过。由于 Consumer 的容错能力，如果在损坏的消息上让作业失败，那么 Consumer 会再次尝试反序列化该消息。如果反序列化仍然失败，则 Consumer 会陷入该消息的不断重启与失败的循环中。</p>
+<h3 id="2-2-起始位置配置"><a href="#2-2-起始位置配置" class="headerlink" title="2.2 起始位置配置"></a>2.2 起始位置配置</h3><p>Flink Kafka Consumer 可以配置如何确定 Kafka 分区的起始位置。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line">FlinkKafkaConsumer&lt;String&gt; myConsumer = <span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(...);</span><br><span class="line"><span class="comment">// 从最早的记录开始消费</span></span><br><span class="line">myConsumer.setStartFromEarliest();</span><br><span class="line"><span class="comment">// 从最近的记录开始消费</span></span><br><span class="line">myConsumer.setStartFromLatest();</span><br><span class="line"><span class="comment">// 从指定时间戳(毫秒)开始消费</span></span><br><span class="line">myConsumer.setStartFromTimestamp(...);</span><br><span class="line"><span class="comment">// 默认行为 从指定消费组偏移量开始消费</span></span><br><span class="line">myConsumer.setStartFromGroupOffsets();</span><br><span class="line"></span><br><span class="line">DataStream&lt;String&gt; stream = env.addSource(myConsumer);</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> env = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment()</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> myConsumer = <span class="keyword">new</span> <span class="type">FlinkKafkaConsumer</span>[<span class="type">String</span>](...)</span><br><span class="line">myConsumer.setStartFromEarliest()      <span class="comment">// start from the earliest record possible</span></span><br><span class="line">myConsumer.setStartFromLatest()        <span class="comment">// start from the latest record</span></span><br><span class="line">myConsumer.setStartFromTimestamp(...)  <span class="comment">// start from specified epoch timestamp (milliseconds)</span></span><br><span class="line">myConsumer.setStartFromGroupOffsets()  <span class="comment">// the default behaviour</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> stream = env.addSource(myConsumer)</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>Flink 所有版本的 Kafka Consumer 都具有上述配置起始位置的方法：</p>
+<ul>
+<li>setStartFromGroupOffsets（默认行为）：从消费者组（通过消费者属性 <code>group.id</code> 配置）提交到 Kafka Broker（Kafka 0.8 版本提交到 ZooKeeper）的偏移量开始读取分区。如果找不到分区的偏移量，会使用 <code>auto.offset.reset</code> 属性中的配置。</li>
+<li>setStartFromEarliest()/setStartFromLatest()：读取最早/最新记录。在这个模式下，提交到 Kafka 偏移量可以忽略，不用作起始位置。</li>
+<li>setStartFromTimestamp(long)：从指定的时间戳开始读取。对于每个分区，第一个大于或者等于指定时间戳的记录会被用作起始位置。如果分区的最新记录早于时间戳，则分区简单的读取最新记录即可。在这个模式下，提交到 Kafka 偏移量可以忽略，不用作起始位置。</li>
+</ul>
+<p>你还可以为 Consumer 指定每个分区应该开始的确切偏移量：</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;KafkaTopicPartition, Long&gt; specificStartOffsets = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> KafkaTopicPartition(<span class="string">"myTopic"</span>, <span class="number">0</span>), <span class="number">23L</span>);</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> KafkaTopicPartition(<span class="string">"myTopic"</span>, <span class="number">1</span>), <span class="number">31L</span>);</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> KafkaTopicPartition(<span class="string">"myTopic"</span>, <span class="number">2</span>), <span class="number">43L</span>);</span><br><span class="line"></span><br><span class="line">myConsumer.setStartFromSpecificOffsets(specificStartOffsets);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> specificStartOffsets = <span class="keyword">new</span> java.util.<span class="type">HashMap</span>[<span class="type">KafkaTopicPartition</span>, java.lang.<span class="type">Long</span>]()</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> <span class="type">KafkaTopicPartition</span>(<span class="string">"myTopic"</span>, <span class="number">0</span>), <span class="number">23</span>L)</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> <span class="type">KafkaTopicPartition</span>(<span class="string">"myTopic"</span>, <span class="number">1</span>), <span class="number">31</span>L)</span><br><span class="line">specificStartOffsets.put(<span class="keyword">new</span> <span class="type">KafkaTopicPartition</span>(<span class="string">"myTopic"</span>, <span class="number">2</span>), <span class="number">43</span>L)</span><br><span class="line"></span><br><span class="line">myConsumer.setStartFromSpecificOffsets(specificStartOffsets)</span><br></pre></td></tr></table></figure></p>
+<p>上面的示例配置 Consumer 从 myTopic 主题的 0、1 和 2 分区的指定偏移量开始消费。偏移量是 Consumer 读取每个分区的下一条记录。需要注意的是如果 Consumer 需要读取的分区在提供的偏移量 Map 中没有指定偏移量，那么自动转换为默认的消费组偏移量。</p>
+<blockquote>
+<p>当作业从故障中自动恢复或使用保存点手动恢复时，这些起始位置配置方法不会影响起始位置。在恢复时，每个 Kafka 分区的起始位置由存储在保存点或检查点中的偏移量确定。</p>
+</blockquote>
+<h3 id="2-3-容错"><a href="#2-3-容错" class="headerlink" title="2.3 容错"></a>2.3 容错</h3><p>当 Flink 启动检查点时，Consumer 会从 Topic 中消费记录，并定期对 Kafka 偏移量以及其他算子的状态进行 Checkpoint。如果作业失败，Flink 会从最新检查点的状态恢复流处理程序，并从保存在检查点中的偏移量重新开始消费来自 Kafka 的记录。</p>
+<p>因此，检查点间隔定义了程序在发生故障时最多可以回退多少。要使用容错的 Kafka Consumer，需要在作业中开启拓扑的检查点。如果禁用了检查点，Kafka Consumer 会定期将偏移量提交给 Zookeeper。</p>
+<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"><span class="comment">// 每5s进行一次checkpoint</span></span><br><span class="line">env.enableCheckpointing(<span class="number">5000</span>);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> env = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment()</span><br><span class="line"><span class="comment">// 每5s进行一次checkpoint</span></span><br><span class="line">env.enableCheckpointing(<span class="number">5000</span>)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果有足够的 slot 可用于重新启动拓扑，那么 Flink 才能重新启动拓扑。因此，如果拓扑由于与 TaskManager 断开而失败，那么必须有足够的可用 slot。</p>
+</blockquote>
+<h3 id="2-4-分区与主题发现"><a href="#2-4-分区与主题发现" class="headerlink" title="2.4 分区与主题发现"></a>2.4 分区与主题发现</h3><h4 id="2-4-1-分区发现"><a href="#2-4-1-分区发现" class="headerlink" title="2.4.1 分区发现"></a>2.4.1 分区发现</h4><p>Flink Kafka Consumer 支持发现动态创建的 Kafka 分区，并使用 Exactly-Once 语义来消费。当作业开始运行，首次检索分区元数据后发现的所有分区会从最早的偏移量开始消费。</p>
+<p>默认情况下，分区发现是禁用的。如果要启用它，需要设置 <code>flink.partition-discovery.interval-millis</code> 为一个非负值，表示发现间隔（以毫秒为单位的）。</p>
+<blockquote>
+<p>当使用 Flink 1.3.x 之前的版本，消费者从保存点恢复时，无法在恢复的运行启用分区发现。如果要启用，恢复将失败并抛出异常。在这种情况下，为了使用分区发现，需要在 Flink 1.3.x 版本中生成保存点，然后再从中恢复。</p>
+</blockquote>
+<h4 id="2-4-2-主题发现"><a href="#2-4-2-主题发现" class="headerlink" title="2.4.2  主题发现"></a>2.4.2  主题发现</h4><p>Flink Kafka Consumer 还能够使用正则表达式匹配 Topic 名称来自动发现 Topic。</p>
+<p>Java 版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"localhost:9092"</span>);</span><br><span class="line">properties.setProperty(<span class="string">"group.id"</span>, <span class="string">"test"</span>);</span><br><span class="line"></span><br><span class="line">FlinkKafkaConsumer&lt;String&gt; myConsumer = <span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(</span><br><span class="line">    java.util.regex.Pattern.compile(<span class="string">"test-topic-[0-9]"</span>),</span><br><span class="line">    <span class="keyword">new</span> SimpleStringSchema(),</span><br><span class="line">    properties);</span><br><span class="line"></span><br><span class="line">DataStream&lt;String&gt; stream = env.addSource(myConsumer);</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment()</span><br><span class="line"></span><br><span class="line">val properties = new Properties()</span><br><span class="line">properties.setProperty(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line">properties.setProperty(&quot;group.id&quot;, &quot;test&quot;)</span><br><span class="line"></span><br><span class="line">val myConsumer = new FlinkKafkaConsumer[String](</span><br><span class="line">  java.util.regex.Pattern.compile(&quot;test-topic-[0-9]&quot;),</span><br><span class="line">  new SimpleStringSchema,</span><br><span class="line">  properties)</span><br><span class="line"></span><br><span class="line">val stream = env.addSource(myConsumer)</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>在上面的示例中，当作业开始运行时，Consumer 会订阅名称与正则表达式相匹配的所有主题（以 test-topic- 开头并以一位数字结尾）。</p>
+<h3 id="2-5-偏移量提交"><a href="#2-5-偏移量提交" class="headerlink" title="2.5 偏移量提交"></a>2.5 偏移量提交</h3><p>Flink Kafka Consumer 可以配置如何将偏移量提交回 Kafka Broker。需要注意的是 Flink Kafka Consumer 不需要依赖提交的偏移量来提供容错保证。提交的偏移量仅是用来展示消费者的进度。</p>
+<p>有不同的方式配置偏移量提交，具体取决于作业是否启用了检查点：</p>
+<ul>
+<li>禁用检查点：如果禁用了检查点，那么 Flink Kafka Consumer 依赖于 Kafka 客户端的定期自动提交偏移量的功能。因此，要禁用或启用偏移量提交，只需在 Properties 配置中将 <code>enable.auto.commit</code> / <code>auto.commit.interval.ms</code> 设置为适当的值。</li>
+<li>启用检查点：如果启用检查点，那么 Flink Kafka Consumer 会在检查点完成时提交偏移量存储在检查点状态中。这样可以确保 Kafka Broker 中的已提交偏移量与检查点状态中的偏移量一致。用户可以通过调用 <code>setCommitOffsetsOnCheckpoints(boolean)</code> 方法来选择禁用或启用偏移提交（默认情况下为true）。请注意，在这种情况下，Properties 配置中的自动定期提交偏移设置将被忽略。</li>
+</ul>
+<h3 id="2-6-时间戳提取与Watermark输出"><a href="#2-6-时间戳提取与Watermark输出" class="headerlink" title="2.6 时间戳提取与Watermark输出"></a>2.6 时间戳提取与Watermark输出</h3><p>在许多情况下，记录的时间戳会存在记录本身中或在 ConsumerRecord 的元数据中。另外，用户可能希望周期性地或不定期地发出 Watermark。对于这些情况，Flink Kafka Consumer 可以指定 Watermark 策略。我们可以按照如下所述指定自定义策略，也可以使用内置策略。</p>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"localhost:9092"</span>);</span><br><span class="line">properties.setProperty(<span class="string">"group.id"</span>, <span class="string">"test"</span>);</span><br><span class="line"></span><br><span class="line">FlinkKafkaConsumer&lt;String&gt; myConsumer =</span><br><span class="line">    <span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(<span class="string">"topic"</span>, <span class="keyword">new</span> SimpleStringSchema(), properties);</span><br><span class="line">myConsumer.assignTimestampsAndWatermarks(</span><br><span class="line">    WatermarkStrategy.</span><br><span class="line">        .forBoundedOutOfOrderness(Duration.ofSeconds(<span class="number">20</span>)));</span><br><span class="line"></span><br><span class="line">DataStream&lt;String&gt; stream = env.addSource(myConsumer);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-Kafka生产者"><a href="#3-Kafka生产者" class="headerlink" title="3. Kafka生产者"></a>3. Kafka生产者</h3><p>Flink 的 Kafka 生产者：FlinkKafkaProducer（对于 Kafka 0.11.x 版本为 FlinkKafkaProducer011，对于 Kafka 0.10.x 版本为 FlinkKafkaProducer010) 提供了可以写入一个或多个 Kafka Topic 的功能。</p>
+<p>Kafka 生产者的构造函数接受如下参数:</p>
+<ul>
+<li>一个默认的输出Topic</li>
+<li>用于序列数据到 Kafka 的 SerializationSchema / KafkaSerializationSchema</li>
+<li>Kafka 生产者的配置。需要以下属性：<code>bootstrap.servers</code>(逗号分隔的 Kafka broker 列表、<code>zookeeper.connect</code>(逗号分隔的 Zookeeper 服务器)(对于 Kafka 0.8 是必需的)</li>
+<li>容错语义</li>
+</ul>
+<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; stream = ...</span><br><span class="line"></span><br><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"localhost:9092"</span>);</span><br><span class="line"></span><br><span class="line">FlinkKafkaProducer&lt;String&gt; myProducer = <span class="keyword">new</span> FlinkKafkaProducer&lt;&gt;(</span><br><span class="line">        <span class="string">"my-topic"</span>,                  <span class="comment">// target topic</span></span><br><span class="line">        <span class="keyword">new</span> SimpleStringSchema(),    <span class="comment">// serialization schema</span></span><br><span class="line">        properties,                  <span class="comment">// producer config</span></span><br><span class="line">        FlinkKafkaProducer.Semantic.EXACTLY_ONCE); <span class="comment">// fault-tolerance</span></span><br><span class="line"></span><br><span class="line">stream.addSink(myProducer);</span><br></pre></td></tr></table></figure></p>
+<p>Scala版本：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val stream: DataStream[String] = ...</span><br><span class="line"></span><br><span class="line">Properties properties = new Properties</span><br><span class="line">properties.setProperty(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;)</span><br><span class="line"></span><br><span class="line">val myProducer = new FlinkKafkaProducer[String](</span><br><span class="line">        &quot;my-topic&quot;,                  // target topic</span><br><span class="line">        new SimpleStringSchema(),    // serialization schema</span><br><span class="line">        properties,                  // producer config</span><br><span class="line">        FlinkKafkaProducer.Semantic.EXACTLY_ONCE) // fault-tolerance</span><br><span class="line"></span><br><span class="line">stream.addSink(myProducer)</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-1-SerializationSchema"><a href="#3-1-SerializationSchema" class="headerlink" title="3.1 SerializationSchema"></a>3.1 SerializationSchema</h4><p>Flink Kafka 生产者需要知道如何将 Java/Scala 对象转换为 Kafka 中的二进制数据。KafkaSerializationSchema 可以允许用户指定这样的一个 Schema。每个 Kafka 消息都会调用 <code>ProducerRecord&lt;byte[], byte[]&gt; serialize(T element, @Nullable Long timestamp)</code> 方法，生成一个 ProducerRecord 写入 Kafka。</p>
+<p>用户可以对如何将数据写到 Kafka 进行细粒度的控制。通过生产者记录，我们可以：</p>
+<ul>
+<li>设置标题值</li>
+<li>为每个记录定义Key</li>
+<li>指定数据的自定义分区</li>
+</ul>
+<h4 id="3-2-容错"><a href="#3-2-容错" class="headerlink" title="3.2 容错"></a>3.2 容错</h4><p>当启用 Flink 的检查点后，FlinkKafkaProducer 与 FlinkKafkaProducer011（适用于Kafka &gt;= 1.0.0 版本的 FlinkKafkaProducer）都可以提供 Exactly-once 的语义保证。FlinkKafkaProducer010 只能提供 At-Least-once 语义的保证。</p>
+<p>除了启用 Flink 的检查点之外，我们还可以通过将语义参数传递给 FlinkKafkaProducer 与 FlinkKafkaProducer011（适用于Kafka &gt;= 1.0.0 版本的FlinkKafkaProducer）来选择三种不同的操作模式：</p>
+<ul>
+<li>Semantic.NONE：Flink 不做任何保证。产生的记录可能会丢失或重复。</li>
+<li>Semantic.AT_LEAST_ONCE（默认设置）：保证了不会丢失任何记录（可能重复）。</li>
+<li>Semantic.EXACTLY_ONCE：通过 Kafka 事务提供 Exactly-once 的语义。每当我们使用事务写入 Kafka 时，请不要忘记为所有使用 Kafka 记录的应用程序设置所需的隔离等级（read_committed 或 read_uncommitted，后者为默认值）。</li>
+</ul>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/connectors/kafka.html" target="_blank" rel="noopener">Apache Kafka Connector</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-kafka-connector.html" title="Flink Kafka Connector">http://smartsi.club/flink-kafka-connector.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/parse-and-pass-arguments-in-flink.html" rel="next" title="Flink中如何解析与传递参数">
+                <i class="fa fa-chevron-left"></i> Flink中如何解析与传递参数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">234</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-依赖"><span class="nav-number">1.</span> <span class="nav-text">1. 依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Kafka消费者"><span class="nav-number">2.</span> <span class="nav-text">2. Kafka消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-DeserializationSchema"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 DeserializationSchema</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-起始位置配置"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 起始位置配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-容错"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 容错</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-分区与主题发现"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 分区与主题发现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-1-分区发现"><span class="nav-number">2.4.1.</span> <span class="nav-text">2.4.1 分区发现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-2-主题发现"><span class="nav-number">2.4.2.</span> <span class="nav-text">2.4.2  主题发现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-偏移量提交"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 偏移量提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-时间戳提取与Watermark输出"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 时间戳提取与Watermark输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Kafka生产者"><span class="nav-number">2.7.</span> <span class="nav-text">3. Kafka生产者</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-SerializationSchema"><span class="nav-number">2.7.1.</span> <span class="nav-text">3.1 SerializationSchema</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-容错"><span class="nav-number">2.7.2.</span> <span class="nav-text">3.2 容错</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
