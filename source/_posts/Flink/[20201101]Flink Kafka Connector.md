@@ -45,13 +45,13 @@ Apache Flink 内置了多个 Kafka Connector：通用、0.10、0.11等。这个�
 
 下面是老版本的 Connector 介绍：
 
-Maven|开始支持版本|消费者与生产者类名|Kafka版本|备注
----|---|---|---|---
-flink-connector-kafka-0.8_2.11|1.0.0|FlinkKafkaConsumer08、FlinkKafkaProducer08|0.8.x|使用 [SimpleConsumer](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example) API。偏移量被提交到ZooKeeper上。
-flink-connector-kafka-0.9_2.11|1.0.0|FlinkKafkaConsumer09、FlinkKafkaProducer09|0.9.x|使用新版 [Consumer](http://kafka.apache.org/documentation.html#newconsumerapi) API。
-flink-connector-kafka-0.10_2.11|1.2.0|FlinkKafkaConsumer010、FlinkKafkaProducer010|0.10.x|这个连接器支持生产与消费的[带时间戳的Kafka消息](https://cwiki.apache.org/confluence/display/KAFKA/KIP-32+-+Add+timestamps+to+Kafka+message)。
-flink-connector-kafka-0.11_2.11|1.4.0|FlinkKafkaConsumer011、FlinkKafkaProducer011|0.11.x| Kafka 0.11.x 版本不支持 scala 2.10 版本。此连接器支持 [Kafka 事务消息](https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging) 可以为生产者提供 Exactly-Once 语义。
-flink-connector-kafka_2.11 | 1.7.0 | FlinkKafkaConsumer、FlinkKafkaProducer | >= 1.0.0 | 这是一个通用的 Kafka 连接器，会追踪最新版本的 Kafka 客户端。|
+| Maven|开始支持版本|消费者与生产者类名|Kafka版本|备注
+|---|---|---|---|---
+| flink-connector-kafka-0.8_2.11|1.0.0|FlinkKafkaConsumer08、FlinkKafkaProducer08|0.8.x|使用 [SimpleConsumer](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+SimpleConsumer+Example) API。偏移量被提交到ZooKeeper上。|
+| flink-connector-kafka-0.9_2.11|1.0.0|FlinkKafkaConsumer09、FlinkKafkaProducer09|0.9.x|使用新版 [Consumer](http://kafka.apache.org/documentation.html#newconsumerapi) API。|
+| flink-connector-kafka-0.10_2.11|1.2.0|FlinkKafkaConsumer010、FlinkKafkaProducer010|0.10.x|这个连接器支持生产与消费的[带时间戳的Kafka消息](https://cwiki.apache.org/confluence/display/KAFKA/KIP-32+-+Add+timestamps+to+Kafka+message)。|
+| flink-connector-kafka-0.11_2.11|1.4.0|FlinkKafkaConsumer011、FlinkKafkaProducer011|0.11.x| Kafka 0.11.x 版本不支持 scala 2.10 版本。此连接器支持 [Kafka 事务消息](https://cwiki.apache.org/confluence/display/KAFKA/KIP-98+-+Exactly+Once+Delivery+and+Transactional+Messaging) 可以为生产者提供 Exactly-Once 语义。|
+| flink-connector-kafka_2.11 | 1.7.0 | FlinkKafkaConsumer、FlinkKafkaProducer | >= 1.0.0 | 这是一个通用的 Kafka 连接器，会追踪最新版本的 Kafka 客户端。|
 
 ## 2. Kafka消费者
 
