@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="Flink版本：1.11.2  编写单元测试是设计生产应用程序的基本任务之一。如果不进行测试，那么一个很小的代码变更都会导致生产任务的失败。因此，无论是清理数据、模型训练的简单作业，还是复杂的多租户实时数据处理系统，我们都应该为所有类型的应用程序编写单元测试。下面我们将提供有关 Apache Flink 应用程序的单元测试指南。Apache Flink 提供了一个强大的单元测试框架，以确保我们的">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink单元测试指南">
+<meta property="og:url" content="http://smartsi.club/a-guide-for-unit-testing-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Flink版本：1.11.2  编写单元测试是设计生产应用程序的基本任务之一。如果不进行测试，那么一个很小的代码变更都会导致生产任务的失败。因此，无论是清理数据、模型训练的简单作业，还是复杂的多租户实时数据处理系统，我们都应该为所有类型的应用程序编写单元测试。下面我们将提供有关 Apache Flink 应用程序的单元测试指南。Apache Flink 提供了一个强大的单元测试框架，以确保我们的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2020-11-09T14:11:27.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink单元测试指南">
+<meta name="twitter:description" content="Flink版本：1.11.2  编写单元测试是设计生产应用程序的基本任务之一。如果不进行测试，那么一个很小的代码变更都会导致生产任务的失败。因此，无论是清理数据、模型训练的简单作业，还是复杂的多租户实时数据处理系统，我们都应该为所有类型的应用程序编写单元测试。下面我们将提供有关 Apache Flink 应用程序的单元测试指南。Apache Flink 提供了一个强大的单元测试框架，以确保我们的">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/a-guide-for-unit-testing-in-apache-flink.html"/>
+
+
+  <title>Flink单元测试指南 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/a-guide-for-unit-testing-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink单元测试指南</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-09T22:09:01+08:00">2020-11-09</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/a-guide-for-unit-testing-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/a-guide-for-unit-testing-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/a-guide-for-unit-testing-in-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink单元测试指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Flink版本：1.11.2</p>
+</blockquote>
+<p>编写单元测试是设计生产应用程序的基本任务之一。如果不进行测试，那么一个很小的代码变更都会导致生产任务的失败。因此，无论是清理数据、模型训练的简单作业，还是复杂的多租户实时数据处理系统，我们都应该为所有类型的应用程序编写单元测试。下面我们将提供有关 Apache Flink 应用程序的单元测试指南。Apache Flink 提供了一个强大的单元测试框架，以确保我们的应用程序在上线后符合我们的预期。</p>
+<h3 id="1-Maven依赖"><a href="#1-Maven依赖" class="headerlink" title="1. Maven依赖"></a>1. Maven依赖</h3><p>如果我们要使用 Apache Flink 提供的单元测试框架，我们需要引入如下依赖：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-streaming-java_$&#123;scala.binary.version&#125;<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;flink.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">classifier</span>&gt;</span>tests<span class="tag">&lt;/<span class="name">classifier</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-test-utils_$&#123;scala.binary.version&#125;<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;flink.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-runtime_$&#123;scala.binary.version&#125;<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;flink.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">classifier</span>&gt;</span>tests<span class="tag">&lt;/<span class="name">classifier</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>flink.version：1.11.2，scala.binary.version：2.11</p>
+</blockquote>
+<p>注意：由于需要测试 JAR 包：org.apache.flink:flink-runtime_2.11:tests:1.11.2 和 org.apache.flink:flink-streaming-java_2.11:tests:1.11.2，所以依赖需要制定 classifier 为 tests。</p>
+<p>对于不同的算子，单元测试的编写也不一样。我们可以分为如下三种：</p>
+<ul>
+<li>无状态算子</li>
+<li>有状态算子</li>
+<li>定时处理算子（ProcessFunction）</li>
+</ul>
+<h3 id="2-无状态算子"><a href="#2-无状态算子" class="headerlink" title="2. 无状态算子"></a>2. 无状态算子</h3><blockquote>
+<p>只有在使用 Test Harnesses 时，我们才需要上述 Maven 依赖，所以在编写无状态算子的单元测试时，可以不添加上述 Maven 依赖。</p>
+</blockquote>
+<p>无状态算子的单元测试编写比较简单。我们只需要遵循编写测试用例的基本规范，即创建函数类的实例并测试适当的方法。我们以一个简单的 Map 算子为例：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyStatelessMap</span> <span class="keyword">implements</span> <span class="title">MapFunction</span>&lt;<span class="title">String</span>, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">map</span><span class="params">(String s)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String out = <span class="string">"hello "</span> + s;</span><br><span class="line">        <span class="keyword">return</span> out;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述算子的单元测试用例如下所示：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">MyStatelessMap</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    MyStatelessMap statelessMap = <span class="keyword">new</span> MyStatelessMap();</span><br><span class="line">    String out = statelessMap.map(<span class="string">"world"</span>);</span><br><span class="line">    Assert.assertEquals(<span class="string">"hello world"</span>, out);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下面让我们来看一下 FlatMap 算子：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyStatelessFlatMap</span> <span class="keyword">implements</span> <span class="title">FlatMapFunction</span>&lt;<span class="title">String</span>, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(String s, Collector&lt;String&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String out = <span class="string">"hello "</span> + s;</span><br><span class="line">        collector.collect(out);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>FlatMap 算子需要一个 Collector 对象以及一个输入参数。编写测试用例，我们有如下两种方式：</p>
+<ul>
+<li>使用 Mockito 模拟 Collector 对象</li>
+<li>使用 Flink 提供的 ListCollector</li>
+</ul>
+<p>我更喜欢第二种方法，因为只需要很少的代码即可，并且适合大多数情况：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">MyStatelessFlatMap</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    MyStatelessFlatMap statelessFlatMap = <span class="keyword">new</span> MyStatelessFlatMap();</span><br><span class="line">    List&lt;String&gt; out = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    ListCollector&lt;String&gt; listCollector = <span class="keyword">new</span> ListCollector&lt;&gt;(out);</span><br><span class="line">    statelessFlatMap.flatMap(<span class="string">"world"</span>, listCollector);</span><br><span class="line">    Assert.assertEquals(Lists.newArrayList(<span class="string">"hello world"</span>), out);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-有状态算子"><a href="#3-有状态算子" class="headerlink" title="3. 有状态算子"></a>3. 有状态算子</h3><p>测试有状态算子（使用状态或者定时器）会比较困难。因为用户代码需要与 Flink Runtime 进行交互。为此，Flink 提供了一组 TestHarness，可用于测试用户定义的函数以及自定义算子：</p>
+<ul>
+<li>OneInputStreamOperatorTestHarness：适用于 DataStreams 上的算子</li>
+<li>KeyedOneInputStreamOperatorTestHarness：适用于 KeyedStreams 上的算子</li>
+<li>TwoInputStreamOperatorTestHarness：用于两个数据流的 ConnectedStream 的算子</li>
+<li>KeyedTwoInputStreamOperatorTestHarness：用于两个 KeyedStream 的 ConnectedStream 上的算子</li>
+</ul>
+<p>我们以有状态的 FlatMap 函数为例：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyStatefulFlatMap</span> <span class="keyword">extends</span> <span class="title">RichFlatMapFunction</span>&lt;<span class="title">String</span>, <span class="title">Long</span>&gt; </span>&#123;</span><br><span class="line">    ValueState&lt;Long&gt; counterState;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">open</span><span class="params">(Configuration parameters)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        ValueStateDescriptor&lt;Long&gt; descriptor = <span class="keyword">new</span> ValueStateDescriptor&lt;&gt;(</span><br><span class="line">                <span class="string">"Counter"</span>,</span><br><span class="line">                Types.LONG</span><br><span class="line">        );</span><br><span class="line">        <span class="keyword">this</span>.counterState = getRuntimeContext().getState(descriptor);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(String s, Collector&lt;Long&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Long count = <span class="number">0L</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.counterState.value() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            count = <span class="keyword">this</span>.counterState.value();</span><br><span class="line">        &#125;</span><br><span class="line">        count ++;</span><br><span class="line">        <span class="keyword">this</span>.counterState.update(count);</span><br><span class="line">        collector.collect(count);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>编写上述类的单元测试最复杂部分是模拟应用程序的配置以及运行时上下文。我们使用 Flink 提供的 TestHarness 类，这样我们就不必自己创建模拟对象。使用 KeyedOperatorHarness 类进行单元测试如下所示：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyStatefullFlatMapUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> KeyedOneInputStreamOperatorTestHarness&lt;String, String, Long&gt;  testHarness;</span><br><span class="line">    <span class="keyword">private</span> MyStatefulFlatMap statefulFlatMap;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setupTestHarness</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        statefulFlatMap = <span class="keyword">new</span> MyStatefulFlatMap();</span><br><span class="line">        <span class="comment">// KeyedOneInputStreamOperatorTestHarness 需要三个参数：算子对象、键 Selector、键类型</span></span><br><span class="line">        testHarness = <span class="keyword">new</span> KeyedOneInputStreamOperatorTestHarness&lt;&gt;(</span><br><span class="line">                <span class="keyword">new</span> StreamFlatMap&lt;&gt;(statefulFlatMap),</span><br><span class="line">                x -&gt; <span class="string">"1"</span>,</span><br><span class="line">                Types.STRING</span><br><span class="line">        );</span><br><span class="line">        testHarness.open();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">MyStatefulFlatMap</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        <span class="comment">// test first record</span></span><br><span class="line">        testHarness.processElement(<span class="string">"a"</span>, <span class="number">10</span>);</span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(<span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">1L</span>, <span class="number">10</span>)),</span><br><span class="line">                <span class="keyword">this</span>.testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        <span class="comment">// test second record</span></span><br><span class="line">        testHarness.processElement(<span class="string">"b"</span>, <span class="number">20</span>);</span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">1L</span>, <span class="number">10</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">2L</span>, <span class="number">20</span>)</span><br><span class="line">                ),</span><br><span class="line">                testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        <span class="comment">// test other record</span></span><br><span class="line">        testHarness.processElement(<span class="string">"c"</span>, <span class="number">30</span>);</span><br><span class="line">        testHarness.processElement(<span class="string">"d"</span>, <span class="number">40</span>);</span><br><span class="line">        testHarness.processElement(<span class="string">"e"</span>, <span class="number">50</span>);</span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">1L</span>, <span class="number">10</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">2L</span>, <span class="number">20</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">3L</span>, <span class="number">30</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">4L</span>, <span class="number">40</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">5L</span>, <span class="number">50</span>)</span><br><span class="line">                ),</span><br><span class="line">                testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>TestHarness 提供了许多辅助方法，上述代码使用了其中三种：</p>
+<ul>
+<li>open：使用相关参数调用 FlatMap 函数的 open 方法，同时还会对上下文进行初始化。</li>
+<li>processElement：允许用户传入输入元素以及与该元素关联的时间戳。</li>
+<li>extractOutputStreamRecords：从 Collector 获取输出记录以及时间戳。</li>
+</ul>
+<p>TestHarness 极大地简化了有状态算子的单元测试。</p>
+<h3 id="4-定时处理算子"><a href="#4-定时处理算子" class="headerlink" title="4. 定时处理算子"></a>4. 定时处理算子</h3><p>为与时间有关的 Process Function 编写单元测试与为有状态算子编写单元测试非常相似，我们都需要使用 TestHarness。但是，在这我们还需要考虑另一个方面，即为事件提供时间戳并控制应用程序的当前时间。通过设置当前（处理时间或事件时间）时间，我们可以触发注册的计时器，并调用该函数的 onTimer 方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TimerProcessFunction</span> <span class="keyword">extends</span> <span class="title">KeyedProcessFunction</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processElement</span><span class="params">(String s, Context context, Collector&lt;String&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        context.timerService().registerProcessingTimeTimer(<span class="number">50</span>);</span><br><span class="line">        String out = <span class="string">"hello "</span> + s;</span><br><span class="line">        collector.collect(out);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onTimer</span><span class="params">(<span class="keyword">long</span> timestamp, OnTimerContext ctx, Collector&lt;String&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 到达时间点触发事件操作</span></span><br><span class="line">        out.collect(String.format(<span class="string">"Timer triggered at timestamp %d"</span>, timestamp));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们需要测试 KeyedProcessFunction 中的两个方法，即 processElement 和 onTimer 方法。使用 TestHarness，我们可以控制函数的当前时间。因此，我们可以随意触发计时器，而不必等待特定的时间：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TimerProcessFunctionUnitTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> OneInputStreamOperatorTestHarness&lt;String, String&gt; testHarness;</span><br><span class="line">    <span class="keyword">private</span> TimerProcessFunction processFunction;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setupTestHarness</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        processFunction = <span class="keyword">new</span> TimerProcessFunction();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// KeyedOneInputStreamOperatorTestHarness 需要三个参数：算子对象、键 Selector、键类型</span></span><br><span class="line">        testHarness = <span class="keyword">new</span> KeyedOneInputStreamOperatorTestHarness&lt;&gt;(</span><br><span class="line">                <span class="keyword">new</span> KeyedProcessOperator&lt;&gt;(processFunction),</span><br><span class="line">                x -&gt; <span class="string">"1"</span>,</span><br><span class="line">                Types.STRING</span><br><span class="line">        );</span><br><span class="line">        <span class="comment">// Function time is initialized to 0</span></span><br><span class="line">        testHarness.open();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testProcessElement</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line"></span><br><span class="line">        testHarness.processElement(<span class="string">"world"</span>, <span class="number">10</span>);</span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="string">"hello world"</span>, <span class="number">10</span>)</span><br><span class="line">                ),</span><br><span class="line">                testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testOnTimer</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// test first record</span></span><br><span class="line">        testHarness.processElement(<span class="string">"world"</span>, <span class="number">10</span>);</span><br><span class="line">        Assert.assertEquals(<span class="number">1</span>, testHarness.numProcessingTimeTimers());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Function time 设置为 50</span></span><br><span class="line">        testHarness.setProcessingTime(<span class="number">50</span>);</span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="string">"hello world"</span>, <span class="number">10</span>),</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="string">"Timer triggered at timestamp 50"</span>)</span><br><span class="line">                ),</span><br><span class="line">                testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>考虑到 ProcessFunction 的重要性，除了上面可以直接用于测试 ProcessFunction 的 TestHarness 之外，Flink 还提供了一个名为 ProcessFunctionTestHarnesses 的 TestHarness 工厂，可以大大简化 TestHarness 的实例化。如下所示：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyProcessFunction</span> <span class="keyword">extends</span> <span class="title">ProcessFunction</span>&lt;<span class="title">Integer</span>, <span class="title">Integer</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processElement</span><span class="params">(Integer integer, Context context, Collector&lt;Integer&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        collector.collect(integer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过传递适当的参数并验证输出，使用 ProcessFunctionTestHarnesses 进行单元测试会更加容易：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProcessFunctionUnitTest</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testPassThrough</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        MyProcessFunction processFunction = <span class="keyword">new</span> MyProcessFunction();</span><br><span class="line"></span><br><span class="line">        OneInputStreamOperatorTestHarness&lt;Integer, Integer&gt; testHarness = ProcessFunctionTestHarnesses</span><br><span class="line">                .forProcessFunction(processFunction);</span><br><span class="line"></span><br><span class="line">        testHarness.processElement(<span class="number">1</span>, <span class="number">10</span>);</span><br><span class="line">        Assert.assertEquals(</span><br><span class="line">                Lists.newArrayList(</span><br><span class="line">                        <span class="keyword">new</span> StreamRecord&lt;&gt;(<span class="number">1</span>, <span class="number">10</span>)</span><br><span class="line">                ),</span><br><span class="line">                testHarness.extractOutputStreamRecords()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>有关如何使用 ProcessFunctionTestHarnesses 测试 ProcessFunction 不同风味（例如 KeyedProcessFunction，KeyedCoProcessFunction，BroadcastProcessFunction等）的更多示例，，可以参阅 <a href="https://github.com/apache/flink/blob/d31bd5af28def3de4e353bb1e667eb7f2973ab6a/flink-streaming-java/src/test/java/org/apache/flink/streaming/util/ProcessFunctionTestHarnessesTest.java" target="_blank" rel="noopener">ProcessFunctionTestHarnessesTest</a>：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;IN, OUT&gt; <span class="function">OneInputStreamOperatorTestHarness&lt;IN, OUT&gt; <span class="title">forProcessFunction</span><span class="params">(ProcessFunction&lt;IN, OUT&gt; function)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K, IN, OUT&gt; <span class="function">KeyedOneInputStreamOperatorTestHarness&lt;K, IN, OUT&gt; <span class="title">forKeyedProcessFunction</span><span class="params">(KeyedProcessFunction&lt;K, IN, OUT&gt; function, KeySelector&lt;IN, K&gt; keySelector, TypeInformation&lt;K&gt; keyType)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;IN1, IN2, OUT&gt; <span class="function">TwoInputStreamOperatorTestHarness&lt;IN1, IN2, OUT&gt; <span class="title">forCoProcessFunction</span><span class="params">(CoProcessFunction&lt;IN1, IN2, OUT&gt; function)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K, IN1, IN2, OUT&gt; <span class="function">KeyedTwoInputStreamOperatorTestHarness&lt;K, IN1, IN2, OUT&gt; <span class="title">forKeyedCoProcessFunction</span><span class="params">(KeyedCoProcessFunction&lt;K, IN1, IN2, OUT&gt; function, KeySelector&lt;IN1, K&gt; keySelector1, KeySelector&lt;IN2, K&gt; keySelector2, TypeInformation&lt;K&gt; keyType)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;IN1, IN2, OUT&gt; <span class="function">BroadcastOperatorTestHarness&lt;IN1, IN2, OUT&gt; <span class="title">forBroadcastProcessFunction</span><span class="params">(BroadcastProcessFunction&lt;IN1, IN2, OUT&gt; function, MapStateDescriptor... descriptors)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;K, IN1, IN2, OUT&gt; <span class="function">KeyedBroadcastOperatorTestHarness&lt;K, IN1, IN2, OUT&gt; <span class="title">forKeyedBroadcastProcessFunction</span><span class="params">(KeyedBroadcastProcessFunction&lt;K, IN1, IN2, OUT&gt; function, KeySelector&lt;IN1, K&gt; keySelector, TypeInformation&lt;K&gt; keyType, MapStateDescriptor... descriptors)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>上述示例代码<a href="https://github.com/sjf0115/data-example/tree/master/flink-example/src/test/java/com/flink/example/test" target="_blank" rel="noopener">点此查看</a></p>
+</blockquote>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>参考：</p>
+<ul>
+<li><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/stream/testing.html" target="_blank" rel="noopener">Testing</a></li>
+<li><a href="https://flink.apache.org/news/2020/02/07/a-guide-for-unit-testing-in-apache-flink.html" target="_blank" rel="noopener">A Guide for Unit Testing in Apache Flink</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/a-guide-for-unit-testing-in-apache-flink.html" title="Flink单元测试指南">http://smartsi.club/a-guide-for-unit-testing-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-kafka-connector.html" rel="next" title="Flink Kafka Connector">
+                <i class="fa fa-chevron-left"></i> Flink Kafka Connector
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">235</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Maven依赖"><span class="nav-number">1.</span> <span class="nav-text">1. Maven依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-无状态算子"><span class="nav-number">2.</span> <span class="nav-text">2. 无状态算子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-有状态算子"><span class="nav-number">3.</span> <span class="nav-text">3. 有状态算子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-定时处理算子"><span class="nav-number">4.</span> <span class="nav-text">4. 定时处理算子</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
