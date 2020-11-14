@@ -301,7 +301,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/java-on-off-heap-memory.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/jvm-common-garbage-collector.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -320,7 +320,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/java-on-off-heap-memory.html" itemprop="url">Java 堆内内存与堆外内存</a></h2>
+                <a class="post-title-link" href="/jvm-common-garbage-collector.html" itemprop="url">JVM 垃圾收集器</a></h2>
         
 
         <div class="post-meta">
@@ -332,7 +332,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-04T17:40:01+08:00">2018-02-04</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-10T17:40:01+08:00">2018-02-10</time>
             
 
             
@@ -367,8 +367,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/java-on-off-heap-memory.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/java-on-off-heap-memory.html" itemprop="commentCount"></span>
+                <a href="/jvm-common-garbage-collector.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/jvm-common-garbage-collector.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -376,7 +376,7 @@
 
           
           
-             <span id="/java-on-off-heap-memory.html" class="leancloud_visitors" data-flag-title="Java 堆内内存与堆外内存">
+             <span id="/jvm-common-garbage-collector.html" class="leancloud_visitors" data-flag-title="JVM 垃圾收集器">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -409,11 +409,12 @@
       
         
           
-          一般情况下，Java 中分配的非空对象都是由 Java 虚拟机的垃圾收集器管理的，也称为堆内内存（on-heap memory）。虚拟机会定期对垃圾内存进行回收，在某些特定的时间点，它会进行一次彻底的回收（full gc）。彻底回收时，垃圾收集器会对所有分配的堆内内存进行完整的扫描，这意味着一个重要
+          本文“垃圾收集器”节选自《深入理解Java虚拟机:JVM高级特性与最佳实践》【作者：周志明】
+如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。Java 虚拟机规范中对垃圾收集器应该如何实现并没有任何规定，因此不同的厂商、不同版本的虚拟机所提供的垃圾收集器都可能会有很大差别，并
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/java-on-off-heap-memory.html#more" rel="contents">
+            <a class="btn" href="/jvm-common-garbage-collector.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -581,6 +582,171 @@
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/jvm-garbage-collection-algorithm.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/java-on-off-heap-memory.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/java-on-off-heap-memory.html" itemprop="url">Java 堆内内存与堆外内存</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-04T17:40:01+08:00">2018-02-04</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/java-on-off-heap-memory.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/java-on-off-heap-memory.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/java-on-off-heap-memory.html" class="leancloud_visitors" data-flag-title="Java 堆内内存与堆外内存">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          一般情况下，Java 中分配的非空对象都是由 Java 虚拟机的垃圾收集器管理的，也称为堆内内存（on-heap memory）。虚拟机会定期对垃圾内存进行回收，在某些特定的时间点，它会进行一次彻底的回收（full gc）。彻底回收时，垃圾收集器会对所有分配的堆内内存进行完整的扫描，这意味着一个重要
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/java-on-off-heap-memory.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -5104,171 +5270,6 @@ The Dataflow Mo
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-parallel-execute.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="sjf0115">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="SmartSi">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/flink-parallel-execute.html" itemprop="url">Flink1.4 并发执行</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T14:07:01+08:00">2018-01-04</time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/flink-parallel-execute.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/flink-parallel-execute.html" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/flink-parallel-execute.html" class="leancloud_visitors" data-flag-title="Flink1.4 并发执行">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallel
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/flink-parallel-execute.html#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -5320,7 +5321,7 @@ The Dataflow Mo
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">235</span>
+                    <span class="site-state-item-count">236</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
