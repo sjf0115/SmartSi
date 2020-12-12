@@ -97,21 +97,23 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink 容错," />
+  <meta name="keywords" content="Flink," />
 
 
-<meta name="description" content="Flink 中的每个函数和操作符都可以是有状态的（请参阅使用状态了解详细信息）。有状态函数在处理单个元素/事件时存储数据。 为了能够状态容错，Flink 需要对状态进行 checkpoint。检查点允许 Flink 在流中恢复状态和位置，为应用程序提供与无故障执行相同的语义。 关于 Flink 流式容错机制背后的技术请参阅流式容错的详细文档。 1. 前提条件Flink 的检查点机制与流和状态的持久">
-<meta name="keywords" content="Flink,Flink 容错">
+<meta name="description" content="Flink版本：1.11  Flink 中每个函数和算子都可以是有状态的（请参阅状态分类了解详细信息）。有状态函数在处理单个元素/事件时会存储数据。为了能够使状态可以容错，Flink 需要对状态进行 checkpoint。checkpoint 可以允许 Flink 在流中恢复状态以及消费位置。  关于 Flink 容错机制背后的技术请参阅流式容错的详细文档。  1. 前提条件Flink Chec">
+<meta name="keywords" content="Flink">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 检查点启用与配置">
+<meta property="og:title" content="Flink 检查点启用与配置">
 <meta property="og:url" content="http://smartsi.club/flink-stream-development-checkpointing-enable-config.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Flink 中的每个函数和操作符都可以是有状态的（请参阅使用状态了解详细信息）。有状态函数在处理单个元素/事件时存储数据。 为了能够状态容错，Flink 需要对状态进行 checkpoint。检查点允许 Flink 在流中恢复状态和位置，为应用程序提供与无故障执行相同的语义。 关于 Flink 流式容错机制背后的技术请参阅流式容错的详细文档。 1. 前提条件Flink 的检查点机制与流和状态的持久">
+<meta property="og:description" content="Flink版本：1.11  Flink 中每个函数和算子都可以是有状态的（请参阅状态分类了解详细信息）。有状态函数在处理单个元素/事件时会存储数据。为了能够使状态可以容错，Flink 需要对状态进行 checkpoint。checkpoint 可以允许 Flink 在流中恢复状态以及消费位置。  关于 Flink 容错机制背后的技术请参阅流式容错的详细文档。  1. 前提条件Flink Chec">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2020-12-12T13:48:20.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 检查点启用与配置">
-<meta name="twitter:description" content="Flink 中的每个函数和操作符都可以是有状态的（请参阅使用状态了解详细信息）。有状态函数在处理单个元素/事件时存储数据。 为了能够状态容错，Flink 需要对状态进行 checkpoint。检查点允许 Flink 在流中恢复状态和位置，为应用程序提供与无故障执行相同的语义。 关于 Flink 流式容错机制背后的技术请参阅流式容错的详细文档。 1. 前提条件Flink 的检查点机制与流和状态的持久">
+<meta name="twitter:title" content="Flink 检查点启用与配置">
+<meta name="twitter:description" content="Flink版本：1.11  Flink 中每个函数和算子都可以是有状态的（请参阅状态分类了解详细信息）。有状态函数在处理单个元素/事件时会存储数据。为了能够使状态可以容错，Flink 需要对状态进行 checkpoint。checkpoint 可以允许 Flink 在流中恢复状态以及消费位置。  关于 Flink 容错机制背后的技术请参阅流式容错的详细文档。  1. 前提条件Flink Chec">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
 
 
 
@@ -121,7 +123,7 @@
   <link rel="canonical" href="http://smartsi.club/flink-stream-development-checkpointing-enable-config.html"/>
 
 
-  <title>Flink1.4 检查点启用与配置 | SmartSi</title>
+  <title>Flink 检查点启用与配置 | SmartSi</title>
   
 
 
@@ -319,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 检查点启用与配置</h2>
+          <h2 class="post-title" itemprop="name headline">Flink 检查点启用与配置</h2>
         
 
         <div class="post-meta">
@@ -331,7 +333,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-17T12:30:17+08:00">2018-01-17</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-12T21:24:17+08:00">2020-12-12</time>
             
 
             
@@ -375,7 +377,7 @@
 
           
           
-             <span id="/flink-stream-development-checkpointing-enable-config.html" class="leancloud_visitors" data-flag-title="Flink1.4 检查点启用与配置">
+             <span id="/flink-stream-development-checkpointing-enable-config.html" class="leancloud_visitors" data-flag-title="Flink 检查点启用与配置">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -406,46 +408,116 @@
       
 
       
-        <p>Flink 中的每个函数和操作符都可以是有状态的（请参阅<a href="http://smartsi.club/2018/01/16/flink-stream-working-with-state/">使用状态</a>了解详细信息）。有状态函数在处理单个元素/事件时存储数据。</p>
-<p>为了能够状态容错，Flink 需要对状态进行 <code>checkpoint</code>。检查点允许 <code>Flink</code> 在流中恢复状态和位置，为应用程序提供与无故障执行相同的语义。</p>
-<p>关于 Flink 流式容错机制背后的技术请参阅<a href="http://smartsi.club/2018/01/24/flink-data-streaming-fault-tolerance/">流式容错</a>的详细文档。</p>
-<h3 id="1-前提条件"><a href="#1-前提条件" class="headerlink" title="1. 前提条件"></a>1. 前提条件</h3><p><code>Flink</code> 的检查点机制与流和状态的持久存储进行交互。一般来说，它要求：</p>
-<ul>
-<li>一个可持久化（或保存很长时间）的数据源，可以重放特定时间段的记录。持久消息队列是这种数据源的一个例子（例如 <code>Apache Kafka</code>，<code>RabbitMQ</code>，<code>Amazon Kinesis</code>，<code>Google PubSub</code>）或 文件系统（例如 <code>HDFS</code>， <code>S3</code>， <code>GFS</code>， <code>NFS</code>， <code>Ceph</code> 等）。</li>
-<li>状态的持久化存储，通常是分布式文件系统（例如 <code>HDFS</code>， <code>S3</code>， <code>GFS</code>， <code>NFS</code>， <code>Ceph</code> 等）</li>
-</ul>
-<h3 id="2-启用和配置检查点"><a href="#2-启用和配置检查点" class="headerlink" title="2. 启用和配置检查点"></a>2. 启用和配置检查点</h3><p>默认情况下，检查点被禁用。要启用检查点，要在 <code>StreamExecutionEnvironment</code> 上调用 <code>enableCheckpointing（n）</code>，其中<code>n</code>是检查点时间间隔（以毫秒为单位）。</p>
-<p>检查点的其他参数包括：</p>
-<p>(1)  <code>exactly-once</code> 与 <code>at-least-once</code>：你可以选择性的将模式传递给 <code>enableCheckpointing（n）</code> 方法来在两个保证级别之间进行选择。对于大多数应用来说，一般都选择 <code>exactly-once</code>。<code>at-least-once</code>可能与某些超低延迟（持续几毫秒）的应用程序有关。</p>
-<p>(2) 检查点超时：如果在规定时间之前没有完成检查点，正在进行的检查点就会被终止。</p>
-<p>(3) 检查点之间的最小时间：为了确保流式应用程序在检查点之间有一定的进展，可以定义检查点之间的时间间隔。例如，如果此值设置为5000，不论检查点持续时间和检查点间隔是多少，下一个检查点将在上一个检查点完成之后的5秒内启动。请注意，这意味着检查点间隔 <code>checkpoint interval</code> 永远不会小于此参数。</p>
-<p>通过定义 <code>检查点之间的时间差</code> (<code>time between checkpoints</code>)而不是检查点间隔(<code>checkpoint interval</code>)来配置应用程序通常更容易，因为 <code>检查点之间的时间差</code> 不会受到检查点有时花费比平均时间更长时间的影响（例如，如果目标存储系统暂时比较慢）。</p>
-<p>请注意，这个值也意味着并发检查点的数量为1。</p>
-<p>(4) 并发检查点的数量：默认情况下，当一个检查点正在运行时，系统不会触发另一个检查点。这确保了拓扑结构不会在检查点上花费太多时间，并且不会在处理流时有进展(not make progress with processing the streams)。可以允许多个重叠的检查点，这对于具有一定处理延迟（例如，因为函数调用外部服务需要等待一些时间响应），但是仍然想要做非常频繁的 <code>checkpoints</code>（100毫秒 ）重新处理很少见的失败情况具有一定意义。</p>
-<p>定义检查点之间的最短时间时，不能使用此选项。</p>
-<p>(5) 外部检查点<code>externalized checkpoints</code>：可以配置定期检查点持久化到从外部存储中。外部检查点将其元数据写入持久性存储，作业失败时也不会自动清理。这样，如果你的作业失败，你将会有一个检查点用来恢复。有关<a href="http://smartsi.club/2018/01/30/flink-stream-deployment-externalized-checkpoints/">外部检查点</a>的部署说明中有更多详细信息。</p>
-<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line"><span class="comment">// start a checkpoint every 1000 ms</span></span><br><span class="line">env.enableCheckpointing(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// advanced options:</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// set mode to exactly-once (this is the default)</span></span><br><span class="line">env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);</span><br><span class="line"></span><br><span class="line"><span class="comment">// make sure 500 ms of progress happen between checkpoints</span></span><br><span class="line">env.getCheckpointConfig().setMinPauseBetweenCheckpoints(<span class="number">500</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// checkpoints have to complete within one minute, or are discarded</span></span><br><span class="line">env.getCheckpointConfig().setCheckpointTimeout(<span class="number">60000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// allow only one checkpoint to be in progress at the same time</span></span><br><span class="line">env.getCheckpointConfig().setMaxConcurrentCheckpoints(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// enable externalized checkpoints which are retained after job cancellation</span></span><br><span class="line">env.getCheckpointConfig().enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本:<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> env = <span class="type">StreamExecutionEnvironment</span>.getExecutionEnvironment()</span><br><span class="line"></span><br><span class="line"><span class="comment">// start a checkpoint every 1000 ms</span></span><br><span class="line">env.enableCheckpointing(<span class="number">1000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// advanced options:</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// set mode to exactly-once (this is the default)</span></span><br><span class="line">env.getCheckpointConfig.setCheckpointingMode(<span class="type">CheckpointingMode</span>.<span class="type">EXACTLY_ONCE</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// make sure 500 ms of progress happen between checkpoints</span></span><br><span class="line">env.getCheckpointConfig.setMinPauseBetweenCheckpoints(<span class="number">500</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// checkpoints have to complete within one minute, or are discarded</span></span><br><span class="line">env.getCheckpointConfig.setCheckpointTimeout(<span class="number">60000</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// allow only one checkpoint to be in progress at the same time</span></span><br><span class="line">env.getCheckpointConfig.setMaxConcurrentCheckpoints(<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
-<h3 id="3-相关配置选项"><a href="#3-相关配置选项" class="headerlink" title="3. 相关配置选项"></a>3. 相关配置选项</h3><p>其他参数和默认值也可以通过<code>conf/flink-conf.yaml</code>配置文件进行设置（请参阅完整指南的<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/config.html" target="_blank" rel="noopener">配置</a>）：</p>
-<p>(1) <code>state.backend</code>：如果启用了检查点，用来存储算子状态检查点的终端。支持的终端：</p>
-<ul>
-<li><code>jobmanager</code>：内存状态，备份到 <code>JobManager</code>/<code>ZooKeeper</code> 的内存中。应在较小状态（<code>Kafka</code>偏移量）或测试和本地调试时使用。</li>
-<li>文件系统：状态存储在 <code>TaskManager</code> 的内存中，状态快照存储在文件系统中。<code>Flink</code>支持所有文件系统，例如 <code>HDFS</code>，<code>S3</code>，…</li>
-</ul>
-<p>(2) <code>state.backend.fs.checkpointdir</code>：用于在 <code>Flink</code> 支持的文件系统中存储检查点的目录。注意：<code>JobManager</code> 必须可以访问状态终端，本地安装时可以使用<code>file：//</code>。</p>
-<p>(3) <code>state.backend.rocksdb.checkpointdir</code>: 用于存储 <code>RocksDB</code> 文件的本地目录，或由系统目录分隔符（例如<code>Linux/Unix</code>上的’：’（冒号））分隔的目录列表。（默认值是<code>taskmanager.tmp.dirs</code>）</p>
-<p>(4) <code>state.checkpoints.dir</code>: 外部检查点元数据的目标目录。</p>
-<p>(5) <code>state.checkpoints.num-retained</code>: 已完成的检查点实例的数量。如果最新的检查点已损坏，必须使用多个实例才可以恢复回退到较早的检查点。（默认值：1）</p>
-<h3 id="4-选择状态终端"><a href="#4-选择状态终端" class="headerlink" title="4. 选择状态终端"></a>4. 选择状态终端</h3><p><code>Flink</code> 的<a href="http://smartsi.club/2018/01/24/flink-data-streaming-fault-tolerance/">检查点机制</a>存储定时器中所有状态和有状态算子的一致性快照，包括连接器，窗口以及任何用户自定义的状态。检查点存储的位置（例如，<code>JobManager</code> 的内存，文件系统，数据库）取决于状态终端的配置。</p>
-<p>默认情况下，状态保存在 <code>TaskManager</code> 的内存中，检查点存储在 <code>JobManager</code> 的内存中。为了适当地存储较大的状态，<code>Flink</code> 也支持多种方法在其他状态终端存储状态以及对状态进行检查点操作。状态终端的选择可以通过 <code>StreamExecutionEnvironment.setStateBackend（...）</code> 来配置。</p>
-<p>有关可用状态终端以及作业范围和群集范围内配置选项的的详细信息，请参阅<a href="http://smartsi.club/2018/01/17/flink-stream-state-backends/">状态终端</a>。</p>
-<h3 id="5-迭代作业中的状态检查点"><a href="#5-迭代作业中的状态检查点" class="headerlink" title="5. 迭代作业中的状态检查点"></a>5. 迭代作业中的状态检查点</h3><p>目前 <code>Flink</code> 只为无迭代作业提供处理保证。在迭代作业上启用检查点会导致异常。为了在迭代程序上强制进行检查点操作，用户需要在启用检查点时设置特殊标志：<code>env.enableCheckpointing（interval，force = true）</code>。</p>
-<h3 id="6-重启策略"><a href="#6-重启策略" class="headerlink" title="6. 重启策略"></a>6. 重启策略</h3><p>Flink支持不同的重启策略，控制在失败情况下重启的方式。有关更多信息，请参阅<a href="http://smartsi.club/2018/01/04/flink-restart-strategy/">重启策略</a>。</p>
-<blockquote>
-<p>备注:</p>
-<p>Flink版本:1.4</p>
+        <blockquote>
+<p>Flink版本：1.11</p>
 </blockquote>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html</a></p>
+<p>Flink 中每个函数和算子都可以是有状态的（请参阅<a href="http://smartsi.club/flink-stream-working-with-state.html">状态分类</a>了解详细信息）。有状态函数在处理单个元素/事件时会存储数据。为了能够使状态可以容错，Flink 需要对状态进行 checkpoint。checkpoint 可以允许 Flink 在流中恢复状态以及消费位置。</p>
+<blockquote>
+<p>关于 Flink 容错机制背后的技术请参阅<a href="http://smartsi.club/flink-data-streaming-fault-tolerance.html">流式容错</a>的详细文档。</p>
+</blockquote>
+<h3 id="1-前提条件"><a href="#1-前提条件" class="headerlink" title="1. 前提条件"></a>1. 前提条件</h3><p>Flink Checkpoint 机制可以与流和状态的持久化存储进行交互。一般来说，需要：</p>
+<ul>
+<li>一个可持久化（或保存很长时间）的数据源：可以重新消费指定时间段的记录。持久化消息队列（例如，Apache Kafka，RabbitMQ，Amazon Kinesis，Google PubSub）或者文件系统（例如，HDFS，S3，GFS，NFS，Ceph）可以满足这样的需求。</li>
+<li>状态的持久化存储。通常是分布式文件系统（例如，HDFS，S3，GFS，NFS，Ceph）。</li>
+</ul>
+<h3 id="2-启用检查点"><a href="#2-启用检查点" class="headerlink" title="2. 启用检查点"></a>2. 启用检查点</h3><p>默认情况下，Checkpoint 不会被启用。如果要启用 Checkpoint，需要在 StreamExecutionEnvironment 上调用 enableCheckpointing 方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.enableCheckpointing(<span class="number">1000</span>);</span><br></pre></td></tr></table></figure></p>
+<p>其中 1000 是 Checkpoint 启动时间间隔，表示下一个 Checkpoint 将在上一个 Checkpoint 启动后的 1 秒内启动。</p>
+<blockquote>
+<p>如果状态比较大，建议适当的增加该值。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">StreamExecutionEnvironment <span class="title">enableCheckpointing</span><span class="params">(<span class="keyword">long</span> interval)</span></span>;</span><br><span class="line"><span class="function">StreamExecutionEnvironment <span class="title">enableCheckpointing</span><span class="params">(<span class="keyword">long</span> interval, CheckpointingMode mode)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>除了设置 Checkpoint 的启动时间间隔，我们还可以可选的将 Checkpoint 模式（CheckpointingMode）传递给 enableCheckpointing 方法，可以选择 Exactly-Once 或 At-Least-Once 处理语义。对于大多数应用来说，选择 Exactly-Once 处理语义即满足需求。只有某些超低延迟（持续几毫秒）的应用程序才会选择 At-Least-Once 处理语义：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.enableCheckpointing(<span class="number">1000</span>, CheckpointingMode.EXACTLY_ONCE);</span><br></pre></td></tr></table></figure></p>
+<p>或者使用如下代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果不显示提供 CheckpointingMode，默认是 Exactly-Once 语义。</p>
+</blockquote>
+<h3 id="3-配置检查点"><a href="#3-配置检查点" class="headerlink" title="3. 配置检查点"></a>3. 配置检查点</h3><p>除了配置启动时间间隔和处理语义之外，我们还可以配置其他参数。</p>
+<h4 id="3-1-Checkpoint-超时时间"><a href="#3-1-Checkpoint-超时时间" class="headerlink" title="3.1 Checkpoint 超时时间"></a>3.1 Checkpoint 超时时间</h4><p>超时时间指定了每次 Checkpoint 执行上限时间，一旦超过该阈值，Flink 将会中断 Checkpoint，并按照超时处理。如下所示配置，必须在一分钟内完成 Checkpoint，否则将会中止正在进行的 Checkpoint：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// checkpoints have to complete within one minute, or are discarded</span></span><br><span class="line">env.getCheckpointConfig().setCheckpointTimeout(<span class="number">60000</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-最大并行执行-Checkpoint-个数"><a href="#3-2-最大并行执行-Checkpoint-个数" class="headerlink" title="3.2 最大并行执行 Checkpoint 个数"></a>3.2 最大并行执行 Checkpoint 个数</h3><p>这个配置指定了能够最大同时执行的 Checkpoint 个数。在默认情况下只有一个 Checkpoint 可以运行，即当一个 Checkpoint 正在运行时，系统不会触发另一个 Checkpoint。这确保了拓扑结构不会在 Checkpoint 上花费太多时间，并且不会影响流应用程序的处理。我们可以指定并行个数，同时触发多个 Checkpoint，进而提升 Checkpoint 的整体效率：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// allow only one checkpoint to be in progress at the same time</span></span><br><span class="line">env.getCheckpointConfig().setMaxConcurrentCheckpoints(<span class="number">1</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果配置 Checkpoint 之间最小时间间隔，不能使用此配置。</p>
+</blockquote>
+<h4 id="3-3-Checkpoint-之间最小时间间隔"><a href="#3-3-Checkpoint-之间最小时间间隔" class="headerlink" title="3.3 Checkpoint 之间最小时间间隔"></a>3.3 Checkpoint 之间最小时间间隔</h4><p>主要目的是设置两个 Checkpoint 之间的最小时间间隔，防止出现例如状态过大而导致 Checkpoint 执行时间过长，从而导致 Checkpoint 积压过多，最终导致 Flink 应用程序密集的触发 Checkpoint 操作，会占用大量计算资源从而影响到整个应用的性能。在大状态下，如果 Checkpoint 每次完成时长都超过系统设定 Checkpoint 启动时间间隔，那么会一直在做 Checkpoint，因为当应用发现它刚刚做完一次 Checkpoint 后，又已经到了下次 Checkpoint 的时间，会又开始新的一次 Checkpoint。如下所示，如果配置为 5000，不论 Checkpoint 持续时间和启动时间间隔是多少，下一个 Checkpoint 将在上一个 Checkpoint 完成之后的5000毫秒内启动，即两个 Checkpoint 之间最少有5000毫秒的时间间隔。这意味着 Checkpoint 启动时间间隔要大于此参数：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// make sure 500 ms of progress happen between checkpoints</span></span><br><span class="line">env.getCheckpointConfig().setMinPauseBetweenCheckpoints(<span class="number">500</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>通过配置 Checkpoint 之间最小时间间隔而不是配置 Checkpoint 启动时间间隔，这样更容易配置应用程序，因为 Checkpoint 之间最小时间间隔不容易受到 Checkpoint 完成时长的影响。<br>请注意，这个值也意味着最大只能同时执行一个 Checkpoint。</p>
+</blockquote>
+<h4 id="3-4-外部-Checkpoint"><a href="#3-4-外部-Checkpoint" class="headerlink" title="3.4 外部 Checkpoint"></a>3.4 外部 Checkpoint</h4><p>可以配置 Checkpoint 定期持久化到从外部存储中。使用这种方式不会在任务正常停止的过程中清理 Checkpoint 数据，而是会一直保存在外部存储中，另外我们也可以通过从外部 Checkpoint 中对任务进行恢复：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>详细信息请参阅<a href="http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html">外部检查点</a></p>
+</blockquote>
+<h4 id="3-5-可容忍的-Checkpoint-失败次数"><a href="#3-5-可容忍的-Checkpoint-失败次数" class="headerlink" title="3.5 可容忍的 Checkpoint 失败次数"></a>3.5 可容忍的 Checkpoint 失败次数</h4><p>默认值为0，这意味着我们不容忍任何 Checkpoint 失败。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Set the tolerable checkpoint failure number</span></span><br><span class="line">env.getCheckpointConfig().setTolerableCheckpointFailureNumber(<span class="number">0</span>);</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-6-优先从-Checkpoint-恢复"><a href="#3-6-优先从-Checkpoint-恢复" class="headerlink" title="3.6 优先从 Checkpoint 恢复"></a>3.6 优先从 Checkpoint 恢复</h4><p>配置优先从 Checkpoint 恢复。即使有更多可用的最近 Savepoint 可以减少恢复时间，但也可以配置作业优先从最新的 Checkpoint 恢复：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// allow job recovery fallback to checkpoint when there is a more recent savepoint</span></span><br><span class="line">env.getCheckpointConfig().setPreferCheckpointForRecovery(<span class="keyword">true</span>);</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-7-非对齐的-Checkpoint"><a href="#3-7-非对齐的-Checkpoint" class="headerlink" title="3.7 非对齐的 Checkpoint"></a>3.7 非对齐的 Checkpoint</h4><p>我们可以启用非对齐的 Checkpoint，可以大大减少 Checkpoint 时间。这个配置仅适用于 EXACTLY-ONCE Checkpoint，并且同时并发为1：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// enables the experimental unaligned checkpoints</span></span><br><span class="line">env.getCheckpointConfig().enableUnalignedCheckpoints();</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-相关配置选项"><a href="#4-相关配置选项" class="headerlink" title="4. 相关配置选项"></a>4. 相关配置选项</h3><p>其他参数和默认值也可以通过 <code>conf/flink-conf.yaml</code> 配置文件进行设置（请参阅完整指南的<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/config.html" target="_blank" rel="noopener">配置</a>）：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">配置项</th>
+<th style="text-align:left">默认值</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">state.backend</td>
+<td style="text-align:left">(none)</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">状态后端用来存储状态和 Checkpoint 状态</td>
+</tr>
+<tr>
+<td style="text-align:left">state.backend.async</td>
+<td style="text-align:left">true</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">状态后端是否使用异步快照方法。某些状态后端可能不支持异步快照，或仅支持异步快照，而忽略此选项。</td>
+</tr>
+<tr>
+<td style="text-align:left">state.backend.fs.memory-threshold</td>
+<td style="text-align:left">20 kb</td>
+<td style="text-align:left">MemorySize</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">state.backend.incremental</td>
+<td style="text-align:left">false</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">状态后端是否使用增量 Checkpoint。对于增量 Checkpoint，仅存储与前一个 Checkpoint 的差异，而不存储完整的 Checkpoint 状态。启用后，在 Web UI 中显示的状态大小或从 rest API 获取的状态大小仅是增量 Checkpoint 大小，而不是完整的 Checkpoint 大小。某些状态后端可能不支持增量检查点，因此会忽略此选项。</td>
+</tr>
+<tr>
+<td style="text-align:left">state.backend.local-recovery</td>
+<td style="text-align:left">false</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">配置状态后端本地恢复。默认是关闭的。目前本地恢复仅涵盖 Keyed 状态后端。MemoryStateBackend 目前不支持本地恢复，请忽略此选项。</td>
+</tr>
+<tr>
+<td style="text-align:left">state.checkpoints.dir</td>
+<td style="text-align:left">(none)</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">用于在 Flink 支持的文件系统中存储 Check 的数据文件和元数据的默认目录。必须从所有参与的进程/节点（即所有TaskManager和JobManager）访问存储路径。</td>
+</tr>
+<tr>
+<td style="text-align:left">state.checkpoints.num-retained</td>
+<td style="text-align:left">1</td>
+<td style="text-align:left">Integer</td>
+<td style="text-align:left">最多保留已完成的检查点实例的数量</td>
+</tr>
+<tr>
+<td style="text-align:left">state.savepoints.dir</td>
+<td style="text-align:left">(none)</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">Savepoint的默认目录。状态后端用于将 Savepoint 写入文件系统（MemoryStateBackend，FsStateBackend，RocksDBStateBackend）。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-选择状态后端"><a href="#5-选择状态后端" class="headerlink" title="5. 选择状态后端"></a>5. 选择状态后端</h3><p>Flink 的<a href="http://smartsi.club/flink-data-streaming-fault-tolerance.html">检查点机制</a>会存储所有状态的一致性快照。Checkpoint 存储的位置（例如，JobManager 的内存，文件系统，数据库）取决于状态后端的配置。</p>
+<p>默认情况下，状态保存在 TaskManager 的内存中，Checkpoint 存储在 JobManager 的内存中。为了能够存储较大的状态，Flink 支持多种方法在其他状态后端存储状态以及对状态进行 Checkpoint。状态后端的选择可以通过 <code>StreamExecutionEnvironment.setStateBackend（...）</code> 来配置。</p>
+<blockquote>
+<p>有关状态后端如何选择，请参阅<a href="http://smartsi.club/stateful-stream-processing-apache-flink-state-backends.html">有状态流处理:Flink状态后端</a>。</p>
+</blockquote>
+<h3 id="6-迭代作业中的状态检查点"><a href="#6-迭代作业中的状态检查点" class="headerlink" title="6. 迭代作业中的状态检查点"></a>6. 迭代作业中的状态检查点</h3><p>目前 Flink 只为没有迭代的作业提供处理保证。在迭代作业上启用检查点会导致异常。为了能够在迭代作业上强制进行 Checkpoint，用户需要在启用 Checkpoint 时设置强制标志：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">env.enableCheckpointing(interval，CheckpointingMode.EXACTLY_ONCE, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/stream/state/checkpointing.html" target="_blank" rel="noopener">Checkpointing</a></p>
 
       
     </div>
@@ -495,7 +567,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-stream-development-checkpointing-enable-config.html" title="Flink1.4 检查点启用与配置">http://smartsi.club/flink-stream-development-checkpointing-enable-config.html</a>
+    <a href="http://smartsi.club/flink-stream-development-checkpointing-enable-config.html" title="Flink 检查点启用与配置">http://smartsi.club/flink-stream-development-checkpointing-enable-config.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -512,8 +584,6 @@
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
           
-            <a href="/tags/Flink-容错/" rel="tag"># Flink 容错</a>
-          
         </div>
       
 
@@ -525,8 +595,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/flink-stream-state-backends.html" rel="next" title="Flink1.4 状态终端">
-                <i class="fa fa-chevron-left"></i> Flink1.4 状态终端
+              <a href="/flink-stream-working-with-state.html" rel="next" title="Flink 状态分类">
+                <i class="fa fa-chevron-left"></i> Flink 状态分类
               </a>
             
           </div>
@@ -534,10 +604,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/flink-data-streaming-fault-tolerance.html" rel="prev" title="Flink 内部原理之数据流容错">
-                Flink 内部原理之数据流容错 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -658,7 +724,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">238</span>
+                    <span class="site-state-item-count">237</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -753,7 +819,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-前提条件"><span class="nav-number">1.</span> <span class="nav-text">1. 前提条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启用和配置检查点"><span class="nav-number">2.</span> <span class="nav-text">2. 启用和配置检查点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-相关配置选项"><span class="nav-number">3.</span> <span class="nav-text">3. 相关配置选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-选择状态终端"><span class="nav-number">4.</span> <span class="nav-text">4. 选择状态终端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-迭代作业中的状态检查点"><span class="nav-number">5.</span> <span class="nav-text">5. 迭代作业中的状态检查点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-重启策略"><span class="nav-number">6.</span> <span class="nav-text">6. 重启策略</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-前提条件"><span class="nav-number">1.</span> <span class="nav-text">1. 前提条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启用检查点"><span class="nav-number">2.</span> <span class="nav-text">2. 启用检查点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-配置检查点"><span class="nav-number">3.</span> <span class="nav-text">3. 配置检查点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Checkpoint-超时时间"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Checkpoint 超时时间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-最大并行执行-Checkpoint-个数"><span class="nav-number">4.</span> <span class="nav-text">3.2 最大并行执行 Checkpoint 个数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-Checkpoint-之间最小时间间隔"><span class="nav-number">4.1.</span> <span class="nav-text">3.3 Checkpoint 之间最小时间间隔</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-外部-Checkpoint"><span class="nav-number">4.2.</span> <span class="nav-text">3.4 外部 Checkpoint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-可容忍的-Checkpoint-失败次数"><span class="nav-number">4.3.</span> <span class="nav-text">3.5 可容忍的 Checkpoint 失败次数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-优先从-Checkpoint-恢复"><span class="nav-number">4.4.</span> <span class="nav-text">3.6 优先从 Checkpoint 恢复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-7-非对齐的-Checkpoint"><span class="nav-number">4.5.</span> <span class="nav-text">3.7 非对齐的 Checkpoint</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-相关配置选项"><span class="nav-number">5.</span> <span class="nav-text">4. 相关配置选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-选择状态后端"><span class="nav-number">6.</span> <span class="nav-text">5. 选择状态后端</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-迭代作业中的状态检查点"><span class="nav-number">7.</span> <span class="nav-text">6. 迭代作业中的状态检查点</span></a></li></ol></div>
             
 
           </div>
