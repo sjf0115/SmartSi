@@ -100,19 +100,20 @@
   <meta name="keywords" content="Flink,Flink Stream," />
 
 
-<meta name="description" content="Flink在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作机器的系统时间(Processing time refers to the system time of the machine that is executing the respective operation.)。 当一个流程序以处理时间来运行时，所有基于时间的操作(如时间窗">
+<meta name="description" content="Flink版本：1.11  Flink 在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作的机器系统时间，是操作算子在计算过程中获取到的所在主机的系统时间。当用户选择使用处理时间时，所有和时间相关的算子，例如 Windows 计算，在当前任务中所有的算子直接使用所在主机的系统时间。例如，一个基于处理时间按每小时进行处理的时间窗口将处理一个">
 <meta name="keywords" content="Flink,Flink Stream">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 事件时间与处理时间">
+<meta property="og:title" content="Flink 事件时间与处理时间">
 <meta property="og:url" content="http://smartsi.club/flink-stream-event-time-and-processing-time.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Flink在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作机器的系统时间(Processing time refers to the system time of the machine that is executing the respective operation.)。 当一个流程序以处理时间来运行时，所有基于时间的操作(如时间窗">
+<meta property="og:description" content="Flink版本：1.11  Flink 在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作的机器系统时间，是操作算子在计算过程中获取到的所在主机的系统时间。当用户选择使用处理时间时，所有和时间相关的算子，例如 Windows 计算，在当前任务中所有的算子直接使用所在主机的系统时间。例如，一个基于处理时间按每小时进行处理的时间窗口将处理一个">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4.png?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2020-12-14T01:00:07.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 事件时间与处理时间">
-<meta name="twitter:description" content="Flink在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作机器的系统时间(Processing time refers to the system time of the machine that is executing the respective operation.)。 当一个流程序以处理时间来运行时，所有基于时间的操作(如时间窗">
+<meta name="twitter:title" content="Flink 事件时间与处理时间">
+<meta name="twitter:description" content="Flink版本：1.11  Flink 在数据流中支持几种不同概念的时间。 1. 处理时间Processing Time(处理时间)是指执行相应操作的机器系统时间，是操作算子在计算过程中获取到的所在主机的系统时间。当用户选择使用处理时间时，所有和时间相关的算子，例如 Windows 计算，在当前任务中所有的算子直接使用所在主机的系统时间。例如，一个基于处理时间按每小时进行处理的时间窗口将处理一个">
 <meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4.png?raw=true">
 
 
@@ -123,7 +124,7 @@
   <link rel="canonical" href="http://smartsi.club/flink-stream-event-time-and-processing-time.html"/>
 
 
-  <title>Flink1.4 事件时间与处理时间 | SmartSi</title>
+  <title>Flink 事件时间与处理时间 | SmartSi</title>
   
 
 
@@ -321,7 +322,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 事件时间与处理时间</h2>
+          <h2 class="post-title" itemprop="name headline">Flink 事件时间与处理时间</h2>
         
 
         <div class="post-meta">
@@ -377,7 +378,7 @@
 
           
           
-             <span id="/flink-stream-event-time-and-processing-time.html" class="leancloud_visitors" data-flag-title="Flink1.4 事件时间与处理时间">
+             <span id="/flink-stream-event-time-and-processing-time.html" class="leancloud_visitors" data-flag-title="Flink 事件时间与处理时间">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -408,25 +409,31 @@
       
 
       
-        <p><code>Flink</code>在数据流中支持几种不同概念的时间。</p>
-<h3 id="1-处理时间"><a href="#1-处理时间" class="headerlink" title="1. 处理时间"></a>1. 处理时间</h3><p><code>Processing Time</code>(处理时间)是指执行相应操作机器的系统时间(Processing time refers to the system time of the machine that is executing the respective operation.)。</p>
-<p>当一个流程序以处理时间来运行时，所有基于时间的操作(如时间窗口)将使用运行算子(<code>operator</code>)所在机器的系统时间。例如:一个基于处理时间按每小时进行处理的时间窗口将包括以系统时间为标准在一个小时内到达指定算子的所有的记录(an hourly processing time window will include all records that arrived at a specific operator between the times when the system clock indicated the full hour.)。</p>
-<p>处理时间是最简单的一个时间概念，不需要在数据流和机器之间进行协调。它有最好的性能和最低的延迟。然而，在分布式或者异步环境中，处理时间具有不确定性，因为容易受到记录到达系统速度的影响(例如从消息队列到达的记录)，还会受到系统内记录流在不同算子之间的流动速度的影响(speed at which records arrive in the system, and to the speed at which the records flow between operators inside the system)。</p>
-<h3 id="2-事件时间"><a href="#2-事件时间" class="headerlink" title="2. 事件时间"></a>2. 事件时间</h3><p><code>Event Time</code>(事件时间)是每个独立事件在它生产设备上产生的时间。在进入<code>Flink</code>之前，事件时间通常要嵌入到记录中，并且事件时间也可以从记录中提取出来。一个基于事件时间按每小时进行处理的时间窗口将包含所有的记录，其事件时间都在这一小时之内，不管它们何时到达，以及它们以什么顺序到达。</p>
-<p>事件时间即使在乱序事件，延迟事件以及从备份或持久化日志中的重复数据也能获得正确的结果。对于事件时间，时间的进度取决于数据，而不是任何时钟。事件时间程序必须指定如何生成事件时间的<code>Watermarks</code>，这是表示事件时间进度的机制。</p>
+        <blockquote>
+<p>Flink版本：1.11</p>
+</blockquote>
+<p>Flink 在数据流中支持几种不同概念的时间。</p>
+<h3 id="1-处理时间"><a href="#1-处理时间" class="headerlink" title="1. 处理时间"></a>1. 处理时间</h3><p><code>Processing Time</code>(处理时间)是指执行相应操作的机器系统时间，是操作算子在计算过程中获取到的所在主机的系统时间。当用户选择使用处理时间时，所有和时间相关的算子，例如 Windows 计算，在当前任务中所有的算子直接使用所在主机的系统时间。例如，一个基于处理时间按每小时进行处理的时间窗口将处理一个小时内（以系统时间为标准）到达指定算子的所有的记录。</p>
+<p>处理时间是最简单的一个时间概念，不需要在数据流和机器之间进行协调。具有最好的性能和最低的延迟。然而，在分布式或者异步环境中，处理时间具有不确定性，因为容易受到记录到达系统速度的影响(例如，从消息队列到达的记录)，还会受到系统内记录在不同算子之间的流动速度的影响。对数据乱序的处理，处理时间不是一种最优的选择。</p>
+<p>总之，处理时间适用于时间计算精度要求不是特别高的计算场景。</p>
+<h3 id="2-事件时间"><a href="#2-事件时间" class="headerlink" title="2. 事件时间"></a>2. 事件时间</h3><p><code>Event Time</code>(事件时间)是每个事件在产生它的设备上发生的时间。在进入 Flink 之前，事件时间通常要嵌入到记录中，并且事件时间也可以从记录中提取出来。对于事件时间，时间的进度取决于数据，而不是系统时钟。基于事件时间的程序必须指定如何生成事件时间的<code>Watermarks</code>，这是表示事件时间进度的机制。</p>
+<p>在理想情况下，事件时间处理将产生完全一致且确定的结果，无论事件何时到达以及以什么样的顺序到达。但是，除非已知事件是按顺序（按时间戳）到达，否则事件时间处理在等待无序事件时产生一定的延迟。由于只能等待有限的时间，因此这限制了事件时间应用程序的确定性。</p>
+<p>假定所有数据都已到达，事件时间算子将按预期方式运行，即使在处理无序、迟到事件或重新处理历史数据时，也会产生正确且一致的结果。例如，每小时事件时间窗口将将处理事件时间在这一小时之内所有的记录，不管它们何时到达，以及它们以什么顺序到达。</p>
 <p>按事件时间处理往往会导致一定的延迟，因为它要等待延迟事件和无序事件一段时间。因此，事件时间程序通常与处理时间操作相结合使用。</p>
-<h3 id="3-摄入时间"><a href="#3-摄入时间" class="headerlink" title="3. 摄入时间"></a>3. 摄入时间</h3><p><code>Ingestion Time</code>(摄入时间)是事件进入<code>Flink</code>的时间。在<code>source operator</code>中，每个记录将源的当前时间记为时间戳，基于时间的操作(如时间窗口)会使用该时间戳。</p>
-<p>摄入时间在概念上处于事件时间和处理时间之间。与处理时间相比，摄入时间的成本稍微更高一些，但是可以提供更可预测的结果。因为摄入时间的时间戳比较稳定(在源处只记录一次)，同一数据在流经不同窗口操作时将使用相同的时间戳，然而对于处理时间，每个窗口算子可能将记录分配给不同的窗口(基于本地系统时钟以及传输延迟)。</p>
-<p>与事件时间相比，摄入时间程序无法处理任何无序事件或延迟事件，但程序不必指定如何生成<code>watermarks</code>。</p>
-<p>在内部，摄入时间与事件时间非常相似，但事件时间会自动分配时间戳以及自动生成<code>watermark</code>(with automatic timestamp assignment and automatic watermark generation)。</p>
+<h3 id="3-摄入时间"><a href="#3-摄入时间" class="headerlink" title="3. 摄入时间"></a>3. 摄入时间</h3><p><code>Ingestion Time</code>(摄入时间)是事件进入Flink的时间。在 Source 算子中，每个记录将 Source 的当前时间记为时间戳，基于时间的操作(如时间窗口)会使用该时间戳。</p>
+<p>摄入时间在概念上处于事件时间和处理时间之间。与处理时间相比，摄入时间的成本稍微更高一些，但是可以提供更可预测的结果。因为摄入时间的时间戳比较稳定(在 Source 处只记录一次)，同一数据在流经不同窗口操作时将使用相同的时间戳，然而对于处理时间，每个窗口算子可能将记录分配给不同的窗口(基于本地系统时钟以及传输延迟)。与事件时间相比，摄入时间程序无法处理任何无序事件或延迟事件，但程序不必指定如何生成<code>watermarks</code>。</p>
+<p>在内部，摄入时间与事件时间非常相似，但事件时间会自动分配时间戳以及自动生成<code>watermark</code>。</p>
 <p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink1.4%20%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8E%E5%A4%84%E7%90%86%E6%97%B6%E9%97%B4.png?raw=true" alt=""></p>
-<h3 id="4-选择时间特性"><a href="#4-选择时间特性" class="headerlink" title="4. 选择时间特性"></a>4. 选择时间特性</h3><p><code>Flink DataStream</code>程序的第一部分通常设置基本的时间特性(base time characteristic)。该设置定义数据流源的行为方式(例如，它们是否产生时间戳)，以及窗口操作如<code>KeyedStream.timeWindow(Time.seconds(30))</code>应使用哪一类型时间，是事件时间还是处理时间等。</p>
-<p>以下示例展示了一个聚合每小时时间窗口内的事件的<code>Flink</code>程序。窗口的行为会与时间特性相匹配。</p>
+<h3 id="4-选择时间特性"><a href="#4-选择时间特性" class="headerlink" title="4. 选择时间特性"></a>4. 选择时间特性</h3><p>Flink DataStream 程序的第一部分通常设置基本的时间特性。该设置定义数据流源的行为方式(例如，它们是否产生时间戳)，以及窗口操作如<code>KeyedStream.timeWindow(Time.seconds(30))</code>应使用哪一类型的时间，是事件时间还是处理时间等。</p>
+<p>以下示例展示了一个聚合每小时时间窗口内的事件的 Flink 程序。窗口的行为会与时间特性相匹配：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line">env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);</span><br><span class="line"></span><br><span class="line"><span class="comment">// alternatively:</span></span><br><span class="line"><span class="comment">// env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);</span></span><br><span class="line"><span class="comment">// env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);</span></span><br><span class="line"></span><br><span class="line">DataStream&lt;MyEvent&gt; stream = env.addSource(<span class="keyword">new</span> FlinkKafkaConsumer09&lt;MyEvent&gt;(topic, schema, props));</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .keyBy( (event) -&gt; event.getUser() )</span><br><span class="line">    .timeWindow(Time.hours(<span class="number">1</span>))</span><br><span class="line">    .reduce( (a, b) -&gt; a.add(b) )</span><br><span class="line">    .addSink(...);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line"></span><br><span class="line">env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)</span><br><span class="line"></span><br><span class="line">// alternatively:</span><br><span class="line">// env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime)</span><br><span class="line">// env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)</span><br><span class="line"></span><br><span class="line">val stream: DataStream[MyEvent] = env.addSource(new FlinkKafkaConsumer09[MyEvent](topic, schema, props))</span><br><span class="line"></span><br><span class="line">stream</span><br><span class="line">    .keyBy( _.getUser )</span><br><span class="line">    .timeWindow(Time.hours(1))</span><br><span class="line">    .reduce( (a, b) =&gt; a.add(b) )</span><br><span class="line">    .addSink(...)</span><br></pre></td></tr></table></figure></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">为了以事件时间运行此示例，程序需要使用定义了事件时间并自动产生watermarks的源，或者程序必须在源之后设置时间戳分配器和watermarks生成器。上述函数描述了如何获取事件时间戳，以及展现事件流的无序程度。</span><br></pre></td></tr></table></figure></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time--processing-time--ingestion-time" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time--processing-time--ingestion-time</a></p>
+<blockquote>
+<p>备注：为了以事件时间运行此示例，程序需要使用定义了事件时间并自动产生watermarks的 Source，或者程序必须在 Source 之后设置时间戳分配器和 watermarks 生成器。</p>
+</blockquote>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/concepts/timely-stream-processing.html" target="_blank" rel="noopener">Timely Stream Processing</a></p>
 
       
     </div>
@@ -476,7 +483,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-stream-event-time-and-processing-time.html" title="Flink1.4 事件时间与处理时间">http://smartsi.club/flink-stream-event-time-and-processing-time.html</a>
+    <a href="http://smartsi.club/flink-stream-event-time-and-processing-time.html" title="Flink 事件时间与处理时间">http://smartsi.club/flink-stream-event-time-and-processing-time.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
