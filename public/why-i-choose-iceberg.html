@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Iceberg," />
+
+
+<meta name="description" content="创作时间：2020-03-03  1. 导言去年4月Databricks在Spark+AI summit上公布了Delta Lake项目，于此同时在Apache社区也有两个非常类似的项目Apache Iceberg和Apache Hudi在锐意开发中，这3个项目不管是在定位还是在功能方面都非常的类似，在大数据发展到现阶段为什么会涌现出这3个类似的项目呢，他们有什么差别呢？本文将从几个方面来介绍为">
+<meta name="keywords" content="Iceberg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="为什么我选择Apache Iceberg">
+<meta property="og:url" content="http://smartsi.club/why-i-choose-iceberg.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="创作时间：2020-03-03  1. 导言去年4月Databricks在Spark+AI summit上公布了Delta Lake项目，于此同时在Apache社区也有两个非常类似的项目Apache Iceberg和Apache Hudi在锐意开发中，这3个项目不管是在定位还是在功能方面都非常的类似，在大数据发展到现阶段为什么会涌现出这3个类似的项目呢，他们有什么差别呢？本文将从几个方面来介绍为">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-3.png?raw=true">
+<meta property="og:updated_time" content="2020-12-21T00:46:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="为什么我选择Apache Iceberg">
+<meta name="twitter:description" content="创作时间：2020-03-03  1. 导言去年4月Databricks在Spark+AI summit上公布了Delta Lake项目，于此同时在Apache社区也有两个非常类似的项目Apache Iceberg和Apache Hudi在锐意开发中，这3个项目不管是在定位还是在功能方面都非常的类似，在大数据发展到现阶段为什么会涌现出这3个类似的项目呢，他们有什么差别呢？本文将从几个方面来介绍为">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/why-i-choose-iceberg.html"/>
+
+
+  <title>为什么我选择Apache Iceberg | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/why-i-choose-iceberg.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">为什么我选择Apache Iceberg</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-20T22:05:01+08:00">2020-12-20</time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Iceberg/" itemprop="url" rel="index"><span itemprop="name">Iceberg</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/why-i-choose-iceberg.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/why-i-choose-iceberg.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/why-i-choose-iceberg.html" class="leancloud_visitors" data-flag-title="为什么我选择Apache Iceberg">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>创作时间：2020-03-03</p>
+</blockquote>
+<h2 id="1-导言"><a href="#1-导言" class="headerlink" title="1. 导言"></a>1. 导言</h2><p>去年4月Databricks在Spark+AI summit上公布了Delta Lake项目，于此同时在Apache社区也有两个非常类似的项目Apache Iceberg和Apache Hudi在锐意开发中，这3个项目不管是在定位还是在功能方面都非常的类似，在大数据发展到现阶段为什么会涌现出这3个类似的项目呢，他们有什么差别呢？本文将从几个方面来介绍为什么我们需要这样一种技术，以及在这3个项目中为何我选择Apache Iceberg。</p>
+<h2 id="2-如何定义这类新的技术"><a href="#2-如何定义这类新的技术" class="headerlink" title="2. 如何定义这类新的技术"></a>2. 如何定义这类新的技术</h2><p>Delta Lake 将其定义为：Delta Lake is an open-source storage layer that brings ACID transactions to Apache Spark and big data workloads。而 Apache Iceberg 将其定义为：Apache Iceberg is an open table format for huge analytic datasets。</p>
+<p>首先，这类技术它的定位是在计算引擎之下，又在存储之上。其次，它是一种数据存储格式，Delta Lake 称其为 “storage layer”，而 Iceberg 则称其为 “table format”。在我看来，这类技术是介于计算引擎和数据存储格式中间的数据组织格式。通过特定的方式将数据和元数据组织起来，因此称之为数据组织格式更为合理，而 Iceberg 将其定义为表格式也直观地反映出了它的定位和功能，下文将此类技术统称为”表格式”。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-1.png?raw=true" alt=""></p>
+<h2 id="3-为什么需要表格式"><a href="#3-为什么需要表格式" class="headerlink" title="3. 为什么需要表格式"></a>3. 为什么需要表格式</h2><p>说完了什么是表格式，接下来我们将从两个方面来介绍为什么需要表格式。</p>
+<h3 id="3-1-数据的组织方式"><a href="#3-1-数据的组织方式" class="headerlink" title="3.1 数据的组织方式"></a>3.1 数据的组织方式</h3><p>从Hadoop诞生到现在，数据的存储格式经历了几代的发展，从最初的 txt file，到后来的 sequence file，rcfile，再到现在的 ORC，Parquet 等列式存储文件，数据的存储格式发生了翻天覆地的变化，更好的性能、更高的压缩比。然而数据组织方式的发展却相当缓慢。</p>
+<p>Hive 提出了分区的概念 - 利用某几个列作为分区值来组织数据，能够有效地过滤掉无需读取的数据，这种分区在物理存储上反映出来的就是按照文件夹进行分区（组织）数据。利用文件夹来组织与 HDFS 的文件系统结构有天然的亲和性，因此这一方式也一直被沿用下来，但是这种数据的组织方式真的没有改进的空间了吗？</p>
+<p>随着大数据和云计算的结合，越来越多的底层存储系统从 HDFS 这样的分布式文件系统换成了云上的对象存储系统，而这种利用文件夹来组织数据的方式在对象存储上遇到了极大的挑战：</p>
+<ul>
+<li>利用对象存储来模拟文件系统从而提供文件夹遍历的方式非常低效，而传统的分区计算中又大量地依赖遍历操作。</li>
+<li>基于文件、文件夹的 Rename 来保证原子性的语义在某些对象存储上是有问题的（如S3)。同时有的对象存储对于 Rename 的实现有巨大的开销。</li>
+</ul>
+<p>那么是否能有一种新的数据组织方式对于对象存储等云存储有更好的亲和性呢？</p>
+<h3 id="3-2-元数据的存取方式"><a href="#3-2-元数据的存取方式" class="headerlink" title="3.2 元数据的存取方式"></a>3.2 元数据的存取方式</h3><p>也是从 Hive 开始在大数据领域提出了 Metastore 的集中式服务来提供元数据管理的能力，集中式的元数据服务能够更好地管理整个数仓的元数据信息，但也带来了几个问题：</p>
+<ul>
+<li>元数据和数据的分离式存储容易造成不一致性。比如在 HDFS 上对数据进行了某些删除、改动，但是 Metastore 并不能感知到数据的变化从而造成两边的不一致。</li>
+<li>集中式的元数据管理对于大规模的企业级应用容易形成单点瓶颈。所以元数据都需要通过 Metastore 来存取，极易造成 Metastore 的压力，从而极大地延长 query plan 的时间。</li>
+</ul>
+<p>为此，是否能够将数据和元数据有效地组织在一起来避免上面的问题呢？</p>
+<h2 id="4-什么是Iceberg"><a href="#4-什么是Iceberg" class="headerlink" title="4. 什么是Iceberg"></a>4. 什么是Iceberg</h2><p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-2.png?raw=true" alt=""></p>
+<p>Iceberg 官网这样介绍：Apache Iceberg is an open table format for huge analytic datasets. Iceberg adds tables to Presto and Spark that use a high-performance format that works just like a SQL table.</p>
+<p>Iceberg 是一个通用的表格式（数据组织格式），它可以适配 Presto，Spark 等引擎提供高性能的读写和元数据管理功能。那 Iceberg 有什么优势呢？</p>
+<h2 id="5-Iceberg有什么优势"><a href="#5-Iceberg有什么优势" class="headerlink" title="5. Iceberg有什么优势"></a>5. Iceberg有什么优势</h2><h3 id="5-1-ACID"><a href="#5-1-ACID" class="headerlink" title="5.1 ACID"></a>5.1 ACID</h3><p>ACID 是现如今表格式的基本能力，Delta Lake、Hudi 和 Iceberg 都提供了 ACID 能力，由 ACID 能力所衍生出来的 Row Level Update/Delete 更是这些表格式最吸引人的特性。</p>
+<p>Iceberg 提供了锁的机制来提供 ACID 的能力，在每次元数据更新时它会从 Hive Metastore 中获取锁并进行更新。同时 Iceberg 保证了线性一致性（Serializable isolation），确保表的修改操作是原子性的，读操作永远不会读到部分或是没有 commit 的数据。Iceberg 提供了乐观锁的机制降低锁的影响，并且使用冲突回退和重试机制来解决并发写所造成的冲突问题。</p>
+<h3 id="5-2-MVCC"><a href="#5-2-MVCC" class="headerlink" title="5.2 MVCC"></a>5.2 MVCC</h3><p>基于 ACID 的能力，Iceberg 提供了类似于 MVCC 的读写分离能力：</p>
+<ul>
+<li>首先，每次写操作都会产生一个新的快照（snapshot），快照始终是往后线性递增，确保了线性一致性。而读操作只会读取已经存在了的快照，对于正在生成的快照读操作是不可见的。</li>
+<li>每一个快照拥有表在那一时刻所有的数据和元数据，因此提供了用户回溯（time travel）表数据的能力。利用 Iceberg 的 time travel 能力，用户可以读取那一时刻的数据，同时也提供了用户快照回滚和数据重放的能力。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Iceberg/why-i-choose-iceberg-3.png?raw=true" alt=""></p>
+<h3 id="5-3-解耦"><a href="#5-3-解耦" class="headerlink" title="5.3 解耦"></a>5.3 解耦</h3><p>相比于 Hudi，Delta Lake，Iceberg 提供了更为完整的表格式的能力、类型的定义和操作的抽象，并与上层数据处理引擎和底层数据存储格式的解耦。</p>
+<ul>
+<li>对接上层，Iceberg 提供了丰富的表操作接口，使得它非常容易与上层数据处理引擎对接，现已支持的包括 Spark（Spark2和Spark3），Presto，Pig，社区正在做的是 Hive 和 Flink 的适配。其中 Iceberg 对于 Spark 的支持最好，它同时支持 Spark2 的 Data Source V2 API 和 Spark3  的 Data Source V2 API（包括multiple catalog支持），同时对于 Spark 的谓词下推能力有全面的支持。</li>
+<li>对接下层，Iceberg 屏蔽了底层数据存储格式的差异，提供对于 Parquet，ORC 和 Avro 格式的支持。Iceberg 起到了中间桥梁的能力，将上层引擎的能力传导到下层的存储格式。</li>
+</ul>
+<p>相比于 Hudi，Delta Lake，Iceberg 在设计之初并没有绑定某种特定的存储引擎，同时避免了与上层引擎之间的相互调用，使得 Iceberg 可以非常容易地扩展到对于不同引擎的支持。</p>
+<h3 id="5-4-Table-Evolution"><a href="#5-4-Table-Evolution" class="headerlink" title="5.4 Table Evolution"></a>5.4 Table Evolution</h3><p>Iceberg 支持 in-place table evolution，用户可以像 SQL 那样修改表的 schema，或者修改分区方式。Iceberg 无需用户重写表数据或者是迁移到新表上。</p>
+<h4 id="5-4-1-Schema-Evolution"><a href="#5-4-1-Schema-Evolution" class="headerlink" title="5.4.1 Schema Evolution"></a>5.4.1 Schema Evolution</h4><p>Iceberg 支持如下这些 schema 修改操作：</p>
+<ul>
+<li>Add - 在表中或是在嵌套结构中新增column。</li>
+<li>Drop - 在表中或是在嵌套结构中移除已有的column。</li>
+<li>Rename - 在表中或是在嵌套结构中修改column的名字。</li>
+<li>Update - 提升数据的类型，支持column，struct field，map key，map value和list中的元素。</li>
+<li>Reorder - 调整表中说是嵌套结构中的column顺序。</li>
+</ul>
+<p>同时 Iceberg 确保 schema evolution 是独立且没有副作用的。</p>
+<h4 id="5-4-2-Partition-Evolution"><a href="#5-4-2-Partition-Evolution" class="headerlink" title="5.4.2 Partition Evolution"></a>5.4.2 Partition Evolution</h4><p>Iceberg 可以在已有的表上更新分区信息，因为查询语句并不直接引用分区值。同时 Iceberg 提供了隐式分区能力，因此用户无须利用分区信息来刻意构造一些 query 使得查询能够加速。相反，Iceberg 可以根据用户的 query 来自动地进行 partition pruning，从而过滤掉不需要的数据。</p>
+<p>另外，在 Iceberg 中 partition evolution 是一个元数据操作，因此并不需要进行文件的重写。</p>
+<h3 id="5-5-隐式分区"><a href="#5-5-隐式分区" class="headerlink" title="5.5 隐式分区"></a>5.5 隐式分区</h3><p>既然说到了 Iceberg 的隐式分区功能，接下来就让我们来看一下什么是隐式分区，以及隐式分区带来的好处有哪些。</p>
+<h4 id="5-5-1-Partitioning-in-Hive"><a href="#5-5-1-Partitioning-in-Hive" class="headerlink" title="5.5.1 Partitioning in Hive"></a>5.5.1 Partitioning in Hive</h4><p>为了展示 Hive 和 Iceberg 在分区实现上的不同点，让我们首先来看一下这样一张表 logs 吧。</p>
+<p>在 Hive 中，分区是显式的，并且对用户呈现为 column 的形式，因此 logs 表就会有一列称为 event_date。当我们向表插入数据时，我们必须提供 event_date 列，如下所示：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">logs</span> <span class="keyword">PARTITION</span> (event_date)</span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">  <span class="keyword">level</span>, message, event_time,</span><br><span class="line">  format_time(event_time, <span class="string">'YYYY-MM-dd'</span>)</span><br><span class="line"><span class="keyword">FROM</span> unstructured_log_source</span><br></pre></td></tr></table></figure></p>
+<p>同样的，当我们读取 logs 表的时候，在 event_time 这个过滤条件之外我们也必须指定 event_date 这样一个过滤条件来进行 partition pruning：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">level</span>, <span class="keyword">count</span>(<span class="number">1</span>) <span class="keyword">as</span> <span class="keyword">count</span></span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">logs</span></span><br><span class="line"><span class="keyword">WHERE</span> event_time <span class="keyword">BETWEEN</span> <span class="string">'2018-12-01 10:00:00'</span> <span class="keyword">AND</span> <span class="string">'2018-12-01 12:00:00'</span></span><br><span class="line">  <span class="keyword">AND</span> event_date = <span class="string">'2018-12-01'</span></span><br></pre></td></tr></table></figure></p>
+<p>如果我们没有指定 event_date 这样一个过滤条件，那么 Hive 就会扫描全表来匹配 event_time 这个过滤条件。这是因为 Hive 并不知道 event_time 这一列和 event_date 是相关的。</p>
+<p>这就是显式分区，这样的分区方式有什么问题呢？</p>
+<ul>
+<li>Hive无法验证分区值，必须交由引擎或是用户来保证生成正确的分区值。</li>
+<li>用户需要了解表的分区结构，从而写出更为”smart”的query。</li>
+<li>Query与分区schema紧紧地绑定在一起，因此无法进行partition evolution。</li>
+</ul>
+<h4 id="5-5-2-Iceberg-Hidden-Partitioning"><a href="#5-5-2-Iceberg-Hidden-Partitioning" class="headerlink" title="5.5.2 Iceberg Hidden Partitioning"></a>5.5.2 Iceberg Hidden Partitioning</h4><p>与 Hive 不同的是，Iceberg 通过 column 的值来自动地计算分区值，而无需用户生成，Iceberg 负责将 event_time 转换成 event_date，并且跟踪两者的映射关系。</p>
+<p>正因为 Iceberg 无须用户来维护“分区列”，因此它可以隐藏分区。每次写入和读取可以正确地生成分区值并有效地进行分区过滤，用户甚至无需知道有 event_date 这样一列的存在。</p>
+<p>更重要的是，由于有了隐式分区这样的功能，query 不再依赖于表的物理组织方式，从而 Iceberg 表可以根据数据的大小及聚合程度动态地修改分区策略而无需重写表。</p>
+<p>当然 Iceberg 还有许多其他的优势，比如对象存储友好的数据组织方式，在数据存储格式之上的统一的向量化读取(基于Arrow实现)，完备的算子下推等等关于表结构的核心能力，就不在这一一赘述了。</p>
+<h2 id="6-Iceberg的发展"><a href="#6-Iceberg的发展" class="headerlink" title="6. Iceberg的发展"></a>6. Iceberg的发展</h2><p>说了那么多Iceberg的优势，那 Iceberg 后面的发展是什么呢，还有什么能力是缺失的吗？</p>
+<ul>
+<li>构建在ACID能力上的行级 update/delete 语义。Hudi 提供了基于 copy on write 和 merge on read 的行级更新能力，而 Delta Lake 提供了 copy on write 的行级更新能力。但是现在在 Iceberg 社区仍然缺乏一个统一的语义来实现这个功能。其中 copy on write 相对简单，利用 Iceberg 现有的 API 可以构建出这样的能力，这在我们内部也实现了。但是基于 merge on read 的能力需要涉及到格式的定义等一些列工作，这也是现在社区推动中的工作。</li>
+<li>更多上游引擎的适配。上文也提到 Iceberg 现在对于 Spark 的支持度比较完善，同时也支持 Presto，Pig。但是对于其他主流引擎如 Flink，Hive 的支持仍然缺失，这也限制了 Iceberg 作为一个通用表格式的推广使用，这一块能力需要亟待加强。</li>
+<li>统一的索引层来加速数据的检索。Iceberg 现在有丰富的文件级别的 metrics 来进行更好的条件过滤，但是这依赖于底层存储格式所提供的能力，同时由于涉及到 snapshot-&gt;manifest-&gt;datafile 的多级查询，在效率上有一定的损耗，一层统一的索引层来加速数据的检索非常必要。</li>
+</ul>
+<p>当然 Iceberg 还有许多的特性功能需要添加，尤其是围绕生态系统的建立和周边能力的打造上还需要更多的发展。</p>
+<h2 id="7-总结"><a href="#7-总结" class="headerlink" title="7. 总结"></a>7. 总结</h2><p>本文从表格式这样一种技术的出现、发展来介绍表格式其存在的价值和意义，同时也着重介绍了Iceberg这样一个表格式的技术它的优势以及未来的发展，我相信未来“表格式”这种技术定会在大数据领域被广泛采用，而 Iceberg 作为一种优秀的实践也必会被大量的采用。</p>
+<p>原文:<a href="https://mp.weixin.qq.com/s/CZYxOXmrEMjS3qn1yuni4w" target="_blank" rel="noopener">为什么我选择Apache Iceberg</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    邵赛赛
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/why-i-choose-iceberg.html" title="为什么我选择Apache Iceberg">http://smartsi.club/why-i-choose-iceberg.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Iceberg/" rel="tag"># Iceberg</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-monitor-checkpoint.html" rel="next" title="Flink监控检查点">
+                <i class="fa fa-chevron-left"></i> Flink监控检查点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">239</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">56</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-导言"><span class="nav-number">1.</span> <span class="nav-text">1. 导言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-如何定义这类新的技术"><span class="nav-number">2.</span> <span class="nav-text">2. 如何定义这类新的技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-为什么需要表格式"><span class="nav-number">3.</span> <span class="nav-text">3. 为什么需要表格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-数据的组织方式"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 数据的组织方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-元数据的存取方式"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 元数据的存取方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-什么是Iceberg"><span class="nav-number">4.</span> <span class="nav-text">4. 什么是Iceberg</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Iceberg有什么优势"><span class="nav-number">5.</span> <span class="nav-text">5. Iceberg有什么优势</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-ACID"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 ACID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-MVCC"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 MVCC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-解耦"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 解耦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-Table-Evolution"><span class="nav-number">5.4.</span> <span class="nav-text">5.4 Table Evolution</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-4-1-Schema-Evolution"><span class="nav-number">5.4.1.</span> <span class="nav-text">5.4.1 Schema Evolution</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-4-2-Partition-Evolution"><span class="nav-number">5.4.2.</span> <span class="nav-text">5.4.2 Partition Evolution</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-隐式分区"><span class="nav-number">5.5.</span> <span class="nav-text">5.5 隐式分区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-5-1-Partitioning-in-Hive"><span class="nav-number">5.5.1.</span> <span class="nav-text">5.5.1 Partitioning in Hive</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-5-2-Iceberg-Hidden-Partitioning"><span class="nav-number">5.5.2.</span> <span class="nav-text">5.5.2 Iceberg Hidden Partitioning</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Iceberg的发展"><span class="nav-number">6.</span> <span class="nav-text">6. Iceberg的发展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-总结"><span class="nav-number">7.</span> <span class="nav-text">7. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
