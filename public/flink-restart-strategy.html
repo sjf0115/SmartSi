@@ -97,21 +97,23 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink 基础," />
+  <meta name="keywords" content="Flink," />
 
 
-<meta name="description" content="Flink支持不同的重启策略，重启策略控制在作业失败后如何重启。可以使用默认的重启策略启动集群，这个默认策略在作业没有特别指定重启策略时使用。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。 1. 概述默认的重启策略通过Flink的配置文件flink-conf.yaml进行设置。配置参数restart-strategy定义了采取哪种策略。如果未启用检查点，那么将使用不重启策略。">
-<meta name="keywords" content="Flink,Flink 基础">
+<meta name="description" content="Flink版本：1.11.0  当任务失败时，Flink 需要重新启动失败的任务以及受到影响的任务，以将作业恢复到正常状态。重新启动策略和故障恢复策略用于控制任务重新启动。重新启动策略决定了是否以及何时重新启动失败/受影响的任务。故障恢复策略决定应重新启动哪些任务以恢复作业。 1. 重启策略Flink 支持不同的重启策略，在作业没有特别指定重启策略时，使用默认的重启策略启动集群。如果在提交作业时">
+<meta name="keywords" content="Flink">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 重启策略">
+<meta property="og:title" content="Flink 任务失败恢复策略">
 <meta property="og:url" content="http://smartsi.club/flink-restart-strategy.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Flink支持不同的重启策略，重启策略控制在作业失败后如何重启。可以使用默认的重启策略启动集群，这个默认策略在作业没有特别指定重启策略时使用。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。 1. 概述默认的重启策略通过Flink的配置文件flink-conf.yaml进行设置。配置参数restart-strategy定义了采取哪种策略。如果未启用检查点，那么将使用不重启策略。">
+<meta property="og:description" content="Flink版本：1.11.0  当任务失败时，Flink 需要重新启动失败的任务以及受到影响的任务，以将作业恢复到正常状态。重新启动策略和故障恢复策略用于控制任务重新启动。重新启动策略决定了是否以及何时重新启动失败/受影响的任务。故障恢复策略决定应重新启动哪些任务以恢复作业。 1. 重启策略Flink 支持不同的重启策略，在作业没有特别指定重启策略时，使用默认的重启策略启动集群。如果在提交作业时">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-01-02T10:50:13.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 重启策略">
-<meta name="twitter:description" content="Flink支持不同的重启策略，重启策略控制在作业失败后如何重启。可以使用默认的重启策略启动集群，这个默认策略在作业没有特别指定重启策略时使用。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。 1. 概述默认的重启策略通过Flink的配置文件flink-conf.yaml进行设置。配置参数restart-strategy定义了采取哪种策略。如果未启用检查点，那么将使用不重启策略。">
+<meta name="twitter:title" content="Flink 任务失败恢复策略">
+<meta name="twitter:description" content="Flink版本：1.11.0  当任务失败时，Flink 需要重新启动失败的任务以及受到影响的任务，以将作业恢复到正常状态。重新启动策略和故障恢复策略用于控制任务重新启动。重新启动策略决定了是否以及何时重新启动失败/受影响的任务。故障恢复策略决定应重新启动哪些任务以恢复作业。 1. 重启策略Flink 支持不同的重启策略，在作业没有特别指定重启策略时，使用默认的重启策略启动集群。如果在提交作业时">
+<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
 
 
 
@@ -121,7 +123,7 @@
   <link rel="canonical" href="http://smartsi.club/flink-restart-strategy.html"/>
 
 
-  <title>Flink1.4 重启策略 | SmartSi</title>
+  <title>Flink 任务失败恢复策略 | SmartSi</title>
   
 
 
@@ -319,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 重启策略</h2>
+          <h2 class="post-title" itemprop="name headline">Flink 任务失败恢复策略</h2>
         
 
         <div class="post-meta">
@@ -331,7 +333,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T16:36:01+08:00">2018-01-04</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-02T17:22:01+08:00">2021-01-02</time>
             
 
             
@@ -375,7 +377,7 @@
 
           
           
-             <span id="/flink-restart-strategy.html" class="leancloud_visitors" data-flag-title="Flink1.4 重启策略">
+             <span id="/flink-restart-strategy.html" class="leancloud_visitors" data-flag-title="Flink 任务失败恢复策略">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -406,9 +408,13 @@
       
 
       
-        <p><code>Flink</code>支持不同的重启策略，重启策略控制在作业失败后如何重启。可以使用默认的重启策略启动集群，这个默认策略在作业没有特别指定重启策略时使用。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。</p>
-<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><p>默认的重启策略通过<code>Flink</code>的配置文件<code>flink-conf.yaml</code>进行设置。配置参数<code>restart-strategy</code>定义了采取哪种策略。如果未启用检查点，那么将使用<code>不重启</code>策略。如果启用检查点且重启策略尚未配置，则固定延迟重启策略与<code>Integer.MAX_VALUE</code>一起使用进行尝试重启。请参阅下面可用的重启策略列表以了解支持哪些值。</p>
-<p>每个重启策略都有自己的一套控制其行为的参数。这些值也在配置文件中配置。每个重启策略的描述都包含有关各个配置值的更多信息。</p>
+        <blockquote>
+<p>Flink版本：1.11.0</p>
+</blockquote>
+<p>当任务失败时，Flink 需要重新启动失败的任务以及受到影响的任务，以将作业恢复到正常状态。重新启动策略和故障恢复策略用于控制任务重新启动。重新启动策略决定了是否以及何时重新启动失败/受影响的任务。故障恢复策略决定应重新启动哪些任务以恢复作业。</p>
+<h2 id="1-重启策略"><a href="#1-重启策略" class="headerlink" title="1. 重启策略"></a>1. 重启策略</h2><p>Flink 支持不同的重启策略，在作业没有特别指定重启策略时，使用默认的重启策略启动集群。如果在提交作业时指定了重启策略，那么此策略将覆盖集群的默认配置策略。</p>
+<p>默认重启策略通过 Flink 的配置文件 flink-conf.yaml 进行配置。配置参数 restart-strategy 决定了采取哪种策略。如果未启用 Checkpoint，那么将使用不重启策略。如果启用了 Checkpoint，但是并没有配置重启策略，那么将使用固定间隔重启策略，其中 Integer.MAX_VALUE 是尝试重启的最大次数。</p>
+<p>每个重启策略都有自己的一套控制其行为的参数。这些值也在配置文件中配置。下面看一下有哪些重启策略：</p>
 <table>
 <thead>
 <tr>
@@ -418,26 +424,23 @@
 </thead>
 <tbody>
 <tr>
-<td>固定延迟重启策略</td>
-<td>fixed-delay</td>
+<td>固定间隔重启策略</td>
+<td>fixeddelay, fixed-delay</td>
+<td></td>
 </tr>
 <tr>
 <td>失败率重启策略</td>
-<td>failure-rate</td>
+<td>failurerate, failure-rate</td>
 </tr>
 <tr>
 <td>不重启策略</td>
-<td>none</td>
+<td>none, off, disable</td>
 </tr>
 </tbody>
 </table>
-<p>除了定义一个默认的重启策略之外，还可以为每个<code>Flink</code>作业定义一个指定的重启策略。此重启策略通过调用<code>ExecutionEnvironment</code>上的<code>setRestartStrategy</code>方法以编程的方式进行设置。请注意，这也适用于<code>StreamExecutionEnvironment</code>。</p>
-<p>以下示例显示了如何为作业设置固定延迟重启策略。如果发生故障，系统将尝试每10s重新启动一次作业，最多重启3次。</p>
-<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// number of restart attempts</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment()</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  3, // number of restart attempts</span><br><span class="line">  Time.of(10, TimeUnit.SECONDS) // delay</span><br><span class="line">))</span><br></pre></td></tr></table></figure></p>
-<h3 id="2-重启策略"><a href="#2-重启策略" class="headerlink" title="2. 重启策略"></a>2. 重启策略</h3><p>下面介绍几种重启策略的配置选项。</p>
-<h4 id="2-1-固定延迟重启策略"><a href="#2-1-固定延迟重启策略" class="headerlink" title="2.1 固定延迟重启策略"></a>2.1 固定延迟重启策略</h4><p>固定延迟重启策略尝试一定次数来重新启动作业。如果超过最大尝试次数，那么作业最终将失败。在两次连续的尝试重启之间，重启策略会等待一段固定的时间(译者注:连续重启时间间隔)。</p>
-<p>通过在<code>flink-conf.yaml</code>中设置以下配置参数，可以将此策略默认启用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy: fixed-delay</span><br></pre></td></tr></table></figure></p>
+<p>除了定义一个默认的重启策略之外，还可以为每个 Flink 作业单独指定一个重启策略。可以通过以编程的方式调用 ExecutionEnvironment 上的 setRestartStrategy 方法进行配置。请注意，这也适用于 StreamExecutionEnvironment。</p>
+<p>以下示例显示了如何为作业设置固定间隔重启策略。如果作业发生故障，系统将尝试每10s重新启动一次作业，最多重启3次：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// number of restart attempts</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-1-固定间隔重启策略"><a href="#1-1-固定间隔重启策略" class="headerlink" title="1.1 固定间隔重启策略"></a>1.1 固定间隔重启策略</h3><p>固定间隔重启策略尝试重新启动作业指定次数。如果超过最大尝试次数，那么作业最终会失败。每次重启之后都会等待一段固定间隔时间。通过在 flink-conf.yaml 中配置如下参数，可以将重启策略默认为固定间隔重启策略：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy: fixed-delay</span><br></pre></td></tr></table></figure></p>
 <table>
 <thead>
 <tr>
@@ -448,23 +451,20 @@
 </thead>
 <tbody>
 <tr>
-<td><code>restart-strategy.fixed-delay.attempts</code></td>
-<td>在声明作业失败之前，<code>Flink</code>重试执行的次数</td>
-<td>1或者如果启用检查点，则为<code>Integer.MAX_VALUE</code></td>
+<td>restart-strategy.fixed-delay.attempts</td>
+<td>最多尝试重启次数</td>
+<td>1</td>
 </tr>
 <tr>
-<td><code>restart-strategy.fixed-delay.delay</code></td>
-<td>延迟重试意味着在执行失败后，重新执行不会立即开始，而只会在某个延迟之后开始。当程序与外部系统进行交互时，延迟重试会很有帮助</td>
-<td><code>akka.ask.timeout</code>，或10s(如果通过检查点激活)</td>
+<td>restart-strategy.fixed-delay.delay</td>
+<td>连续重启的时间间隔</td>
+<td>1s</td>
 </tr>
 </tbody>
 </table>
 <p>Example:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy.fixed-delay.attempts: 3</span><br><span class="line">restart-strategy.fixed-delay.delay: 10 s</span><br></pre></td></tr></table></figure></p>
-<p>固定延迟重启策略也可以通过编程来设置：</p>
-<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// number of restart attempts</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment()</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  3, // number of restart attempts</span><br><span class="line">  Time.of(10, TimeUnit.SECONDS) // delay</span><br><span class="line">))</span><br></pre></td></tr></table></figure></p>
-<h4 id="2-2-失败率重启策略"><a href="#2-2-失败率重启策略" class="headerlink" title="2.2 失败率重启策略"></a>2.2 失败率重启策略</h4><p>失败率重启策略在失败后重新启动作业，但当超过失败率(每个时间间隔的失败)时，作业最终会失败。在两次连续的重启尝试之间，重启策略会等待一段固定的时间。</p>
-<p>通过在<code>flink-conf.yaml</code>中设置以下配置参数，可以将此策略默认启用:</p>
+<p>固定间隔重启策略也可以通过编程来配置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.fixedDelayRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// number of restart attempts</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-2-失败率重启策略"><a href="#1-2-失败率重启策略" class="headerlink" title="1.2 失败率重启策略"></a>1.2 失败率重启策略</h3><p>失败率重启策略在作业失败后会重新启动作业，只有当每个时间区间内失败次数超过指定次数时，作业才最终会失败。失败率重启策略跟固定间隔重启策略一样，每次重启之后都会等待一段固定间隔时间，不同的是失败率重启策略阈值设置了一个时间区间，只有当时间区间内超过指定次数时才失败。通过在 flink-conf.yaml 中配置如下参数，可以将失败率重启策略设置为默认重启策略:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy: failure-rate</span><br></pre></td></tr></table></figure></p>
 <table>
 <thead>
 <tr>
@@ -475,33 +475,62 @@
 </thead>
 <tbody>
 <tr>
-<td><code>restart-strategy.failure-rate.max-failures-per-interval</code></td>
-<td>在一个作业声明失败之前，在给定时间间隔内最大的重启次数</td>
-<td>1</td>
+<td>restart-strategy.failure-rate.delay</td>
+<td>连续重启的时间间隔</td>
+<td>1 s</td>
 </tr>
 <tr>
-<td><code>restart-strategy.failure-rate.failure-rate-interval</code></td>
+<td>restart-strategy.failure-rate.failure-rate-interval</td>
 <td>计算失败率的时间间隔</td>
-<td>1分钟</td>
+<td>1 min</td>
 </tr>
 <tr>
-<td><code>restart-strategy.failure-rate.delay</code></td>
-<td>两次连续重启尝试之间的时间间隔</td>
-<td><code>akka.ask.timeout</code></td>
+<td>restart-strategy.failure-rate.max-failures-per-interval</td>
+<td>指定时间区间内最多尝试重启次数</td>
+<td>1</td>
 </tr>
 </tbody>
 </table>
 <p>Example:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy.failure-rate.max-failures-per-interval: 3</span><br><span class="line">restart-strategy.failure-rate.failure-rate-interval: 5 min</span><br><span class="line">restart-strategy.failure-rate.delay: 10 s</span><br></pre></td></tr></table></figure></p>
-<p>失败率重新启动策略也可以通过编程来设置：</p>
-<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.failureRateRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// max failures per interval</span></span><br><span class="line">  Time.of(<span class="number">5</span>, TimeUnit.MINUTES), <span class="comment">//time interval for measuring failure rate</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment()</span><br><span class="line">env.setRestartStrategy(RestartStrategies.failureRateRestart(</span><br><span class="line">  3, // max failures per unit</span><br><span class="line">  Time.of(5, TimeUnit.MINUTES), //time interval for measuring failure rate</span><br><span class="line">  Time.of(10, TimeUnit.SECONDS) // delay</span><br><span class="line">))</span><br></pre></td></tr></table></figure></p>
-<h4 id="2-3-不重启策略"><a href="#2-3-不重启策略" class="headerlink" title="2.3 不重启策略"></a>2.3 不重启策略</h4><p>作业直接失败，不会尝试重新启动:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy: none</span><br></pre></td></tr></table></figure></p>
-<p>不重启策略也可以通过编程来设置：</p>
-<p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.noRestart());</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = ExecutionEnvironment.getExecutionEnvironment()</span><br><span class="line">env.setRestartStrategy(RestartStrategies.noRestart())</span><br></pre></td></tr></table></figure></p>
-<h4 id="2-4-回退重启策略"><a href="#2-4-回退重启策略" class="headerlink" title="2.4 回退重启策略"></a>2.4 回退重启策略</h4><p>使用集群定义的重启策略(The cluster defined restart strategy is used. )。这有助于启用检查点的流式传输程序。默认情况下，如果没有定义其他重启策略，则选择固定延时重启策略。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/restart_strategies.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/restart_strategies.html</a></p>
+<p>失败率重新启动策略也可以通过编程来设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.failureRateRestart(</span><br><span class="line">  <span class="number">3</span>, <span class="comment">// max failures per interval</span></span><br><span class="line">  Time.of(<span class="number">5</span>, TimeUnit.MINUTES), <span class="comment">//time interval for measuring failure rate</span></span><br><span class="line">  Time.of(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// delay</span></span><br><span class="line">));</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-3-不重启策略"><a href="#1-3-不重启策略" class="headerlink" title="1.3 不重启策略"></a>1.3 不重启策略</h3><p>作业直接失败，不会重启:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">restart-strategy: none</span><br></pre></td></tr></table></figure></p>
+<p>不重启策略也可以通过编程来设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setRestartStrategy(RestartStrategies.noRestart());</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-故障恢复策略"><a href="#2-故障恢复策略" class="headerlink" title="2. 故障恢复策略"></a>2. 故障恢复策略</h2><p>Flink 支持不同的故障恢复策略，可以通过 Flink 的配置文件 flink-conf.yaml 中的 jobmanager.execution.failover-strategy 配置参数进行配置：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">jobmanager.execution.failover-strategy: region</span><br></pre></td></tr></table></figure></p>
+<table>
+<thead>
+<tr>
+<th>Failover策略</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Restart all</td>
+<td>full</td>
+</tr>
+<tr>
+<td>Restart pipelined region</td>
+<td>region</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-1-重启所有故障恢复策略"><a href="#2-1-重启所有故障恢复策略" class="headerlink" title="2.1 重启所有故障恢复策略"></a>2.1 重启所有故障恢复策略</h3><p>此策略会重新启动作业中所有任务以从失败任务中恢复。</p>
+<h3 id="2-2-重启流水线区域故障恢复策略"><a href="#2-2-重启流水线区域故障恢复策略" class="headerlink" title="2.2 重启流水线区域故障恢复策略"></a>2.2 重启流水线区域故障恢复策略</h3><p>该策略会将作业中的所有 Task 划分为几个 Region。当有 Task 发生故障时，它会尝试找出进行故障恢复需要重启的最小 Region 集合。相比于全部重启的故障恢复策略，这种策略在一定场景下重启的 Task 会少一些。</p>
+<p>Region 是指以 Pipelined 形式进行数据交换的 Task 集合。也就是说，Batch 形式的数据交换会构成 Region 的边界。</p>
+<ul>
+<li>DataStream 和 流式 Table/SQL 作业的所有数据交换都是 Pipelined 形式。</li>
+<li>批处理式 Table/SQL 作业的所有数据交换默认都是 Batch 形式的。</li>
+<li>DataSet 作业中的数据交换形式会根据 ExecutionConfig 中配置的 ExecutionMode 决定。</li>
+</ul>
+<p>需要重启的 Region 的判断逻辑如下：</p>
+<ul>
+<li>出错 Task 所在 Region 需要重启。</li>
+<li>如果要重启的 Region 需要消费的数据有部分无法访问（丢失或损坏），产出该部分数据的 Region 也需要重启。</li>
+<li>需要重启的 Region 的下游 Region 也需要重启。这是出于保障数据一致性的考虑，因为一些非确定性的计算或者分发会导致同一个 Result Partition 每次产生时包含的数据都不相同。</li>
+</ul>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/task_failure_recovery.html" target="_blank" rel="noopener">Task Failure Recovery</a></p>
 
       
     </div>
@@ -551,7 +580,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-restart-strategy.html" title="Flink1.4 重启策略">http://smartsi.club/flink-restart-strategy.html</a>
+    <a href="http://smartsi.club/flink-restart-strategy.html" title="Flink 任务失败恢复策略">http://smartsi.club/flink-restart-strategy.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -568,8 +597,6 @@
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
           
-            <a href="/tags/Flink-基础/" rel="tag"># Flink 基础</a>
-          
         </div>
       
 
@@ -581,8 +608,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/flink-stream-dataflow-type-and-transformation.html" rel="next" title="Flink1.4 数据流类型与转换关系">
-                <i class="fa fa-chevron-left"></i> Flink1.4 数据流类型与转换关系
+              <a href="/big-data-we-have-learned-together-in-2020.html" rel="next" title="2020年我们一起看过的大数据">
+                <i class="fa fa-chevron-left"></i> 2020年我们一起看过的大数据
               </a>
             
           </div>
@@ -590,10 +617,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/flink-stream-event-time-and-processing-time.html" rel="prev" title="Flink 事件时间与处理时间">
-                Flink 事件时间与处理时间 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -809,7 +832,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-重启策略"><span class="nav-number">2.</span> <span class="nav-text">2. 重启策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-固定延迟重启策略"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 固定延迟重启策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-失败率重启策略"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 失败率重启策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-不重启策略"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 不重启策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-回退重启策略"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 回退重启策略</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-重启策略"><span class="nav-number">1.</span> <span class="nav-text">1. 重启策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-固定间隔重启策略"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 固定间隔重启策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-失败率重启策略"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 失败率重启策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-不重启策略"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 不重启策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-故障恢复策略"><span class="nav-number">2.</span> <span class="nav-text">2. 故障恢复策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-重启所有故障恢复策略"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 重启所有故障恢复策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-重启流水线区域故障恢复策略"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 重启流水线区域故障恢复策略</span></a></li></ol></li></ol></div>
             
 
           </div>
