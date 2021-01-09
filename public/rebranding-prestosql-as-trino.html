@@ -97,36 +97,34 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink 内部原理," />
+  <meta name="keywords" content="Presto," />
 
 
-<meta name="description" content="1. 调度Flink中的执行资源是通过任务槽定义。每个TaskManager都有一个或多个任务槽，每个任务槽可以运行一个并行任务的流水线(pipeline)。流水线由多个连续的任务组成，例如 MapFunction 的第n个并行实例和 ReduceFunction 的第n个并行实例。请注意，Flink经常同时执行连续的任务：对于流式处理程序时刻发生，但是对于批处理程序来说却是经常发生。 下图证明了">
-<meta name="keywords" content="Flink,Flink 内部原理">
+<meta name="description" content="开源大数据分布式 SQL 查询引擎 PrestoSQL ，如今已经更名为 Trino 。原来的项目创始团队和主要贡献者依然在维护着这一开源项目，只是 PrestoSQL 已经不再叫做 PrestoSQL 了。 近日，PrestoSQL 官网贴出一则消息，宣称正式将 PrestoSQL 重命名为 Trino 。“ Trino 是 PrestoSQL 的新名称，更名后依然得到了 Presto® 的创建">
+<meta name="keywords" content="Presto">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink 内部原理之作业与调度">
-<meta property="og:url" content="http://smartsi.club/flink-internals-job-scheduling.html">
+<meta property="og:title" content="&lt;转&gt;与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名">
+<meta property="og:url" content="http://smartsi.club/rebranding-prestosql-as-trino.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. 调度Flink中的执行资源是通过任务槽定义。每个TaskManager都有一个或多个任务槽，每个任务槽可以运行一个并行任务的流水线(pipeline)。流水线由多个连续的任务组成，例如 MapFunction 的第n个并行实例和 ReduceFunction 的第n个并行实例。请注意，Flink经常同时执行连续的任务：对于流式处理程序时刻发生，但是对于批处理程序来说却是经常发生。 下图证明了">
+<meta property="og:description" content="开源大数据分布式 SQL 查询引擎 PrestoSQL ，如今已经更名为 Trino 。原来的项目创始团队和主要贡献者依然在维护着这一开源项目，只是 PrestoSQL 已经不再叫做 PrestoSQL 了。 近日，PrestoSQL 官网贴出一则消息，宣称正式将 PrestoSQL 重命名为 Trino 。“ Trino 是 PrestoSQL 的新名称，更名后依然得到了 Presto® 的创建">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-4.png?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Presto/rebranding-prestosql-as-trino-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Presto/rebranding-prestosql-as-trino-2.png?raw=true">
+<meta property="og:updated_time" content="2021-01-09T13:56:19.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink 内部原理之作业与调度">
-<meta name="twitter:description" content="1. 调度Flink中的执行资源是通过任务槽定义。每个TaskManager都有一个或多个任务槽，每个任务槽可以运行一个并行任务的流水线(pipeline)。流水线由多个连续的任务组成，例如 MapFunction 的第n个并行实例和 ReduceFunction 的第n个并行实例。请注意，Flink经常同时执行连续的任务：对于流式处理程序时刻发生，但是对于批处理程序来说却是经常发生。 下图证明了">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-1.png?raw=true">
+<meta name="twitter:title" content="&lt;转&gt;与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名">
+<meta name="twitter:description" content="开源大数据分布式 SQL 查询引擎 PrestoSQL ，如今已经更名为 Trino 。原来的项目创始团队和主要贡献者依然在维护着这一开源项目，只是 PrestoSQL 已经不再叫做 PrestoSQL 了。 近日，PrestoSQL 官网贴出一则消息，宣称正式将 PrestoSQL 重命名为 Trino 。“ Trino 是 PrestoSQL 的新名称，更名后依然得到了 Presto® 的创建">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Presto/rebranding-prestosql-as-trino-1.jpg?raw=true">
 
 
 
 
 
 
-  <link rel="canonical" href="http://smartsi.club/flink-internals-job-scheduling.html"/>
+  <link rel="canonical" href="http://smartsi.club/rebranding-prestosql-as-trino.html"/>
 
 
-  <title>Flink 内部原理之作业与调度 | SmartSi</title>
+  <title><转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名 | SmartSi</title>
   
 
 
@@ -307,7 +305,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-internals-job-scheduling.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/rebranding-prestosql-as-trino.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -324,7 +322,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink 内部原理之作业与调度</h2>
+          <h2 class="post-title" itemprop="name headline"><转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名</h2>
         
 
         <div class="post-meta">
@@ -336,7 +334,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-29T17:31:01+08:00">2018-01-29</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-04T21:22:01+08:00">2021-01-04</time>
             
 
             
@@ -356,7 +354,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Presto/" itemprop="url" rel="index"><span itemprop="name">Presto</span></a></span>
 
                 
                 
@@ -371,8 +369,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/flink-internals-job-scheduling.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/flink-internals-job-scheduling.html" itemprop="commentCount"></span>
+                <a href="/rebranding-prestosql-as-trino.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/rebranding-prestosql-as-trino.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -380,7 +378,7 @@
 
           
           
-             <span id="/flink-internals-job-scheduling.html" class="leancloud_visitors" data-flag-title="Flink 内部原理之作业与调度">
+             <span id="/rebranding-prestosql-as-trino.html" class="leancloud_visitors" data-flag-title="<转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -411,23 +409,31 @@
       
 
       
-        <h3 id="1-调度"><a href="#1-调度" class="headerlink" title="1. 调度"></a>1. 调度</h3><p><code>Flink</code>中的执行资源是通过任务槽定义。每个<code>TaskManager</code>都有一个或多个任务槽，每个任务槽可以运行一个并行任务的流水线(pipeline)。流水线由多个连续的任务组成，例如 <code>MapFunction</code> 的第n个并行实例和 <code>ReduceFunction</code> 的第n个并行实例。请注意，<code>Flink</code>经常同时执行连续的任务：对于流式处理程序时刻发生，但是对于批处理程序来说却是经常发生。</p>
-<p>下图证明了这一点。考虑一个带有数据源，一个<code>MapFunction</code> 和 一个<code>ReduceFunction</code> 的程序。数据源和 <code>MapFunction</code> 以并行度<code>4</code>运行， <code>ReduceFunction</code>以并行度<code>3</code>运行。流水线由 <code>Source-Map-Reduce</code> 序列组成。在具有2个<code>TaskManager</code>（每个有3个插槽）的集群上，程序将按照下面的描述执行:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-1.png?raw=true" alt=""></p>
-<p>在内部，<code>Flink</code>通过<a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/jobmanager/scheduler/SlotSharingGroup.java" target="_blank" rel="noopener">SlotSharingGroup</a>和 <a href="">CoLocationGroup</a>定义哪些任务可以共享一个槽（允许），哪些任务必须严格放置在同一个槽中。</p>
-<h3 id="2-JobManager-数据结构"><a href="#2-JobManager-数据结构" class="headerlink" title="2. JobManager 数据结构"></a>2. JobManager 数据结构</h3><p>在作业执行期间，<code>JobManager</code> 追踪分布式任务，决定何时调度下一个任务（或任务集合），并对完成的任务或执行失败的任务进行相应的处理。</p>
-<p><code>JobManager</code> 接收 <a href="https://github.com/apache/flink/tree/master/flink-runtime/src/main/java/org/apache/flink/runtime/jobgraph" target="_blank" rel="noopener">JobGraph</a>，<code>JobGraph</code>表示由算子（<a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/jobgraph/JobVertex.java" target="_blank" rel="noopener">JobVertex</a>）和中间结果（<a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/jobgraph/IntermediateDataSet.java" target="_blank" rel="noopener">IntermediateDataSet</a>）组成的数据流。每个算子都具有属性，如并行度和执行的代码等。另外，<code>JobGraph</code>还有一组附加的库，运行算子代码必需使用这些库。</p>
-<p><code>JobManager</code> 将 <code>JobGraph</code> 转换成 <a href="https://github.com/apache/flink/tree/master/flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph" target="_blank" rel="noopener">ExecutionGraph</a>。 <code>ExecutionGraph</code> 是 <code>JobGraph</code> 的并行版本：对于每个 <code>JobVertex</code>，对于每个并行子任务它都包含一个  <a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph/ExecutionVertex.java" target="_blank" rel="noopener">ExecutionVertex</a>。例如并行度为100的算子会有一个 <code>JobVertex</code> 以及 100个 <code>ExecutionVertices</code>。 <code>ExecutionVertex</code>跟踪特定子任务的执行状态。<code>JobVertex</code> 中所有的 <code>ExecutionVertices</code> 都保存在一个 <code>ExecutionJobVertex</code> 中，该 <a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph/ExecutionJobVertex.java" target="_blank" rel="noopener">ExecutionJobVertex</a> 跟踪整个算子的状态。除了顶点之外， <code>ExecutionGraph</code> 还包含 <a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph/IntermediateResult.java" target="_blank" rel="noopener">IntermediateResult</a> 和 <a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph/IntermediateResultPartition.java" target="_blank" rel="noopener">IntermediateResultPartition</a>。前者跟踪 <code>IntermediateDataSet</code> 的状态，后者追踪每个分区的状态。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-2.png?raw=true" alt=""></p>
-<p>每个 <code>ExecutionGraph</code> 都有一个与之相关的作业状态。作业状态表示作业执行的当前状态。</p>
-<p><code>Flink</code> 作业首先处于 <code>ctreated</code> 状态，然后切换到 <code>running</code> 状态，一旦所有工作完成后切换到 <code>finished</code> 状态。在出现故障的情况下，作业首先切换到 <code>failing</code> 状态，取消所有正在运行任务的地方。如果所有作业顶点已达到最终状态，并且作业不可重新启动，那么作业转换 <code>failed</code> 状态。如果作业可以重新启动，那么它将进入 <code>restarting</code> 状态。一旦作业重新启动完成后，将进入 <code>ctreated</code> 状态。</p>
-<p>在用户取消作业的情况下，将进入 <code>cancelling</code> 状态。这也需要取消所有正在运行的任务。一旦所有正在运行的任务都达到最终状态，作业将转换到 <code>cancelled</code> 状态。</p>
-<p>不同于表示全局终端状态以及触发清理工作的 <code>finished</code>， <code>canceled</code> 和 <code>failed</code> 状态，<code>suspended</code> 状态只是本地终端。本地终端的意思是作业的执行已在相应的 <code>JobManager</code> 上终止，但 <code>Flink</code> 集群的另一个 <code>JobManager</code> 可从持久性 <code>HA</code> 存储中检索作业并重新启动作业。因此，进入 <code>suspended</code> 状态的作业将不会完全清理。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-3.png?raw=true" alt=""></p>
-<p>在 <code>ExecutionGraph</code> 的执行过程中，每个并行任务都经历了从 <code>ctreated</code> 到 <code>finished</code> 或 <code>failed</code> 的多个阶段。下图说明了它们之间的状态和可能的转换。任务可以执行多次（例如在故障恢复过程中）。出于这个原因， <code>ExecutionVertex</code> 执行跟踪信息保存在 <a href="https://github.com/apache/flink/blob/master//flink-runtime/src/main/java/org/apache/flink/runtime/executiongraph/Execution.java" target="_blank" rel="noopener">Execution</a> 中。 每个 <code>ExecutionVertex</code> 都有一个当前的<code>Execution</code>，以及之前的<code>Executions</code>。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/flink_internals_job_scheduling-4.png?raw=true" alt=""></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/job_scheduling.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/internals/job_scheduling.html</a></p>
+        <p>开源大数据分布式 SQL 查询引擎 PrestoSQL ，如今已经更名为 Trino 。原来的项目创始团队和主要贡献者依然在维护着这一开源项目，只是 PrestoSQL 已经不再叫做 PrestoSQL 了。</p>
+<p>近日，PrestoSQL 官网贴出一则消息，宣称正式将 PrestoSQL 重命名为 Trino 。“ Trino 是 PrestoSQL 的新名称，更名后依然得到了 Presto® 的创建者和创建者以及主要贡献者的支持，Trino 只是一个闪亮的新名字。” 在官方公告中，原 PrestoSQL 团队如此表示。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Presto/rebranding-prestosql-as-trino-1.jpg?raw=true" alt=""></p>
+<h2 id="1-更名原因：侵犯-Facebook-商标权"><a href="#1-更名原因：侵犯-Facebook-商标权" class="headerlink" title="1. 更名原因：侵犯 Facebook 商标权"></a>1. 更名原因：侵犯 Facebook 商标权</h2><p>Presto 最初是由 Facebook 开源的一款面向大数据的分布式 SQL 查询引擎，可对从 GB 到 PB 级的大数据进行交互式的查询，查询速度达到商业数据仓库级别。</p>
+<p>从这一次更名的对外公告中，PrestoSQL 项目被迫更名的原因，主要是因为 Presto 的商标被 Facebook 注册之后，由原来 Presto 创始团队成员以分支形式发展壮大的 PrestoSQL 不能再继续以 Presto 这一商标作为前缀使用，最终只能被迫更名为 Trino。</p>
+<p>据介绍，2012 年，Dain、David 和 Martin 加入了 Facebook 数据基础架构团队。与 Eric Hwang 共同创建了 Presto ，以解决 Facebook 庞大的 Hadoop 数据仓库上的低延迟交互式分析问题，由于大家一致认为开源是构建可经受住时间考验的成功软件的关键力量，于是决定将 Presto 代码开源。</p>
+<p>在接下来的六年中，Presto 项目的创始团队们积极参与构建开源社区和生态系统，并且很快受到了外界的认可。然而不幸的是，在 2018 年，由于 Facebook 的管理层希望对 Presto 项目发展及其未来进行更为严格的控制，于是，他们强制决定授予 Facebook 的开发人员对该项目自由提交并合并代码的权利，而且使用者无需任何 Presto 经验。</p>
+<p>这一调整与 Presto 创始团队发展一个健康、开放的社区的理念不相容。最终，Presto 创始团队中的 Dain、David 和 Martin 开始决定以开源分支的形式发展新项目，继续坚持自己对于开源项目及社区发展的理念，于是，PrestoSQL 诞生了。</p>
+<p>在 2019 年 1 月，Dain、David 和 Martin 等人还通过成立 Presto 软件基金会的形式，全面负责监督 PrestoSQL 代码贡献及社区的发展，并且长期保持失业状态参与社区维护，进一步将更多的精力投入到开源项目的运营维护上。</p>
+<p>事实证明，由于有更多的精力投入，以分支机构运行的 PrestoSQL 在开源社区获得了比主干项目 PrestoDB 更多的关注度。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Presto/rebranding-prestosql-as-trino-2.png?raw=true" alt=""></p>
+<p>但也是在 2019 年 Presto 软件基金会成立几个月之后，Facebook  开始申请注册 Presto 的商标。随后到了 2019 年 9 月，Facebook 宣布将 Presto 捐赠给 Linux 基金会，并成立 Presto 基金会 (Presto Foundation, PF)，成为了依附于 Linux 基金会的子基金会。</p>
+<p>因此，Presto 成为了 Linux 基金会的注册商标，在 Facebook 积极主张 Presto 商标的使用权的压力下，Presto 创始团队去年与 Facebook 以及 Linux 基金会多番交涉，希望在继续使用 PrestoSQL 名字的前提下达成不会对双方产生负面影响的条款。但是，最后他们无法形成一致的意见，最终 PrestoSQL 只能修改名字。</p>
+<p>“虽然对此我们感到十分悲伤和失望，但团队不希望再把时间耗费在这些分心的事情上，所以唯有接受修改 PrestoSQL 名字。”最初将项目命名为 Presto 的创始人如此表示。</p>
+<h2 id="2-需引起重视的开源项目合规问题"><a href="#2-需引起重视的开源项目合规问题" class="headerlink" title="2. 需引起重视的开源项目合规问题"></a>2. 需引起重视的开源项目合规问题</h2><p>与 Facebook 理念不合开始以分支形式独立发展，在取得了比根开源项目更高的市场关注度之后，PrestoSQL 却又因为侵犯了 Facebook 注册的 Presto 商标，最终被迫更名。在 PrestoSQL 官网宣布更名的信息传出之后，网络上出现了一些不满的声音。“资本市场都是利益至上，其他的第二。”有网友发帖表示。</p>
+<p>事实上，从 PrestoSQL 不得已更名的情况来看，在 Presto 商标早已被 Facebook 注册，多次沟通未果的情况之下，如果 PrestoSQL 继续使用原有名称则必然将造成侵权事实。</p>
+<p>单纯从法律视角来看，Facebook 维护企业商标的行为正当合法，PrestoSQL 更换名称显然也是保全自身免受法律追究最为明智的做法。但是如果避开商标侵权不谈，PrestoSQL 被迫更名的背后，其实仍然有许多值得讨论的地方。</p>
+<p>由于开源软件通常是由个人或一群彼此之间没有正式联系的开发者所共同完成的，每个开源软件的开发者都是该开源软件的贡献者。在这种特殊的开发模式下，可能由于个人或开发者缺少法律意识，很容易就会出现开源软件版权归属混乱的情形。</p>
+<p>在这样的情况之下，最初开发 Presto 项目的时候谁付出的更多一点？谁才是真正意义上最该持有 Presto 商标权的最佳人选？这些问题都不再仅仅是通过谁最终持有法定商标注册证书，就能够武断得出结论的。</p>
+<p>“ PrestoSQL 更名，直观说明的是他们团队在一开始的时候对项目商标权的不够重视，所以最终被迫更名也是必然的。但是，这背后真实情况是什么样的，注定是只能有少数人才能够知晓。”一位长期关注开源的业内人士评价称。</p>
+<p>事实上，开源项目因为理念不合、专利以及商标归属等问题引发的团队纠纷等问题层出不穷。在国内，一些开源项目的创始人从原来的开源项目中脱离，出去以分支形式继续创业并仍在沿用原来项目名称的做法也同样存在。</p>
+<p>对于开源项目而言，由于免费的原因，其往往能够有效的缩减企业研发成本，降低开发人员技术研发门槛。因此，开发者在技术选型的时候往往也更愿意尝试开源技术。但是在选择尝试的基础上，开发人员同时也会重点考虑开源代码使用可能带来的风险问题。</p>
+<p>“代码之外，开源项目更重要的还有社区、开发者等组成单元，如果一个开源项目长期负面不断，这对于项目本身以及这一项目的使用方企业都会造成比较负面的影响，不利于项目长远发展。”上述发言人表示。</p>
+<p>在其看来，由于缺乏可持续的收入来源和稳定的组织架构支撑，大多数开源项目本身就很脆弱。这样的情况之下，如果一个开源项目想要取得更加良性的发展，在合适的时机选择进入专业的开源基金会等组织进行孵化，通过系统的流程梳理让项目及其运作的方式更加的科学、合规，这是每一个开源项目发展过程中都需要重点考虑的问题，开源项目应该提前布局并合理规避合规、安全等方面问题的发生。</p>
+<p>原文:<a href="https://www.infoq.cn/article/WmH0WXhqsWqpHDm6PpjC" target="_blank" rel="noopener">与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名</a></p>
 
       
     </div>
@@ -473,11 +479,11 @@
         <ul class="post-copyright">
   <li class="post-copyright-author">
     <strong>本文作者：</strong>
-    sjf0115
+    周文猛
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-internals-job-scheduling.html" title="Flink 内部原理之作业与调度">http://smartsi.club/flink-internals-job-scheduling.html</a>
+    <a href="http://smartsi.club/rebranding-prestosql-as-trino.html" title="<转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名">http://smartsi.club/rebranding-prestosql-as-trino.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -492,9 +498,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Flink/" rel="tag"># Flink</a>
-          
-            <a href="/tags/Flink-内部原理/" rel="tag"># Flink 内部原理</a>
+            <a href="/tags/Presto/" rel="tag"># Presto</a>
           
         </div>
       
@@ -507,8 +511,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/hadoop-how-to-determine-the-hdfs-file-exists.html" rel="next" title="Hadoop Shell中判断HDFS文件是否存在">
-                <i class="fa fa-chevron-left"></i> Hadoop Shell中判断HDFS文件是否存在
+              <a href="/flink-restart-strategy.html" rel="next" title="Flink 任务失败恢复策略">
+                <i class="fa fa-chevron-left"></i> Flink 任务失败恢复策略
               </a>
             
           </div>
@@ -516,10 +520,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/flink-stream-deployment-externalized-checkpoints.html" rel="prev" title="Flink1.4 外部检查点">
-                Flink1.4 外部检查点 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -735,7 +735,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-调度"><span class="nav-number">1.</span> <span class="nav-text">1. 调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-JobManager-数据结构"><span class="nav-number">2.</span> <span class="nav-text">2. JobManager 数据结构</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-更名原因：侵犯-Facebook-商标权"><span class="nav-number">1.</span> <span class="nav-text">1. 更名原因：侵犯 Facebook 商标权</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-需引起重视的开源项目合规问题"><span class="nav-number">2.</span> <span class="nav-text">2. 需引起重视的开源项目合规问题</span></a></li></ol></div>
             
 
           </div>
