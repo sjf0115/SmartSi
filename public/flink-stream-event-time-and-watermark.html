@@ -115,7 +115,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-5.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-6.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2021-01-10T08:15:21.000Z">
+<meta property="og:updated_time" content="2021-01-10T08:20:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink Watermark机制">
 <meta name="twitter:description" content="Flink版本：1.11.0  1. 为何要使用Watermark？在说 Watermark 之前，我们先提一下 EventTime（事件时间）和 ProcessingTime（处理时间）。事件时间是事件在现实世界中发生的时间，处理时间是 Flink 系统处理该事件的时间。如果我们比较关心事件实际发生的时间，我们就需要基于事件时间进行处理。但是基于事件时间，我们就不得不面对乱序的问题。 通常情况">
@@ -539,8 +539,8 @@
 <tr>
 <td style="text-align:left">1</td>
 <td style="text-align:left">A,2021-01-05 12:07:01</td>
-<td style="text-align:left">2021-01-05 12:07:01(1609819621000)</td>
-<td style="text-align:left">2021-01-05 11:57:00(1609819020999)</td>
+<td style="text-align:left">2021-01-05 12:07:01</td>
+<td style="text-align:left">2021-01-05 11:57:00</td>
 <td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -549,8 +549,8 @@
 <tr>
 <td style="text-align:left">2</td>
 <td style="text-align:left">B,2021-01-05 12:08:01</td>
-<td style="text-align:left">2021-01-05 12:08:01(1609819681000)</td>
-<td style="text-align:left">2021-01-05 11:58:00(1609819080999)</td>
+<td style="text-align:left">2021-01-05 12:08:01</td>
+<td style="text-align:left">2021-01-05 11:58:00</td>
 <td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -559,8 +559,8 @@
 <tr>
 <td style="text-align:left">3</td>
 <td style="text-align:left">A,2021-01-05 12:14:01</td>
-<td style="text-align:left">2021-01-05 12:14:01(1609820041000)</td>
-<td style="text-align:left">2021-01-05 12:04:00(1609819440999)</td>
+<td style="text-align:left">2021-01-05 12:14:01</td>
+<td style="text-align:left">2021-01-05 12:04:00</td>
 <td style="text-align:left">[12:05, 12:15]、[12:10, 12:20]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -569,8 +569,8 @@
 <tr>
 <td style="text-align:left">4</td>
 <td style="text-align:left">C,2021-01-05 12:09:01</td>
-<td style="text-align:left">2021-01-05 12:14:01(1609820041000)</td>
-<td style="text-align:left">2021-01-05 12:04:00(1609819440999)</td>
+<td style="text-align:left">2021-01-05 12:14:01</td>
+<td style="text-align:left">2021-01-05 12:04:00</td>
 <td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -579,8 +579,8 @@
 <tr>
 <td style="text-align:left">5</td>
 <td style="text-align:left">C,2021-01-05 12:15:01</td>
-<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
-<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">2021-01-05 12:15:01</td>
+<td style="text-align:left">2021-01-05 12:05:00</td>
 <td style="text-align:left">[12:10, 12:20]、[12:15, 12:25]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -589,8 +589,8 @@
 <tr>
 <td style="text-align:left">6</td>
 <td style="text-align:left">A,2021-01-05 12:08:01</td>
-<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
-<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">2021-01-05 12:15:01</td>
+<td style="text-align:left">2021-01-05 12:05:00</td>
 <td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -599,8 +599,8 @@
 <tr>
 <td style="text-align:left">7</td>
 <td style="text-align:left">B,2021-01-05 12:13:01</td>
-<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
-<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">2021-01-05 12:15:01</td>
+<td style="text-align:left">2021-01-05 12:05:00</td>
 <td style="text-align:left">[12:05, 12:15]、[12:10, 12:20]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -609,8 +609,8 @@
 <tr>
 <td style="text-align:left">8</td>
 <td style="text-align:left">B,2021-01-05 12:21:01</td>
-<td style="text-align:left">2021-01-05 12:21:01(1609820461000)</td>
-<td style="text-align:left">2021-01-05 12:11:00(1609819860999)</td>
+<td style="text-align:left">2021-01-05 12:21:01</td>
+<td style="text-align:left">2021-01-05 12:11:00</td>
 <td style="text-align:left">[12:15, 12:25]、[12:20, 12:30]</td>
 <td style="text-align:left">[12:00, 12:10]</td>
 <td style="text-align:left">1、2、4、6</td>
@@ -619,8 +619,8 @@
 <tr>
 <td style="text-align:left">9</td>
 <td style="text-align:left">D,2021-01-05 12:04:01</td>
-<td style="text-align:left">2021-01-05 12:21:01(1609820461000)</td>
-<td style="text-align:left">2021-01-05 12:11:00(1609819860999)</td>
+<td style="text-align:left">2021-01-05 12:21:01</td>
+<td style="text-align:left">2021-01-05 12:11:00</td>
 <td style="text-align:left">[11:55, 12:05]、[12:00, 12:10]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -629,8 +629,8 @@
 <tr>
 <td style="text-align:left">10</td>
 <td style="text-align:left">B,2021-01-05 12:26:01</td>
-<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
-<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">2021-01-05 12:26:01</td>
+<td style="text-align:left">2021-01-05 12:16:00</td>
 <td style="text-align:left">[12:20, 12:30]、[12:25, 12:35]</td>
 <td style="text-align:left">[12:05, 12:15]</td>
 <td style="text-align:left">1、2、3、4、6、7</td>
@@ -639,8 +639,8 @@
 <tr>
 <td style="text-align:left">11</td>
 <td style="text-align:left">B,2021-01-05 12:17:01</td>
-<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
-<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">2021-01-05 12:26:01</td>
+<td style="text-align:left">2021-01-05 12:16:00</td>
 <td style="text-align:left">[12:10, 12:20]、[12:15, 12:25]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -649,8 +649,8 @@
 <tr>
 <td style="text-align:left">12</td>
 <td style="text-align:left">D,2021-01-05 12:09:01</td>
-<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
-<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">2021-01-05 12:26:01</td>
+<td style="text-align:left">2021-01-05 12:16:00</td>
 <td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
 <td style="text-align:left"></td>
 <td style="text-align:left"></td>
@@ -659,8 +659,8 @@
 <tr>
 <td style="text-align:left">13</td>
 <td style="text-align:left">C,2021-01-05 12:30:01</td>
-<td style="text-align:left">2021-01-05 12:30:01(1609821001000)</td>
-<td style="text-align:left">2021-01-05 12:20:00(1609820400999)</td>
+<td style="text-align:left">2021-01-05 12:30:01</td>
+<td style="text-align:left">2021-01-05 12:20:00</td>
 <td style="text-align:left">[12:25, 12:35]、[12:30, 12:40]</td>
 <td style="text-align:left">[12:15,12:20]</td>
 <td style="text-align:left">3、5、7、11</td>
