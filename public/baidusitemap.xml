@@ -5,10 +5,10 @@
     
   <url>
     <loc>http://smartsi.club/hive-query-federation.html</loc>
-    <lastmod>2021-01-10T13:14:24.000Z</lastmod>
+    <lastmod>2021-01-10T13:17:27.000Z</lastmod>
     <data>
         <display>
-        <title>Apache Hive 联邦查询</title>
+        <title><转>Apache Hive 联邦查询</title>
         <pubTime>2021-01-10T13:02:01.000Z</pubTime>
         
         <tag>Hive</tag>
@@ -1099,26 +1099,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/Airflow/%5BAirFlow%5DAirFlow%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%80%20%E5%AE%89%E8%A3%85%E4%B8%8E%E5%90%AF%E5%8A%A8.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Airflow使用指南一 安装与启动</title>
-        <pubTime>2017-12-29T04:55:01.000Z</pubTime>
-        
-        <tag>Airflow</tag>
-         
-         
-           
-             
-              <breadCrumb title="Airflow" url="http://smartsi.club/categories/Airflow/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/better-bitmap-performance-with-roaring-bitmaps.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -1139,19 +1119,19 @@
 
     
   <url>
-    <loc>http://smartsi.club/an-illustrated-proof-of-the-cap-theorem.html</loc>
+    <loc>http://smartsi.club/Airflow/%5BAirFlow%5DAirFlow%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97%E4%B8%80%20%E5%AE%89%E8%A3%85%E4%B8%8E%E5%90%AF%E5%8A%A8.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>图解CAP定理</title>
-        <pubTime>2019-09-21T04:35:17.000Z</pubTime>
+        <title>Airflow使用指南一 安装与启动</title>
+        <pubTime>2017-12-29T04:55:01.000Z</pubTime>
         
-        <tag>Architecture</tag>
+        <tag>Airflow</tag>
          
          
            
              
-              <breadCrumb title="Architecture" url="http://smartsi.club/categories/Architecture/"/>
+              <breadCrumb title="Airflow" url="http://smartsi.club/categories/Airflow/"/>
           
         </display>
     </data>
@@ -1185,6 +1165,26 @@
         <display>
         <title>OLAP vs OLTP</title>
         <pubTime>2019-10-08T01:28:04.000Z</pubTime>
+        
+        <tag>Architecture</tag>
+         
+         
+           
+             
+              <breadCrumb title="Architecture" url="http://smartsi.club/categories/Architecture/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/an-illustrated-proof-of-the-cap-theorem.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>图解CAP定理</title>
+        <pubTime>2019-09-21T04:35:17.000Z</pubTime>
         
         <tag>Architecture</tag>
          
@@ -1289,56 +1289,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-how-to-use-mapping.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ElasticSearch Mapping映射</title>
-        <pubTime>2016-10-19T11:15:17.000Z</pubTime>
-        
-        <tag>ElasticSearch</tag>
-         
-        <tag>ElasticSearch 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/elasticsearch-base-scroll-search.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
         <title>ElasticSearch Scroll游标搜索</title>
         <pubTime>2016-10-28T11:20:17.000Z</pubTime>
-        
-        <tag>ElasticSearch</tag>
-         
-        <tag>ElasticSearch 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/elasticsearch-built-in-analyzer.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ElasticSearch 内置分析器</title>
-        <pubTime>2016-10-21T12:15:17.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
@@ -1377,6 +1333,50 @@
 
     
   <url>
+    <loc>http://smartsi.club/elasticsearch-pagination-search.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ElasticSearch 分页搜索</title>
+        <pubTime>2016-10-25T04:45:17.000Z</pubTime>
+        
+        <tag>ElasticSearch</tag>
+         
+        <tag>ElasticSearch 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/elasticsearch-built-in-analyzer.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ElasticSearch 内置分析器</title>
+        <pubTime>2016-10-21T12:15:17.000Z</pubTime>
+        
+        <tag>ElasticSearch</tag>
+         
+        <tag>ElasticSearch 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/elasticsearch-how-to-use-analysis-and-analyser.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -1399,12 +1399,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-pagination-search.html</loc>
+    <loc>http://smartsi.club/elasticsearch-how-to-use-mapping.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch 分页搜索</title>
-        <pubTime>2016-10-25T04:45:17.000Z</pubTime>
+        <title>ElasticSearch Mapping映射</title>
+        <pubTime>2016-10-19T11:15:17.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
@@ -1465,48 +1465,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-setup-and-run.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ElasticSearch安装与启动</title>
-        <pubTime>2016-06-23T15:15:17.000Z</pubTime>
-        
-        <tag>ElasticSearch</tag>
-         
-         
-           
-             
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/elasticsearch-base-making-changes-persistent.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ElasticSearch 持久化变更</title>
-        <pubTime>2016-11-08T12:01:23.000Z</pubTime>
-        
-        <tag>ElasticSearch</tag>
-         
-        <tag>ElasticSearch 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/elasticsearch-base-sgement-merge.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -1551,16 +1509,58 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-how-to-indexing.html</loc>
+    <loc>http://smartsi.club/elasticsearch-base-making-changes-persistent.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch 索引</title>
-        <pubTime>2016-10-18T11:15:17.000Z</pubTime>
+        <title>ElasticSearch 持久化变更</title>
+        <pubTime>2016-11-08T12:01:23.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
         <tag>ElasticSearch 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/elasticsearch-setup-and-run.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ElasticSearch安装与启动</title>
+        <pubTime>2016-06-23T15:15:17.000Z</pubTime>
+        
+        <tag>ElasticSearch</tag>
+         
+         
+           
+             
+              <breadCrumb title="ElasticSearch" url="http://smartsi.club/categories/ElasticSearch/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-store.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ElasticSearch 内部原理之分布式文档存储</title>
+        <pubTime>2016-10-25T12:15:17.000Z</pubTime>
+        
+        <tag>ElasticSearch</tag>
+         
+        <tag>ElasticSearch 内部原理</tag>
          
          
            
@@ -1595,16 +1595,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-store.html</loc>
+    <loc>http://smartsi.club/elasticsearch-how-to-indexing.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ElasticSearch 内部原理之分布式文档存储</title>
-        <pubTime>2016-10-25T12:15:17.000Z</pubTime>
+        <title>ElasticSearch 索引</title>
+        <pubTime>2016-10-18T11:15:17.000Z</pubTime>
         
         <tag>ElasticSearch</tag>
          
-        <tag>ElasticSearch 内部原理</tag>
+        <tag>ElasticSearch 基础</tag>
          
          
            
@@ -1661,16 +1661,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink.html</loc>
+    <loc>http://smartsi.club/watermarks-in-apache-flink-made-easy.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理</title>
-        <pubTime>2018-09-02T06:54:01.000Z</pubTime>
+        <title>Flink 轻松理解Watermark</title>
+        <pubTime>2019-03-20T04:17:21.000Z</pubTime>
         
         <tag>Flink</tag>
          
-        <tag>Flink 内部原理</tag>
+        <tag>Flink Stream</tag>
          
          
            
@@ -1705,16 +1705,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/watermarks-in-apache-flink-made-easy.html</loc>
+    <loc>http://smartsi.club/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink 轻松理解Watermark</title>
-        <pubTime>2019-03-20T04:17:21.000Z</pubTime>
+        <title>Flink 使用Flink进行高吞吐，低延迟和Exactly-Once语义流处理</title>
+        <pubTime>2018-09-02T06:54:01.000Z</pubTime>
         
         <tag>Flink</tag>
          
-        <tag>Flink Stream</tag>
+        <tag>Flink 内部原理</tag>
          
          
            
@@ -1859,28 +1859,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/flink-sql-persistent-query-of-dynamic-table.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Flink 动态表的持续查询</title>
-        <pubTime>2018-02-02T03:29:01.000Z</pubTime>
-        
-        <tag>Flink</tag>
-         
-        <tag>Flink SQL</tag>
-         
-         
-           
-             
-              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/four-ways-to-optimize-your-flink-applications.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -1903,16 +1881,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/flink-how-to-install-and-run.html</loc>
+    <loc>http://smartsi.club/flink-sql-persistent-query-of-dynamic-table.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink1.4 安装与启动</title>
-        <pubTime>2018-01-04T00:54:01.000Z</pubTime>
+        <title>Flink 动态表的持续查询</title>
+        <pubTime>2018-02-02T03:29:01.000Z</pubTime>
         
         <tag>Flink</tag>
          
-        <tag>Flink 基础</tag>
+        <tag>Flink SQL</tag>
          
          
            
@@ -1935,6 +1913,28 @@
         <tag>Flink</tag>
          
         <tag>Flink Stream</tag>
+         
+         
+           
+             
+              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/flink-how-to-install-and-run.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Flink1.4 安装与启动</title>
+        <pubTime>2018-01-04T00:54:01.000Z</pubTime>
+        
+        <tag>Flink</tag>
+         
+        <tag>Flink 基础</tag>
          
          
            
@@ -1991,26 +1991,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-flink-handles-backpressure.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Flink1.4 处理背压</title>
-        <pubTime>2018-02-11T02:39:01.000Z</pubTime>
-        
-        <tag>Flink</tag>
-         
-         
-           
-             
-              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2021,26 +2001,6 @@
         <tag>Flink</tag>
          
         <tag>Flink 容错</tag>
-         
-         
-           
-             
-              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/flink-how-to-specifying-keys.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Flink1.4 定义keys的几种方法</title>
-        <pubTime>2018-01-04T03:07:01.000Z</pubTime>
-        
-        <tag>Flink</tag>
          
          
            
@@ -2075,16 +2035,14 @@
 
     
   <url>
-    <loc>http://smartsi.club/flink-execution-plans.html</loc>
+    <loc>http://smartsi.club/how-flink-handles-backpressure.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink1.4 执行计划</title>
-        <pubTime>2018-01-04T06:46:01.000Z</pubTime>
+        <title>Flink1.4 处理背压</title>
+        <pubTime>2018-02-11T02:39:01.000Z</pubTime>
         
         <tag>Flink</tag>
-         
-        <tag>Flink 基础</tag>
          
          
            
@@ -2097,16 +2055,14 @@
 
     
   <url>
-    <loc>http://smartsi.club/flink-stream-dataflow-type-and-transformation.html</loc>
+    <loc>http://smartsi.club/flink-how-to-specifying-keys.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Flink1.4 数据流类型与转换关系</title>
-        <pubTime>2018-01-04T07:47:01.000Z</pubTime>
+        <title>Flink1.4 定义keys的几种方法</title>
+        <pubTime>2018-01-04T03:07:01.000Z</pubTime>
         
         <tag>Flink</tag>
-         
-        <tag>Flink Stream</tag>
          
          
            
@@ -2141,6 +2097,28 @@
 
     
   <url>
+    <loc>http://smartsi.club/flink-execution-plans.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Flink1.4 执行计划</title>
+        <pubTime>2018-01-04T06:46:01.000Z</pubTime>
+        
+        <tag>Flink</tag>
+         
+        <tag>Flink 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/flink-stream-state-backends.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2151,6 +2129,28 @@
         <tag>Flink</tag>
          
         <tag>Flink 容错</tag>
+         
+         
+           
+             
+              <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/flink-stream-dataflow-type-and-transformation.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Flink1.4 数据流类型与转换关系</title>
+        <pubTime>2018-01-04T07:47:01.000Z</pubTime>
+        
+        <tag>Flink</tag>
+         
+        <tag>Flink Stream</tag>
          
          
            
@@ -2178,6 +2178,26 @@
            
              
               <breadCrumb title="Flink" url="http://smartsi.club/categories/Flink/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/how-to-install-and-run-grafana.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Grafana安装与启动</title>
+        <pubTime>2019-08-03T04:22:34.000Z</pubTime>
+        
+        <tag>Grafana</tag>
+         
+         
+           
+             
+              <breadCrumb title="Grafana" url="http://smartsi.club/categories/Grafana/"/>
           
         </display>
     </data>
@@ -2251,46 +2271,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-to-install-and-run-grafana.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Grafana安装与启动</title>
-        <pubTime>2019-08-03T04:22:34.000Z</pubTime>
-        
-        <tag>Grafana</tag>
-         
-         
-           
-             
-              <breadCrumb title="Grafana" url="http://smartsi.club/categories/Grafana/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hbase-pseudo-distributed-setup-and-start.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>HBase 伪分布式模式安装与启动</title>
-        <pubTime>2019-10-07T09:08:01.000Z</pubTime>
-        
-        <tag>HBase</tag>
-         
-         
-           
-             
-              <breadCrumb title="HBase" url="http://smartsi.club/categories/HBase/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/understanding-hbase-and-bigtable.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2331,12 +2311,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/introduction-to-hbase-schema-design.html</loc>
+    <loc>http://smartsi.club/hbase-pseudo-distributed-setup-and-start.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>HBase Schema 设计</title>
-        <pubTime>2019-10-19T03:15:07.000Z</pubTime>
+        <title>HBase 伪分布式模式安装与启动</title>
+        <pubTime>2019-10-07T09:08:01.000Z</pubTime>
         
         <tag>HBase</tag>
          
@@ -2351,21 +2331,19 @@
 
     
   <url>
-    <loc>http://smartsi.club/speculative-execution-in-hadoop-mapreduce.html</loc>
+    <loc>http://smartsi.club/introduction-to-hbase-schema-design.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop 推测执行</title>
-        <pubTime>2017-12-07T11:32:17.000Z</pubTime>
+        <title>HBase Schema 设计</title>
+        <pubTime>2019-10-19T03:15:07.000Z</pubTime>
         
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
+        <tag>HBase</tag>
          
          
            
              
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+              <breadCrumb title="HBase" url="http://smartsi.club/categories/HBase/"/>
           
         </display>
     </data>
@@ -2395,16 +2373,16 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-mapReduce1.x-secondary-nameNode.html</loc>
+    <loc>http://smartsi.club/speculative-execution-in-hadoop-mapreduce.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop MapReduce 1.x Secondary NameNode</title>
-        <pubTime>2017-12-20T12:26:01.000Z</pubTime>
+        <title>Hadoop 推测执行</title>
+        <pubTime>2017-12-07T11:32:17.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
-        <tag>Hadoop 内部原理</tag>
+        <tag>Hadoop 基础</tag>
          
          
            
@@ -2423,6 +2401,28 @@
         <display>
         <title>Hadoop MapReduce 2.x 工作原理</title>
         <pubTime>2017-12-14T11:58:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 内部原理</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-mapReduce1.x-secondary-nameNode.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop MapReduce 1.x Secondary NameNode</title>
+        <pubTime>2017-12-20T12:26:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2483,12 +2483,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-mapreduce-working-process.html</loc>
+    <loc>http://smartsi.club/hadoop-mapReduce-new-generation-architecture-mrv2.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop MapReduce 工作过程</title>
-        <pubTime>2017-12-30T01:32:17.000Z</pubTime>
+        <title>Hadoop MapReduce新一代架构MRv2</title>
+        <pubTime>2017-12-08T05:49:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2527,12 +2527,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-mapReduce-new-generation-architecture-mrv2.html</loc>
+    <loc>http://smartsi.club/hadoop-mapreduce-working-process.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop MapReduce新一代架构MRv2</title>
-        <pubTime>2017-12-08T05:49:01.000Z</pubTime>
+        <title>Hadoop MapReduce 工作过程</title>
+        <pubTime>2017-12-30T01:32:17.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2571,6 +2571,28 @@
 
     
   <url>
+    <loc>http://smartsi.club/hadoop-hdfs-trash.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop Trash回收站使用指南</title>
+        <pubTime>2017-12-07T02:07:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2593,12 +2615,56 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-hdfs-trash.html</loc>
+    <loc>http://smartsi.club/trouble-shooting-cannot-access-port-50070-in-hadoop.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop Trash回收站使用指南</title>
-        <pubTime>2017-12-07T02:07:01.000Z</pubTime>
+        <title>Hadoop无法访问50070端口</title>
+        <pubTime>2019-06-16T09:36:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>TroubleShooting</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-ssh-password-free-login.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop SSH免密码登录</title>
+        <pubTime>2016-12-29T03:13:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-base-block-and-inputsplit.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop Block 与 InputSplit 的区别与联系</title>
+        <pubTime>2018-05-19T07:01:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2637,122 +2703,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/trouble-shooting-cannot-access-port-50070-in-hadoop.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop无法访问50070端口</title>
-        <pubTime>2019-06-16T09:36:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>TroubleShooting</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-base-block-and-inputsplit.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop Block 与 InputSplit 的区别与联系</title>
-        <pubTime>2018-05-19T07:01:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-ssh-password-free-login.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop SSH免密码登录</title>
-        <pubTime>2016-12-29T03:13:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-scheduler-of-yarn.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop Yarn上的调度器</title>
-        <pubTime>2018-05-07T12:01:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/hadoop-base-task-failure.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
         <title>Hadoop 任务运行失败</title>
         <pubTime>2018-05-21T12:01:01.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-base-implementing-the-tool-interface-for-mapreduce.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop 利用ToolRunner运行MapReduce</title>
-        <pubTime>2018-06-01T09:01:01.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2791,6 +2747,72 @@
 
     
   <url>
+    <loc>http://smartsi.club/hadoop-scheduler-of-yarn.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop Yarn上的调度器</title>
+        <pubTime>2018-05-07T12:01:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-base-implementing-the-tool-interface-for-mapreduce.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 利用ToolRunner运行MapReduce</title>
+        <pubTime>2018-06-01T09:01:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-how-to-use-compression.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 如何使用压缩</title>
+        <pubTime>2018-04-23T11:32:17.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+        <tag>Hadoop 优化</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/hadoop-small-files-problem.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2813,12 +2835,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-how-to-use-compression.html</loc>
+    <loc>http://smartsi.club/hadoop-data-compress.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop 如何使用压缩</title>
-        <pubTime>2018-04-23T11:32:17.000Z</pubTime>
+        <title>Hadoop 数据压缩简介</title>
+        <pubTime>2018-04-22T01:32:17.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2857,48 +2879,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-data-compress.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop 数据压缩简介</title>
-        <pubTime>2018-04-22T01:32:17.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-        <tag>Hadoop 优化</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/hadoop-basics-secondary-sort-in-mapreduce.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hadoop中的Secondary Sort</title>
-        <pubTime>2018-03-21T05:15:17.000Z</pubTime>
-        
-        <tag>Hadoop</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/hadoop-how-to-determine-the-hdfs-file-exists.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -2921,12 +2901,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/hadoop-ecosystem-break-away-jvm.html</loc>
+    <loc>http://smartsi.club/hadoop-basics-secondary-sort-in-mapreduce.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hadoop 脱离JVM？ Hadoop生态圈的挣扎与演化</title>
-        <pubTime>2018-02-02T01:50:01.000Z</pubTime>
+        <title>Hadoop中的Secondary Sort</title>
+        <pubTime>2018-03-21T05:15:17.000Z</pubTime>
         
         <tag>Hadoop</tag>
          
@@ -2989,6 +2969,26 @@
          
          
            
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hadoop-ecosystem-break-away-jvm.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hadoop 脱离JVM？ Hadoop生态圈的挣扎与演化</title>
+        <pubTime>2018-02-02T01:50:01.000Z</pubTime>
+        
+        <tag>Hadoop</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hadoop" url="http://smartsi.club/categories/Hadoop/"/>
+          
         </display>
     </data>
     </url>
@@ -3135,26 +3135,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/hive-base-orc-file-format.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hive ORC文件格式</title>
-        <pubTime>2018-07-18T04:22:01.000Z</pubTime>
-        
-        <tag>Hive</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hive" url="http://smartsi.club/categories/Hive/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/hive-managed-table-external-table.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -3175,12 +3155,54 @@
 
     
   <url>
+    <loc>http://smartsi.club/hive-base-orc-file-format.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hive ORC文件格式</title>
+        <pubTime>2018-07-18T04:22:01.000Z</pubTime>
+        
+        <tag>Hive</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hive" url="http://smartsi.club/categories/Hive/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/hive-enable-compression.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
         <title>Hive 启用压缩</title>
         <pubTime>2018-04-12T12:16:01.000Z</pubTime>
+        
+        <tag>Hive</tag>
+         
+        <tag>Hive 优化</tag>
+         
+         
+           
+             
+              <breadCrumb title="Hive" url="http://smartsi.club/categories/Hive/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/hive-tuning-local-mode.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Hive 本地执行模式</title>
+        <pubTime>2018-06-10T12:16:01.000Z</pubTime>
         
         <tag>Hive</tag>
          
@@ -3237,16 +3259,14 @@
 
     
   <url>
-    <loc>http://smartsi.club/hive-tuning-local-mode.html</loc>
+    <loc>http://smartsi.club/exclude-columns-from-select-query-in-hive.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Hive 本地执行模式</title>
-        <pubTime>2018-06-10T12:16:01.000Z</pubTime>
+        <title>Hive中排除SELECT查询列</title>
+        <pubTime>2019-08-27T13:48:09.000Z</pubTime>
         
         <tag>Hive</tag>
-         
-        <tag>Hive 优化</tag>
          
          
            
@@ -3265,26 +3285,6 @@
         <display>
         <title>Hive 正则序列化器RegexSerDe</title>
         <pubTime>2018-06-06T05:16:01.000Z</pubTime>
-        
-        <tag>Hive</tag>
-         
-         
-           
-             
-              <breadCrumb title="Hive" url="http://smartsi.club/categories/Hive/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/exclude-columns-from-select-query-in-hive.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Hive中排除SELECT查询列</title>
-        <pubTime>2019-08-27T13:48:09.000Z</pubTime>
         
         <tag>Hive</tag>
          
@@ -3363,28 +3363,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/rsync-command-usage.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Linux rsync命令使用指南</title>
-        <pubTime>2018-03-20T07:17:17.000Z</pubTime>
-        
-        <tag>Linux</tag>
-         
-        <tag>Linux 命令</tag>
-         
-         
-           
-             
-              <breadCrumb title="Linux" url="http://smartsi.club/categories/Linux/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/rsync-config-usage.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -3407,12 +3385,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/linux-split-file-usage.html</loc>
+    <loc>http://smartsi.club/rsync-command-usage.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Linux 使用split命令分割文件</title>
-        <pubTime>2018-04-08T10:17:17.000Z</pubTime>
+        <title>Linux rsync命令使用指南</title>
+        <pubTime>2018-03-20T07:17:17.000Z</pubTime>
         
         <tag>Linux</tag>
          
@@ -3442,6 +3420,28 @@
            
              
               <breadCrumb title="MySQL" url="http://smartsi.club/categories/MySQL/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/linux-split-file-usage.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Linux 使用split命令分割文件</title>
+        <pubTime>2018-04-08T10:17:17.000Z</pubTime>
+        
+        <tag>Linux</tag>
+         
+        <tag>Linux 命令</tag>
+         
+         
+           
+             
+              <breadCrumb title="Linux" url="http://smartsi.club/categories/Linux/"/>
           
         </display>
     </data>
@@ -3509,12 +3509,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/scala-notes-basis.html</loc>
+    <loc>http://smartsi.club/scala-notes-regex.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Scala 学习笔记之基础语法</title>
-        <pubTime>2018-02-27T01:35:01.000Z</pubTime>
+        <title>Scala 学习笔记之正则表达式</title>
+        <pubTime>2018-02-27T01:55:01.000Z</pubTime>
         
         <tag>Scala</tag>
          
@@ -3529,12 +3529,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/scala-notes-regex.html</loc>
+    <loc>http://smartsi.club/scala-notes-basis.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Scala 学习笔记之正则表达式</title>
-        <pubTime>2018-02-27T01:55:01.000Z</pubTime>
+        <title>Scala 学习笔记之基础语法</title>
+        <pubTime>2018-02-27T01:35:01.000Z</pubTime>
         
         <tag>Scala</tag>
          
@@ -3569,12 +3569,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/scala-notes-apply-update.html</loc>
+    <loc>http://smartsi.club/scala-notes-array.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Scala 学习笔记之提取器</title>
-        <pubTime>2018-02-27T02:00:01.000Z</pubTime>
+        <title>Scala 学习笔记之数组</title>
+        <pubTime>2018-02-27T01:36:01.000Z</pubTime>
         
         <tag>Scala</tag>
          
@@ -3589,12 +3589,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/scala-notes-array.html</loc>
+    <loc>http://smartsi.club/scala-notes-apply-update.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Scala 学习笔记之数组</title>
-        <pubTime>2018-02-27T01:36:01.000Z</pubTime>
+        <title>Scala 学习笔记之提取器</title>
+        <pubTime>2018-02-27T02:00:01.000Z</pubTime>
         
         <tag>Scala</tag>
          
@@ -3689,28 +3689,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-base-how-to-use-accumulator.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Spark 如何使用累加器Accumulator</title>
-        <pubTime>2018-06-04T12:28:01.000Z</pubTime>
-        
-        <tag>Spark</tag>
-         
-        <tag>Spark 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/introducing-apache-spark-2-3.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -3737,6 +3715,28 @@
         <display>
         <title>Spark Persist,Cache以及Checkpoint</title>
         <pubTime>2018-07-11T04:55:01.000Z</pubTime>
+        
+        <tag>Spark</tag>
+         
+        <tag>Spark 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/spark-base-how-to-use-accumulator.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Spark 如何使用累加器Accumulator</title>
+        <pubTime>2018-06-04T12:28:01.000Z</pubTime>
         
         <tag>Spark</tag>
          
@@ -3929,12 +3929,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-streaming-improved-driver-fault-tolerance-and-zero-data-loss.html</loc>
+    <loc>http://smartsi.club/improvements-to-kafka-integration-of-spark-streaming.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark Streaming 容错的改进与零数据丢失</title>
-        <pubTime>2018-05-01T12:28:01.000Z</pubTime>
+        <title>Spark Streaming 与 Kafka 整合的改进</title>
+        <pubTime>2018-03-18T03:28:01.000Z</pubTime>
         
         <tag>Spark Stream</tag>
          
@@ -3951,12 +3951,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/improvements-to-kafka-integration-of-spark-streaming.html</loc>
+    <loc>http://smartsi.club/spark-streaming-improved-driver-fault-tolerance-and-zero-data-loss.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark Streaming 与 Kafka 整合的改进</title>
-        <pubTime>2018-03-18T03:28:01.000Z</pubTime>
+        <title>Spark Streaming 容错的改进与零数据丢失</title>
+        <pubTime>2018-05-01T12:28:01.000Z</pubTime>
         
         <tag>Spark Stream</tag>
          
@@ -4215,6 +4215,50 @@
 
     
   <url>
+    <loc>http://smartsi.club/spark-base-build-resilient-distributed-datasets.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Spark2.3.0 创建RDD</title>
+        <pubTime>2018-03-12T11:13:01.000Z</pubTime>
+        
+        <tag>Spark</tag>
+         
+        <tag>Spark 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/spark-base-shared-variables.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Spark2.3.0 共享变量</title>
+        <pubTime>2018-04-10T11:28:01.000Z</pubTime>
+        
+        <tag>Spark</tag>
+         
+        <tag>Spark 基础</tag>
+         
+         
+           
+             
+              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/spark-base-rdd-operations.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -4259,34 +4303,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-base-shared-variables.html</loc>
+    <loc>http://smartsi.club/spark-base-linking-with-spark.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Spark2.3.0 共享变量</title>
-        <pubTime>2018-04-10T11:28:01.000Z</pubTime>
-        
-        <tag>Spark</tag>
-         
-        <tag>Spark 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/spark-base-build-resilient-distributed-datasets.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Spark2.3.0 创建RDD</title>
-        <pubTime>2018-03-12T11:13:01.000Z</pubTime>
+        <title>Spark2.3.0 引入Spark</title>
+        <pubTime>2018-03-12T07:03:01.000Z</pubTime>
         
         <tag>Spark</tag>
          
@@ -4325,28 +4347,6 @@
 
     
   <url>
-    <loc>http://smartsi.club/spark-base-linking-with-spark.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Spark2.3.0 引入Spark</title>
-        <pubTime>2018-03-12T07:03:01.000Z</pubTime>
-        
-        <tag>Spark</tag>
-         
-        <tag>Spark 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/spark-base-rdd-persistence.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -4357,50 +4357,6 @@
         <tag>Spark</tag>
          
         <tag>Spark 基础</tag>
-         
-         
-           
-             
-              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/spark-internal-memory-management.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Spark内部原理之内存管理</title>
-        <pubTime>2018-04-25T10:28:01.000Z</pubTime>
-        
-        <tag>Spark</tag>
-         
-        <tag>Spark 内部原理</tag>
-         
-         
-           
-             
-              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/spark-internal-operating-principle-one.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Spark内部原理之运行原理</title>
-        <pubTime>2018-03-14T03:33:01.000Z</pubTime>
-        
-        <tag>Spark</tag>
-         
-        <tag>Spark 内部原理</tag>
          
          
            
@@ -4435,6 +4391,50 @@
 
     
   <url>
+    <loc>http://smartsi.club/spark-internal-operating-principle-one.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Spark内部原理之运行原理</title>
+        <pubTime>2018-03-14T03:33:01.000Z</pubTime>
+        
+        <tag>Spark</tag>
+         
+        <tag>Spark 内部原理</tag>
+         
+         
+           
+             
+              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/spark-internal-memory-management.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Spark内部原理之内存管理</title>
+        <pubTime>2018-04-25T10:28:01.000Z</pubTime>
+        
+        <tag>Spark</tag>
+         
+        <tag>Spark 内部原理</tag>
+         
+         
+           
+             
+              <breadCrumb title="Spark" url="http://smartsi.club/categories/Spark/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/understanding-the-parallelism-of-Storm-topology.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -4445,6 +4445,28 @@
         <tag>Storm</tag>
          
         <tag>Storm 内部原理</tag>
+         
+         
+           
+             
+              <breadCrumb title="Storm" url="http://smartsi.club/categories/Storm/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/how-to-choose-basicbolt-and-richbolt-of-storm.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Storm BasicBolt vs RichBolt</title>
+        <pubTime>2019-05-25T06:33:01.000Z</pubTime>
+        
+        <tag>Storm</tag>
+         
+        <tag>Storm 基础</tag>
          
          
            
@@ -4501,21 +4523,39 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-to-choose-basicbolt-and-richbolt-of-storm.html</loc>
+    <loc>http://smartsi.club/two-phase-commit-of-distributed-transaction.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Storm BasicBolt vs RichBolt</title>
-        <pubTime>2019-05-25T06:33:01.000Z</pubTime>
+        <title>分布式事务之两阶段提交(2PC)</title>
+        <pubTime>2018-09-14T12:16:01.000Z</pubTime>
         
-        <tag>Storm</tag>
-         
-        <tag>Storm 基础</tag>
+        <tag>分布式</tag>
          
          
            
              
-              <breadCrumb title="Storm" url="http://smartsi.club/categories/Storm/"/>
+              <breadCrumb title="分布式" url="http://smartsi.club/categories/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/exactly-once-is-not-necessarily-exactly-once.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Exactly once 未必严格一次</title>
+        <pubTime>2018-01-11T03:18:01.000Z</pubTime>
+        
+        <tag>Stream</tag>
+         
+         
+           
+             
+              <breadCrumb title="Stream" url="http://smartsi.club/categories/Stream/"/>
           
         </display>
     </data>
@@ -4545,72 +4585,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/exactly-once-is-not-necessarily-exactly-once.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Exactly once 未必严格一次</title>
-        <pubTime>2018-01-11T03:18:01.000Z</pubTime>
-        
-        <tag>Stream</tag>
-         
-         
-           
-             
-              <breadCrumb title="Stream" url="http://smartsi.club/categories/Stream/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/two-phase-commit-of-distributed-transaction.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>分布式事务之两阶段提交(2PC)</title>
-        <pubTime>2018-09-14T12:16:01.000Z</pubTime>
-        
-        <tag>分布式</tag>
-         
-         
-           
-             
-              <breadCrumb title="分布式" url="http://smartsi.club/categories/%E5%88%86%E5%B8%83%E5%BC%8F/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
         <title>Stream 分布式数据流的轻量级异步快照</title>
         <pubTime>2018-03-06T04:04:01.000Z</pubTime>
-        
-        <tag>Stream</tag>
-         
-         
-           
-             
-              <breadCrumb title="Stream" url="http://smartsi.club/categories/Stream/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/main-stream-processing-framework-comparison-part-one.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>Stream 主流流处理框架比较(1)</title>
-        <pubTime>2018-01-10T07:34:01.000Z</pubTime>
         
         <tag>Stream</tag>
          
@@ -4665,6 +4645,26 @@
 
     
   <url>
+    <loc>http://smartsi.club/main-stream-processing-framework-comparison-part-one.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>Stream 主流流处理框架比较(1)</title>
+        <pubTime>2018-01-10T07:34:01.000Z</pubTime>
+        
+        <tag>Stream</tag>
+         
+         
+           
+             
+              <breadCrumb title="Stream" url="http://smartsi.club/categories/Stream/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://smartsi.club/zookeeper-setup-and-run.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
@@ -4705,32 +4705,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/java-api-in-zookeeper.html</loc>
+    <loc>http://smartsi.club/zkui-zookeeper-ui-dashboard.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ZooKeeper Java API</title>
-        <pubTime>2019-08-24T09:10:31.000Z</pubTime>
-        
-        <tag>ZooKeeper</tag>
-         
-         
-           
-             
-              <breadCrumb title="ZooKeeper" url="http://smartsi.club/categories/ZooKeeper/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://smartsi.club/how-to-config-log-in-zookeeper.html</loc>
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    <data>
-        <display>
-        <title>ZooKeeper日志配置</title>
-        <pubTime>2019-08-25T04:14:45.000Z</pubTime>
+        <title>ZooKeeper可视化监控ZKUI</title>
+        <pubTime>2019-09-02T11:04:15.000Z</pubTime>
         
         <tag>ZooKeeper</tag>
          
@@ -4765,12 +4745,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/zkui-zookeeper-ui-dashboard.html</loc>
+    <loc>http://smartsi.club/how-to-config-log-in-zookeeper.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ZooKeeper可视化监控ZKUI</title>
-        <pubTime>2019-09-02T11:04:15.000Z</pubTime>
+        <title>ZooKeeper日志配置</title>
+        <pubTime>2019-08-25T04:14:45.000Z</pubTime>
         
         <tag>ZooKeeper</tag>
          
@@ -4785,12 +4765,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html</loc>
+    <loc>http://smartsi.club/java-api-in-zookeeper.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>ZooKeeper ACL权限控制机制</title>
-        <pubTime>2019-09-28T11:12:45.000Z</pubTime>
+        <title>ZooKeeper Java API</title>
+        <pubTime>2019-08-24T09:10:31.000Z</pubTime>
         
         <tag>ZooKeeper</tag>
          
@@ -4811,6 +4791,26 @@
         <display>
         <title>ZooKeeper 伪集群模式安装与启动</title>
         <pubTime>2019-09-28T05:16:01.000Z</pubTime>
+        
+        <tag>ZooKeeper</tag>
+         
+         
+           
+             
+              <breadCrumb title="ZooKeeper" url="http://smartsi.club/categories/ZooKeeper/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html</loc>
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    <data>
+        <display>
+        <title>ZooKeeper ACL权限控制机制</title>
+        <pubTime>2019-09-28T11:12:45.000Z</pubTime>
         
         <tag>ZooKeeper</tag>
          
@@ -4975,12 +4975,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/kafka-setup-and-run.html</loc>
+    <loc>http://smartsi.club/how-kafka-achieves-millions-of-concurrent-writes-per-second.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Kafka 安装与启动</title>
-        <pubTime>2019-09-01T04:30:01.000Z</pubTime>
+        <title>Kafka如何实现每秒上百万的高并发写入</title>
+        <pubTime>2019-06-21T10:15:01.000Z</pubTime>
         
         <tag>Kafka</tag>
          
@@ -4995,12 +4995,12 @@
 
     
   <url>
-    <loc>http://smartsi.club/how-kafka-achieves-millions-of-concurrent-writes-per-second.html</loc>
+    <loc>http://smartsi.club/kafka-setup-and-run.html</loc>
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     <data>
         <display>
-        <title>Kafka如何实现每秒上百万的高并发写入</title>
-        <pubTime>2019-06-21T10:15:01.000Z</pubTime>
+        <title>Kafka 安装与启动</title>
+        <pubTime>2019-09-01T04:30:01.000Z</pubTime>
         
         <tag>Kafka</tag>
          
