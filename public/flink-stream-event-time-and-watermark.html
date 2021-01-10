@@ -97,25 +97,29 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink Stream," />
+  <meta name="keywords" content="Flink," />
 
 
-<meta name="description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
-<meta name="keywords" content="Flink,Flink Stream">
+<meta name="description" content="Flink版本：1.11.0  1. 为何要使用Watermark？在说 Watermark 之前，我们先提一下 EventTime（事件时间）和 ProcessingTime（处理时间）。事件时间是事件在现实世界中发生的时间，处理时间是 Flink 系统处理该事件的时间。如果我们比较关心事件实际发生的时间，我们就需要基于事件时间进行处理。但是基于事件时间，我们就不得不面对乱序的问题。 通常情况">
+<meta name="keywords" content="Flink">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 事件时间与Watermarks">
+<meta property="og:title" content="Flink Watermark机制">
 <meta property="og:url" content="http://smartsi.club/flink-stream-event-time-and-watermark.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
+<meta property="og:description" content="Flink版本：1.11.0  1. 为何要使用Watermark？在说 Watermark 之前，我们先提一下 EventTime（事件时间）和 ProcessingTime（处理时间）。事件时间是事件在现实世界中发生的时间，处理时间是 Flink 系统处理该事件的时间。如果我们比较关心事件实际发生的时间，我们就需要基于事件时间进行处理。但是基于事件时间，我们就不得不面对乱序的问题。 通常情况">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-2.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-3.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-4.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-5.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-6.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-01-10T08:15:21.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 事件时间与Watermarks">
-<meta name="twitter:description" content="1. watermarkFlink实现了数据流模型(Dataflow Model)中许多技术。如果想对事件时间(event time)和watermarks更详细的了解，请参阅下面的文章:  The world beyond batch: Streaming 101  The Dataflow Model  支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true">
+<meta name="twitter:title" content="Flink Watermark机制">
+<meta name="twitter:description" content="Flink版本：1.11.0  1. 为何要使用Watermark？在说 Watermark 之前，我们先提一下 EventTime（事件时间）和 ProcessingTime（处理时间）。事件时间是事件在现实世界中发生的时间，处理时间是 Flink 系统处理该事件的时间。如果我们比较关心事件实际发生的时间，我们就需要基于事件时间进行处理。但是基于事件时间，我们就不得不面对乱序的问题。 通常情况">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-1.jpg?raw=true">
 
 
 
@@ -125,7 +129,7 @@
   <link rel="canonical" href="http://smartsi.club/flink-stream-event-time-and-watermark.html"/>
 
 
-  <title>Flink1.4 事件时间与Watermarks | SmartSi</title>
+  <title>Flink Watermark机制 | SmartSi</title>
   
 
 
@@ -323,7 +327,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 事件时间与Watermarks</h2>
+          <h2 class="post-title" itemprop="name headline">Flink Watermark机制</h2>
         
 
         <div class="post-meta">
@@ -335,7 +339,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-04T17:57:01+08:00">2018-01-04</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-09T18:12:01+08:00">2021-01-09</time>
             
 
             
@@ -379,7 +383,7 @@
 
           
           
-             <span id="/flink-stream-event-time-and-watermark.html" class="leancloud_visitors" data-flag-title="Flink1.4 事件时间与Watermarks">
+             <span id="/flink-stream-event-time-and-watermark.html" class="leancloud_visitors" data-flag-title="Flink Watermark机制">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -410,29 +414,272 @@
       
 
       
-        <h3 id="1-watermark"><a href="#1-watermark" class="headerlink" title="1. watermark"></a>1. watermark</h3><p><code>Flink</code>实现了数据流模型(<code>Dataflow Model</code>)中许多技术。如果想对事件时间(<code>event time</code>)和<code>watermarks</code>更详细的了解，请参阅下面的文章:</p>
+        <blockquote>
+<p>Flink版本：1.11.0</p>
+</blockquote>
+<h2 id="1-为何要使用Watermark？"><a href="#1-为何要使用Watermark？" class="headerlink" title="1. 为何要使用Watermark？"></a>1. 为何要使用Watermark？</h2><p>在说 Watermark 之前，我们先提一下 EventTime（事件时间）和 ProcessingTime（处理时间）。事件时间是事件在现实世界中发生的时间，处理时间是 Flink 系统处理该事件的时间。如果我们比较关心事件实际发生的时间，我们就需要基于事件时间进行处理。但是基于事件时间，我们就不得不面对乱序的问题。</p>
+<p>通常情况下，由于网络或者系统等外部因素影响，事件往往不能及时传输到 Flink 系统中，导致数据延迟到达。另一方面，流处理从事件产生，到流经 Source，再到算子，中间是有一个过程和时间的。虽然大部分情况下，流到算子的数据都是按照事件产生的时间来的，但是也可能由于网络、背压等原因，导致乱序的产生。</p>
+<p>因此，我们需要一种机制能够控制数据处理的过程和进度，比如，基于事件时间的 Window 创建后，那如何确定属于该 Window 的数据已经全部到达。如果确定全部到达，就可以对 Window 的所有数据做窗口计算操作，如果数据没有全部到达，则继续等待该 Window 中的数据全部到达才开始处理。这种情况下就需要使用 Watermark ，它能够衡量数据处理进度（表达数据到达的完整性），保证事件数据全部到达 Flink 系统，或者在乱序以及延迟到达时，也能够像预期一样计算出正确并且连续的结果。Flink 会用最新的事件时间减去最大可以容忍的延迟时间最为 Watermark，也就是说理论上不会有事件超过该容忍延迟时间到达，否则被认为是迟到事件。</p>
+<p>Watermark 的出现是为了解决一定范围内的乱序问题，一定范围内表明我们不会无限制的等待延迟的事件，我们有一定的可容忍的延迟时间。Watermark 用来表明所有比当前 Watermark 事件时间早的事件都已经（可能）到达，从而来衡量数据处理进度（表达数据到达的完整性）。</p>
+<h2 id="2-Watermark如何产生？"><a href="#2-Watermark如何产生？" class="headerlink" title="2. Watermark如何产生？"></a>2. Watermark如何产生？</h2><h3 id="2-1-顺序事件中的Watermark"><a href="#2-1-顺序事件中的Watermark" class="headerlink" title="2.1 顺序事件中的Watermark"></a>2.1 顺序事件中的Watermark</h3><p>如果数据元素的事件时间是有序的，Watermark 时间戳会随着数据元素的事件时间按顺序生成，此时 Watermark 的变化和事件时间保持一致，这就是理想状态中的 Watermark。如下图所示， 事件按照其原本的顺序进入 Flink 系统中，Watermark 也跟随着事件时间之后生效，可以看出 Watermark 只是对数据流简单的进行周期性标记，并没有特别大的意义，也就是说在顺序事件的数据处理过程中，Watermark 并不能发挥太大的价值，反而会因为设定超期时间而导致延迟输出计算结果。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-1.jpg?raw=true" alt=""></p>
+<h3 id="2-2-乱序事件中的Watermark"><a href="#2-2-乱序事件中的Watermark" class="headerlink" title="2.2 乱序事件中的Watermark"></a>2.2 乱序事件中的Watermark</h3><p>现实情况下数据往往并不是找找其产生顺序接入到 Flink 系统中进行处理，而频繁出现乱序或者迟到的情况，这种情况就需要使用 Watermark 来应对。当事件无序时，我们通常认为他们有一定的无序性，那么一定的无序性表明数据不可能无限期的延迟，那它只能在一定范围内处于一种无序状态，那么这个时候我们通过 MaxOutOfOrderness 参数设定我们可以忍受的最大延迟时间。如下图所示 MaxOutOfOrderness = 4，表明可以接受有4个时间单位的延迟，比如，4秒或者4分钟等。当超过4个时间单位之后，我们认为这个数据就是一种无效数据。在4个时间单位之内接入的数据，我们认为是一种有效的乱序事件。在乱序的情况下，我们看看会产生怎样的 Watermark。在这通过 MaxOutOfOrderness 参数去计算我们的 Watermark，也就是会在我们的事件时间的基础之上减去我们的 MaxOutOfOrderness，比如，事件时间为7，Watermark 就为 3（事件时间减去 MaxOutOfOrderness）：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-2.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>Watermark = 当前最大时间戳 - 最大能容忍的时间（MaxOutOfOrderness）</p>
+</blockquote>
+<p>每当新来一条数据，如果高于了我们前面的最大事件时间，就会触发一个 Watermark 的更新。比如事件时间 11 高于前面的最大事件时间 7，就会触发 w(7) 的更新：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-3.jpg?raw=true" alt=""></p>
+<p>对于事件时间 7 产生 Watermark 3，事件时间 11 产生 Watermark 7，但是对于 9 这样一条事件，我们发现它的事件时间没有超过我们前面的事件时间的最大值（11），那么就不会触发 Watermark 的更新。</p>
+<p>我们发现 Watermark 的更新其实是根据我们事件时间的变动而发生变化，如果新接入的事件时间大于了前面的事件时间，这时候才会触发产生 Watermark，即每当有新的最大事件时间出现时，就可以产生新的 Watermark。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-4.jpg?raw=true" alt=""></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">事件时间</th>
+<th style="text-align:left">当前最大事件时间</th>
+<th style="text-align:left">Watermark</th>
+<th style="text-align:left">是否触发</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">7</td>
+<td style="text-align:left">w(3)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">11</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">w(7)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">11</td>
+<td style="text-align:left">w(7)</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">15</td>
+<td style="text-align:left">15</td>
+<td style="text-align:left">w(11)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">12</td>
+<td style="text-align:left">15</td>
+<td style="text-align:left">w(11)</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">13</td>
+<td style="text-align:left">15</td>
+<td style="text-align:left">w(11)</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">17</td>
+<td style="text-align:left">17</td>
+<td style="text-align:left">w(13)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">14</td>
+<td style="text-align:left">17</td>
+<td style="text-align:left">w(13)</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">21</td>
+<td style="text-align:left">21</td>
+<td style="text-align:left">w(17)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">24</td>
+<td style="text-align:left">24</td>
+<td style="text-align:left">w(20)</td>
+<td style="text-align:left">是</td>
+</tr>
+<tr>
+<td style="text-align:left">22</td>
+<td style="text-align:left">24</td>
+<td style="text-align:left">w(20)</td>
+<td style="text-align:left">否</td>
+</tr>
+<tr>
+<td style="text-align:left">19</td>
+<td style="text-align:left">24</td>
+<td style="text-align:left">w(20)</td>
+<td style="text-align:left">否</td>
+</tr>
+</tbody>
+</table>
+<p>但是对于事件时间 19 这样一条数据，我们发现它的时间戳已经小于了当前的 Watermark 的时间，这个时候系统就会将这条数据标记为迟到事件。迟到事件在窗口计算时就不会被纳入窗口的统计范围内，w(20) 之前的数据会被纳入到窗口的统计范围内。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-5.jpg?raw=true" alt=""></p>
+<h3 id="2-3-并行数据流中的Watermark"><a href="#2-3-并行数据流中的Watermark" class="headerlink" title="2.3 并行数据流中的Watermark"></a>2.3 并行数据流中的Watermark</h3><p>Watermark 一般在 Source 算子中生成，并且在每个 Source 算子的子任务中都会独立生成 Watermark。在 Source 算子的子任务中生成后就会更新该任务的 Watermark，并且会逐步更新下游算子中的 Watermark。如下图所示，Watermark w(17) 已经将 Source 算子和 Map 算子的子任务时钟全部更新值为 17。如果多个 Watermark 同时更新一个算子子任务的当前时间，Flink 会选择最小的 Watermark 来更新。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-event-time-and-watermark-6.jpg?raw=true" alt=""></p>
+<h2 id="3-Watermark与窗口的关系"><a href="#3-Watermark与窗口的关系" class="headerlink" title="3. Watermark与窗口的关系"></a>3. Watermark与窗口的关系</h2><p>Watermark 在 Flink 系统中本身没有太大的意义，只有与窗口结合才能产生其相应价值。对于窗口来讲，其实是通过 Watermark 去控制它的窗口触发时机，告诉窗口不再会有比当前 Watermark 更晚的数据到达了。只有当 Watermark 大于窗口的右边界时才会触发窗口的计算。下面我们通过具体的示例一起来看一下 Watermark 怎么应用于窗口之中。下面我们创建一个窗口大小为10分钟，滑动步长为5分钟的滑动窗口。我们的输入元素都有特定格式:&lt;事件Id,事件时间&gt;，我们的目标就是统计每个事件Id在窗口中出现的次数。假设我们可以接受的最大延迟时间为10分钟，即10分钟以外的数据我们标记为延迟事件：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">序号</th>
+<th style="text-align:left">输入</th>
+<th style="text-align:left">当前最大时间(时间戳)</th>
+<th style="text-align:left">当前Watermark(时间戳)</th>
+<th style="text-align:left">属于窗口</th>
+<th style="text-align:left">触发窗口</th>
+<th style="text-align:left">触发元素</th>
+<th style="text-align:left">计算结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">A,2021-01-05 12:07:01</td>
+<td style="text-align:left">2021-01-05 12:07:01(1609819621000)</td>
+<td style="text-align:left">2021-01-05 11:57:00(1609819020999)</td>
+<td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">2</td>
+<td style="text-align:left">B,2021-01-05 12:08:01</td>
+<td style="text-align:left">2021-01-05 12:08:01(1609819681000)</td>
+<td style="text-align:left">2021-01-05 11:58:00(1609819080999)</td>
+<td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">3</td>
+<td style="text-align:left">A,2021-01-05 12:14:01</td>
+<td style="text-align:left">2021-01-05 12:14:01(1609820041000)</td>
+<td style="text-align:left">2021-01-05 12:04:00(1609819440999)</td>
+<td style="text-align:left">[12:05, 12:15]、[12:10, 12:20]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">4</td>
+<td style="text-align:left">C,2021-01-05 12:09:01</td>
+<td style="text-align:left">2021-01-05 12:14:01(1609820041000)</td>
+<td style="text-align:left">2021-01-05 12:04:00(1609819440999)</td>
+<td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">C,2021-01-05 12:15:01</td>
+<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
+<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">[12:10, 12:20]、[12:15, 12:25]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">A,2021-01-05 12:08:01</td>
+<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
+<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">7</td>
+<td style="text-align:left">B,2021-01-05 12:13:01</td>
+<td style="text-align:left">2021-01-05 12:15:01(1609820101000)</td>
+<td style="text-align:left">2021-01-05 12:05:00(1609819500999)</td>
+<td style="text-align:left">[12:05, 12:15]、[12:10, 12:20]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">8</td>
+<td style="text-align:left">B,2021-01-05 12:21:01</td>
+<td style="text-align:left">2021-01-05 12:21:01(1609820461000)</td>
+<td style="text-align:left">2021-01-05 12:11:00(1609819860999)</td>
+<td style="text-align:left">[12:15, 12:25]、[12:20, 12:30]</td>
+<td style="text-align:left">[12:00, 12:10]</td>
+<td style="text-align:left">1、2、4、6</td>
+<td style="text-align:left">(A,2)、(B,1)、(C,1)</td>
+</tr>
+<tr>
+<td style="text-align:left">9</td>
+<td style="text-align:left">D,2021-01-05 12:04:01</td>
+<td style="text-align:left">2021-01-05 12:21:01(1609820461000)</td>
+<td style="text-align:left">2021-01-05 12:11:00(1609819860999)</td>
+<td style="text-align:left">[11:55, 12:05]、[12:00, 12:10]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">10</td>
+<td style="text-align:left">B,2021-01-05 12:26:01</td>
+<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
+<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">[12:20, 12:30]、[12:25, 12:35]</td>
+<td style="text-align:left">[12:05, 12:15]</td>
+<td style="text-align:left">1、2、3、4、6、7</td>
+<td style="text-align:left">(A,3)、(C,1)、(B,2)</td>
+</tr>
+<tr>
+<td style="text-align:left">11</td>
+<td style="text-align:left">B,2021-01-05 12:17:01</td>
+<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
+<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">[12:10, 12:20]、[12:15, 12:25]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">12</td>
+<td style="text-align:left">D,2021-01-05 12:09:01</td>
+<td style="text-align:left">2021-01-05 12:26:01(1609820761000)</td>
+<td style="text-align:left">2021-01-05 12:16:00(1609820160999)</td>
+<td style="text-align:left">[12:00, 12:10]、[12:05, 12:15]</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">13</td>
+<td style="text-align:left">C,2021-01-05 12:30:01</td>
+<td style="text-align:left">2021-01-05 12:30:01(1609821001000)</td>
+<td style="text-align:left">2021-01-05 12:20:00(1609820400999)</td>
+<td style="text-align:left">[12:25, 12:35]、[12:30, 12:40]</td>
+<td style="text-align:left">[12:15,12:20]</td>
+<td style="text-align:left">3、5、7、11</td>
+<td style="text-align:left">(B,2)、(C,1)、(A,1)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>maxOutOfOrderness=10分钟，watermark(t)=currentMaxTimeStamp(t)-maxOutOfOrderness(t)-1</p>
+</blockquote>
+<p>第二列是我们输入的事件，第三列是当前最大的事件时间，第四列是当前最新的 Watermark，第五列是当前事件所属于的窗口，第六列是当前 Watermark 触发了哪个窗口的计算，第七列是哪些事件在这个触发的窗口中，第八列是窗口计算的最终结果。</p>
+<p>当第一条数据接入 Flink 系统时，会产生一个新的 Watermark，同时会产生 [12:00, 12:10]、[12:05, 12:15] 两个窗口。当第二条数据到达时，由于大于了前面的事件时间，因此会触发 Watermark 的更新，该数据属于前面一条数据创建的窗口中。前7条数据比较类似，都是创建每条数据属于的窗口以及每当有新的最大事件时间出现，都会触发 Watermark 的更新。第8条数据到来时，由于都大于前面的事件时间，因此产生新的 Watermark（2021-01-05 12:11:00）。由于当前的 Watermark 大于第一个窗口 [12:00, 12:10] 的右边界，因此第一次触发窗口的计算。同理，第13条数据到来时，触发了第二次窗口计算。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>参考:</p>
 <ul>
-<li><a href="https://www.oreilly.com/ideas/the-world-beyond-batch-streaming-101" target="_blank" rel="noopener">The world beyond batch: Streaming 101
-</a></li>
-<li><a href="http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf" target="_blank" rel="noopener">The Dataflow Model</a></li>
+<li><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/event_time.html#event-time-and-watermarks" target="_blank" rel="noopener">Event Time and Watermarks</a></li>
+<li>Flink核心技术与实战</li>
 </ul>
-<p>支持事件时间的流处理器需要一种方法来衡量事件时间的进度。例如，一个构建小时窗口的窗口算子(<code>operator</code>)，当事件时间超过一小时末尾时需要告知窗口算子，以便算子可以关闭正在进行的窗口。</p>
-<p>事件时间可以独立于处理时间来运行。例如，在一个程序中，算子的当前事件时间可以略微落后于处理时间(考虑到接收事件的延迟)，而两者以相同的速度继续运行。另一方面，另一个流式处理程序处理几个星期的事件时间只需几秒钟就可以，通过快速浏览缓存在<code>Kafka Topic</code>中历史数据。</p>
-<p><code>Flink</code>中测量事件时间进度的机制是<code>watermarks</code>。<code>watermarks</code>会作为数据流的一部分进行流动，并带有一个时间戳<code>t</code>。<code>Watermark(t)</code>表示数据流中的事件时间已达到时间<code>t</code>，意思就是说数据流之后不再有时间戳<code>t‘&lt;= t</code>的元素(即带时间戳的事件老于或等于<code>watermark</code>)。</p>
-<p>下图显示了具有时间戳(逻辑上)的事件流以及内嵌的<code>watermark</code>。在这个例子中，事件是有序的(相对于它们的时间戳)，这意味着<code>watermark</code>只是数据流中的周期性标记。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-1.png?raw=true" alt=""></p>
-<p><code>watermark</code>对于乱序数据流至关重要，如下图所示，事件并未按照时间戳进行排序。通常，<code>watermark</code>表示在数据流中那个时刻小于时间戳的所有事件都已经到达。一旦<code>watermark</code>到达算子，算子就可以将其内部的事件时间提到<code>watermark</code>的那个值。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-2.png?raw=true" alt=""></p>
-<h3 id="2-数据流中的并行Watermarks"><a href="#2-数据流中的并行Watermarks" class="headerlink" title="2. 数据流中的并行Watermarks"></a>2. 数据流中的并行Watermarks</h3><p><code>watermarks</code>是直接通过数据源函数(source functions)生成的或在数据源函数之后生成的。源函数的每个并行子任务通常独立生成<code>watermarks</code>。这些<code>watermarks</code>在指定并行数据源上定义事件时间。</p>
-<p><code>watermarks</code>贯穿整个流处理程序，他们会在<code>watermark</code>到达的算子时将事件时间提前(advance)。每当算子提前事件时间时，它都会为下游的后续算子生成一个新的<code>watermarks</code>(Whenever an operator advances its event time, it generates a new watermark downstream for its successor operators.)。</p>
-<p>一些算子消耗多个输入流；例如，union操作，或者算子后面跟着<code>keyBy(...)</code>函数或者<code>partition(...)函数</code>。这样的算子的当前事件时间是其输入流的所有事件时间中的最小值。随着输入流更新事件时间，算子也会更新事件。</p>
-<p>下图显示了事件和<code>watermarks</code>流经并行流的的示例，以及跟踪事件时间的算子:</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/%E4%BA%8B%E4%BB%B6%E6%97%B6%E9%97%B4%E4%B8%8EWatermarks-3.png?raw=true" alt=""></p>
-<h3 id="3-延迟元素"><a href="#3-延迟元素" class="headerlink" title="3. 延迟元素"></a>3. 延迟元素</h3><p>某些元素可能违反<code>watermarks</code>条件，这意味着即使出现<code>watermarks(t)</code>，但是还是会出现很多的时间戳<code>t&#39;&lt;= t</code>的元素。事实上，在现实世界中，某些元素可能被任意地延迟，因此指定一个时间，带有事件时间戳的所有事件在此之前出现是不可能的。此外，即使延迟时间是有限制的，也不希望延迟太多的<code>watermarks</code>，因为它会在事件时间窗口的评估中导致太多的延迟。</p>
-<p>因此，流处理程序中可能会明确的知道会有延迟元素。延迟元素是那些系统事件时钟(由<code>watermark</code>所示)已经超过了延迟元素的时间戳的那些元素。有关如何处理事件时间窗口中的延迟元素的更多信息，请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html#allowed-lateness" target="_blank" rel="noopener">Allowed Lateness</a>。</p>
-<h3 id="4-调试Watermarks"><a href="#4-调试Watermarks" class="headerlink" title="4. 调试Watermarks"></a>4. 调试Watermarks</h3><p>请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.3/monitoring/debugging_event_time.html" target="_blank" rel="noopener">调试Windows和事件时间</a>部分，以便在运行时调试Watermarks。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time-and-watermarks" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html#event-time-and-watermarks</a></p>
 
       
     </div>
@@ -482,7 +729,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-stream-event-time-and-watermark.html" title="Flink1.4 事件时间与Watermarks">http://smartsi.club/flink-stream-event-time-and-watermark.html</a>
+    <a href="http://smartsi.club/flink-stream-event-time-and-watermark.html" title="Flink Watermark机制">http://smartsi.club/flink-stream-event-time-and-watermark.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -499,8 +746,6 @@
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
           
-            <a href="/tags/Flink-Stream/" rel="tag"># Flink Stream</a>
-          
         </div>
       
 
@@ -512,8 +757,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/flink-stream-event-time-and-processing-time.html" rel="next" title="Flink 事件时间与处理时间">
-                <i class="fa fa-chevron-left"></i> Flink 事件时间与处理时间
+              <a href="/rebranding-prestosql-as-trino.html" rel="next" title="<转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名">
+                <i class="fa fa-chevron-left"></i> <转>与 Facebook 分手后 ，PrestoSQL 再度因商标侵权被迫更名
               </a>
             
           </div>
@@ -521,10 +766,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/main-stream-processing-framework-comparison-part-one.html" rel="prev" title="Stream 主流流处理框架比较(1)">
-                Stream 主流流处理框架比较(1) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -645,7 +886,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">245</span>
+                    <span class="site-state-item-count">246</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -740,7 +981,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-watermark"><span class="nav-number">1.</span> <span class="nav-text">1. watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-数据流中的并行Watermarks"><span class="nav-number">2.</span> <span class="nav-text">2. 数据流中的并行Watermarks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-延迟元素"><span class="nav-number">3.</span> <span class="nav-text">3. 延迟元素</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-调试Watermarks"><span class="nav-number">4.</span> <span class="nav-text">4. 调试Watermarks</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-为何要使用Watermark？"><span class="nav-number">1.</span> <span class="nav-text">1. 为何要使用Watermark？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Watermark如何产生？"><span class="nav-number">2.</span> <span class="nav-text">2. Watermark如何产生？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-顺序事件中的Watermark"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 顺序事件中的Watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-乱序事件中的Watermark"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 乱序事件中的Watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-并行数据流中的Watermark"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 并行数据流中的Watermark</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Watermark与窗口的关系"><span class="nav-number">3.</span> <span class="nav-text">3. Watermark与窗口的关系</span></a></li></ol></div>
             
 
           </div>
