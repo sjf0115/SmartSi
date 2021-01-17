@@ -97,31 +97,33 @@
 
 
   
-  <meta name="keywords" content="Spark,Spark 基础," />
+  <meta name="keywords" content="Airflow," />
 
 
-<meta name="description" content="Spark的核心概念是弹性分布式数据集（RDD），RDD 是一个可容错、并行操作的分布式元素集合。有两种方法可以创建 RDD 对象：  在驱动程序中并行化操作已存在集合来创建 RDD 从外部存储系统中引用数据集（如：共享文件系统、HDFS、HBase 或者其他 Hadoop 支持的数据源）。  1. 并行化集合在你驱动程序的现有集合上调用 JavaSparkContext 的 paralleliz">
-<meta name="keywords" content="Spark,Spark 基础">
+<meta name="description" content="1. 安装通过pip安装:xiaosi@yoona:~$ pip install airflow 如果速度比较慢，可以使用下面提供的源进行安装:xiaosi@yoona:~$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple airflow 如果出现下面提示，表示你的airflow安装成功了:Successfully installed">
+<meta name="keywords" content="Airflow">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Spark2.3.0 创建RDD">
-<meta property="og:url" content="http://smartsi.club/spark-base-build-resilient-distributed-datasets.html">
+<meta property="og:title" content="Airflow使用指南一 安装与启动">
+<meta property="og:url" content="http://smartsi.club/how-install-and-startup-airflow.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Spark的核心概念是弹性分布式数据集（RDD），RDD 是一个可容错、并行操作的分布式元素集合。有两种方法可以创建 RDD 对象：  在驱动程序中并行化操作已存在集合来创建 RDD 从外部存储系统中引用数据集（如：共享文件系统、HDFS、HBase 或者其他 Hadoop 支持的数据源）。  1. 并行化集合在你驱动程序的现有集合上调用 JavaSparkContext 的 paralleliz">
+<meta property="og:description" content="1. 安装通过pip安装:xiaosi@yoona:~$ pip install airflow 如果速度比较慢，可以使用下面提供的源进行安装:xiaosi@yoona:~$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple airflow 如果出现下面提示，表示你的airflow安装成功了:Successfully installed">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="http://img.blog.csdn.net/20170802173129848?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2021-01-17T04:06:05.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Spark2.3.0 创建RDD">
-<meta name="twitter:description" content="Spark的核心概念是弹性分布式数据集（RDD），RDD 是一个可容错、并行操作的分布式元素集合。有两种方法可以创建 RDD 对象：  在驱动程序中并行化操作已存在集合来创建 RDD 从外部存储系统中引用数据集（如：共享文件系统、HDFS、HBase 或者其他 Hadoop 支持的数据源）。  1. 并行化集合在你驱动程序的现有集合上调用 JavaSparkContext 的 paralleliz">
+<meta name="twitter:title" content="Airflow使用指南一 安装与启动">
+<meta name="twitter:description" content="1. 安装通过pip安装:xiaosi@yoona:~$ pip install airflow 如果速度比较慢，可以使用下面提供的源进行安装:xiaosi@yoona:~$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple airflow 如果出现下面提示，表示你的airflow安装成功了:Successfully installed">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20170802173129848?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
 
 
 
 
 
 
-  <link rel="canonical" href="http://smartsi.club/spark-base-build-resilient-distributed-datasets.html"/>
+  <link rel="canonical" href="http://smartsi.club/how-install-and-startup-airflow.html"/>
 
 
-  <title>Spark2.3.0 创建RDD | SmartSi</title>
+  <title>Airflow使用指南一 安装与启动 | SmartSi</title>
   
 
 
@@ -302,7 +304,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/spark-base-build-resilient-distributed-datasets.html">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/how-install-and-startup-airflow.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="sjf0115">
@@ -319,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Spark2.3.0 创建RDD</h2>
+          <h2 class="post-title" itemprop="name headline">Airflow使用指南一 安装与启动</h2>
         
 
         <div class="post-meta">
@@ -331,7 +333,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-12T19:13:01+08:00">2018-03-12</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-29T12:55:01+08:00">2017-12-29</time>
             
 
             
@@ -351,7 +353,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Airflow/" itemprop="url" rel="index"><span itemprop="name">Airflow</span></a></span>
 
                 
                 
@@ -366,8 +368,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/spark-base-build-resilient-distributed-datasets.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/spark-base-build-resilient-distributed-datasets.html" itemprop="commentCount"></span>
+                <a href="/how-install-and-startup-airflow.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/how-install-and-startup-airflow.html" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -375,7 +377,7 @@
 
           
           
-             <span id="/spark-base-build-resilient-distributed-datasets.html" class="leancloud_visitors" data-flag-title="Spark2.3.0 创建RDD">
+             <span id="/how-install-and-startup-airflow.html" class="leancloud_visitors" data-flag-title="Airflow使用指南一 安装与启动">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -406,39 +408,26 @@
       
 
       
-        <p>Spark的核心概念是弹性分布式数据集（RDD），RDD 是一个可容错、并行操作的分布式元素集合。有两种方法可以创建 RDD 对象：</p>
-<ul>
-<li>在驱动程序中并行化操作已存在集合来创建 RDD</li>
-<li>从外部存储系统中引用数据集（如：共享文件系统、HDFS、HBase 或者其他 Hadoop 支持的数据源）。</li>
-</ul>
-<h3 id="1-并行化集合"><a href="#1-并行化集合" class="headerlink" title="1. 并行化集合"></a>1. 并行化集合</h3><p>在你驱动程序的现有集合上调用 <code>JavaSparkContext</code> 的 <code>parallelize</code> 方法创建并行化集合(Parallelized collections)。集合的元素被复制以形成可以并行操作的分布式数据集。 例如，下面是如何创建一个包含数字1到5的并行化集合：</p>
-<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>);</span><br><span class="line">JavaRDD&lt;Integer&gt; rdd = sc.parallelize(list);</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> data = <span class="type">Array</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line"><span class="keyword">val</span> distData = sc.parallelize(data)</span><br></pre></td></tr></table></figure></p>
-<p>Python版本：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">data = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]</span><br><span class="line">distData = sc.parallelize(data)</span><br></pre></td></tr></table></figure></p>
-<p>RDD 一旦创建，分布式数据集（distData）就可以并行操作。例如，我们可以调用 <code>distData.reduce（（a，b） - &gt; a + b）</code> 来实现对列表元素求和。我们稍后介绍分布式数据集的操作。</p>
-<p>并行化集合的一个重要参数是将数据集分割成多少分区的 <code>partitions</code> 个数。Spark 集群中每个分区运行一个任务(task)。典型场景下，一般为每个CPU分配2－4个分区。但通常而言，Spark 会根据你集群的情况，自动设置分区数。当然，你可以给 <code>parallelize</code> 方法传递第二个参数来手动设置分区数（如：<code>sc.parallelize(data, 10)</code>）。</p>
-<blockquote>
-<p>Spark代码里有些地方仍然使用分片（slice）这个术语(分区的同义词)，主要为了保持向后兼容。</p>
-</blockquote>
-<h3 id="2-外部数据集"><a href="#2-外部数据集" class="headerlink" title="2. 外部数据集"></a>2. 外部数据集</h3><p>Spark 可以从 Hadoop 支持的任何存储数据源创建分布式数据集，包括本地文件系统，HDFS，Cassandra，HBase，Amazon S3等。Spark 也支持文本文件，SequenceFiles 以及任何其他 Hadoop 输入格式。</p>
-<p>文本文件 RDD 可以使用 <code>SparkContext</code> 的 <code>textFile</code> 方法创建。该方法根据URL获取文件（机器的本地路径，或 <code>hdfs://</code> ， <code>s3n://</code> 等等），并按行读取。下面是一个示例调用：</p>
-<p>Java版本：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">JavaRDD&lt;String&gt; distFile = sc.textFile(<span class="string">"data.txt"</span>);</span><br></pre></td></tr></table></figure></p>
-<p>Scala版本：<br><figure class="highlight scala"><table><tr><td class="code"><pre><span class="line">scala&gt; <span class="keyword">val</span> distFile = sc.textFile(<span class="string">"data.txt"</span>)</span><br><span class="line">distFile: org.apache.spark.rdd.<span class="type">RDD</span>[<span class="type">String</span>] = data.txt <span class="type">MapPartitionsRDD</span>[<span class="number">10</span>] at textFile at &lt;console&gt;:<span class="number">26</span></span><br></pre></td></tr></table></figure></p>
-<p>Python版本：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; distFile = sc.textFile(&quot;data.txt&quot;)</span><br></pre></td></tr></table></figure></p>
-<p>一旦创建完成，就可以在 distFiile 上做数据集操作。例如，我们可以用下面的方式使用 map 和 reduce 操作将所有行的长度相加：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">distFile.map(s -&gt; s.length()).reduce((a, b) -&gt; a + b);</span><br></pre></td></tr></table></figure></p>
-<p>Spark读文件时一些注意事项：</p>
-<p>(1) 如果使用本地文件系统路径，在所有工作节点上该文件必须都能用相同的路径访问到。要么能复制文件到所有的工作节点，要么能使用网络的方式共享文件系统。</p>
-<p>(2) Spark 所有基于文件的输入方法，包括 <code>textFile</code>，能很好地支持文件目录，压缩文件和通配符。例如，你可以使用:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">textFile(&quot;/my/directory&quot;)</span><br><span class="line">textFile(&quot;/my/directory/*.txt&quot;)</span><br><span class="line">textFile(&quot;/my/directory/*.gz&quot;)</span><br></pre></td></tr></table></figure></p>
-<p>(3) <code>textFile</code> 方法也可以选择第二个可选参数来控制文件分区数目，默认情况下，Spark 为每一个文件块创建一个分区（HDFS中分块大小默认为128MB），你也可以通过传递一个较大数值来请求更多分区。注意的是，分区数目不能少于分块数目。</p>
-<p>除了文本文件，Spark 的 Java API 还支持其他几种数据格式：</p>
-<p>(1) <code>JavaSparkContext.wholeTextFiles</code> 可以读取包含多个小文本文件的目录，并将它们以（文件名，内容）键值对返回。这与 textFile 相反，textFile 将在每个文件中每行返回一条记录。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">JavaPairRDD&lt;String, String&gt; rdd = sc.wholeTextFiles(<span class="string">"/home/xiaosi/wholeText"</span>);</span><br><span class="line">List&lt;Tuple2&lt;String, String&gt;&gt; list = rdd.collect();</span><br><span class="line"><span class="keyword">for</span> (Tuple2&lt;?, ?&gt; tuple : list) &#123;</span><br><span class="line">    System.out.println(tuple._1() + <span class="string">": "</span> + tuple._2());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>(2) 对于 SequenceFiles，可以使用 SparkContext 的 <code>sequenceFile[K，V]</code> 方法，其中 K 和 V 是文件中的键和值的类型。这些应该是 Hadoop 的 Writable 接口的子类，如 IntWritable 和 Text。</p>
-<p>(3) 对于其他 Hadoop InputFormats，你可以使用 <code>JavaSparkContext.hadoopRDD</code> 方法，该方法采用任意 JobConf 和输入格式类，键类和值类。将这些设置与使用输入源的 Hadoop 作业相同。你还可以使用基于“新” MapReduce API（org.apache.hadoop.mapreduce）的 InputFormats 的 <code>JavaSparkContext.newAPIHadoopRDD</code>。</p>
-<p>(4) <code>JavaRDD.saveAsObjectFile</code> 和 <code>SparkContext.objectFile</code> 支持保存一个 RDD，保存格式是一个简单的 Java 对象序列化格式。这是一种效率不高的专有格式，如 Avro，它提供了简单的方法来保存任何一个 RDD。</p>
-<blockquote>
-<p>Spark版本: 2.3.0</p>
-</blockquote>
-<p>原文：<a href="http://spark.apache.org/docs/2.3.0/rdd-programming-guide.html#resilient-distributed-datasets-rdds" target="_blank" rel="noopener">http://spark.apache.org/docs/2.3.0/rdd-programming-guide.html#resilient-distributed-datasets-rdds</a></p>
+        <h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>通过pip安装:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ pip install airflow</span><br></pre></td></tr></table></figure></p>
+<p>如果速度比较慢，可以使用下面提供的源进行安装:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple airflow</span><br></pre></td></tr></table></figure></p>
+<p>如果出现下面提示，表示你的airflow安装成功了:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Successfully installed airflow alembic croniter dill flask flask-admin flask-cache flask-login flask-swagger flask-wtf funcsigs future gitpython gunicorn jinja2 lxml markdown pandas psutil pygments python-daemon python-dateutil python-nvd3 requests setproctitle sqlalchemy tabulate thrift zope.deprecation Mako python-editor click itsdangerous Werkzeug wtforms PyYAML ordereddict gitdb2 MarkupSafe pytz numpy docutils setuptools lockfile six python-slugify idna urllib3 certifi chardet smmap2 Unidecode</span><br><span class="line">Cleaning up...</span><br></pre></td></tr></table></figure></p>
+<p>安装完成之后我的默认安装在<code>~/.local/bin</code>目录下</p>
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h3><p>如果不修改路径，默认的配置为<code>~/airflow</code></p>
+<p>永久修改环境变量<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">echo &quot;export AIRFLOW_HOME=/home/xiaosi/opt/airflow&quot; &gt;&gt; /etc/profile</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p>为了便于操作方便，进行如下配置:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">echo &quot;export PATH=/home/xiaosi/.local/bin:$PATH&quot; &gt;&gt; /etc/profile</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-初始化"><a href="#3-初始化" class="headerlink" title="3. 初始化"></a>3. 初始化</h3><p>初始化数据库:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ airflow initdb</span><br><span class="line">[2017-08-02 16:39:22,319] &#123;__init__.py:57&#125; INFO - Using executor SequentialExecutor</span><br><span class="line">[2017-08-02 16:39:22,432] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/Grammar.txt</span><br><span class="line">[2017-08-02 16:39:22,451] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt</span><br><span class="line">DB: sqlite:////home/xiaosi/opt/airflow/airflow.db</span><br><span class="line">[2017-08-02 16:39:22,708] &#123;db.py:287&#125; INFO - Creating tables</span><br><span class="line">INFO  [alembic.runtime.migration] Context impl SQLiteImpl.</span><br><span class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade  -&gt; e3a246e0dc1, current schema</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade e3a246e0dc1 -&gt; 1507a7289a2f, create is_encrypted</span><br><span class="line">/home/xiaosi/.local/lib/python2.7/site-packages/alembic/util/messaging.py:69: UserWarning: Skipping unsupported ALTER for creation of implicit constraint</span><br><span class="line">  warnings.warn(msg)</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1507a7289a2f -&gt; 13eb55f81627, maintain history for compatibility with earlier migrations</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 13eb55f81627 -&gt; 338e90f54d61, More logging into task_isntance</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 338e90f54d61 -&gt; 52d714495f0, job_id indices</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 52d714495f0 -&gt; 502898887f84, Adding extra to Log</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 502898887f84 -&gt; 1b38cef5b76e, add dagrun</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1b38cef5b76e -&gt; 2e541a1dcfed, task_duration</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 2e541a1dcfed -&gt; 40e67319e3a9, dagrun_config</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 40e67319e3a9 -&gt; 561833c1c74b, add password column to user</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 561833c1c74b -&gt; 4446e08588, dagrun start end</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 4446e08588 -&gt; bbc73705a13e, Add notification_sent column to sla_miss</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade bbc73705a13e -&gt; bba5a7cfc896, Add a column to track the encryption state of the &apos;Extra&apos; field in connection</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade bba5a7cfc896 -&gt; 1968acfc09e3, add is_encrypted column to variable table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1968acfc09e3 -&gt; 2e82aab8ef20, rename user table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 2e82aab8ef20 -&gt; 211e584da130, add TI state index</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 211e584da130 -&gt; 64de9cddf6c9, add task fails journal table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 64de9cddf6c9 -&gt; f2ca10b85618, add dag_stats table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade f2ca10b85618 -&gt; 4addfa1236f1, Add fractional seconds to mysql tables</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 4addfa1236f1 -&gt; 8504051e801b, xcom dag task indices</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 8504051e801b -&gt; 5e7d17757c7a, add pid field to TaskInstance</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 5e7d17757c7a -&gt; 127d2bf2dfa7, Add dag_id/state index on dag_run table</span><br><span class="line">Done.</span><br></pre></td></tr></table></figure></p>
+<p>运行上述命令之后，会在$AIRFLOW_HOME目录下生成如下文件:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~/opt/airflow$ ll</span><br><span class="line">总用量 88</span><br><span class="line">drwxrwxr-x  2 xiaosi xiaosi  4096  8月  2 16:39 ./</span><br><span class="line">drwxrwxr-x 26 xiaosi xiaosi  4096  7月 31 13:56 ../</span><br><span class="line">-rw-rw-r--  1 xiaosi xiaosi 11424  8月  2 16:38 airflow.cfg</span><br><span class="line">-rw-r--r--  1 xiaosi xiaosi 58368  8月  2 16:39 airflow.db</span><br><span class="line">-rw-rw-r--  1 xiaosi xiaosi  1554  8月  2 16:38 unittests.cfg</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-修改默认数据库"><a href="#4-修改默认数据库" class="headerlink" title="4. 修改默认数据库"></a>4. 修改默认数据库</h3><p>找到<code>$AIRFLOW_HOME/airflow.cfg</code>配置文件，进行如下修改:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sql_alchemy_conn = mysql://root:root@localhost:3306/airflow</span><br></pre></td></tr></table></figure></p>
+<p><strong>备注</strong></p>
+<p>数据库用户名与密码均为<code>root</code>，airflow使用的数据库为<code>airflow</code>．使用如下命令创建对应的数据库:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; create database airflow;</span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<p>重新初始化服务器数据库:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ airflow initdb</span><br></pre></td></tr></table></figure></p>
+<p>出现了如下错误:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ airflow initdb</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/home/xiaosi/.local/bin/airflow&quot;, line 17, in &lt;module&gt;</span><br><span class="line">    from airflow import configuration</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/airflow/__init__.py&quot;, line 30, in &lt;module&gt;</span><br><span class="line">    from airflow import settings</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/airflow/settings.py&quot;, line 159, in &lt;module&gt;</span><br><span class="line">    configure_orm()</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/airflow/settings.py&quot;, line 147, in configure_orm</span><br><span class="line">    engine = create_engine(SQL_ALCHEMY_CONN, **engine_args)</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/sqlalchemy/engine/__init__.py&quot;, line 387, in create_engine</span><br><span class="line">    return strategy.create(*args, **kwargs)</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/sqlalchemy/engine/strategies.py&quot;, line 80, in create</span><br><span class="line">    dbapi = dialect_cls.dbapi(**dbapi_args)</span><br><span class="line">  File &quot;/home/xiaosi/.local/lib/python2.7/site-packages/sqlalchemy/dialects/mysql/mysqldb.py&quot;, line 110, in dbapi</span><br><span class="line">    return __import__(&apos;MySQLdb&apos;)</span><br><span class="line">ImportError: No module named MySQLdb</span><br></pre></td></tr></table></figure></p>
+<p>解决方案:</p>
+<p>MySQL是最流行的开源数据库之一，但在Python标准库中并没有集成MySQL接口程序，MySQLdb是一个第三方包，需独立下载并安装。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get install python-mysqldb</span><br></pre></td></tr></table></figure></p>
+<p>再次初始化:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ airflow initdb</span><br><span class="line">[2017-08-02 17:22:21,169] &#123;__init__.py:57&#125; INFO - Using executor SequentialExecutor</span><br><span class="line">[2017-08-02 17:22:21,282] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/Grammar.txt</span><br><span class="line">[2017-08-02 17:22:21,302] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt</span><br><span class="line">DB: mysql://root:***@localhost:3306/airflow</span><br><span class="line">[2017-08-02 17:22:21,553] &#123;db.py:287&#125; INFO - Creating tables</span><br><span class="line">INFO  [alembic.runtime.migration] Context impl MySQLImpl.</span><br><span class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade  -&gt; e3a246e0dc1, current schema</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade e3a246e0dc1 -&gt; 1507a7289a2f, create is_encrypted</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1507a7289a2f -&gt; 13eb55f81627, maintain history for compatibility with earlier migrations</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 13eb55f81627 -&gt; 338e90f54d61, More logging into task_isntance</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 338e90f54d61 -&gt; 52d714495f0, job_id indices</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 52d714495f0 -&gt; 502898887f84, Adding extra to Log</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 502898887f84 -&gt; 1b38cef5b76e, add dagrun</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1b38cef5b76e -&gt; 2e541a1dcfed, task_duration</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 2e541a1dcfed -&gt; 40e67319e3a9, dagrun_config</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 40e67319e3a9 -&gt; 561833c1c74b, add password column to user</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 561833c1c74b -&gt; 4446e08588, dagrun start end</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 4446e08588 -&gt; bbc73705a13e, Add notification_sent column to sla_miss</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade bbc73705a13e -&gt; bba5a7cfc896, Add a column to track the encryption state of the &apos;Extra&apos; field in connection</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade bba5a7cfc896 -&gt; 1968acfc09e3, add is_encrypted column to variable table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 1968acfc09e3 -&gt; 2e82aab8ef20, rename user table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 2e82aab8ef20 -&gt; 211e584da130, add TI state index</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 211e584da130 -&gt; 64de9cddf6c9, add task fails journal table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 64de9cddf6c9 -&gt; f2ca10b85618, add dag_stats table</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade f2ca10b85618 -&gt; 4addfa1236f1, Add fractional seconds to mysql tables</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 4addfa1236f1 -&gt; 8504051e801b, xcom dag task indices</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 8504051e801b -&gt; 5e7d17757c7a, add pid field to TaskInstance</span><br><span class="line">INFO  [alembic.runtime.migration] Running upgrade 5e7d17757c7a -&gt; 127d2bf2dfa7, Add dag_id/state index on dag_run table</span><br><span class="line">Done.</span><br></pre></td></tr></table></figure></p>
+<p>查看一下airflow数据库中做了哪些操作:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mysql&gt; use airflow;</span><br><span class="line">Reading table information for completion of table and column names</span><br><span class="line">You can turn off this feature to get a quicker startup with -A</span><br><span class="line"></span><br><span class="line">Database changed</span><br><span class="line">mysql&gt; show tables;</span><br><span class="line">+-------------------+</span><br><span class="line">| Tables_in_airflow |</span><br><span class="line">+-------------------+</span><br><span class="line">| alembic_version   |</span><br><span class="line">| chart             |</span><br><span class="line">| connection        |</span><br><span class="line">| dag               |</span><br><span class="line">| dag_pickle        |</span><br><span class="line">| dag_run           |</span><br><span class="line">| dag_stats         |</span><br><span class="line">| import_error      |</span><br><span class="line">| job               |</span><br><span class="line">| known_event       |</span><br><span class="line">| known_event_type  |</span><br><span class="line">| log               |</span><br><span class="line">| sla_miss          |</span><br><span class="line">| slot_pool         |</span><br><span class="line">| task_fail         |</span><br><span class="line">| task_instance     |</span><br><span class="line">| users             |</span><br><span class="line">| variable          |</span><br><span class="line">| xcom              |</span><br><span class="line">+-------------------+</span><br><span class="line">19 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure></p>
+<h3 id="5-启动"><a href="#5-启动" class="headerlink" title="5. 启动"></a>5. 启动</h3><p>通过如下命令就可以启动后台管理界面，默认访问localhost:8080即可:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">xiaosi@yoona:~$ airflow webserver</span><br><span class="line">[2017-08-02 17:25:31,961] &#123;__init__.py:57&#125; INFO - Using executor SequentialExecutor</span><br><span class="line">[2017-08-02 17:25:32,075] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/Grammar.txt</span><br><span class="line">[2017-08-02 17:25:32,095] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt</span><br><span class="line">  ____________       _____________</span><br><span class="line"> ____    |__( )_________  __/__  /________      __</span><br><span class="line">____  /| |_  /__  ___/_  /_ __  /_  __ \_ | /| / /</span><br><span class="line">___  ___ |  / _  /   _  __/ _  / / /_/ /_ |/ |/ /</span><br><span class="line"> _/_/  |_/_/  /_/    /_/    /_/  \____/____/|__/</span><br><span class="line"></span><br><span class="line">/home/xiaosi/.local/lib/python2.7/site-packages/flask/exthook.py:71: ExtDeprecationWarning: Importing flask.ext.cache is deprecated, use flask_cache instead.</span><br><span class="line">  .format(x=modname), ExtDeprecationWarning</span><br><span class="line">[2017-08-02 17:25:32,469] [9703] &#123;models.py:167&#125; INFO - Filling up the DagBag from /home/xiaosi/opt/airflow/dags</span><br><span class="line">Running the Gunicorn Server with:</span><br><span class="line">Workers: 4 sync</span><br><span class="line">Host: 0.0.0.0:8080</span><br><span class="line">Timeout: 120</span><br><span class="line">Logfiles: - -</span><br><span class="line">=================================================================            </span><br><span class="line">[2017-08-02 17:25:33,052] &#123;__init__.py:57&#125; INFO - Using executor SequentialExecutor</span><br><span class="line">[2017-08-02 17:25:33,156] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/Grammar.txt</span><br><span class="line">[2017-08-02 17:25:33,179] &#123;driver.py:120&#125; INFO - Generating grammar tables from /usr/lib/python2.7/lib2to3/PatternGrammar.txt</span><br><span class="line">[2017-08-02 17:25:33 +0000] [9706] [INFO] Starting gunicorn 19.3.0</span><br><span class="line">[2017-08-02 17:25:33 +0000] [9706] [INFO] Listening at: http://0.0.0.0:8080 (9706)</span><br><span class="line">[2017-08-02 17:25:33 +0000] [9706] [INFO] Using worker: sync</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>可以访问 <a href="http://localhost:8080/admin/" target="_blank" rel="noopener">http://localhost:8080/admin/</a> , 呈现出的主界面如下:<br><img src="http://img.blog.csdn.net/20170802173129848?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvU3VubnlZb29uYQ==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="img"></p>
 
       
     </div>
@@ -488,7 +477,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/spark-base-build-resilient-distributed-datasets.html" title="Spark2.3.0 创建RDD">http://smartsi.club/spark-base-build-resilient-distributed-datasets.html</a>
+    <a href="http://smartsi.club/how-install-and-startup-airflow.html" title="Airflow使用指南一 安装与启动">http://smartsi.club/how-install-and-startup-airflow.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -503,9 +492,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Spark/" rel="tag"># Spark</a>
-          
-            <a href="/tags/Spark-基础/" rel="tag"># Spark 基础</a>
+            <a href="/tags/Airflow/" rel="tag"># Airflow</a>
           
         </div>
       
@@ -518,8 +505,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/spark-base-rdd-operations.html" rel="next" title="Spark2.3.0 RDD操作">
-                <i class="fa fa-chevron-left"></i> Spark2.3.0 RDD操作
+              <a href="/flink-programming-model.html" rel="next" title="Flink 内部原理之编程模型">
+                <i class="fa fa-chevron-left"></i> Flink 内部原理之编程模型
               </a>
             
           </div>
@@ -528,8 +515,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/spark-internal-operating-principle-one.html" rel="prev" title="Spark内部原理之运行原理">
-                Spark内部原理之运行原理 <i class="fa fa-chevron-right"></i>
+              <a href="/MySQL/[MySQL]MySQL配置远程登录.html" rel="prev" title="MySQL 配置远程登录">
+                MySQL 配置远程登录 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -746,7 +733,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-并行化集合"><span class="nav-number">1.</span> <span class="nav-text">1. 并行化集合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-外部数据集"><span class="nav-number">2.</span> <span class="nav-text">2. 外部数据集</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装"><span class="nav-number">1.</span> <span class="nav-text">1. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-配置"><span class="nav-number">2.</span> <span class="nav-text">2. 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-初始化"><span class="nav-number">3.</span> <span class="nav-text">3. 初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-修改默认数据库"><span class="nav-number">4.</span> <span class="nav-text">4. 修改默认数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-启动"><span class="nav-number">5.</span> <span class="nav-text">5. 启动</span></a></li></ol></div>
             
 
           </div>
