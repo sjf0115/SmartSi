@@ -109,10 +109,10 @@
 <meta property="og:description" content="Flink 1.11  在 Flink 1.11 版本之前，Flink 提供了两种生成 Watermark 的策略，分别是 AssignerWithPunctuatedWatermarks 和 AssignerWithPeriodicWatermarks，这两个接口都继承自 TimestampAssigner 接口。用户想使用不同的 Watermark 生成方式，则需要实现不同的接口。为了实现接">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/generating-watermarks-in-flink-1.11-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/generating-watermarks-in-flink-1.11-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/generating-watermarks-in-flink-1.11-2.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true">
-<meta property="og:updated_time" content="2021-02-27T13:55:25.000Z">
+<meta property="og:updated_time" content="2021-02-27T13:59:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 1.11版本如何生成Watermark">
 <meta name="twitter:description" content="Flink 1.11  在 Flink 1.11 版本之前，Flink 提供了两种生成 Watermark 的策略，分别是 AssignerWithPunctuatedWatermarks 和 AssignerWithPeriodicWatermarks，这两个接口都继承自 TimestampAssigner 接口。用户想使用不同的 Watermark 生成方式，则需要实现不同的接口。为了实现接">
@@ -350,7 +350,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2021-02-27T21:55:25+08:00">2021-02-27</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-02-27T21:59:40+08:00">2021-02-27</time>
             
           </span>
 
@@ -468,7 +468,7 @@
 <p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/watermark/PunctuatedWatermarkGeneratorExample.java" target="_blank" rel="noopener">PunctuatedWatermarkGeneratorExample</a></p>
 </blockquote>
 <p>通过如下输入示例数据，我们可以观察输出的Watermark信息：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">A,false,2021-02-19 12:07:01</span><br><span class="line">B,true,2021-02-19 12:08:01</span><br><span class="line">A,false,2021-02-19 12:14:01</span><br><span class="line">C,false,2021-02-19 12:09:01</span><br><span class="line">C,true,2021-02-19 12:15:01</span><br><span class="line">A,true,2021-02-19 12:08:01</span><br></pre></td></tr></table></figure></p>
-<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/generating-watermarks-in-flink-1.11-2.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/generating-watermarks-in-flink-1.11-2.jpg?raw=true" alt=""></p>
 <p>欢迎关注我的公众号和博客：</p>
 <p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
 <p>推荐订阅：<br><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true" alt=""></p>
