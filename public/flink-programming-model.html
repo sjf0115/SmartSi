@@ -97,28 +97,28 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink 内部原理," />
+  <meta name="keywords" content="Flink," />
 
 
 <meta name="description" content="1. 抽象层次Flink提供不同级别的抽象层次来开发流处理和批处理应用程序。  (1) 最低级别的抽象只是提供有状态的数据流。通过Process Function集成到DataStream API中。它允许用户不受限制的处理来自一个或多个数据流的事件，并可以使用一致的容错状态(consistent fault tolerant state)。另外，用户可以注册事件时间和处理时间的回调函数，允许程序">
-<meta name="keywords" content="Flink,Flink 内部原理">
+<meta name="keywords" content="Flink">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flink 内部原理之编程模型">
 <meta property="og:url" content="http://smartsi.club/flink-programming-model.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="1. 抽象层次Flink提供不同级别的抽象层次来开发流处理和批处理应用程序。  (1) 最低级别的抽象只是提供有状态的数据流。通过Process Function集成到DataStream API中。它允许用户不受限制的处理来自一个或多个数据流的事件，并可以使用一致的容错状态(consistent fault tolerant state)。另外，用户可以注册事件时间和处理时间的回调函数，允许程序">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-3.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-4.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-5.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-5.png?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-6.png?raw=true">
+<meta property="og:updated_time" content="2021-02-28T13:05:02.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 内部原理之编程模型">
 <meta name="twitter:description" content="1. 抽象层次Flink提供不同级别的抽象层次来开发流处理和批处理应用程序。  (1) 最低级别的抽象只是提供有状态的数据流。通过Process Function集成到DataStream API中。它允许用户不受限制的处理来自一个或多个数据流的事件，并可以使用一致的容错状态(consistent fault tolerant state)。另外，用户可以注册事件时间和处理时间的回调函数，允许程序">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-1.png?raw=true">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-1.png?raw=true">
 
 
 
@@ -352,7 +352,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-02-28T21:05:02+08:00">2021-02-28</time>
             
           </span>
 
@@ -424,7 +424,7 @@
 
       
         <h3 id="1-抽象层次"><a href="#1-抽象层次" class="headerlink" title="1. 抽象层次"></a>1. 抽象层次</h3><p>Flink提供不同级别的抽象层次来开发流处理和批处理应用程序。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-1.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-1.png?raw=true" alt=""></p>
 <p>(1) 最低级别的抽象只是提供有状态的数据流。通过<code>Process Function</code>集成到DataStream API中。它允许用户不受限制的处理来自一个或多个数据流的事件，并可以使用一致的容错状态(consistent fault tolerant state)。另外，用户可以注册事件时间和处理时间的回调函数，允许程序实现复杂的计算。</p>
 <p>(2) 在实际中，大多数应用程序不需要上述描述的低级抽象，而是使用如<code>DataStream API</code>(有界/无界流)和<code>DataSet API</code>(有界数据集)的核心API进行编程。这些核心API提供了用于数据处理的通用构建模块，如用户指定的各种转换，连接，聚集，窗口，状态等。在这些API中处理的数据类型被表示为对应编程语言中的类。</p>
 <p>低级别的<code>Process Function</code>与<code>DataStream API</code>集成在一起，使得可以对特定操作使用较低级别的抽象接口。<code>DataSet API</code>为有限数据集提供了额外的原语(primitives)，如循环/迭代。</p>
@@ -432,31 +432,33 @@
 <p>可以在表和<code>DataStream</code>/<code>DataSet</code>之间进行无缝转换，允许程序混合使用<code>Table API</code>和<code>DataStream</code>和<code>DataSet API</code>。</p>
 <p>(4) Flink提供的最高级抽象是SQL。这种抽象在语法和表现力方面与<code>Table API</code>类似，但是是通过SQL查询表达式实现程序。SQL抽象与<code>Table API</code>紧密交互，SQL查询可以在<code>Table API</code>中定义的表上执行。</p>
 <h3 id="2-程序与数据流"><a href="#2-程序与数据流" class="headerlink" title="2. 程序与数据流"></a>2. 程序与数据流</h3><p>Flink程序的基本构建块是流和转换操作。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink的DataSet API中使用的数据集也是内部的流 - 稍后会介绍这一点。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>备注: Flink的DataSet API中使用的数据集也是内部的流 - 稍后会介绍这一点。</p>
+</blockquote>
 <p>从概念上讲，流是数据记录(可能是永无止境的)流，而转换是将一个或多个流作为输入，并产生一个或多个输出流。</p>
 <p>执行时，Flink程序被映射到由流和转换算子组成的流式数据流(streaming dataflows)。每个数据流从一个或多个source开始，并在一个或多个sink中结束。数据流类似于有向无环图(DAG)。尽管通过迭代构造允许特殊形式的环，但是为了简单起见，大部分我们都会这样描述。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-2.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-2.png?raw=true" alt=""></p>
 <p>程序中的转换与数据流中的算子通常是一一对应的。然而，有时候，一个转换可能由多个转换算子组成。</p>
 <h3 id="3-并行数据流图"><a href="#3-并行数据流图" class="headerlink" title="3. 并行数据流图"></a>3. 并行数据流图</h3><p>Flink中的程序本质上是分布式并发执行的。在执行过程中，一个流有一个或多个流分区，每个算子有一个或多个算子子任务。算子子任务之间相互独立，并且在不同的线程中执行，甚至有可能在不同的机器或容器上执行。</p>
 <p>算子子任务的数量是该特定算子的并发数。流的并发数总是产生它的算子的并发数。同一程序的不同算子可能具有不同的并发级别。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-3.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-3.png?raw=true" alt=""></p>
 <p>在两个算子之间的流可以以一对一模式或重新分发模式传输数据:</p>
 <p>(1) 一对一流(例如上图中的Source和map()算子之间的流)保留了元素的分区和排序。这意味着将会在map()算子的子任务[1]中看到在Source算子的子任务[1]中产生的相同元素，并且具有相同的顺序。</p>
 <p>(2) 重分发流(例如上图的的<code>map()</code>和<code>keyBy()/window()/apply()</code>之间，以及在<code>keyBy()/window()/apply()</code>和<code>Sink</code>之间的数据流)改变了流的分区。每个算子子任务根据所选的转换操作将数据发送到不同的目标子任务。比如<code>keyBy()</code>(根据key的哈希值重新分区)，<code>broadcast()</code>，或者<code>rebalance()</code>(随机重新分区)。在重新分配交换中，只会在每对发送与接受子任务(比如，<code>map()</code>的子任务[1]与<code>keyBy()/window()/apply()</code>的子任务[2])中保留元素间的顺序。在上图的例子中，尽管在子任务之间每个 key 的顺序都是确定的，但是由于程序的并发引入了不确定性，最终到达<code>Sink</code>的元素顺序就不能保证与一开始的元素顺序完全一致。</p>
 <p>关于配置并发的更多信息可以参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.3/dev/parallel.html" target="_blank" rel="noopener">并发执行文档</a>。</p>
 <h3 id="4-窗口"><a href="#4-窗口" class="headerlink" title="4. 窗口"></a>4. 窗口</h3><p>聚合事件(比如计数、求和)在流上的工作方式与批处理不同。比如，不可能对流中的所有元素进行计数，因为通常流是无限的(无界的)。相反，流上的聚合(计数，求和等)需要由<code>窗口</code>来划定范围，比如<code>在最近5分钟内计算</code>，或者<code>对最近100个元素求和</code>。</p>
 <p>窗口可以是<code>时间驱动的</code>(比如：每30秒）或者<code>数据驱动</code>的(比如：每100个元素)。窗口通常被区分为不同的类型，比如<code>滚动窗口</code>(没有重叠)，<code>滑动窗口</code>(有重叠)，以及<code>会话窗口</code>(由不活动的间隙所打断)</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-4.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-4.png?raw=true" alt=""></p>
 <p>更多的窗口示例可以在这篇<a href="https://flink.apache.org/news/2015/12/04/Introducing-windows.html" target="_blank" rel="noopener">博客</a>中找到。更多详细信息在<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/operators/windows.html" target="_blank" rel="noopener">窗口</a>文档。</p>
 <h3 id="5-时间"><a href="#5-时间" class="headerlink" title="5. 时间"></a>5. 时间</h3><p>当提到流程序(例如定义窗口)中的时间时，你可以参考不同的时间概念：</p>
 <p>(1) <code>事件时间</code>是事件创建的时间。它通常由事件中的时间戳描述，例如附接在生产传感器，或者生产服务。Flink通过<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_timestamps_watermarks.html" target="_blank" rel="noopener">时间戳分配器</a>访问事件时间戳。</p>
 <p>(2) <code>摄入时间</code>是事件进入<code>Flink</code>数据流源(source)算子的时间。</p>
 <p>(3) <code>处理事件</code>是每一个执行基于时间操作算子的本地时间。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-5.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-5.png?raw=true" alt=""></p>
 <p>更多关于如何处理时间的详细信息可以查看<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/event_time.html" target="_blank" rel="noopener">事件时间</a>文档.</p>
 <h3 id="6-有状态操作"><a href="#6-有状态操作" class="headerlink" title="6. 有状态操作"></a>6. 有状态操作</h3><p>尽管数据流中的很多操作一次只查看一个独立的事件(比如事件解析器)，但是有些操作会记录多个事件间的信息(比如窗口算子)。这些操作被称为<code>有状态</code>的 。</p>
 <p>有状态操作的状态保存在一个可被视为嵌入式键值对存储中。状态与由有状态算子读取的流一起被严格地分区与分布(distributed)。因此，只有在应用<code>keyBy()</code>函数之后，才能访问<code>keyed streams</code>上的键/值对状态，并且仅限于与当前事件<code>key</code>相关联的值(access to the key/value state is only possible on keyed streams, after a keyBy() function, and is restricted to the values associated with the current event’s key. )。对齐流和状态的<code>key</code>(Aligning the keys of streams and state)确保了所有状态更新都是本地操作，保证一致性，而没有事务开销(guaranteeing consistency without transaction overhead)。这种对齐还使得<code>Flink</code>可以透明地重新分配状态与调整流的分区。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Flink/Flink%E7%BC%96%E7%A8%8B%E6%A8%A1%E5%9E%8B-5.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-programming-model-6.png?raw=true" alt=""></p>
 <h3 id="7-容错性检查点"><a href="#7-容错性检查点" class="headerlink" title="7. 容错性检查点"></a>7. 容错性检查点</h3><p><code>Flink</code>组合使用流重放与检查点实现了容错。检查点与每一个输入流以及每一个算子对应的状态所在的特定点相关联(A checkpoint is related to a specific point in each of the input streams along with the corresponding state for each of the operators.)。一个流数据流可以可以从一个检查点恢复出来，其中通过恢复算子状态并从检查点重放事件以保持一致性(一次处理语义)</p>
 <p>检查点时间间隔是在恢复时间(需要重放的事件数量)内消除执行过程中容错开销的一种手段。</p>
 <p>更多关于检查点与容错的详细信息可以查看<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/stream/state/checkpointing.html" target="_blank" rel="noopener">容错</a>文档。</p>
@@ -530,8 +532,6 @@
         <div class="post-tags">
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
-          
-            <a href="/tags/Flink-内部原理/" rel="tag"># Flink 内部原理</a>
           
         </div>
       
