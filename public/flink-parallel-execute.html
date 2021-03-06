@@ -97,21 +97,24 @@
 
 
   
-  <meta name="keywords" content="Flink,Flink 基础," />
+  <meta name="keywords" content="Flink," />
 
 
-<meta name="description" content="本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该考虑设置最大并发度。从保存点恢复时，可以更改特定算子或整个程序">
-<meta name="keywords" content="Flink,Flink 基础">
+<meta name="description" content="Flink 1.11  本节介绍如何在 Flink 中配置程序的并发执行。一个 Flink 程序由多个 Task (transformations/operators，data sources 以及 sinks)组成。一个 Task 可以分成多个并发实例来执行，每个并发实例只处理输入数据的一个子集。一个 Task 的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该">
+<meta name="keywords" content="Flink">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink1.4 并发执行">
+<meta property="og:title" content="Flink 如何指定并发">
 <meta property="og:url" content="http://smartsi.club/flink-parallel-execute.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该考虑设置最大并发度。从保存点恢复时，可以更改特定算子或整个程序">
+<meta property="og:description" content="Flink 1.11  本节介绍如何在 Flink 中配置程序的并发执行。一个 Flink 程序由多个 Task (transformations/operators，data sources 以及 sinks)组成。一个 Task 可以分成多个并发实例来执行，每个并发实例只处理输入数据的一个子集。一个 Task 的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true">
+<meta property="og:updated_time" content="2021-03-06T03:58:14.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flink1.4 并发执行">
-<meta name="twitter:description" content="本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该考虑设置最大并发度。从保存点恢复时，可以更改特定算子或整个程序">
+<meta name="twitter:title" content="Flink 如何指定并发">
+<meta name="twitter:description" content="Flink 1.11  本节介绍如何在 Flink 中配置程序的并发执行。一个 Flink 程序由多个 Task (transformations/operators，data sources 以及 sinks)组成。一个 Task 可以分成多个并发实例来执行，每个并发实例只处理输入数据的一个子集。一个 Task 的并发实例的个数称为并发度(parallelism)。 如果你想使用保存点，也应该">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
 
 
 
@@ -121,7 +124,7 @@
   <link rel="canonical" href="http://smartsi.club/flink-parallel-execute.html"/>
 
 
-  <title>Flink1.4 并发执行 | SmartSi</title>
+  <title>Flink 如何指定并发 | SmartSi</title>
   
 
 
@@ -319,7 +322,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Flink1.4 并发执行</h2>
+          <h2 class="post-title" itemprop="name headline">Flink 如何指定并发</h2>
         
 
         <div class="post-meta">
@@ -345,7 +348,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-03-06T11:58:14+08:00">2021-03-06</time>
             
           </span>
 
@@ -385,7 +388,7 @@
 
           
           
-             <span id="/flink-parallel-execute.html" class="leancloud_visitors" data-flag-title="Flink1.4 并发执行">
+             <span id="/flink-parallel-execute.html" class="leancloud_visitors" data-flag-title="Flink 如何指定并发">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -416,27 +419,30 @@
       
 
       
-        <p>本节介绍如何在<code>Flink</code>中配置程序的并行执行。一个<code>Flink</code>程序由多个任务(<code>transformations</code>/<code>operators</code>，<code>data sources</code>和<code>sinks</code>)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(<code>parallelism</code>)。</p>
-<p>如果你想使用<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.3/setup/savepoints.html" target="_blank" rel="noopener">保存点</a>，也应该考虑设置最大并发度。从保存点恢复时，可以更改特定算子或整个程序的并发度，并且此配置指定了并发的上限。</p>
-<h3 id="1-设置并发度"><a href="#1-设置并发度" class="headerlink" title="1. 设置并发度"></a>1. 设置并发度</h3><p>一个任务的并发度可以在<code>Flink</code>中指定不同级别。</p>
-<h4 id="1-1-算子级别"><a href="#1-1-算子级别" class="headerlink" title="1.1 算子级别"></a>1.1 算子级别</h4><p>单个算子，数据源，sink可以通过调用<code>setParallelism()</code>方法来定义并发度。例如，像这样：</p>
+        <blockquote>
+<p>Flink 1.11</p>
+</blockquote>
+<p>本节介绍如何在 Flink 中配置程序的并发执行。一个 Flink 程序由多个 Task (transformations/operators，data sources 以及 sinks)组成。一个 Task 可以分成多个并发实例来执行，每个并发实例只处理输入数据的一个子集。一个 Task 的并发实例的个数称为并发度(parallelism)。</p>
+<p>如果你想使用<a href="http://smartsi.club/flink-stream-deployment-savepoints.html">保存点</a>，也应该考虑设置最大并发度。从保存点恢复时，可以更改指定算子或整个程序的并发度，并且此配置指定了并发的上限。</p>
+<h3 id="1-设置并发度"><a href="#1-设置并发度" class="headerlink" title="1. 设置并发度"></a>1. 设置并发度</h3><p>在 Flink 中一个 Task 的并发度可以指定不同级别。</p>
+<h4 id="1-1-算子级别"><a href="#1-1-算子级别" class="headerlink" title="1.1 算子级别"></a>1.1 算子级别</h4><p>单个算子，数据源，Sink 都可以通过调用 <code>setParallelism()</code> 方法来指定并发度。如下代码所示指定算子级别的并发度：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; text = [...]</span><br><span class="line">DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; wordCounts = text</span><br><span class="line">    .flatMap(<span class="keyword">new</span> LineSplitter())</span><br><span class="line">    .keyBy(<span class="number">0</span>)</span><br><span class="line">    .timeWindow(Time.seconds(<span class="number">5</span>))</span><br><span class="line">    .sum(<span class="number">1</span>).setParallelism(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">wordCounts.print();</span><br><span class="line"></span><br><span class="line">env.execute(<span class="string">"Word Count Example"</span>);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line"></span><br><span class="line">val text = [...]</span><br><span class="line">val wordCounts = text</span><br><span class="line">    .flatMap&#123; _.split(&quot; &quot;) map &#123; (_, 1) &#125; &#125;</span><br><span class="line">    .keyBy(0)</span><br><span class="line">    .timeWindow(Time.seconds(5))</span><br><span class="line">    .sum(1).setParallelism(5)</span><br><span class="line">wordCounts.print()</span><br><span class="line"></span><br><span class="line">env.execute(&quot;Word Count Example&quot;)</span><br></pre></td></tr></table></figure></p>
-<h4 id="1-2-执行环境级别"><a href="#1-2-执行环境级别" class="headerlink" title="1.2 执行环境级别"></a>1.2 执行环境级别</h4><p>如<a href="http://smartsi.club/2018/01/04/Flink/[Flink]Flink%20Flink%E7%A8%8B%E5%BA%8F%E5%89%96%E6%9E%90/">这</a>所述，<code>Flink</code>程序是在执行环境的上下文中执行的。执行环境为它执行的所有算子，数据源和数据<code>sink</code>提供了默认的并发度。执行环境的并发度可以通过显式配置一个算子的并发度来覆盖。</p>
-<p>执行环境的默认并发度可以通过调用<code>setParallelism()</code>方法来指定。要为执行的所有算子，数据源和<code>sink</code>设置并发度为3，请按如下方式设置执行环境的默认并发度：</p>
+<h4 id="1-2-执行环境级别"><a href="#1-2-执行环境级别" class="headerlink" title="1.2 执行环境级别"></a>1.2 执行环境级别</h4><p>如<a href="http://smartsi.club/flink-anatomy-of-a-flink-program.html">Flink程序剖析</a> 博文所述，Flink 程序是在执行环境的上下文中执行的。执行环境为它执行的所有算子，数据源和 Sink 提供了默认的并发度。执行环境的并发度可以通过显式配置一个算子的并发度来覆盖。</p>
+<p>执行环境的默认并发度可以通过调用 <code>setParallelism()</code> 方法来指定。要为执行的所有算子，数据源和 Sink 设置并发度为3，可以按如下代码所示设置执行环境的默认并发度：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.setParallelism(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">DataStream&lt;String&gt; text = [...]</span><br><span class="line">DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; wordCounts = [...]</span><br><span class="line">wordCounts.print();</span><br><span class="line"></span><br><span class="line">env.execute(<span class="string">"Word Count Example"</span>);</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">val env = StreamExecutionEnvironment.getExecutionEnvironment</span><br><span class="line">env.setParallelism(3)</span><br><span class="line"></span><br><span class="line">val text = [...]</span><br><span class="line">val wordCounts = text</span><br><span class="line">    .flatMap&#123; _.split(&quot; &quot;) map &#123; (_, 1) &#125; &#125;</span><br><span class="line">    .keyBy(0)</span><br><span class="line">    .timeWindow(Time.seconds(5))</span><br><span class="line">    .sum(1)</span><br><span class="line">wordCounts.print()</span><br><span class="line"></span><br><span class="line">env.execute(&quot;Word Count Example&quot;)</span><br></pre></td></tr></table></figure></p>
-<h4 id="1-3-客户端级别"><a href="#1-3-客户端级别" class="headerlink" title="1.3 客户端级别"></a>1.3 客户端级别</h4><p>在向<code>Flink</code>提交作业时，可以在客户端设置并发度。客户端可以是<code>Java</code>或<code>Scala</code>程序。<code>Flink</code>的命令行接口(<code>CLI</code>)就是一种客户端。</p>
-<p>对于<code>CLI</code>客户端，可以使用<code>-p</code>指定并发度参数。 例如：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/flink run -p 10 ../examples/*WordCount-java*.jar</span><br></pre></td></tr></table></figure></p>
-<p>在<code>Java</code>/<code>Scala</code>程序中，并发度设置如下：</p>
+<h4 id="1-3-客户端级别"><a href="#1-3-客户端级别" class="headerlink" title="1.3 客户端级别"></a>1.3 客户端级别</h4><p>在向 Flink 提交作业时，可以在客户端设置并发度。客户端可以是 Java 或者 Scala 程序。Flink 的命令行接口(<code>CLI</code>)就是其中一种客户端。对于 CLI 客户端，可以使用 <code>-p</code> 参数指定并发度。如下代码所示指定10个并发：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/flink run -p 10 ../examples/*WordCount-java*.jar</span><br></pre></td></tr></table></figure></p>
+<p>在 Java/Scala 程序中，并发度设置如下：</p>
 <p>Java版本:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">    PackagedProgram program = <span class="keyword">new</span> PackagedProgram(file, args);</span><br><span class="line">    InetSocketAddress jobManagerAddress = RemoteExecutor.getInetFromHostport(<span class="string">"localhost:6123"</span>);</span><br><span class="line">    Configuration config = <span class="keyword">new</span> Configuration();</span><br><span class="line"></span><br><span class="line">    Client client = <span class="keyword">new</span> Client(jobManagerAddress, config, program.getUserCodeClassLoader());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// set the parallelism to 10 here</span></span><br><span class="line">    client.run(program, <span class="number">10</span>, <span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">catch</span> (ProgramInvocationException e) &#123;</span><br><span class="line">    e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>Scala版本:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">try &#123;</span><br><span class="line">    PackagedProgram program = new PackagedProgram(file, args)</span><br><span class="line">    InetSocketAddress jobManagerAddress = RemoteExecutor.getInetFromHostport(&quot;localhost:6123&quot;)</span><br><span class="line">    Configuration config = new Configuration()</span><br><span class="line"></span><br><span class="line">    Client client = new Client(jobManagerAddress, new Configuration(), program.getUserCodeClassLoader())</span><br><span class="line"></span><br><span class="line">    // set the parallelism to 10 here</span><br><span class="line">    client.run(program, 10, true)</span><br><span class="line"></span><br><span class="line">&#125; catch &#123;</span><br><span class="line">    case e: Exception =&gt; e.printStackTrace</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<h4 id="1-4-系统级别"><a href="#1-4-系统级别" class="headerlink" title="1.4 系统级别"></a>1.4 系统级别</h4><p>可以通过在<code>./conf/flink-conf.yaml</code>中设置<code>parallelism.default</code>属性来为所有执行环境定义全系统默认并发度。详细信息请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/config.html" target="_blank" rel="noopener">配置文档</a>。</p>
-<h3 id="2-设置最大并发度"><a href="#2-设置最大并发度" class="headerlink" title="2. 设置最大并发度"></a>2. 设置最大并发度</h3><p>最大并发度可以在可以设置并发度的地方设置(客户端级别和系统级别除外)。你可以调用<code>setMaxParallelism()</code>取代<code>setParallelism()</code>方法来设置最大并发度。</p>
-<p>最大并发度的默认设置大致为<code>operatorParallelism +（operatorParallelism / 2）</code>，下限为<code>127</code>，上限为<code>32768</code>。</p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">将最大并发度设置为非常大的数值可能会对性能造成不利影响，因为一些后端状态必须保持在内部数据结构，而这些内部数据结构随key-groups(这是可扩展状态的内部实现机制)的数量进行扩展。(some state backends have to keep internal data structures that scale with the number of key-groups (which are the internal implementation mechanism for rescalable state).)</span><br></pre></td></tr></table></figure></p>
-<p>备注:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink版本:1.4</span><br></pre></td></tr></table></figure></p>
-<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/parallel.html" target="_blank" rel="noopener">https://ci.apache.org/projects/flink/flink-docs-release-1.4/dev/parallel.html</a></p>
+<h4 id="1-4-系统级别"><a href="#1-4-系统级别" class="headerlink" title="1.4 系统级别"></a>1.4 系统级别</h4><p>可以通过在 <code>./conf/flink-conf.yaml</code> 中设置 <code>parallelism.default</code> 属性来为所有执行环境定义全系统默认并发度。详细信息请参阅<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.4/ops/config.html" target="_blank" rel="noopener">配置文档</a>。</p>
+<h3 id="2-设置最大并发度"><a href="#2-设置最大并发度" class="headerlink" title="2. 设置最大并发度"></a>2. 设置最大并发度</h3><p>最大并发度可以在可以设置并发度的地方设置(客户端级别和系统级别除外)。你可以调用 <code>setMaxParallelism()</code> 方法来设置最大并发度。最大并发度的默认设置大致为：算子并发度 +（算子并发度 / 2），下限为 127，上限为 32768。</p>
+<p>将最大并发度设置为一个非常大的数可能会对性能造成不利影响，这是因为某些状态后端必须保持内部数据结构与 KeyGroup 的数量成比例（这也是可伸缩状态的内部实现机制）。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>推荐订阅：<br><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true" alt=""></p>
+<p>原文:<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.11/dev/parallel.html" target="_blank" rel="noopener">Parallel Execution</a></p>
 
       
     </div>
@@ -486,7 +492,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/flink-parallel-execute.html" title="Flink1.4 并发执行">http://smartsi.club/flink-parallel-execute.html</a>
+    <a href="http://smartsi.club/flink-parallel-execute.html" title="Flink 如何指定并发">http://smartsi.club/flink-parallel-execute.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -502,8 +508,6 @@
         <div class="post-tags">
           
             <a href="/tags/Flink/" rel="tag"># Flink</a>
-          
-            <a href="/tags/Flink-基础/" rel="tag"># Flink 基础</a>
           
         </div>
       

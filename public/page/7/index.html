@@ -3141,7 +3141,7 @@ Flink 在数据流中支持几种不同概念的时间。
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/flink-parallel-execute.html" itemprop="url">Flink1.4 并发执行</a></h2>
+                <a class="post-title-link" href="/flink-parallel-execute.html" itemprop="url">Flink 如何指定并发</a></h2>
         
 
         <div class="post-meta">
@@ -3167,7 +3167,7 @@ Flink 在数据流中支持几种不同概念的时间。
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-03-06T11:58:14+08:00">2021-03-06</time>
             
           </span>
 
@@ -3207,7 +3207,7 @@ Flink 在数据流中支持几种不同概念的时间。
 
           
           
-             <span id="/flink-parallel-execute.html" class="leancloud_visitors" data-flag-title="Flink1.4 并发执行">
+             <span id="/flink-parallel-execute.html" class="leancloud_visitors" data-flag-title="Flink 如何指定并发">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -3240,7 +3240,10 @@ Flink 在数据流中支持几种不同概念的时间。
       
         
           
-          本节介绍如何在Flink中配置程序的并行执行。一个Flink程序由多个任务(transformations/operators，data sources和sinks)组成。一个任务被分成多个并发实例来执行，每个并发实例只处理任务输入数据的一个子集。一个任务的并发实例的个数称为并发度(parallel
+          
+Flink 1.11
+
+本节介绍如何在 Flink 中配置程序的并发执行。一个 Flink 程序由多个 Task (transformations/operators，data sources 以及 sinks)组成。一个 Task 可以分成多个并发实例来执行，每个并发实例只处理输入数据的一个子集
           ...
           <!--noindex-->
           <div class="post-button text-center">
