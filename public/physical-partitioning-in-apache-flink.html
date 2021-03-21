@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="任务之间的数据交换策略决定了数据会分发到下游算子的哪个实例上，在 Flink 中有八种不同的策略，也称为分区器：  GlobalPartitioner ForwardPartitioner BroadcastPartitioner ShufflePartitioner RebalancePartitioner RescalePartitioner KeyGroupStreamPartitioner">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 数据交换策略Partitioner">
+<meta property="og:url" content="http://smartsi.club/physical-partitioning-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="任务之间的数据交换策略决定了数据会分发到下游算子的哪个实例上，在 Flink 中有八种不同的策略，也称为分区器：  GlobalPartitioner ForwardPartitioner BroadcastPartitioner ShufflePartitioner RebalancePartitioner RescalePartitioner KeyGroupStreamPartitioner">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-18.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-6.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-8.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-9.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-10.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-11.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-12.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-13.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-14.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-15.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-16.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-17.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true">
+<meta property="og:updated_time" content="2021-03-21T08:37:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 数据交换策略Partitioner">
+<meta name="twitter:description" content="任务之间的数据交换策略决定了数据会分发到下游算子的哪个实例上，在 Flink 中有八种不同的策略，也称为分区器：  GlobalPartitioner ForwardPartitioner BroadcastPartitioner ShufflePartitioner RebalancePartitioner RescalePartitioner KeyGroupStreamPartitioner">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-18.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/physical-partitioning-in-apache-flink.html"/>
+
+
+  <title>Flink 数据交换策略Partitioner | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/physical-partitioning-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink 数据交换策略Partitioner</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-21T16:35:01+08:00">2021-03-21</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-03-21T16:37:20+08:00">2021-03-21</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/physical-partitioning-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/physical-partitioning-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/physical-partitioning-in-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink 数据交换策略Partitioner">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>任务之间的数据交换策略决定了数据会分发到下游算子的哪个实例上，在 Flink 中有八种不同的策略，也称为分区器：</p>
+<ul>
+<li>GlobalPartitioner</li>
+<li>ForwardPartitioner</li>
+<li>BroadcastPartitioner</li>
+<li>ShufflePartitioner</li>
+<li>RebalancePartitioner</li>
+<li>RescalePartitioner</li>
+<li>KeyGroupStreamPartitioner</li>
+<li>CustomPartitionerWrapper</li>
+</ul>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-18.png?raw=true" alt=""></p>
+<p>我们可以看到所有的 Partitioner 都继承了 StreamPartitioner 类。StreamPartitioner 继承自 ChannelSelector 接口。这里的 Channel 概念与 Netty 不同，只是 Flink 对于数据写入实例的简单抽象，我们可以直接认为它就是下游算子的并发实例（即物理分区）。所有 StreamPartitioner 的子类都要实现 selectChannel() 方法，用来选择发送到哪个实例。下面我们分别看看 Flink 提供的 8 种 Partitioner。</p>
+<h3 id="1-GlobalPartitioner"><a href="#1-GlobalPartitioner" class="headerlink" title="1. GlobalPartitioner"></a>1. GlobalPartitioner</h3><h4 id="1-1-作用"><a href="#1-1-作用" class="headerlink" title="1.1 作用"></a>1.1 作用</h4><p>GlobalPartitioner 分区器会将上游所有元素都发送到下游的第一个算子实例上(SubTask Id = 0)：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-1.png?raw=true" alt=""></p>
+<h4 id="1-2-源码"><a href="#1-2-源码" class="headerlink" title="1.2 源码"></a>1.2 源码</h4><p>我们可以看到 selectChannel 方法中始终返回 0，表示只发送给下游算子 SubTask Id = 0 的子任务上。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalPartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 返回0表示只发送给下游算子SubTask Id=0的子任务上</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SubtaskStateMapper.FIRST;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"GLOBAL"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-3-如何使用"><a href="#1-3-如何使用" class="headerlink" title="1.3 如何使用"></a>1.3 如何使用</h4><p>如下所示，调用 global() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">    .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">2</span>)</span><br><span class="line">    .global()</span><br><span class="line">    .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/GlobalPartitionerExample.java" target="_blank" rel="noopener">GlobalPartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 GLOBAL 标示，表示我们使用的 GlobalPartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-2.png?raw=true" alt=""></p>
+<p>如下所示，LowerCaseMap 算子两个子任务分别接受到3个元素，经过处理之后均发送到 UpperCaseMap 算子的第一个子任务上：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-3.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-4.png?raw=true" alt=""></p>
+<h3 id="2-ForwardPartitioner"><a href="#2-ForwardPartitioner" class="headerlink" title="2. ForwardPartitioner"></a>2. ForwardPartitioner</h3><h4 id="2-1-作用"><a href="#2-1-作用" class="headerlink" title="2.1 作用"></a>2.1 作用</h4><p>仅将元素转发到本地运行的下游算子第一个实例：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-5.png?raw=true" alt=""></p>
+<p>与 GlobalPartitioner 实现相同，但它只会将数据输出到本地运行的下游算子的第一个实例，而非全局。</p>
+<h4 id="2-2-源码"><a href="#2-2-源码" class="headerlink" title="2.2 源码"></a>2.2 源码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ForwardPartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"FORWARD"</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.ROUND_ROBIN;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-如何使用"><a href="#2-3-如何使用" class="headerlink" title="2.3 如何使用"></a>2.3 如何使用</h4><p>如下所示，调用 forward() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ForwardPartitioner</span></span><br><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">        .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">3</span>)</span><br><span class="line">        .forward()</span><br><span class="line">        .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">3</span>).disableChaining();</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/ForwardPartitionerExample.java" target="_blank" rel="noopener">ForwardPartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 FORWARD 标示，表示我们使用的 ForwardPartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-6.jpg?raw=true" alt=""></p>
+<blockquote>
+<p>在代码中特意使用了 disableChaining() 方法，目的是不让 LowerCaseMap 和 UpperCaseMap 算子 Chain 一起，更好的观察两个算子之间的分区方式。</p>
+</blockquote>
+<p>在没有指定 Partitioner 时，如果上下游算子的并行度相同，默认就会采用 ForwardPartitioner，否则会采用下面要讲解的的 RebalancePartitioner：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// If no partitioner was specified and the parallelism of upstream and downstream</span></span><br><span class="line"><span class="comment">// operator matches use forward partitioning, use rebalance otherwise.</span></span><br><span class="line"><span class="keyword">if</span> (partitioner == <span class="keyword">null</span></span><br><span class="line">        &amp;&amp; upstreamNode.getParallelism() == downstreamNode.getParallelism()) &#123;</span><br><span class="line">    partitioner = <span class="keyword">new</span> ForwardPartitioner&lt;Object&gt;();</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (partitioner == <span class="keyword">null</span>) &#123;</span><br><span class="line">    partitioner = <span class="keyword">new</span> RebalancePartitioner&lt;Object&gt;();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是在使用 ForwardPartitioner 时，必须保证上下游算子的并行度一致，否则就会抛出如下异常：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (partitioner <span class="keyword">instanceof</span> ForwardPartitioner) &#123;</span><br><span class="line">    <span class="keyword">if</span> (upstreamNode.getParallelism() != downstreamNode.getParallelism()) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(</span><br><span class="line">                <span class="string">"Forward partitioning does not allow "</span></span><br><span class="line">                        + <span class="string">"change of parallelism. Upstream operation: "</span></span><br><span class="line">                        + upstreamNode</span><br><span class="line">                        + <span class="string">" parallelism: "</span></span><br><span class="line">                        + upstreamNode.getParallelism()</span><br><span class="line">                        + <span class="string">", downstream operation: "</span></span><br><span class="line">                        + downstreamNode</span><br><span class="line">                        + <span class="string">" parallelism: "</span></span><br><span class="line">                        + downstreamNode.getParallelism()</span><br><span class="line">                        + <span class="string">" You must use another partitioning strategy, such as broadcast, rebalance, shuffle or global."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-BroadcastPartitioner"><a href="#3-BroadcastPartitioner" class="headerlink" title="3. BroadcastPartitioner"></a>3. BroadcastPartitioner</h3><h4 id="3-1-作用"><a href="#3-1-作用" class="headerlink" title="3.1 作用"></a>3.1 作用</h4><p>上游算子实例广播发送到下游所有的算子实例上：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-7.png?raw=true" alt=""></p>
+<h4 id="3-2-源码"><a href="#3-2-源码" class="headerlink" title="3.2 源码"></a>3.2 源码</h4><p>BroadcastPartitioner 策略是直接发送到下游的所有 Task 上，所以不需要通过下面的 selectChannel 方法选择发送的通道：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BroadcastPartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Note: Broadcast mode could be handled directly for all the output channels</span></span><br><span class="line"><span class="comment">	 * in record writer, so it is no need to select channels via this method.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedOperationException(<span class="string">"Broadcast partitioner does not support select channels."</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getUpstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.DISCARD_EXTRA_STATE;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.ROUND_ROBIN;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isBroadcast</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"BROADCAST"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-3-如何使用"><a href="#3-3-如何使用" class="headerlink" title="3.3 如何使用"></a>3.3 如何使用</h4><p>如下所示，调用 broadcast() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">  .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">2</span>)</span><br><span class="line">  .broadcast()</span><br><span class="line">  .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/BroadcastPartitionerExample.java" target="_blank" rel="noopener">BroadcastPartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 BROADCAST 标示，表示我们使用的 BroadcastPartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-8.jpg?raw=true" alt=""></p>
+<h3 id="4-ShufflePartitioner"><a href="#4-ShufflePartitioner" class="headerlink" title="4. ShufflePartitioner"></a>4. ShufflePartitioner</h3><h4 id="4-1-作用"><a href="#4-1-作用" class="headerlink" title="4.1 作用"></a>4.1 作用</h4><p>上游算子实例每次都随机选择一个下游算子实例进行发送：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-9.png?raw=true" alt=""></p>
+<h4 id="4-2-源码"><a href="#4-2-源码" class="headerlink" title="4.2 源码"></a>4.2 源码</h4><p>ShufflePartitioner 使用 java.util.Random 随机函数将数据随机输出到下游算子的一个实例。由于 Random 生成的随机数符合均匀分布，所以可以认为是输出均匀分布：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShufflePartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> Random random = <span class="keyword">new</span> Random();</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> random.nextInt(numberOfChannels);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.ROUND_ROBIN;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> ShufflePartitioner&lt;T&gt;();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"SHUFFLE"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-3-如何使用"><a href="#4-3-如何使用" class="headerlink" title="4.3 如何使用"></a>4.3 如何使用</h4><p>如下所示，调用 shuffle() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">  .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">2</span>)</span><br><span class="line">  .shuffle()</span><br><span class="line">  .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/ShufflePartitionerExample.java" target="_blank" rel="noopener">ShufflePartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 SHUFFLE 标示，表示我们使用的 ShufflePartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-10.jpg?raw=true" alt=""></p>
+<h3 id="5-RebalancePartitioner"><a href="#5-RebalancePartitioner" class="headerlink" title="5. RebalancePartitioner"></a>5. RebalancePartitioner</h3><h4 id="5-1-作用"><a href="#5-1-作用" class="headerlink" title="5.1 作用"></a>5.1 作用</h4><p>RebalancePartitioner 会先利用 ThreadLocalRandom.current().nextInt 随机数函数生成一个随机数，以选择第一个要发送的下游算子实例。然后以轮询（round-robin）的方式从该实例开始循环输出。该方式能保证下游的负载均衡，所以常用来处理有倾斜的数据流：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-11.png?raw=true" alt=""></p>
+<h4 id="5-2-源码"><a href="#5-2-源码" class="headerlink" title="5.2 源码"></a>5.2 源码</h4><p>在 setup 方法中初始化第一个发送的 channel id，返回 [0,numberOfChannels) 一个随机数。确定第一个要发送的下游算子实例之后，循环依次发送到下游的 Task，比如：nextChannelToSendTo 初始值为0，numberOfChannels(下游算子的实例个数，并行度)值为 2，那么第一次发送到 ID = 1 的 Task，第二次发送到 ID = 0 的 Task，第三次发送到 ID = 1 的 Task上，依次类推：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RebalancePartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> nextChannelToSendTo;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setup</span><span class="params">(<span class="keyword">int</span> numberOfChannels)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>.setup(numberOfChannels);</span><br><span class="line"></span><br><span class="line">		nextChannelToSendTo = ThreadLocalRandom.current().nextInt(numberOfChannels);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		nextChannelToSendTo = (nextChannelToSendTo + <span class="number">1</span>) % numberOfChannels;</span><br><span class="line">		<span class="keyword">return</span> nextChannelToSendTo;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.ROUND_ROBIN;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"REBALANCE"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="5-3-如何使用"><a href="#5-3-如何使用" class="headerlink" title="5.3 如何使用"></a>5.3 如何使用</h4><p>如下所示，调用 rebalance() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">    .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">1</span>)</span><br><span class="line">    .rebalance()</span><br><span class="line">    .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/RebalancePartitionerExample.java" target="_blank" rel="noopener">RebalancePartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 REBALANCE 标示，表示我们使用的 RebalancePartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-12.jpg?raw=true" alt=""></p>
+<h3 id="6-RescalePartitioner"><a href="#6-RescalePartitioner" class="headerlink" title="6. RescalePartitioner"></a>6. RescalePartitioner</h3><h4 id="6-1-作用"><a href="#6-1-作用" class="headerlink" title="6.1 作用"></a>6.1 作用</h4><p>基于上下游算子的并行度，将元素循环的分配到下游算子的某几个实例上。如果想使上游算子的每个并行实例均匀分散到下游算子的某几个实例来达到负载均衡，但又不希望使用 rebalance 这种方式达到整体的负载均衡，那么 Rescale 这种方式很有用。这种方式仅需要本地数据传输，不需要通过网络传输数据，具体取决于我们的配置，例如，TaskManager的 Slot 数。</p>
+<p>上游算子实例具体发送到哪几个下游算子实例，取决于上游算子和下游算子两者的并行度。例如，如果上游算子并行度为 2，而下游算子并行度为 4，那么其中一个上游算子实例将元素发送到其中两个下游算子实例，而另一个上游算子实例则发送到另外两个下游算子实例。相反，如果下游算子并行度为 2，而上游算子并行度为 4，那么两个上游算子实例将发送到其中一个下游算子实例，而其他两个上游算子则发送到另一个下游算子实例：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-13.png?raw=true" alt=""></p>
+<p>RebalancePartitioner 和 RescalePartitioner 有什么不同呢？我们还是以上游算子并行度为 2，而下游算子并行度为 4 为例，当使用 RebalancePartitioner时，上游每个实例会轮询发给下游的 4 个实例。但是当使用 RescalePartitioner 时，上游每个实例只需轮询发给下游 2 个实例。因为 Channel 个数变少了，Subpartition 的 Buffer 填充速度能变快，能提高网络效率。当上游的数据比较均匀时，且上下游的并发数成比例时，可以使用 RescalePartitioner 替换 RebalancePartitioner。</p>
+<h4 id="6-2-源码"><a href="#6-2-源码" class="headerlink" title="6.2 源码"></a>6.2 源码</h4><p>初始化 channel 为 -1，循环依次发送到下游的 SubTask：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RescalePartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> nextChannelToSendTo = -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (++nextChannelToSendTo &gt;= numberOfChannels) &#123;</span><br><span class="line">			nextChannelToSendTo = <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> nextChannelToSendTo;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.ROUND_ROBIN;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"RESCALE"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="6-3-如何使用"><a href="#6-3-如何使用" class="headerlink" title="6.3 如何使用"></a>6.3 如何使用</h4><p>如下所示，调用 rescale() 方法即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">  .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">1</span>)</span><br><span class="line">  .rescale()</span><br><span class="line">  .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/RescalePartitionerExample.java" target="_blank" rel="noopener">RescalePartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 RESCALE 标示，表示我们使用的 RescalePartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-14.jpg?raw=true" alt=""></p>
+<h3 id="7-KeyGroupStreamPartitioner"><a href="#7-KeyGroupStreamPartitioner" class="headerlink" title="7. KeyGroupStreamPartitioner"></a>7. KeyGroupStreamPartitioner</h3><h4 id="7-1-作用"><a href="#7-1-作用" class="headerlink" title="7.1 作用"></a>7.1 作用</h4><p>使用 keyBy 函数指定分组 key，将具有相同 key 的元素发送到相同的下游算子实例上：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-15.png?raw=true" alt=""></p>
+<h4 id="7-2-源码"><a href="#7-2-源码" class="headerlink" title="7.2 源码"></a>7.2 源码</h4><p>具体输出到下游算子哪个实例上，取决于 KeyGroupRangeAssignment.assignKeyToParallelOperator 方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">KeyGroupStreamPartitioner</span>&lt;<span class="title">T</span>, <span class="title">K</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">ConfigurableStreamPartitioner</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> KeySelector&lt;T, K&gt; keySelector;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> maxParallelism;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">KeyGroupStreamPartitioner</span><span class="params">(KeySelector&lt;T, K&gt; keySelector, <span class="keyword">int</span> maxParallelism)</span> </span>&#123;</span><br><span class="line">		Preconditions.checkArgument(maxParallelism &gt; <span class="number">0</span>, <span class="string">"Number of key-groups must be &gt; 0!"</span>);</span><br><span class="line">		<span class="keyword">this</span>.keySelector = Preconditions.checkNotNull(keySelector);</span><br><span class="line">		<span class="keyword">this</span>.maxParallelism = maxParallelism;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMaxParallelism</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> maxParallelism;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		K key;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			key = keySelector.getKey(record.getInstance().getValue());</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Could not extract key from "</span> + record.getInstance().getValue(), e);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> KeyGroupRangeAssignment.assignKeyToParallelOperator(key, maxParallelism, numberOfChannels);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.RANGE;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"HASH"</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(<span class="keyword">int</span> maxParallelism)</span> </span>&#123;</span><br><span class="line">		KeyGroupRangeAssignment.checkParallelismPreconditions(maxParallelism);</span><br><span class="line">		<span class="keyword">this</span>.maxParallelism = maxParallelism;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">equals</span><span class="params">(Object o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span> == o) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (o == <span class="keyword">null</span> || getClass() != o.getClass()) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (!<span class="keyword">super</span>.equals(o)) &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">final</span> KeyGroupStreamPartitioner&lt;?, ?&gt; that = (KeyGroupStreamPartitioner&lt;?, ?&gt;) o;</span><br><span class="line">		<span class="keyword">return</span> maxParallelism == that.maxParallelism &amp;&amp;</span><br><span class="line">			keySelector.equals(that.keySelector);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">hashCode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Objects.hash(<span class="keyword">super</span>.hashCode(), keySelector, maxParallelism);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们具体看看如何根据输入的 Key 判断输出到哪个算子实例上：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">assignKeyToParallelOperator</span><span class="params">(Object key, <span class="keyword">int</span> maxParallelism, <span class="keyword">int</span> parallelism)</span> </span>&#123;</span><br><span class="line">	Preconditions.checkNotNull(key, <span class="string">"Assigned key must not be null!"</span>);</span><br><span class="line">	<span class="keyword">return</span> computeOperatorIndexForKeyGroup(maxParallelism, parallelism, assignToKeyGroup(key, maxParallelism));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">assignToKeyGroup</span><span class="params">(Object key, <span class="keyword">int</span> maxParallelism)</span> </span>&#123;</span><br><span class="line">	Preconditions.checkNotNull(key, <span class="string">"Assigned key must not be null!"</span>);</span><br><span class="line">	<span class="keyword">return</span> computeKeyGroupForKeyHash(key.hashCode(), maxParallelism);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">computeKeyGroupForKeyHash</span><span class="params">(<span class="keyword">int</span> keyHash, <span class="keyword">int</span> maxParallelism)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> MathUtils.murmurHash(keyHash) % maxParallelism;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">computeOperatorIndexForKeyGroup</span><span class="params">(<span class="keyword">int</span> maxParallelism, <span class="keyword">int</span> parallelism, <span class="keyword">int</span> keyGroupId)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> keyGroupId * parallelism / maxParallelism;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过上面代码，我们知道需要在 key 上进行两重哈希得到 key 对应的哈希值，第一重是 Java 自带的 hashCode()，第二重则是 MurmurHash。然后将哈希值对 最大并行度 取模，在乘以算子并行度，并除以最大并行度，得到最终的算子实例Id：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">SubTaskId = (MathUtils.murmurHash(key.hashCode()) % maxParallelism) * parallelism / maxParallelism</span><br></pre></td></tr></table></figure></p>
+<h4 id="7-3-如何使用"><a href="#7-3-如何使用" class="headerlink" title="7.3 如何使用"></a>7.3 如何使用</h4><p>如下所示，调用 keyBy 方法指定分区 Key 即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">  .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">2</span>)</span><br><span class="line">  .keyBy(str -&gt; str)</span><br><span class="line">  .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">2</span>);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/KeyGroupStreamPartitionerExample.java" target="_blank" rel="noopener">KeyGroupStreamPartitionerExample</a></p>
+</blockquote>
+<p>我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 HASH 标示，表示我们使用的 KeyGroupStreamPartitioner：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-16.jpg?raw=true" alt=""></p>
+<h3 id="8-CustomPartitionerWrapper"><a href="#8-CustomPartitionerWrapper" class="headerlink" title="8. CustomPartitionerWrapper"></a>8. CustomPartitionerWrapper</h3><h4 id="8-1-作用"><a href="#8-1-作用" class="headerlink" title="8.1 作用"></a>8.1 作用</h4><p>自定义实现元素要发送到相对应的下游算子实例上。</p>
+<h4 id="8-2-源码"><a href="#8-2-源码" class="headerlink" title="8.2 源码"></a>8.2 源码</h4><p>在 CustomPartitionerWrapper 构造器中传入我们自定义的 Partitioner 和 KeySelector 方法。通过自定义的 Partitioner 的 partition 方法选择要发送的实例：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomPartitionerWrapper</span>&lt;<span class="title">K</span>, <span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">StreamPartitioner</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;</span><br><span class="line"></span><br><span class="line">	Partitioner&lt;K&gt; partitioner;</span><br><span class="line">	KeySelector&lt;T, K&gt; keySelector;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">CustomPartitionerWrapper</span><span class="params">(Partitioner&lt;K&gt; partitioner, KeySelector&lt;T, K&gt; keySelector)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.partitioner = partitioner;</span><br><span class="line">		<span class="keyword">this</span>.keySelector = keySelector;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">selectChannel</span><span class="params">(SerializationDelegate&lt;StreamRecord&lt;T&gt;&gt; record)</span> </span>&#123;</span><br><span class="line">		K key;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			key = keySelector.getKey(record.getInstance().getValue());</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Could not extract key from "</span> + record.getInstance(), e);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> partitioner.partition(key, numberOfChannels);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> SubtaskStateMapper <span class="title">getDownstreamSubtaskStateMapper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// fully rely on filtering downstream</span></span><br><span class="line">		<span class="comment">// note that custom partitioners are not officially supported - the user has to force rescaling</span></span><br><span class="line">		<span class="comment">// in that case, we assume that the custom partitioner is deterministic</span></span><br><span class="line">		<span class="keyword">return</span> SubtaskStateMapper.FULL;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> StreamPartitioner&lt;T&gt; <span class="title">copy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="string">"CUSTOM"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="8-3-如何使用"><a href="#8-3-如何使用" class="headerlink" title="8.3 如何使用"></a>8.3 如何使用</h4><p>如下所示，调用 partitionCustom 方法指定我们自定义的 MyCustomPartitioner 即可：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = env.socketTextStream(<span class="string">"localhost"</span>, <span class="number">9100</span>, <span class="string">"\n"</span>)</span><br><span class="line">    .map(str -&gt; str.toLowerCase()).name(<span class="string">"LowerCaseMap"</span>).setParallelism(<span class="number">3</span>)</span><br><span class="line">    .partitionCustom(<span class="keyword">new</span> MyCustomPartitioner(), <span class="keyword">new</span> KeySelector&lt;String, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(String value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> value;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    .map(str -&gt; str.toUpperCase()).name(<span class="string">"UpperCaseMap"</span>).setParallelism(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyCustomPartitioner</span> <span class="keyword">implements</span> <span class="title">Partitioner</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(String key, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 全部大写分发到 0 实例</span></span><br><span class="line">        <span class="keyword">if</span> (StringUtils.isAllUpperCase(key)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 其他分发到 1 实例</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完成代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/partitioner/CustomPartitionerExample.java" target="_blank" rel="noopener">CustomPartitionerExample</a></p>
+</blockquote>
+<p>通过 Partitioner 接口的 partition 方法，可以实现自定义的将数据输出到下游指定实例中。我们可以看到 LowerCaseMap 和 UpperCaseMap 算子之间的 CUSTOM 标示，表示我们使用的 CustomPartitionerWrapper：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/physical-partitioning-in-apache-flink-17.jpg?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>推荐订阅：<br><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true" alt=""></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/physical-partitioning-in-apache-flink.html" title="Flink 数据交换策略Partitioner">http://smartsi.club/physical-partitioning-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/generating-watermarks-in-flink-1.11.html" rel="next" title="Flink 1.11版本如何生成Watermark">
+                <i class="fa fa-chevron-left"></i> Flink 1.11版本如何生成Watermark
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">253</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">58</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-GlobalPartitioner"><span class="nav-number">1.</span> <span class="nav-text">1. GlobalPartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-作用"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-源码"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-如何使用"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ForwardPartitioner"><span class="nav-number">2.</span> <span class="nav-text">2. ForwardPartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-作用"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-源码"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-如何使用"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BroadcastPartitioner"><span class="nav-number">3.</span> <span class="nav-text">3. BroadcastPartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-作用"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-源码"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-如何使用"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ShufflePartitioner"><span class="nav-number">4.</span> <span class="nav-text">4. ShufflePartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-作用"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-源码"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-如何使用"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-RebalancePartitioner"><span class="nav-number">5.</span> <span class="nav-text">5. RebalancePartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-作用"><span class="nav-number">5.1.</span> <span class="nav-text">5.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-源码"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-如何使用"><span class="nav-number">5.3.</span> <span class="nav-text">5.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-RescalePartitioner"><span class="nav-number">6.</span> <span class="nav-text">6. RescalePartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-作用"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-源码"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-3-如何使用"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-KeyGroupStreamPartitioner"><span class="nav-number">7.</span> <span class="nav-text">7. KeyGroupStreamPartitioner</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-作用"><span class="nav-number">7.1.</span> <span class="nav-text">7.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-源码"><span class="nav-number">7.2.</span> <span class="nav-text">7.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-3-如何使用"><span class="nav-number">7.3.</span> <span class="nav-text">7.3 如何使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-CustomPartitionerWrapper"><span class="nav-number">8.</span> <span class="nav-text">8. CustomPartitionerWrapper</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#8-1-作用"><span class="nav-number">8.1.</span> <span class="nav-text">8.1 作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-2-源码"><span class="nav-number">8.2.</span> <span class="nav-text">8.2 源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-3-如何使用"><span class="nav-number">8.3.</span> <span class="nav-text">8.3 如何使用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
