@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="在离线 Hive 中，我们经常会使用 Join 进行多表关联。那么在实时中我们应该如何实现两条流的 Join 呢？Flink DataStream API 为我们提供了3个算子来实现双流 join，分别是：  join coGroup intervalJoin  下面我们分别详细看一下这3个算子是如何实现双流 Join 的。 1. JoinJoin 算子提供的语义为 “Window join”，即">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink DataStream 如何实现双流Join">
+<meta property="og:url" content="http://smartsi.club/two-stream-join-with-datastream-in-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="在离线 Hive 中，我们经常会使用 Join 进行多表关联。那么在实时中我们应该如何实现两条流的 Join 呢？Flink DataStream API 为我们提供了3个算子来实现双流 join，分别是：  join coGroup intervalJoin  下面我们分别详细看一下这3个算子是如何实现双流 Join 的。 1. JoinJoin 算子提供的语义为 “Window join”，即">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-8.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-9.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-10.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-11.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-12.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-13.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-14.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true">
+<meta property="og:updated_time" content="2021-05-03T04:50:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink DataStream 如何实现双流Join">
+<meta name="twitter:description" content="在离线 Hive 中，我们经常会使用 Join 进行多表关联。那么在实时中我们应该如何实现两条流的 Join 呢？Flink DataStream API 为我们提供了3个算子来实现双流 join，分别是：  join coGroup intervalJoin  下面我们分别详细看一下这3个算子是如何实现双流 Join 的。 1. JoinJoin 算子提供的语义为 “Window join”，即">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/two-stream-join-with-datastream-in-flink.html"/>
+
+
+  <title>Flink DataStream 如何实现双流Join | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/two-stream-join-with-datastream-in-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink DataStream 如何实现双流Join</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-03T12:38:17+08:00">2021-05-03</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-05-03T12:50:38+08:00">2021-05-03</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/two-stream-join-with-datastream-in-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/two-stream-join-with-datastream-in-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/two-stream-join-with-datastream-in-flink.html" class="leancloud_visitors" data-flag-title="Flink DataStream 如何实现双流Join">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在离线 Hive 中，我们经常会使用 Join 进行多表关联。那么在实时中我们应该如何实现两条流的 Join 呢？Flink DataStream API 为我们提供了3个算子来实现双流 join，分别是：</p>
+<ul>
+<li>join</li>
+<li>coGroup</li>
+<li>intervalJoin</li>
+</ul>
+<p>下面我们分别详细看一下这3个算子是如何实现双流 Join 的。</p>
+<h3 id="1-Join"><a href="#1-Join" class="headerlink" title="1. Join"></a>1. Join</h3><p>Join 算子提供的语义为 “Window join”，即按照指定字段和（滚动/滑动/会话）窗口进行内连接(InnerJoin)。Join 将有相同 Key 并且位于同一窗口中的两条流的元素进行关联。</p>
+<blockquote>
+<p>Join 可以支持处理时间和事件时间两种时间特征。</p>
+</blockquote>
+<p>Join 通用用法如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.join(otherStream)</span><br><span class="line">    .where(&lt;KeySelector&gt;)</span><br><span class="line">    .equalTo(&lt;KeySelector&gt;)</span><br><span class="line">    .window(&lt;WindowAssigner&gt;)</span><br><span class="line">    .apply(&lt;JoinFunction&gt;)</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Join 语义类似与离线 Hive 的 InnnerJoin (内连接)，这意味着如果一个流中的元素在另一个流中没有相对应的元素，则不会输出该元素。</p>
+</blockquote>
+<p>下面我们看一下 Join 算子在不同类型窗口上的具体表现。</p>
+<h4 id="1-1-滚动窗口Join"><a href="#1-1-滚动窗口Join" class="headerlink" title="1.1 滚动窗口Join"></a>1.1 滚动窗口Join</h4><p>当在滚动窗口上进行 Join 时，所有有相同 Key 并且位于同一滚动窗口中的两条流的元素两两组合进行关联，并最终传递到 JoinFunction 或 FlatJoinFunction 进行处理。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-1.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个大小为 2 秒的滚动窗口，最终产生 [0,1]，[2,3]，… 这种形式的数据。上图显示了每个窗口中橘色流和绿色流的所有元素成对组合。需要注意的是，在滚动窗口 [6,7] 中，由于绿色流中不存在要与橘色流中元素 6、7 相关联的元素，因此该窗口不会输出任何内容。</p>
+<p>下面我们一起看一下如何实现上图所示的滚动窗口 Join：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 绿色流</span></span><br><span class="line">DataStream&lt;Tuple3&lt;String, String, String&gt;&gt; greenStream = greenSource.map(<span class="keyword">new</span> MapFunction&lt;String, Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple3&lt;String, String, String&gt; <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">        String key = params[<span class="number">0</span>];</span><br><span class="line">        String value = params[<span class="number">1</span>];</span><br><span class="line">        String eventTime = params[<span class="number">2</span>];</span><br><span class="line">        LOG.info(<span class="string">"[绿色流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>, key, value, eventTime);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(key, value, eventTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).assignTimestampsAndWatermarks(</span><br><span class="line">        WatermarkStrategy.&lt;Tuple3&lt;String, String, String&gt;&gt;forBoundedOutOfOrderness(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Tuple3&lt;String, String, String&gt; element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">                        Long timeStamp = <span class="number">0L</span>;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            timeStamp = DateUtil.date2TimeStamp(element.f2, <span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (ParseException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">return</span> timeStamp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 橘色流</span></span><br><span class="line">DataStream&lt;Tuple3&lt;String, String, String&gt;&gt; orangeStream = orangeSource.map(<span class="keyword">new</span> MapFunction&lt;String, Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple3&lt;String, String, String&gt; <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">        String key = params[<span class="number">0</span>];</span><br><span class="line">        String value = params[<span class="number">1</span>];</span><br><span class="line">        String eventTime = params[<span class="number">2</span>];</span><br><span class="line">        LOG.info(<span class="string">"[橘色流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>, key, value, eventTime);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(key, value, eventTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).assignTimestampsAndWatermarks(</span><br><span class="line">        WatermarkStrategy.&lt;Tuple3&lt;String, String, String&gt;&gt;forBoundedOutOfOrderness(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Tuple3&lt;String, String, String&gt; element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">                        Long timeStamp = <span class="number">0L</span>;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            timeStamp = DateUtil.date2TimeStamp(element.f2, <span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (ParseException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">return</span> timeStamp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 双流合并</span></span><br><span class="line">DataStream&lt;String&gt; result = orangeStream.join(greenStream)</span><br><span class="line">    .where(tuple -&gt; tuple.f0)</span><br><span class="line">    .equalTo(tuple -&gt; tuple.f0)</span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">2</span>)))</span><br><span class="line">    .apply(<span class="keyword">new</span> JoinFunction&lt;Tuple3&lt;String, String, String&gt;, Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">join</span><span class="params">(Tuple3&lt;String, String, String&gt; first, Tuple3&lt;String, String, String&gt; second)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            LOG.info(<span class="string">"[合并流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                    first.f0, first.f1 + <span class="string">","</span> + second.f1, first.f2 + <span class="string">","</span> + second.f2</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">return</span> first.f1 + <span class="string">","</span> + second.f1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/TumblingWindowJoinExample.java" target="_blank" rel="noopener">TumblingWindowJoinExample</a></p>
+</blockquote>
+<p>如上代码所示为绿色流和橘色流指定 BoundedOutOfOrdernessWatermarks Watermark 策略，设置100毫秒的最大可容忍的延迟时间，同时也会为流分配事件时间戳。假设输入流为 <key, value,="" eventtime=""> 格式，两条流输入元素如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">绿色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,3,2021-03-26 12:09:03</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br><span class="line"></span><br><span class="line">橘色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,2,2021-03-26 12:09:02</span><br><span class="line">key,3,2021-03-26 12:09:03</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,5,2021-03-26 12:09:05</span><br><span class="line">key,6,2021-03-26 12:09:06</span><br><span class="line">key,7,2021-03-26 12:09:07</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br></pre></td></tr></table></figure></key,></p>
+<p>Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-2.png?raw=true" alt=""></p>
+<h4 id="1-2-滑动窗口Join"><a href="#1-2-滑动窗口Join" class="headerlink" title="1.2 滑动窗口Join"></a>1.2 滑动窗口Join</h4><p>当在滑动窗口上进行 Join 时，所有有相同 Key 并且位于同一滑动窗口中的两条流的元素两两组合进行关联，并最终传递到 JoinFunction 或 FlatJoinFunction 进行处理。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-3.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个窗口大小为 2 秒、滑动步长为 1 秒的滑动窗口。需要注意的是，一个元素可能会落在不同的窗口中，因此会在不同窗口中发生关联，例如，绿色流中的0元素。当滑动窗口中一个流的元素在另一个流中没有相对应的元素，则不会输出该元素。</p>
+<p>下面我们一起看一下如何实现上图所示的滑动窗口 Join：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = orangeStream.join(greenStream)</span><br><span class="line">      .where(tuple -&gt; tuple.f0)</span><br><span class="line">      .equalTo(tuple -&gt; tuple.f0)</span><br><span class="line">      .window(SlidingEventTimeWindows.of(Time.seconds(<span class="number">2</span>) <span class="comment">/* size */</span>, Time.seconds(<span class="number">1</span>) <span class="comment">/* slide */</span>))</span><br><span class="line">      .apply(<span class="keyword">new</span> JoinFunction&lt;Tuple3&lt;String, String, String&gt;, Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">          <span class="meta">@Override</span></span><br><span class="line">          <span class="function"><span class="keyword">public</span> String <span class="title">join</span><span class="params">(Tuple3&lt;String, String, String&gt; first, Tuple3&lt;String, String, String&gt; second)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">              LOG.info(<span class="string">"[合并流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                      first.f0, first.f1 + <span class="string">","</span> + second.f1, first.f2 + <span class="string">","</span> + second.f2</span><br><span class="line">              );</span><br><span class="line">              <span class="keyword">return</span> first.f1 + <span class="string">","</span> + second.f1;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/SlidingWindowJoinExample.java" target="_blank" rel="noopener">SlidingWindowJoinExample</a></p>
+</blockquote>
+<p>假设输入流为 <key, value,="" eventtime=""> 格式，两条流输入元素如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">绿色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,3,2021-03-26 12:09:03</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br><span class="line"></span><br><span class="line">橘色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,2,2021-03-26 12:09:02</span><br><span class="line">key,3,2021-03-26 12:09:03</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br></pre></td></tr></table></figure></key,></p>
+<p>Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-4.png?raw=true" alt=""></p>
+<h4 id="1-3-会话窗口Join"><a href="#1-3-会话窗口Join" class="headerlink" title="1.3 会话窗口Join"></a>1.3 会话窗口Join</h4><p>当在会话窗口上进行 Join 时，所有有相同 Key 并且位于同一会话窗口中的两条流的元素两两组合进行关联，并最终传递到 JoinFunction 或 FlatJoinFunction 进行处理。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-5.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个会话窗口，其中每个会话之间的间隔至少为1秒。上图中一共有三个会话，在前两个会话中，两个流中的元素两两组合传递给 JoinFunction。在第三个会话中，绿色流中没有元素，因此元素 8 和 9 不会发生Join。</p>
+<p>下面我们一起看一下如何实现上图所示的滑动窗口 Join：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; result = orangeStream.join(greenStream)</span><br><span class="line">        .where(tuple -&gt; tuple.f0)</span><br><span class="line">        .equalTo(tuple -&gt; tuple.f0)</span><br><span class="line">        .window(EventTimeSessionWindows.withGap(Time.seconds(<span class="number">1</span>)))</span><br><span class="line">        .apply(<span class="keyword">new</span> JoinFunction&lt;Tuple3&lt;String, String, String&gt;, Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">join</span><span class="params">(Tuple3&lt;String, String, String&gt; first, Tuple3&lt;String, String, String&gt; second)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                LOG.info(<span class="string">"[合并流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        first.f0, first.f1 + <span class="string">","</span> + second.f1, first.f2 + <span class="string">","</span> + second.f2</span><br><span class="line">                );</span><br><span class="line">                <span class="keyword">return</span> first.f1 + <span class="string">","</span> + second.f1;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/SessionWindowJoinExample.java" target="_blank" rel="noopener">SessionWindowJoinExample</a></p>
+</blockquote>
+<p>假设输入流为 <key, value,="" eventtime=""> 格式，两条流输入元素如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">绿色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,5,2021-03-26 12:09:05</span><br><span class="line">key,11,2021-03-26 12:09:11</span><br><span class="line"></span><br><span class="line">橘色流：</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,2,2021-03-26 12:09:02</span><br><span class="line">key,5,2021-03-26 12:09:05</span><br><span class="line">key,6,2021-03-26 12:09:06</span><br><span class="line">key,8,2021-03-26 12:09:08</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br><span class="line">key,11,2021-03-26 12:09:11</span><br></pre></td></tr></table></figure></key,></p>
+<p>Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-6.png?raw=true" alt=""></p>
+<h3 id="2-CoGroup"><a href="#2-CoGroup" class="headerlink" title="2. CoGroup"></a>2. CoGroup</h3><p>CoGroup 算子是将两条数据流按照 Key 进行分组，然后将相同 Key 的数据进行处理。要实现 CoGroup 功能需要为两个输入流分别指定 KeySelector 和 WindowAssigner。它的调用方式类似于 Join 算子，但是 CoGroupFunction 比 JoinFunction 更加灵活，可以按照用户指定的逻辑匹配左流或者右流的数据，基于此我们可以实现内连接(InnerJoin)、左连接(LeftJoin)以及右连接(RightJoin)。</p>
+<blockquote>
+<p>目前，这些分组中的数据是在内存中保存的，因此需要确保保存的数据量不能太大，否则，JVM 可能会崩溃。</p>
+</blockquote>
+<p>CoGroup 通用用法如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">stream.coGroup(otherStream)</span><br><span class="line">		.where(&lt;KeySelector&gt;)</span><br><span class="line">		.equalTo(&lt;KeySelector&gt;)</span><br><span class="line">		.window(&lt;WindowAssigner&gt;)</span><br><span class="line">		.apply(&lt;CoGroupFunction&gt;);</span><br></pre></td></tr></table></figure></p>
+<p>下面我们看一下如何使用 CoGroup 算子实现内连接(InnerJoin)、左连接(LeftJoin)以及右连接(RightJoin)。</p>
+<h4 id="2-1-InnerJoin"><a href="#2-1-InnerJoin" class="headerlink" title="2.1 InnerJoin"></a>2.1 InnerJoin</h4><p>下面我们看一下如何使用 CoGroup 实现内连接：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-7.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个大小为 2 秒的滚动窗口。InnerJoin 只有在两个流对应窗口中都存在元素时，才会输出。</p>
+<blockquote>
+<p>我们以滚动窗口为例来实现 InnerJoin</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Join流</span></span><br><span class="line">CoGroupedStreams coGroupStream = greenStream.coGroup(orangeStream);</span><br><span class="line">DataStream&lt;String&gt; result = coGroupStream</span><br><span class="line">        <span class="comment">// 绿色流</span></span><br><span class="line">        .where(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 橘色流</span></span><br><span class="line">        .equalTo(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 滚动窗口</span></span><br><span class="line">        .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">2</span>)))</span><br><span class="line">        .apply(<span class="keyword">new</span> InnerJoinFunction());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 内连接</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">InnerJoinFunction</span> <span class="keyword">implements</span> <span class="title">CoGroupFunction</span>&lt;<span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">coGroup</span><span class="params">(Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; greenIterable, Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; orangeIterable, Collector&lt;String&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; greenTuple : greenIterable) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; orangeTuple : orangeIterable) &#123;</span><br><span class="line">                LOG.info(<span class="string">"[Join流] Key : &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        greenTuple.f0, greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1, greenTuple.f2 + <span class="string">", "</span> + orangeTuple.f2</span><br><span class="line">                );</span><br><span class="line">                collector.collect(greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/CoGroupJoinExample.java" target="_blank" rel="noopener">CoGroupJoinExample</a></p>
+</blockquote>
+<p>如上代码所示，我们实现了 CoGroupFunction 接口，重写 coGroup 方法。一个流中有相同 Key 并且位于同一窗口的元素都会保存在同一个迭代器(Iterable)，本示例中绿色流为 greenIterable，橘色流为 orangeIterable，如果要实现 InnerJoin ，只需要两个迭代器中的元素两两组合即可。两条流输入元素如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">绿色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,2,2021-03-26 12:09:02</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,5,2021-03-26 12:09:05</span><br><span class="line">key,8,2021-03-26 12:09:08</span><br><span class="line">key,9,2021-03-26 12:09:09</span><br><span class="line">key,11,2021-03-26 12:09:11</span><br><span class="line"></span><br><span class="line">橘色流：</span><br><span class="line">key,0,2021-03-26 12:09:00</span><br><span class="line">key,1,2021-03-26 12:09:01</span><br><span class="line">key,2,2021-03-26 12:09:02</span><br><span class="line">key,3,2021-03-26 12:09:03</span><br><span class="line">key,4,2021-03-26 12:09:04</span><br><span class="line">key,6,2021-03-26 12:09:06</span><br><span class="line">key,7,2021-03-26 12:09:07</span><br><span class="line">key,11,2021-03-26 12:09:11</span><br></pre></td></tr></table></figure></p>
+<p>Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-8.png?raw=true" alt=""></p>
+<h4 id="2-2-LeftJoin"><a href="#2-2-LeftJoin" class="headerlink" title="2.2 LeftJoin"></a>2.2 LeftJoin</h4><p>下面我们看一下如何使用 CoGroup 实现左连接：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-9.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个大小为 2 秒的滚动窗口。LeftJoin 只要绿色流窗口中有元素时，就会输出。即使在橘色流对应窗口中没有相对应的元素。</p>
+<blockquote>
+<p>我们以滚动窗口为例来实现 LeftJoin</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Join流</span></span><br><span class="line">CoGroupedStreams coGroupStream = greenStream.coGroup(orangeStream);</span><br><span class="line">DataStream&lt;String&gt; result = coGroupStream</span><br><span class="line">        <span class="comment">// 绿色流</span></span><br><span class="line">        .where(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 橘色流</span></span><br><span class="line">        .equalTo(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 滚动窗口</span></span><br><span class="line">        .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">2</span>)))</span><br><span class="line">        .apply(<span class="keyword">new</span> LeftJoinFunction());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 左连接</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LeftJoinFunction</span> <span class="keyword">implements</span> <span class="title">CoGroupFunction</span>&lt;<span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">coGroup</span><span class="params">(Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; greenIterable, Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; orangeIterable, Collector&lt;String&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; greenTuple : greenIterable) &#123;</span><br><span class="line">            <span class="keyword">boolean</span> noElements = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; orangeTuple : orangeIterable) &#123;</span><br><span class="line">                noElements = <span class="keyword">false</span>;</span><br><span class="line">                LOG.info(<span class="string">"[Join流] Key : &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        greenTuple.f0, greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1, greenTuple.f2 + <span class="string">", "</span> + orangeTuple.f2</span><br><span class="line">                );</span><br><span class="line">                collector.collect(greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (noElements)&#123;</span><br><span class="line">                LOG.info(<span class="string">"[Join流] Key : &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        greenTuple.f0, greenTuple.f1 + <span class="string">", null"</span>, greenTuple.f2 + <span class="string">", null"</span></span><br><span class="line">                );</span><br><span class="line">                collector.collect(greenTuple.f1 + <span class="string">", null"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/CoGroupJoinExample.java" target="_blank" rel="noopener">CoGroupJoinExample</a></p>
+</blockquote>
+<p>如上代码所示，我们实现了 CoGroupFunction 接口，重写 coGroup 方法。一个流中有相同 Key 并且位于同一窗口的元素都会保存在同一个迭代器(Iterable)，本示例中绿色流为 greenIterable，橘色流为 orangeIterable，如果要实现 LeftJoin ，需要保证 orangeIterable 中没有元素，greenIterable 中的元素也能输出。因此我们定义了一个 noElements 变量来判断 orangeIterable 是否有元素，如果 orangeIterable 中没有元素，单独输出 greenIterable 中的元素即可。Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-10.png?raw=true" alt=""></p>
+<h4 id="2-3-RightJoin"><a href="#2-3-RightJoin" class="headerlink" title="2.3 RightJoin"></a>2.3 RightJoin</h4><p>下面我们看一下如何使用 CoGroup 实现右连接：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-11.png?raw=true" alt=""></p>
+<p>如上图所示，我们定义了一个大小为 2 秒的滚动窗口。LeftJoin 只要橘色流窗口中有元素时，就会输出。即使在绿色流对应窗口中没有相对应的元素。</p>
+<blockquote>
+<p>我们以滚动窗口为例来实现 RightJoin</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Join流</span></span><br><span class="line">CoGroupedStreams coGroupStream = greenStream.coGroup(orangeStream);</span><br><span class="line">DataStream&lt;String&gt; result = coGroupStream</span><br><span class="line">        <span class="comment">// 绿色流</span></span><br><span class="line">        .where(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 橘色流</span></span><br><span class="line">        .equalTo(<span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; tuple3)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> tuple3.f0;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        <span class="comment">// 滚动窗口</span></span><br><span class="line">        .window(TumblingEventTimeWindows.of(Time.seconds(<span class="number">2</span>)))</span><br><span class="line">        .apply(<span class="keyword">new</span> RightJoinFunction());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 右连接</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RightJoinFunction</span> <span class="keyword">implements</span> <span class="title">CoGroupFunction</span>&lt;<span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">Tuple3</span>&lt;<span class="title">String</span>, <span class="title">String</span>, <span class="title">String</span>&gt;, <span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">coGroup</span><span class="params">(Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; greenIterable, Iterable&lt;Tuple3&lt;String, String, String&gt;&gt; orangeIterable, Collector&lt;String&gt; collector)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; orangeTuple : orangeIterable) &#123;</span><br><span class="line">            <span class="keyword">boolean</span> noElements = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">for</span> (Tuple3&lt;String, String, String&gt; greenTuple : greenIterable) &#123;</span><br><span class="line">                noElements = <span class="keyword">false</span>;</span><br><span class="line">                LOG.info(<span class="string">"[Join流] Key : &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        greenTuple.f0, greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1, greenTuple.f2 + <span class="string">", "</span> + orangeTuple.f2</span><br><span class="line">                );</span><br><span class="line">                collector.collect(greenTuple.f1 + <span class="string">", "</span> + orangeTuple.f1);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (noElements) &#123;</span><br><span class="line">                LOG.info(<span class="string">"[Join流] Key : &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                        orangeTuple.f0, <span class="string">"null, "</span> + orangeTuple.f1, <span class="string">"null, "</span> + orangeTuple.f2</span><br><span class="line">                );</span><br><span class="line">                collector.collect(<span class="string">"null, "</span> + orangeTuple.f2);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/CoGroupJoinExample.java" target="_blank" rel="noopener">CoGroupJoinExample</a></p>
+</blockquote>
+<p>如上代码所示，我们实现了 CoGroupFunction 接口，重写 coGroup 方法。一个流中有相同 Key 并且位于同一窗口的元素都会保存在同一个迭代器(Iterable)，本示例中绿色流为 greenIterable，橘色流为 orangeIterable，如果要实现 RightJoin，实现原理跟 LeftJoin 一样，需要保证 greenIterable 中没有元素，orangeIterable 中的元素也能输出。因此我们定义了一个 noElements 变量来判断 greenIterable 是否有元素，如果 greenIterable 中没有元素，单独输出 orangeIterable 中的元素即可。Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-12.png?raw=true" alt=""></p>
+<h3 id="3-Interval-Join"><a href="#3-Interval-Join" class="headerlink" title="3. Interval Join"></a>3. Interval Join</h3><p>Flink 中基于 DataStream 的 Join，只能实现在同一个窗口的两个数据流进行 Join，但是在实际中常常会存在数据乱序或者延时的情况，导致两个流的数据进度不一致，就会出现数据跨窗口的情况，那么数据就无法在同一个窗口内 Join。Flink 基于 KeyedStream 提供的 Interval Join 机制可以对两个 keyedStream 进行 Join, 按照相同的 key 在一个相对数据时间的时间段内进行 Join。按照指定字段以及右流相对左流偏移的时间区间进行关联：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">b.timestamp ∈ [a.timestamp + lowerBound, a.timestamp + upperBound]</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a.timestamp + lowerBound &lt;= b.timestamp &lt;= a.timestamp + upperBound</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-13.png?raw=true" alt=""></p>
+<blockquote>
+<p>其中a和b分别是上图中绿色流和橘色流中的元素，并且有相同的 key。只需要保证 lowerBound 永远小于等于 upperBound 即可，均可以为正数或者负数。</p>
+</blockquote>
+<p>从上面可以看出绿色流可以晚到 lowerBound（lowerBound为负的话）时间，也可以早到 upperBound（upperBound为正的话）时间。也可以理解为橘色流中的每个元素可以和绿色流指中定区间的元素进行 Join。需要注意的是 Interval Join 当前仅支持事件时间：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> IntervalJoined&lt;T1, T2, KEY&gt; <span class="title">between</span><span class="params">(Time lowerBound, Time upperBound)</span> </span>&#123;</span><br><span class="line">			<span class="keyword">if</span> (timeBehaviour != TimeBehaviour.EventTime) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> UnsupportedTimeCharacteristicException(<span class="string">"Time-bounded stream joins are only supported in event time"</span>);</span><br><span class="line">			&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下面我们具体看看如何实现一个 Interval Join：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 绿色流</span></span><br><span class="line">DataStream&lt;Tuple3&lt;String, String, String&gt;&gt; greenStream = greenSource.map(<span class="keyword">new</span> MapFunction&lt;String, Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple3&lt;String, String, String&gt; <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">        String key = params[<span class="number">0</span>];</span><br><span class="line">        String eventTime = params[<span class="number">2</span>];</span><br><span class="line">        String value = params[<span class="number">1</span>];</span><br><span class="line">        LOG.info(<span class="string">"[绿色流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>, key, value, eventTime);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(key, value, eventTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).assignTimestampsAndWatermarks(</span><br><span class="line">        <span class="comment">// 需要指定Watermark</span></span><br><span class="line">        WatermarkStrategy.&lt;Tuple3&lt;String, String, String&gt;&gt;forBoundedOutOfOrderness(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Tuple3&lt;String, String, String&gt; element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">                        Long timeStamp = <span class="keyword">null</span>;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            timeStamp = DateUtil.date2TimeStamp(element.f2, <span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (ParseException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">return</span> timeStamp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 橘色流</span></span><br><span class="line">DataStream&lt;Tuple3&lt;String, String, String&gt;&gt; orangeStream = orangeSource.map(<span class="keyword">new</span> MapFunction&lt;String, Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Tuple3&lt;String, String, String&gt; <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">        String key = params[<span class="number">0</span>];</span><br><span class="line">        String value = params[<span class="number">1</span>];</span><br><span class="line">        String eventTime = params[<span class="number">2</span>];</span><br><span class="line">        LOG.info(<span class="string">"[橘色流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>, key, value, eventTime);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Tuple3&lt;&gt;(key, value, eventTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).assignTimestampsAndWatermarks(</span><br><span class="line">        <span class="comment">// 需要指定Watermark</span></span><br><span class="line">        WatermarkStrategy.&lt;Tuple3&lt;String, String, String&gt;&gt;forBoundedOutOfOrderness(Duration.ofMillis(<span class="number">100</span>))</span><br><span class="line">                .withTimestampAssigner(<span class="keyword">new</span> SerializableTimestampAssigner&lt;Tuple3&lt;String, String, String&gt;&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">extractTimestamp</span><span class="params">(Tuple3&lt;String, String, String&gt; element, <span class="keyword">long</span> recordTimestamp)</span> </span>&#123;</span><br><span class="line">                        Long timeStamp = <span class="keyword">null</span>;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            timeStamp = DateUtil.date2TimeStamp(element.f2, <span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (ParseException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">return</span> timeStamp;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt; keySelector = <span class="keyword">new</span> KeySelector&lt;Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple3&lt;String, String, String&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.f0;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 双流合并</span></span><br><span class="line">DataStream result = orangeStream</span><br><span class="line">    .keyBy(keySelector)</span><br><span class="line">    .intervalJoin(greenStream.keyBy(keySelector))</span><br><span class="line">    .between(Time.seconds(-<span class="number">2</span>), Time.seconds(<span class="number">1</span>))</span><br><span class="line">    .process(<span class="keyword">new</span> ProcessJoinFunction&lt;Tuple3&lt;String, String, String&gt;, Tuple3&lt;String, String, String&gt;, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processElement</span><span class="params">(Tuple3&lt;String, String, String&gt; left,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   Tuple3&lt;String, String, String&gt; right,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   Context ctx, Collector&lt;String&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            LOG.info(<span class="string">"[合并流] Key: &#123;&#125;, Value: &#123;&#125;, EventTime: &#123;&#125;"</span>,</span><br><span class="line">                    left.f0, <span class="string">"["</span> + left.f1 + <span class="string">", "</span> + right.f1 + <span class="string">"]"</span>,</span><br><span class="line">                    <span class="string">"["</span> + right.f2 + <span class="string">"|"</span> + ctx.getRightTimestamp() + <span class="string">", "</span> + right.f2 + <span class="string">"|"</span> + ctx.getLeftTimestamp() + <span class="string">"]"</span></span><br><span class="line">            );</span><br><span class="line">            out.collect(left.f1 + <span class="string">", "</span> + right.f1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是 Interval Join 当前仅支持事件时间，所以需要为流指定事件时间戳。</p>
+<blockquote>
+<p>完整代码请查阅:<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/join/IntervalJoinExample.java" target="_blank" rel="noopener">IntervalJoinExample</a></p>
+</blockquote>
+<p>两条流输入元素如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">绿色流：</span><br><span class="line">c,0,2021-03-23 12:09:00</span><br><span class="line">c,1,2021-03-23 12:09:01</span><br><span class="line">c,6,2021-03-23 12:09:06</span><br><span class="line">c,7,2021-03-23 12:09:07</span><br><span class="line"></span><br><span class="line">橘色流：</span><br><span class="line">c,0,2021-03-23 12:09:00</span><br><span class="line">c,2,2021-03-23 12:09:02</span><br><span class="line">c,3,2021-03-23 12:09:03</span><br><span class="line">c,4,2021-03-23 12:09:04</span><br><span class="line">c,5,2021-03-23 12:09:05</span><br><span class="line">c,7,2021-03-23 12:09:07</span><br></pre></td></tr></table></figure></p>
+<p>Join 效果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/two-stream-join-with-datastream-in-flink-14.png?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>推荐订阅：<br><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-jk.jpeg?raw=true" alt=""></p>
+<p>参考:</p>
+<ul>
+<li><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.12/dev/stream/operators/joining.html" target="_blank" rel="noopener">Joining</a></li>
+<li>Flink核心技术与实战</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/two-stream-join-with-datastream-in-flink.html" title="Flink DataStream 如何实现双流Join">http://smartsi.club/two-stream-join-with-datastream-in-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/a-guide-to-apache-hudi.html" rel="next" title="<转>Apache Hudi 初学者指南">
+                <i class="fa fa-chevron-left"></i> <转>Apache Hudi 初学者指南
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">255</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">37</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">59</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Join"><span class="nav-number">1.</span> <span class="nav-text">1. Join</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-滚动窗口Join"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 滚动窗口Join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-滑动窗口Join"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 滑动窗口Join</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-会话窗口Join"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 会话窗口Join</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-CoGroup"><span class="nav-number">2.</span> <span class="nav-text">2. CoGroup</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-InnerJoin"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 InnerJoin</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-LeftJoin"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 LeftJoin</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-RightJoin"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 RightJoin</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Interval-Join"><span class="nav-number">3.</span> <span class="nav-text">3. Interval Join</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
