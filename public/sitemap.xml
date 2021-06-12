@@ -4,7 +4,7 @@
   <url>
     <loc>http://smartsi.club/how-to-use-flink-in-zeppelin.html</loc>
     
-    <lastmod>2021-06-12T10:28:34.000Z</lastmod>
+    <lastmod>2021-06-12T10:40:57.000Z</lastmod>
     
   </url>
   
@@ -492,13 +492,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/olap-vs-oltp.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/better-bitmap-performance-with-roaring-bitmaps.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -507,6 +500,13 @@
   
   <url>
     <loc>http://smartsi.club/an-illustrated-proof-of-the-cap-theorem.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/olap-vs-oltp.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -555,13 +555,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-search.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/elasticsearch-built-in-analyzer.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -576,7 +569,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/elasticsearch-base-replica-shard.html</loc>
+    <loc>http://smartsi.club/elasticsearch-internal-distributed-document-search.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -597,21 +590,14 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/elasticsearch-base-replica-shard.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/elasticsearch-setup-and-run.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/elasticsearch-base-making-changes-persistent.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/elasticsearch-how-to-indexing.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -639,6 +625,20 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/elasticsearch-base-making-changes-persistent.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/elasticsearch-how-to-indexing.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/elasticsearch-internal-distributed-document-store.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -660,20 +660,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/watermarks-in-apache-flink-made-easy.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/how-flink-manages-kafka-consumer-offsets.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/high-throughput-low-latency-and-exactly-once-stream-processing-with-apache-flink.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -682,6 +668,20 @@
   
   <url>
     <loc>http://smartsi.club/flink-introduction-to-state-management-and-fault-tolerance.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/watermarks-in-apache-flink-made-easy.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/how-flink-manages-kafka-consumer-offsets.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -730,6 +730,13 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/flink-stream-graphic-watermark.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/flink-basic-command-line-interface.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -737,7 +744,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/flink-stream-graphic-watermark.html</loc>
+    <loc>http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -758,14 +765,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/flink-stream-deployment-externalized-checkpoints.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/flink-execution-plans.html</loc>
+    <loc>http://smartsi.club/flink-stream-state-overview.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -779,7 +779,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/flink-stream-event-timestamps-and-watermark.html</loc>
+    <loc>http://smartsi.club/flink-execution-plans.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -793,7 +793,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/flink-stream-state-overview.html</loc>
+    <loc>http://smartsi.club/flink-stream-event-timestamps-and-watermark.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -807,13 +807,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/flink-accumulators-counters.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/hbase-pseudo-distributed-setup-and-start.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -821,14 +814,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/how-to-install-and-run-grafana.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/understanding-hbase-and-bigtable.html</loc>
+    <loc>http://smartsi.club/introduction-to-hbase-schema-design.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -842,7 +828,21 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/introduction-to-hbase-schema-design.html</loc>
+    <loc>http://smartsi.club/flink-accumulators-counters.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/understanding-hbase-and-bigtable.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/how-to-install-and-run-grafana.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -857,6 +857,13 @@
   
   <url>
     <loc>http://smartsi.club/hadoop-2.x-hdfs-architecture.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hadoop-mapReduce2.0-architecture-detail.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -884,27 +891,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hadoop-mapreduce-working-process.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hadoop-mapReduce2.0-architecture-detail.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/hadoop-mapreduce-inputsplit.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -919,7 +905,28 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/hadoop-mapreduce-working-process.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hadoop-hdfs-trash.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/hadoop-mapreduce-partitioner-usage.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -947,13 +954,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hadoop-hdfs-trash.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/hadoop-ssh-password-free-login.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -962,6 +962,13 @@
   
   <url>
     <loc>http://smartsi.club/hadoop-base-multiple-output-format.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hadoop-base-implementing-the-tool-interface-for-mapreduce.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -982,7 +989,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hadoop-base-implementing-the-tool-interface-for-mapreduce.html</loc>
+    <loc>http://smartsi.club/hadoop-setup-and-start.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -996,21 +1003,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hadoop-how-to-use-compression.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hadoop-setup-and-start.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/hadoop-data-compress.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hadoop-how-to-use-compression.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1025,6 +1025,13 @@
   
   <url>
     <loc>http://smartsi.club/hadoop-basics-secondary-sort-in-mapreduce.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hexo_generate_blog.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1052,7 +1059,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hexo_generate_blog.html</loc>
+    <loc>http://smartsi.club/Hexo/%5BHexo%5DHexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1060,13 +1067,6 @@
   
   <url>
     <loc>http://smartsi.club/hexo-next-add-copyright-information.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/Hexo/%5BHexo%5DHexo+Github%E4%B8%BANexT%E4%B8%BB%E9%A2%98%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E9%98%85%E8%AF%BB%E9%87%8F%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1101,13 +1101,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hive-base-grouping-sets.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/hive-base-orc-file-format.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -1115,28 +1108,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/hive-base-sub-queries.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hive-managed-table-external-table.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hive-base-how-to-use-sampling.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/hive-tuning-local-mode.html</loc>
+    <loc>http://smartsi.club/hive-base-grouping-sets.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1150,7 +1122,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/exclude-columns-from-select-query-in-hive.html</loc>
+    <loc>http://smartsi.club/hive-managed-table-external-table.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1164,14 +1136,35 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/jvm-garbage-collection-algorithm.html</loc>
+    <loc>http://smartsi.club/hive-tuning-local-mode.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/java-on-off-heap-memory.html</loc>
+    <loc>http://smartsi.club/hive-base-how-to-use-sampling.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/exclude-columns-from-select-query-in-hive.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/hive-base-sub-queries.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/jvm-garbage-collection-algorithm.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1185,14 +1178,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/rsync-command-usage.html</loc>
+    <loc>http://smartsi.club/java-on-off-heap-memory.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/rsync-config-usage.html</loc>
+    <loc>http://smartsi.club/rsync-command-usage.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1206,7 +1199,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/how-hbase-rowkey-is-designed-of-opentsdb.html</loc>
+    <loc>http://smartsi.club/rsync-config-usage.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1214,6 +1207,13 @@
   
   <url>
     <loc>http://smartsi.club/MySQL/%5BMySQL%5DMySQL%E9%85%8D%E7%BD%AE%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/how-hbase-rowkey-is-designed-of-opentsdb.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1269,7 +1269,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/scala-notes-array.html</loc>
+    <loc>http://smartsi.club/scala-notes-file.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1283,7 +1283,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-base-how-to-use-accumulator.html</loc>
+    <loc>http://smartsi.club/scala-notes-array.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1291,13 +1291,6 @@
   
   <url>
     <loc>http://smartsi.club/scala-notes-class.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/scala-notes-file.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1325,28 +1318,14 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/spark-base-how-to-use-accumulator.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/spark-sql-sparksession-new-entry-point.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/spark-streaming-first-example.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/spark-streaming-initializing-streamingcontext.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/spark-streaming-discretized-streams-dstreams.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1360,7 +1339,21 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-streaming-kafka-integration-achieve-zero-data-loss.html</loc>
+    <loc>http://smartsi.club/spark-streaming-discretized-streams-dstreams.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/spark-streaming-initializing-streamingcontext.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/spark-streaming-first-example.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1374,6 +1367,13 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/spark-streaming-kafka-integration-achieve-zero-data-loss.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/spark-base-task-not-serializable.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -1381,21 +1381,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-streaming-improved-driver-fault-tolerance-and-zero-data-loss.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/spark-sql-how-to-use-sparksession-in-spark-2-0.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/improvements-to-kafka-integration-of-spark-streaming.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/spark-streaming-improved-driver-fault-tolerance-and-zero-data-loss.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1423,14 +1416,21 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-sql-how-to-use-datasets-in-spark.html</loc>
+    <loc>http://smartsi.club/spark-base-multiple-output-format.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-base-multiple-output-format.html</loc>
+    <loc>http://smartsi.club/spark-sql-how-to-use-sparksession-in-spark-2-0.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/spark-sql-how-to-use-datasets-in-spark.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1451,13 +1451,6 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-performance-resources-tuning.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://smartsi.club/spark-performance-data-skew-tuning.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -1465,7 +1458,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/spark-base-build-resilient-distributed-datasets.html</loc>
+    <loc>http://smartsi.club/spark-performance-resources-tuning.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1480,6 +1473,13 @@
   
   <url>
     <loc>http://smartsi.club/spark-base-rdd-operations.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/spark-base-build-resilient-distributed-datasets.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1514,6 +1514,13 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/spark-first-application-word-count.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/spark-internal-memory-management.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -1522,13 +1529,6 @@
   
   <url>
     <loc>http://smartsi.club/spark-internal-operating-principle-one.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/spark-first-application-word-count.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1570,7 +1570,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/storm-ui-rest-api.html</loc>
+    <loc>http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1584,7 +1584,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/lightweight-asynchronous-snapshots-for-distributed-dataflows.html</loc>
+    <loc>http://smartsi.club/storm-ui-rest-api.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1598,14 +1598,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/main-stream-processing-framework-comparison-part-two.html</loc>
+    <loc>http://smartsi.club/misunderstanding-of-stream-processing.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/misunderstanding-of-stream-processing.html</loc>
+    <loc>http://smartsi.club/main-stream-processing-framework-comparison-part-two.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1640,14 +1640,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/how-to-use-watcher-in-zookeeper.html</loc>
+    <loc>http://smartsi.club/zkui-zookeeper-ui-dashboard.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html</loc>
+    <loc>http://smartsi.club/how-to-use-watcher-in-zookeeper.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1661,7 +1661,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/zkui-zookeeper-ui-dashboard.html</loc>
+    <loc>http://smartsi.club/zookeeper-acl-access-permission-control-mechanism.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1669,13 +1669,6 @@
   
   <url>
     <loc>http://smartsi.club/apache-flink-1-5-0-release.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1696,14 +1689,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/4-steps-flink-application-production-ready.html</loc>
+    <loc>http://smartsi.club/end-to-end-exactly-once-processing-apache-flink-apache-kafka.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/performance-factors-stateful-functions-operators-flink.html</loc>
+    <loc>http://smartsi.club/4-steps-flink-application-production-ready.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1717,7 +1710,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/kafka-setup-and-run.html</loc>
+    <loc>http://smartsi.club/performance-factors-stateful-functions-operators-flink.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1731,14 +1724,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/using-pipelining-to-speedup-redis-queries.html</loc>
-    
-    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://smartsi.club/how-install-and-startup-redis.html</loc>
+    <loc>http://smartsi.club/kafka-setup-and-run.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1752,6 +1738,20 @@
   </url>
   
   <url>
+    <loc>http://smartsi.club/how-install-and-startup-redis.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://smartsi.club/using-pipelining-to-speedup-redis-queries.html</loc>
+    
+    <lastmod>2019-10-26T03:57:13.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://smartsi.club/baidu_verify_M0XLseG5ut.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
@@ -1759,7 +1759,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/archives/index.html</loc>
+    <loc>http://smartsi.club/categories/index.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1773,7 +1773,7 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/categories/index.html</loc>
+    <loc>http://smartsi.club/archives/index.html</loc>
     
     <lastmod>2019-10-26T03:57:13.000Z</lastmod>
     
@@ -1794,14 +1794,14 @@
   </url>
   
   <url>
-    <loc>http://smartsi.club/Python/Python%20%E5%88%97%E8%A1%A8,%E5%85%83%E7%BB%84%E4%B8%8E%E9%9B%86%E5%90%88.html</loc>
+    <loc>http://smartsi.club/Python/Python%20Numpy%20%E6%95%B0%E7%BB%84.html</loc>
     
     <lastmod>2017-12-01T02:20:17.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://smartsi.club/Python/Python%20Numpy%20%E6%95%B0%E7%BB%84.html</loc>
+    <loc>http://smartsi.club/Python/Python%20%E5%88%97%E8%A1%A8,%E5%85%83%E7%BB%84%E4%B8%8E%E9%9B%86%E5%90%88.html</loc>
     
     <lastmod>2017-12-01T02:20:17.000Z</lastmod>
     
