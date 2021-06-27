@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink,Flink SQL," />
+
+
+<meta name="description" content="Flink 版本 1.13.0  Flink 的 Table &amp;amp; SQL API 可以处理 SQL 语言编写的查询语句，但是这些查询需要嵌入用 Java 或 Scala 编写的 Table 程序中。此外，这些程序在提交到集群前需要用构建工具打包。这或多或少限制了 Java/Scala 程序员对 Flink 的使用。 SQL 客户端的目的是提供一种简单的方式来编写、调试和提交表程序到 Fl">
+<meta name="keywords" content="Flink,Flink SQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink SQL 客户端如何使用">
+<meta property="og:url" content="http://smartsi.club/flink-sql-client.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Flink 版本 1.13.0  Flink 的 Table &amp;amp; SQL API 可以处理 SQL 语言编写的查询语句，但是这些查询需要嵌入用 Java 或 Scala 编写的 Table 程序中。此外，这些程序在提交到集群前需要用构建工具打包。这或多或少限制了 Java/Scala 程序员对 Flink 的使用。 SQL 客户端的目的是提供一种简单的方式来编写、调试和提交表程序到 Fl">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-06-27T12:55:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink SQL 客户端如何使用">
+<meta name="twitter:description" content="Flink 版本 1.13.0  Flink 的 Table &amp;amp; SQL API 可以处理 SQL 语言编写的查询语句，但是这些查询需要嵌入用 Java 或 Scala 编写的 Table 程序中。此外，这些程序在提交到集群前需要用构建工具打包。这或多或少限制了 Java/Scala 程序员对 Flink 的使用。 SQL 客户端的目的是提供一种简单的方式来编写、调试和提交表程序到 Fl">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-sql-client.html"/>
+
+
+  <title>Flink SQL 客户端如何使用 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-sql-client.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink SQL 客户端如何使用</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-27T12:07:21+08:00">2021-06-27</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-06-27T20:55:56+08:00">2021-06-27</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-sql-client.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-sql-client.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-sql-client.html" class="leancloud_visitors" data-flag-title="Flink SQL 客户端如何使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Flink 版本 1.13.0</p>
+</blockquote>
+<p>Flink 的 Table &amp; SQL API 可以处理 SQL 语言编写的查询语句，但是这些查询需要嵌入用 Java 或 Scala 编写的 Table 程序中。此外，这些程序在提交到集群前需要用构建工具打包。这或多或少限制了 Java/Scala 程序员对 Flink 的使用。</p>
+<p>SQL 客户端的目的是提供一种简单的方式来编写、调试和提交表程序到 Flink 集群上，不需写 Java 或 Scala 代码。SQL 客户端命令行界面（CLI） 能够在命令行中检索和可视化分布式应用的实时结果。</p>
+<h3 id="1-入门"><a href="#1-入门" class="headerlink" title="1. 入门"></a>1. 入门</h3><p>本节介绍如何在命令行里启动和运行你的第一个 Flink SQL 程序。SQL 客户端绑定在常规的 Flink 发行包中，因此可以直接运行。仅需要一个正在运行的 Flink 集群就可以在上面执行 Table 程序。如果仅想试用 SQL 客户端，也可以使用以下命令启动本地集群：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/start-cluster.sh</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-1-启动SQL客户端CLI"><a href="#1-1-启动SQL客户端CLI" class="headerlink" title="1.1 启动SQL客户端CLI"></a>1.1 启动SQL客户端CLI</h4><p>SQL 客户端脚本也位于 Flink 的 bin 目录中。将来，用户有两种方式来启动 SQL 客户端命令行界面：通过嵌入式独立进程或者通过连接到远程 SQL 客户端网关。目前仅支持嵌入式模式，现在默认模式就是嵌入式。可以通过以下方式启动 CLI：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/sql-client.sh</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注意低版本不能使用该命令</p>
+</blockquote>
+<p>或者显式使用嵌入式模式:<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/sql-client.sh embedded</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-1.png?raw=true" alt=""></p>
+<h4 id="1-2-执行SQL查询"><a href="#1-2-执行SQL查询" class="headerlink" title="1.2 执行SQL查询"></a>1.2 执行SQL查询</h4><p>CLI 启动后，你可以使用 HELP 命令列出所有可用的 SQL 语句。为了验证你的设置及集群连接是否正确，可以输入一条 SQL 查询语句并按 Enter 键执行：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SELECT &apos;Hello World&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>该查询不需要数据表，并且只会产生一行结果。CLI 将从集群中检索结果并将其可视化。可以按 Q 键退出结果视图。CLI 为维护和可视化结果提供三种模式。下面具体看一下。</p>
+<blockquote>
+<p>注意：Flink 1.24.0 版本使用 execution.result-mode 参数。</p>
+</blockquote>
+<h5 id="1-2-1-表格模式"><a href="#1-2-1-表格模式" class="headerlink" title="1.2.1 表格模式"></a>1.2.1 表格模式</h5><p>表格模式（table mode）在内存中物化结果，并将结果用规则的分页表格的形式可视化展示出来。执行如下命令启用：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET sql-client.execution.result-mode = table;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>文档中 SET ‘sql-client.execution.result-mode’ = ‘xxx’ 方式配置不生效</p>
+</blockquote>
+<p>可以使用如下查询语句查看不同模式的的运行结果：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="keyword">name</span>, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> cnt <span class="keyword">FROM</span> (<span class="keyword">VALUES</span> (<span class="string">'Bob'</span>), (<span class="string">'Alice'</span>), (<span class="string">'Greg'</span>), (<span class="string">'Bob'</span>)) <span class="keyword">AS</span> NameTable(<span class="keyword">name</span>) <span class="keyword">GROUP</span> <span class="keyword">BY</span> <span class="keyword">name</span>;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-2.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-3.png?raw=true" alt=""></p>
+<h5 id="1-2-2-变更日志模式"><a href="#1-2-2-变更日志模式" class="headerlink" title="1.2.2 变更日志模式"></a>1.2.2 变更日志模式</h5><p>变更日志模式（changelog mode）不会物化结果。可视化展示由插入（+）和撤销（-）组成的持续查询结果流。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET sql-client.execution.result-mode = changelog;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-4.png?raw=true" alt=""></p>
+<h5 id="1-2-3-Tableau模式"><a href="#1-2-3-Tableau模式" class="headerlink" title="1.2.3 Tableau模式"></a>1.2.3 Tableau模式</h5><p>Tableau模式（tableau mode）更接近传统的数据库，会将执行的结果以制表的形式直接打在屏幕之上。具体显示的内容取决于作业执行模式(execution.type)：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">SET sql-client.execution.result-mode = tableau;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-5.png?raw=true" alt=""></p>
+<blockquote>
+<p>注意：当你在流式查询上使用这种模式时，Flink 会将结果持续的打印在当前的控制台上。如果流式查询的输入是有限数据集，那么 Flink 在处理完所有的输入数据之后，作业会自动停止，同时控制台上的打印也会自动停止。如果你想提前结束这个查询，那么可以直接使用 CTRL-C 按键，这个会停止作业同时停止在控制台上的打印。</p>
+</blockquote>
+<h3 id="2-配置"><a href="#2-配置" class="headerlink" title="2. 配置"></a>2. 配置</h3><h4 id="2-1-启动选项"><a href="#2-1-启动选项" class="headerlink" title="2.1 启动选项"></a>2.1 启动选项</h4><p>可以使用如下可选 CLI 命令启动 SQL 客户端：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">./bin/sql-client.sh --help</span><br><span class="line"></span><br><span class="line">Mode &quot;embedded&quot; (default) submits Flink jobs from the local machine.</span><br><span class="line"></span><br><span class="line">  Syntax: [embedded] [OPTIONS]</span><br><span class="line">  &quot;embedded&quot; mode options:</span><br><span class="line">         -d,--defaults &lt;environment file&gt;      Deprecated feature: the environment</span><br><span class="line">                                               properties with which every new</span><br><span class="line">                                               session is initialized. Properties</span><br><span class="line">                                               might be overwritten by session</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-2-客户端配置"><a href="#2-2-客户端配置" class="headerlink" title="2.2 客户端配置"></a>2.2 客户端配置</h4><table>
+<thead>
+<tr>
+<th style="text-align:left">Key</th>
+<th style="text-align:left">默认值</th>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">sql-client.execution.max-table-result.rows</td>
+<td style="text-align:left">1000000</td>
+<td style="text-align:left">Integer</td>
+<td style="text-align:left">在表格模式下缓存的行数。如果行数超过指定值，则以 FIFO 样式重试该行。</td>
+</tr>
+<tr>
+<td style="text-align:left">sql-client.execution.result-mode</td>
+<td style="text-align:left">TABLE</td>
+<td style="text-align:left">枚举值，可以是 TABLE, CHANGELOG, TABLEAU</td>
+<td style="text-align:left">确定展示查询结果的模式。可以是 table、tableau、changelog。</td>
+</tr>
+<tr>
+<td style="text-align:left">sql-client.verbose</td>
+<td style="text-align:left">false</td>
+<td style="text-align:left">Boolean</td>
+<td style="text-align:left">确定是否将输出详细信息输出到控制台。如果将选项设置为 true，会打印异常堆栈。否则，只输出原因。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-2-使用SQL文件初始化会话"><a href="#2-2-使用SQL文件初始化会话" class="headerlink" title="2.2 使用SQL文件初始化会话"></a>2.2 使用SQL文件初始化会话</h4><p>SQL 查询需要配置执行环境。SQL 客户端支持 -i 启动选项以在启动 SQL 客户端时执行初始化 SQL 文件以设置环境。所谓的初始化 SQL 文件，可以使用 DDL 来定义可用的 catalogs、table source、sink、用户自定义函数以及其他执行和部署所需的属性。</p>
+<p>下面给出了此类文件的示例：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 定义 Catalogs</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">CATALOG</span> MyCatalog</span><br><span class="line">  <span class="keyword">WITH</span> (</span><br><span class="line">    <span class="string">'type'</span> = <span class="string">'hive'</span></span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line"><span class="keyword">USE</span> <span class="keyword">CATALOG</span> MyCatalog;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 定义 DataBase</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> MyDatabase;</span><br><span class="line"></span><br><span class="line"><span class="keyword">USE</span> MyDatabase;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 定义 TABLE</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> MyTable (</span><br><span class="line">  MyField1 <span class="built_in">INT</span>,</span><br><span class="line">  MyField2 <span class="keyword">STRING</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span> = <span class="string">'filesystem'</span>,</span><br><span class="line">  <span class="string">'path'</span> = <span class="string">'/path/to/something'</span>,</span><br><span class="line">  <span class="string">'format'</span> = <span class="string">'csv'</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 定义 VIEW</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> MyCustomView <span class="keyword">AS</span> <span class="keyword">SELECT</span> MyField2 <span class="keyword">FROM</span> MyTable;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 定义用户自定义函数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">FUNCTION</span> foo.bar.AggregateUDF <span class="keyword">AS</span> myUDF;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 修改属性</span></span><br><span class="line"><span class="keyword">SET</span> table.planner = blink; <span class="comment">-- planner: either blink (default) or old</span></span><br><span class="line"><span class="keyword">SET</span> execution.runtime-<span class="keyword">mode</span> = streaming; <span class="comment">-- execution mode either batch or streaming</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">sql</span>-client.execution.result-<span class="keyword">mode</span> = <span class="keyword">table</span>; <span class="comment">-- available values: table, changelog and tableau</span></span><br><span class="line"><span class="keyword">SET</span> <span class="keyword">sql</span>-client.execution.max-<span class="keyword">table</span>-result.rows = <span class="number">10000</span>; <span class="comment">-- optional: maximum number of maintained rows</span></span><br><span class="line"><span class="keyword">SET</span> parallelism.default = <span class="number">1</span>; <span class="comment">-- optional: Flinks parallelism (1 by default)</span></span><br><span class="line"><span class="keyword">SET</span> pipeline.auto-watermark-<span class="built_in">interval</span> = <span class="number">200</span>; <span class="comment">--optional: interval for periodic watermarks</span></span><br><span class="line"><span class="keyword">SET</span> pipeline.max-parallelism = <span class="number">10</span>; <span class="comment">-- optional: Flink's maximum parallelism</span></span><br><span class="line"><span class="keyword">SET</span> table.exec.state.ttl = <span class="number">1000</span>; <span class="comment">-- optional: table program's idle state time</span></span><br><span class="line"><span class="keyword">SET</span> restart-strategy = <span class="keyword">fixed</span>-delay;</span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> table.optimizer.join-reorder-enabled = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">SET</span> table.exec.spill-compression.enabled = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">SET</span> table.exec.spill-compression.block-<span class="keyword">size</span> = <span class="number">128</span>kb;</span><br></pre></td></tr></table></figure></p>
+<p>上述配置：</p>
+<ul>
+<li>连接到 Hive Catalog 并使用 MyCatalog 作为当前 Catalog，使用 MyDatabase 作为目录的当前数据库</li>
+<li>定义一个可以从 CSV 文件中读取数据的表 MyTable</li>
+<li>定义一个视图 MyCustomView，它使用 SQL 查询声明一个虚拟表</li>
+<li>定义了一个可以使用类名实例化的用户定义函数 myUDF</li>
+<li>在流模式下使用 blink 计划器运行语句，并且设置并行度为 1</li>
+<li>使用表格模式运行 SQL 进行探索性查询，</li>
+</ul>
+<p>使用 -i <init.sql> 选项初始化 SQL 客户端会话时，初始化 SQL 文件中允许使用以下语句：</init.sql></p>
+<ul>
+<li>DDL（CREATE/DROP/ALTER）</li>
+<li>USE CATALOG/DATABASE</li>
+<li>LOAD/UNLOAD MODULE</li>
+<li>SET 命令</li>
+<li>RESET 命令</li>
+</ul>
+<p>执行查询或插入语句时，请进入交互模式或使用-f选项提交SQL语句。如果 SQL 客户端在初始化时遇到错误，SQL 客户端将退出并显示错误信息。</p>
+<h3 id="3-使用SQL客户端提交作业"><a href="#3-使用SQL客户端提交作业" class="headerlink" title="3. 使用SQL客户端提交作业"></a>3. 使用SQL客户端提交作业</h3><p>SQL 客户端可以允许用户在交互式命令行中或使用 -f 选项执行 sql 文件来提交作业。在这两种模式下，SQL 客户端都可以支持解析和执行 Flink 支持的所有类型的 SQL 语句。</p>
+<h4 id="3-1-交互式命令行"><a href="#3-1-交互式命令行" class="headerlink" title="3.1 交互式命令行"></a>3.1 交互式命令行</h4><p>在交互式命令行中，SQL 客户端读取用户输入并在获取分号 (;) 时执行语句。如果语句成功执行，SQL 客户端会打印成功消息。当出现错误时，SQL 客户端也会打印错误信息。默认情况下，错误消息仅包含错误原因。为了打印完整的异常堆栈以进行调试，需要通过如下命令设置：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> <span class="keyword">sql</span>-client.verbose = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>将 sql-client.verbose 设置为 true</p>
+</blockquote>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-6.png?raw=true" alt=""></p>
+<h4 id="3-2-执行SQL文件"><a href="#3-2-执行SQL文件" class="headerlink" title="3.2 执行SQL文件"></a>3.2 执行SQL文件</h4><p>SQL 客户端支持使用 -f 选项执行 SQL 脚本文件。SQL 客户端会一一执行 SQL 脚本文件中的语句，并为每条执行的语句打印执行信息。一旦一条语句失败，SQL 客户端就会退出，所有剩余的语句也不会执行。</p>
+<p>下面给出了此类文件的示例：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TEMPORARY</span> <span class="keyword">TABLE</span> <span class="keyword">users</span> (</span><br><span class="line">  user_id <span class="built_in">BIGINT</span>,</span><br><span class="line">  user_name <span class="keyword">STRING</span>,</span><br><span class="line">  user_level <span class="keyword">STRING</span>,</span><br><span class="line">  region <span class="keyword">STRING</span>,</span><br><span class="line">  PRIMARY <span class="keyword">KEY</span> (user_id) <span class="keyword">NOT</span> <span class="keyword">ENFORCED</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span> = <span class="string">'upsert-kafka'</span>,</span><br><span class="line">  <span class="string">'topic'</span> = <span class="string">'users'</span>,</span><br><span class="line">  <span class="string">'properties.bootstrap.servers'</span> = <span class="string">'...'</span>,</span><br><span class="line">  <span class="string">'key.format'</span> = <span class="string">'csv'</span>,</span><br><span class="line">  <span class="string">'value.format'</span> = <span class="string">'avro'</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- set sync mode</span></span><br><span class="line"><span class="keyword">SET</span> table.dml-<span class="keyword">sync</span> = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- set the job name</span></span><br><span class="line"><span class="keyword">SET</span> pipeline.name = SqlJob;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- set the queue that the job submit to</span></span><br><span class="line"><span class="keyword">SET</span> yarn.application.queue = root;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- set the job parallism</span></span><br><span class="line"><span class="keyword">SET</span> parallism.default = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- restore from the specific savepoint path</span></span><br><span class="line"><span class="keyword">SET</span> execution.savepoint.path = /tmp/flink-savepoints/<span class="keyword">savepoint</span>-cca7bc-bb1e257f0dab;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> pageviews_enriched</span><br><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> pageviews <span class="keyword">AS</span> p</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">JOIN</span> <span class="keyword">users</span> <span class="keyword">FOR</span> SYSTEM_TIME <span class="keyword">AS</span> <span class="keyword">OF</span> p.proctime <span class="keyword">AS</span> u</span><br><span class="line"><span class="keyword">ON</span> p.user_id = u.user_id;</span><br></pre></td></tr></table></figure></p>
+<p>这个配置：</p>
+<ul>
+<li>定义从 CSV 文件读取的时态表 users，</li>
+<li>设置属性，例如作业名称，</li>
+<li>设置保存点路径，</li>
+<li>提交从指定保存点路径加载保存点的 sql 作业。</li>
+</ul>
+<blockquote>
+<p>与交互模式相比，SQL 客户端遇到错误会停止执行并退出。</p>
+</blockquote>
+<h4 id="3-3-执行一组SQL语句"><a href="#3-3-执行一组SQL语句" class="headerlink" title="3.3 执行一组SQL语句"></a>3.3 执行一组SQL语句</h4><p>SQL 客户端将每个 INSERT INTO 语句作为单个 Flink 作业执行。但是，这有时性能不是最佳，因为 Pipeline 的某些部分可以重复使用。SQL 客户端支持 STATEMENT SET 语法来执行一组 SQL 语句。这与 Table API 中 StatementSet 功能类似。STATEMENT SET 语法包含一个或多个 INSERT INTO 语句。 STATEMENT SET 块中的所有语句都要经过整体优化后作为一个 Flink 作业执行。</p>
+<p>具体语法如下：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">BEGIN</span> <span class="keyword">STATEMENT</span> <span class="keyword">SET</span>;</span><br><span class="line">  <span class="comment">-- one or more INSERT INTO statements</span></span><br><span class="line">  &#123; INSERT INTO|OVERWRITE &lt;select_statement&gt;; &#125;+</span><br><span class="line"><span class="keyword">END</span>;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>包含在 STATEMENT SET 中的语句必须用分号 (;) 分隔。</p>
+</blockquote>
+<p>具体看一下示例：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> pageviews (</span><br><span class="line">  user_id <span class="built_in">BIGINT</span>,</span><br><span class="line">  page_id <span class="built_in">BIGINT</span>,</span><br><span class="line">  viewtime <span class="keyword">TIMESTAMP</span>,</span><br><span class="line">  proctime <span class="keyword">AS</span> PROCTIME()</span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span> = <span class="string">'kafka'</span>,</span><br><span class="line">  <span class="string">'topic'</span> = <span class="string">'pageviews'</span>,</span><br><span class="line">  <span class="string">'properties.bootstrap.servers'</span> = <span class="string">'...'</span>,</span><br><span class="line">  <span class="string">'format'</span> = <span class="string">'avro'</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> pageview (</span><br><span class="line">  page_id <span class="built_in">BIGINT</span>,</span><br><span class="line">  cnt <span class="built_in">BIGINT</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span> = <span class="string">'jdbc'</span>,</span><br><span class="line">  <span class="string">'url'</span> = <span class="string">'jdbc:mysql://localhost:3306/mydatabase'</span>,</span><br><span class="line">  <span class="string">'table-name'</span> = <span class="string">'pageview'</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> uniqueview (</span><br><span class="line">  page_id <span class="built_in">BIGINT</span>,</span><br><span class="line">  cnt <span class="built_in">BIGINT</span></span><br><span class="line">) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span> = <span class="string">'jdbc'</span>,</span><br><span class="line">  <span class="string">'url'</span> = <span class="string">'jdbc:mysql://localhost:3306/mydatabase'</span>,</span><br><span class="line">  <span class="string">'table-name'</span> = <span class="string">'uniqueview'</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">BEGIN</span> <span class="keyword">STATEMENT</span> <span class="keyword">SET</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> pageviews</span><br><span class="line"><span class="keyword">SELECT</span> page_id, <span class="keyword">count</span>(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">FROM</span> pageviews</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> page_id;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> uniqueview</span><br><span class="line"><span class="keyword">SELECT</span> page_id, <span class="keyword">count</span>(<span class="keyword">distinct</span> user_id)</span><br><span class="line"><span class="keyword">FROM</span> pageviews</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> page_id;</span><br><span class="line"></span><br><span class="line"><span class="keyword">END</span>;</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-4-同步-异步执行DML语句"><a href="#3-4-同步-异步执行DML语句" class="headerlink" title="3.4 同步/异步执行DML语句"></a>3.4 同步/异步执行DML语句</h4><p>默认情况下，SQL 客户端异步执行 DML 语句。这意味着，SQL 客户端将 DML 语句的作业提交给 Flink 集群即可，不用等待作业完成。所以 SQL 客户端可以同时提交多个作业。这对于通常长时间运行的流作业很有用。SQL 客户端确保语句成功提交到集群。提交语句后，CLI 将显示有关 Flink 作业的信息：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; INSERT INTO MyTableSink SELECT * FROM MyTableSource;</span><br><span class="line">[INFO] Table <span class="keyword">update</span> <span class="keyword">statement</span> has been successfully submitted <span class="keyword">to</span> the cluster:</span><br><span class="line">Cluster <span class="keyword">ID</span>: StandaloneClusterId</span><br><span class="line">Job <span class="keyword">ID</span>: <span class="number">6</span>f922fe5cba87406ff23ae4a7bb79044</span><br></pre></td></tr></table></figure></p>
+<p>SQL 客户端再提交作业后不会跟踪作业的状态。CLI 进程可以在提交后关闭而不影响查询。Flink 的重启策略负责容错。可以使用 Flink 的 Web 界面、命令行或 REST API 取消查询。但是，对于批处理用户，更常见的是下一个 DML 语句需要等待前一个 DML 语句完成才能执行。为了同步执行 DML 语句，我们可以在 SQL 客户端中设置 table.dml-sync 选项为 true：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; SET table.dml-sync = true;</span><br><span class="line">[INFO] Session property has been set.</span><br><span class="line"></span><br><span class="line">Flink <span class="keyword">SQL</span>&gt; <span class="keyword">INSERT</span> <span class="keyword">INTO</span> MyTableSink <span class="keyword">SELECT</span> * <span class="keyword">FROM</span> MyTableSource;</span><br><span class="line">[INFO] Submitting SQL <span class="keyword">update</span> <span class="keyword">statement</span> <span class="keyword">to</span> the cluster...</span><br><span class="line">[INFO] <span class="keyword">Execute</span> <span class="keyword">statement</span> <span class="keyword">in</span> <span class="keyword">sync</span> mode. Please <span class="keyword">wait</span> <span class="keyword">for</span> the execution finish...</span><br><span class="line">[INFO] <span class="keyword">Complete</span> execution <span class="keyword">of</span> the <span class="keyword">SQL</span> <span class="keyword">update</span> statement.</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果要终止作业，只需键入 CTRL-C 即可取消执行。</p>
+</blockquote>
+<h4 id="3-5-从保存点启动SQL作业"><a href="#3-5-从保存点启动SQL作业" class="headerlink" title="3.5 从保存点启动SQL作业"></a>3.5 从保存点启动SQL作业</h4><p>Flink 支持从指定的保存点启动作业。在 SQL 客户端中，允许使用 SET 命令指定保存点的路径：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; SET execution.savepoint.path = /tmp/flink-savepoints/savepoint-cca7bc-bb1e257f0dab;</span><br><span class="line">[INFO] Session property has been set.</span><br><span class="line"></span><br><span class="line"><span class="comment">-- all the following DML statements will be restroed from the specified savepoint path</span></span><br><span class="line">Flink <span class="keyword">SQL</span>&gt; <span class="keyword">INSERT</span> <span class="keyword">INTO</span> ...</span><br></pre></td></tr></table></figure></p>
+<p>当指定了保存点的路径时，Flink 会在执行 DML 语句时会尝试从保存点恢复状态。因为指定的保存点路径会影响后面所有的 DML 语句，你可以使用 RESET 命令来重置这个配置选项，即禁用从保存点恢复：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; RESET execution.savepoint.path;</span><br><span class="line">[INFO] Session property has been reset.</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-6-自定义作业名称"><a href="#3-6-自定义作业名称" class="headerlink" title="3.6 自定义作业名称"></a>3.6 自定义作业名称</h4><p>SQL 客户端支持通过 SET 命令为查询和 DML 语句定义作业名称：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; SET pipeline.name = kafka-to-hive;</span><br><span class="line">[INFO] Session property has been set.</span><br><span class="line"></span><br><span class="line"><span class="comment">-- all the following DML statements will use the specified job name.</span></span><br><span class="line">Flink <span class="keyword">SQL</span>&gt; <span class="keyword">INSERT</span> <span class="keyword">INTO</span> ...</span><br></pre></td></tr></table></figure></p>
+<p>因为指定的作业名会影响后面所有的查询和 DML 语句，你也可以使用 RESET 命令来重置这个配置，即使用默认的作业名：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; RESET pipeline.name;</span><br><span class="line">[INFO] Session property has been reset.</span><br></pre></td></tr></table></figure></p>
+<p>如果未指定选项 pipeline.name，SQL 客户端将为提交的作业生成默认名称，例如 insert-into_<sink_table_name> 用于 INSERT INTO 语句。</sink_table_name></p>
+<h3 id="4-兼容性"><a href="#4-兼容性" class="headerlink" title="4. 兼容性"></a>4. 兼容性</h3><p>为了与之前版本兼容，SQL 客户端仍然支持使用 YAML 文件进行初始化，并允许在 YAML 文件中设置 key。当在 YAML 文件中定义 key 时，SQL 客户端将打印警告消息以通知：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; SET execution.type = batch;</span><br><span class="line">[WARNING] The specified key 'execution.type' is deprecated. Please <span class="keyword">use</span> <span class="string">'execution.runtime-mode'</span> instead.</span><br><span class="line">[INFO] <span class="keyword">Session</span> property has been set.</span><br><span class="line"></span><br><span class="line"><span class="comment">-- all the following DML statements will be restored from the specified savepoint path</span></span><br><span class="line">Flink <span class="keyword">SQL</span>&gt; <span class="keyword">INSERT</span> <span class="keyword">INTO</span> ...</span><br></pre></td></tr></table></figure></p>
+<p>当使用 SET 命令打印属性时，SQL 客户端会打印所有的属性。为了区分不推荐使用的 key，SQL 客户端使用 [DEPRECATED] 作为标识符：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt;SET;</span><br><span class="line">execution.runtime-mode=batch</span><br><span class="line">sql-client.execution.result-mode=table</span><br><span class="line">table.planner=blink</span><br><span class="line">[DEPRECATED] execution.planner=blink</span><br><span class="line">[DEPRECATED] execution.result-mode=table</span><br><span class="line">[DEPRECATED] execution.type=batch</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-sql-client-7.png?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文：<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.13/docs/dev/table/sqlclient/" target="_blank" rel="noopener">SQL Client</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-sql-client.html" title="Flink SQL 客户端如何使用">http://smartsi.club/flink-sql-client.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Flink-SQL/" rel="tag"># Flink SQL</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/state-ttl-for-apache-flink-how-to-limit-the-lifetime-of-state.html" rel="next" title="Flink 状态TTL如何限制状态的生命周期">
+                <i class="fa fa-chevron-left"></i> Flink 状态TTL如何限制状态的生命周期
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">263</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-入门"><span class="nav-number">1.</span> <span class="nav-text">1. 入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-启动SQL客户端CLI"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 启动SQL客户端CLI</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-执行SQL查询"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 执行SQL查询</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-1-表格模式"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.2.1 表格模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-2-变更日志模式"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2.2 变更日志模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-3-Tableau模式"><span class="nav-number">1.2.3.</span> <span class="nav-text">1.2.3 Tableau模式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-配置"><span class="nav-number">2.</span> <span class="nav-text">2. 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-启动选项"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 启动选项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-客户端配置"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 客户端配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-使用SQL文件初始化会话"><span class="nav-number">2.3.</span> <span class="nav-text">2.2 使用SQL文件初始化会话</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-使用SQL客户端提交作业"><span class="nav-number">3.</span> <span class="nav-text">3. 使用SQL客户端提交作业</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-交互式命令行"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 交互式命令行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-执行SQL文件"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 执行SQL文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-执行一组SQL语句"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 执行一组SQL语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-同步-异步执行DML语句"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 同步/异步执行DML语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-5-从保存点启动SQL作业"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 从保存点启动SQL作业</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-6-自定义作业名称"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 自定义作业名称</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-兼容性"><span class="nav-number">4.</span> <span class="nav-text">4. 兼容性</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
