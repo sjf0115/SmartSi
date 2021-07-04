@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="Flink 版本 1.13.0  Flink 从 1.5.0 版本开始引入了一种新的状态，称为广播状态。在这篇文章中，我们会解释什么是广播状态以及展示一个示例来说明如何使用广播状态。 1. 什么是广播状态？广播状态可以以某种方式组合处理两个事件流。第一个流的事件被广播到算子所有并行实例上，并存储在状态中。另一个流的事件不会被广播，但是会被发送到同一算子的各个实例上，并与广播流的事件一起处理。这种">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink Broadcast State 实战指南">
+<meta property="og:url" content="http://smartsi.club/a-practical-guide-to-broadcast-state-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Flink 版本 1.13.0  Flink 从 1.5.0 版本开始引入了一种新的状态，称为广播状态。在这篇文章中，我们会解释什么是广播状态以及展示一个示例来说明如何使用广播状态。 1. 什么是广播状态？广播状态可以以某种方式组合处理两个事件流。第一个流的事件被广播到算子所有并行实例上，并存储在状态中。另一个流的事件不会被广播，但是会被发送到同一算子的各个实例上，并与广播流的事件一起处理。这种">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-07-04T07:01:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink Broadcast State 实战指南">
+<meta name="twitter:description" content="Flink 版本 1.13.0  Flink 从 1.5.0 版本开始引入了一种新的状态，称为广播状态。在这篇文章中，我们会解释什么是广播状态以及展示一个示例来说明如何使用广播状态。 1. 什么是广播状态？广播状态可以以某种方式组合处理两个事件流。第一个流的事件被广播到算子所有并行实例上，并存储在状态中。另一个流的事件不会被广播，但是会被发送到同一算子的各个实例上，并与广播流的事件一起处理。这种">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/a-practical-guide-to-broadcast-state-in-apache-flink.html"/>
+
+
+  <title>Flink Broadcast State 实战指南 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/a-practical-guide-to-broadcast-state-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink Broadcast State 实战指南</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-02T19:45:21+08:00">2021-07-02</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-07-04T15:01:38+08:00">2021-07-04</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/a-practical-guide-to-broadcast-state-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/a-practical-guide-to-broadcast-state-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/a-practical-guide-to-broadcast-state-in-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink Broadcast State 实战指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Flink 版本 1.13.0</p>
+</blockquote>
+<p>Flink 从 1.5.0 版本开始引入了一种新的状态，称为广播状态。在这篇文章中，我们会解释什么是广播状态以及展示一个示例来说明如何使用广播状态。</p>
+<h3 id="1-什么是广播状态？"><a href="#1-什么是广播状态？" class="headerlink" title="1. 什么是广播状态？"></a>1. 什么是广播状态？</h3><p>广播状态可以以某种方式组合处理两个事件流。第一个流的事件被广播到算子所有并行实例上，并存储在状态中。另一个流的事件不会被广播，但是会被发送到同一算子的各个实例上，并与广播流的事件一起处理。这种新的广播状态非常适合低吞吐量和高吞吐量流 Join 或需要动态更新处理逻辑的应用程序。我们将使用一个具体示例来演示如何使用广播状态，并展示具体的API。</p>
+<h3 id="2-广播状态的动态模型评估"><a href="#2-广播状态的动态模型评估" class="headerlink" title="2. 广播状态的动态模型评估"></a>2. 广播状态的动态模型评估</h3><p>想象一下，一个电子商务网站获取用户所有交互行为作为用户行为流。运营该网站的公司分析交互行为以增加收入，改善用户体验，以及检测和防止恶意行为。该网站实现了一个流应用程序，用于检测用户事件流上的行为模式。但是，我们希望每次模式修改时不需要修改以及重新部署应用程序，应用程序能从模式数据流接收新模式并动态更新模式。在下文中，我们将逐步讨论此应用程序，并展示如何利用 Flink 中的广播状态功能。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-1.png?raw=true" alt=""></p>
+<p>我们示例应用程序接收两个数据流。第一个数据流提供在网站上的用户行为操作，在上图的左上方显示。用户交互事件由不同类型的操作（用户登录，用户退出，添加到购物车或完成支付）以及由不同颜色编码的用户ID组成。在上图中我们可以看到用户行为数据流最新三个事件分别为：1001用户的登录事件、1003用户的支付完成事件以及1002用户的添加购物车事件。</p>
+<p>第二个流提供了动态模型评估的用户操作模式。一个模式由两个连续的行为组成。在上图中的模式流包含以下两个模式：</p>
+<ul>
+<li>模式＃1：用户登录后并立即退出，没有浏览电子商务网站上的任何页面。</li>
+<li>模式＃2：用户将物品添加到购物车并立即退出，没有进行购买。</li>
+</ul>
+<p>这些模式有助于企业更好地分析用户行为，检测恶意行为并改善网站的用户体验。例如，如果商品被添加到购物车而没有后续购买，网站团队可以采取适当的措施来更好地了解用户未完成购买的原因并进行一些工作改善网站的转化率（ 如提供折扣，限时免费送货优惠等）。</p>
+<p>在右侧，该图显示了算子的三个并发任务，该算子接收模式流和用户行为流，并在用户行为流上进行模式评估，然后向下游发送匹配的模式。为简单起见，我们示例中的算子仅计算满足单个模式的连续两个操作。当从模式流接收到新模式时，新模式会替换当前模式。原则上，还可以实现计算更复杂的模式或多个模式，这些模式可以单独添加或是删除。</p>
+<p>我们将描述模式匹配应用程序如何处理用户操作和模式流。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-2.png?raw=true" alt=""></p>
+<p>首先将模式发送给算子。该模式被广播到算子的所有三个并发任务上。任务将模式存储在其广播状态中。由于广播状态只应使用广播数据进行更新，因此所有任务的状态都是一样的。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-3.png?raw=true" alt=""></p>
+<p>接下来，第一个用户行为根据用户ID分区并发送到算子任务上。分区可确保同一用户的所有行为都由同一个任务处理。上图显示了算子任务消费第一个模式和前三个行为事件后应用程序的状态。</p>
+<p>当任务收到新的用户行为时，通过查看用户最新行为和前一个行为来评估当前的活跃模式。对于每个用户，算子都将前一个行为存储在 Keyed State 中。由于上图中的任务到目前为止每个用户仅收到了一个行为（因为我们刚刚才启动应用程序），因此不需要进行模式评估。最后， 最新行为会更新 Keyed State 中存储的前一个行为，以便能够在同一用户的下一个行为到达时进行查找。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-4.png?raw=true" alt=""></p>
+<p>在处理完前三个行为之后，下一个行为（用户1001的退出行为）被发送到处理用户 1001 的任务上。当任务接收到新行为时，从广播状态中查找当前模式以及用户1001的前一个行为。由于两个行为匹配模式（用户登录后并立即退出），因此任务发出一个模式匹配事件。最后，任务使用最新行为来覆盖 Keyed State 上的前一个行为。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-5.png?raw=true" alt=""></p>
+<p>当一个新模式进入了模式流，它会被广播给所有任务，并且每个并发任务通过使用新模式替换当前模式来更新其广播状态。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-6.png?raw=true" alt=""></p>
+<p>一旦用新模式更新了广播状态，匹配逻辑就像之前一样继续执行，即用户行为事件按 key 分区并由负责的任务进行评估。</p>
+<h3 id="3-如何使用广播状态实现应用程序？"><a href="#3-如何使用广播状态实现应用程序？" class="headerlink" title="3. 如何使用广播状态实现应用程序？"></a>3. 如何使用广播状态实现应用程序？</h3><p>到目前为止，我们在理论上讨论了应用程序并解释了如何使用广播状态来计算事件流上的动态模式。接下来，我们将展示如何使用 Flink 的 DataStream API 和广播状态功能实现示例应用程序。</p>
+<p>让我们从应用程序的输入数据开始。我们有两个数据流，行为数据流和模式数据流。在这，我们并不关心流来自何处。可以从 Kafka 或 Kinesis 或任何其他系统获取流:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;String&gt; actionsSource =</span><br><span class="line">DataStream&lt;String&gt; patternsSource =</span><br></pre></td></tr></table></figure></p>
+<p>行为和模式都有两个字段：</p>
+<ul>
+<li>Action的字段：String uid, String action</li>
+<li>Pattern的字段：String firstAction, String secondAction</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 行为流 (uid, action)</span></span><br><span class="line">DataStream&lt;Action&gt; actionsStream = actionsSource</span><br><span class="line">    .map(<span class="keyword">new</span> MapFunction&lt;String, Action&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Action <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">            String uid = params[<span class="number">0</span>];</span><br><span class="line">            String action = params[<span class="number">1</span>];</span><br><span class="line">            LOG.info(<span class="string">"[行为流] uid: "</span> + uid + <span class="string">", action: "</span> + action);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Action(uid, action);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模式流 (firstAction, secondAction)</span></span><br><span class="line">DataStream&lt;Pattern&gt; patternsStream = patternsSource</span><br><span class="line">    .map(<span class="keyword">new</span> MapFunction&lt;String, Pattern&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Pattern <span class="title">map</span><span class="params">(String str)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            String[] params = str.split(<span class="string">","</span>);</span><br><span class="line">            String firstAction = params[<span class="number">0</span>];</span><br><span class="line">            String secondAction = params[<span class="number">1</span>];</span><br><span class="line">            LOG.info(<span class="string">"[模式流] firstAction: "</span> + firstAction + <span class="string">", secondAction: "</span> + secondAction);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Pattern(firstAction, secondAction);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<p>作为第一步，我们根据 uid 对行为流分区:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">KeyedStream&lt;Action, String&gt; actionsByUser = actionsStream.keyBy(<span class="keyword">new</span> KeySelector&lt;Action, String&gt;() &#123;</span><br><span class="line">      <span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Action action)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">          <span class="keyword">return</span> action.uid;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure></p>
+<p>下面，我们准备广播状态。广播状态始终用 MapState 表示，这是 Flink 提供的最通用的状态原语:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">MapStateDescriptor&lt;Void, Pattern&gt; stateDescriptor = <span class="keyword">new</span> MapStateDescriptor&lt;&gt;(</span><br><span class="line">  <span class="string">"patternsState"</span>, Types.VOID, Types.POJO(Pattern.class)</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>由于我们的应用程序一次只评估和存储一个 Pattern，因此我们将广播状态配置键为 Void 类型和值为 Pattern 类型的 MapState。Pattern 始终存储在 MapState 中，并将 null 作为键:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">BroadcastStream broadcastStream = patternsStream.broadcast(stateDescriptor);</span><br></pre></td></tr></table></figure></p>
+<p>以 MapStateDescriptor 为参数，调用模式流上的 Broadcast 转换操作，得到一个  BroadcastStream 对象 broadcastStream。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Tuple2&lt;Long, Pattern&gt;&gt; matches = actionsByUser</span><br><span class="line"> .connect(broadcastStream)</span><br><span class="line"> .process(<span class="keyword">new</span> PatternEvaluatorProcessFunction());</span><br></pre></td></tr></table></figure></p>
+<p>在我们获得 actionsByUser 行为流和 broadcastStream 广播流之后，使用 connect() 函数连接两个流并在连接的流上应用 PatternEvaluatorProcessFunction。PatternEvaluatorProcessFunction 是一个实现 KeyedBroadcastProcessFunction 接口的自定义函数。它调用了我们之前讨论过的模式匹配逻辑，并发出模式匹配的记录，其中包含用户 ID 和匹配的模式：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">PatternEvaluatorProcessFunction</span></span></span><br><span class="line"><span class="class">        <span class="keyword">extends</span> <span class="title">KeyedBroadcastProcessFunction</span>&lt;<span class="title">String</span>, <span class="title">Action</span>, <span class="title">Pattern</span>, <span class="title">Tuple2</span>&lt;<span class="title">String</span>, <span class="title">Pattern</span>&gt;&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 前一个行为</span></span><br><span class="line">    <span class="keyword">private</span> ValueState&lt;String&gt; prevActionState;</span><br><span class="line">    <span class="comment">// 模式</span></span><br><span class="line">    <span class="keyword">private</span> MapStateDescriptor&lt;Void, Pattern&gt; patternDesc;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">open</span><span class="params">(Configuration parameters)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 初始化 KeyedState</span></span><br><span class="line">        prevActionState = getRuntimeContext().getState(</span><br><span class="line">                <span class="keyword">new</span> ValueStateDescriptor&lt;&gt;(<span class="string">"lastAction"</span>, Types.STRING)</span><br><span class="line">        );</span><br><span class="line">        patternDesc = <span class="keyword">new</span> MapStateDescriptor&lt;&gt;(<span class="string">"patternsState"</span>, Types.VOID, Types.POJO(Pattern.class));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processElement</span><span class="params">(Action action, ReadOnlyContext ctx, Collector&lt;Tuple2&lt;String, Pattern&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String uid = action.uid;</span><br><span class="line">        String lastAction = action.action;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 从广播状态中获取模式</span></span><br><span class="line">        Pattern pattern = ctx.getBroadcastState(<span class="keyword">this</span>.patternDesc)</span><br><span class="line">                <span class="comment">// access MapState with null as VOID default value</span></span><br><span class="line">                .get(<span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 获取当前用户的前一个行为</span></span><br><span class="line">        String prevAction = prevActionState.value();</span><br><span class="line">        <span class="keyword">if</span> (pattern != <span class="keyword">null</span> &amp;&amp; prevAction != <span class="keyword">null</span>) &#123;</span><br><span class="line">            String firstAction = pattern.firstAction;</span><br><span class="line">            String secondAction = pattern.secondAction;</span><br><span class="line">            <span class="comment">// 模式是否匹配</span></span><br><span class="line">            <span class="keyword">boolean</span> isMatch = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">if</span> (firstAction.equals(prevAction) &amp;&amp; secondAction.equals(lastAction)) &#123;</span><br><span class="line">                isMatch = <span class="keyword">true</span>;</span><br><span class="line">                out.collect(<span class="keyword">new</span> Tuple2&lt;&gt;(ctx.getCurrentKey(), pattern));</span><br><span class="line">            &#125;</span><br><span class="line">            LOG.info(<span class="string">"[Evaluation] uid: &#123;&#125;, Action: [&#123;&#125;-&gt;&#123;&#125;], Pattern: [&#123;&#125;-&gt;&#123;&#125;], IsMatch: &#123;&#125;"</span>,</span><br><span class="line">                    uid, prevAction, lastAction, firstAction, secondAction, isMatch</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 用最新行为更新状态</span></span><br><span class="line">        prevActionState.update(lastAction);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">processBroadcastElement</span><span class="params">(Pattern pattern, Context ctx, Collector&lt;Tuple2&lt;String, Pattern&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 如果有新模式则更新广播状态</span></span><br><span class="line">        BroadcastState&lt;Void, Pattern&gt; broadcastState = ctx.getBroadcastState(patternDesc);</span><br><span class="line">        broadcastState.put(<span class="keyword">null</span>, pattern);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅 <a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/state/state/BroadcastStateExample.java" target="_blank" rel="noopener">BroadcastStateExample</a></p>
+</blockquote>
+<p>KeyedBroadcastProcessFunction 接口提供了三种处理记录和发送结果的方法：</p>
+<ul>
+<li>processBroadcastElement：每次收到广播流的记录时会调用。在自定义实现中，我们只需使用 null 键将接收到的 Pattern 记录放入广播状态中（记住，我们只在 MapState 中存储一个模式）。</li>
+<li>processElement：每次收到行为流的记录时会调用。它提供对广播状态的只读访问权限，以防止对广播状态修改导致函数的并行实例之间有不同的广播状态。自定义函数实现中我们从广播状态查看当前的模式，并从 KeyedState 查看用户的前一个行为。如果两者都存在，就会检查上一个行为和当前行为是否与模式匹配，如果是匹配，则发送模式匹配记录。最后，用当前最新行为更新 KeyedState。</li>
+<li>onTimer：当之前注册过的计时器触发时被调用。计时器可以在 processElement 方法中定义，用于执行计算或是清除状态。为了保持代码的简洁性，我们没有在例子中实现这个方法，但当用户在某段时间内没有操作时，它可以用来删除最后一个操作，以避免由于非活动用户而导致状态增长；</li>
+</ul>
+<p>你可能注意到了 KeyedBroadcastProcessFunction 类方法的上下文对象，提供了对其它功能的访问方法，例如：</p>
+<ul>
+<li>广播状态（读写或只读，取决于方法），</li>
+<li>TimerService，可以访问记录的时间戳，当前的 Watermark，可以注册定时器，</li>
+<li>当前键（仅在 processElement() 中可用）以及</li>
+<li>一种将函数应用于每个已注册键的 keyed state 的方法（仅在 processBroadcastElement() 方法中可用）。</li>
+</ul>
+<p>KeyedBroadcastProcessFunction 可以像任何其他 ProcessFunction 一样访问 Flink 状态和时间功能，因此可用于实现复杂的应用程序逻辑。广播状态被设计为一种适用于不同场景和用例的通用功能。虽然我们只讨论了一个相当简单且受限制的应用程序，但你可以通过多种方式使用广播状态来实现应用程序的要求。</p>
+<p>现在我们以下面的具体行为和模式为例，具体演示一下执行过程：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 模式流输入</span><br><span class="line">login,logout</span><br><span class="line"></span><br><span class="line">// 行为流输入</span><br><span class="line">1001,login</span><br><span class="line">1003,pay</span><br><span class="line">1002,cart</span><br><span class="line">1001,logout</span><br><span class="line">1002,pay</span><br><span class="line"></span><br><span class="line">// 模式流切换模式</span><br><span class="line">cart,logout</span><br><span class="line"></span><br><span class="line">// 行为流输入</span><br><span class="line">1003,cart</span><br><span class="line">1002,logout</span><br><span class="line">1003,logout</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-practical-guide-to-broadcast-state-in-apache-flink-7.png?raw=true" alt=""></p>
+<h3 id="4-结论"><a href="#4-结论" class="headerlink" title="4. 结论"></a>4. 结论</h3><p>在这篇博文中，我们向你介绍了一个示例应用程序，以解释 Flink 的广播状态以及它如何用于计算事件流上的动态模式。 我们还讨论了API并展示了我们的示例应用程序的源代码。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://www.ververica.com/blog/a-practical-guide-to-broadcast-state-in-apache-flink" target="_blank" rel="noopener">A Practical Guide to Broadcast State in Apache Flink</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/a-practical-guide-to-broadcast-state-in-apache-flink.html" title="Flink Broadcast State 实战指南">http://smartsi.club/a-practical-guide-to-broadcast-state-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-install-and-startup-clickhouse.html" rel="next" title="ClickHouse 安装与部署">
+                <i class="fa fa-chevron-left"></i> ClickHouse 安装与部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">265</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是广播状态？"><span class="nav-number">1.</span> <span class="nav-text">1. 什么是广播状态？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-广播状态的动态模型评估"><span class="nav-number">2.</span> <span class="nav-text">2. 广播状态的动态模型评估</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-如何使用广播状态实现应用程序？"><span class="nav-number">3.</span> <span class="nav-text">3. 如何使用广播状态实现应用程序？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-结论"><span class="nav-number">4.</span> <span class="nav-text">4. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
