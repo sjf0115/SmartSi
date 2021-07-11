@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="流处理应用程序通常都是有状态的，已处理事件的信息会被记录下来来影响下一步的事件处理。在 Flink 中，这些被记录的信息，即状态，本地存储在我们配置的状态后端中。为了防止出现故障时数据丢失，状态后端会定期将其内容的快照保存到预先配置的持久存储中。RocksDB 状态后端（即 RocksDBStateBackend）是 Flink 三个内置状态后端中的一个。这篇博文将指导您了解使用 RocksDB">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 何时以及如何使用 RocksDB 状态后端">
+<meta property="og:url" content="http://smartsi.club/when-and-how-use-rocksdb-state-backend-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="流处理应用程序通常都是有状态的，已处理事件的信息会被记录下来来影响下一步的事件处理。在 Flink 中，这些被记录的信息，即状态，本地存储在我们配置的状态后端中。为了防止出现故障时数据丢失，状态后端会定期将其内容的快照保存到预先配置的持久存储中。RocksDB 状态后端（即 RocksDBStateBackend）是 Flink 三个内置状态后端中的一个。这篇博文将指导您了解使用 RocksDB">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/when-and-how-use-rocksdb-state-backend-in-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-07-11T12:50:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 何时以及如何使用 RocksDB 状态后端">
+<meta name="twitter:description" content="流处理应用程序通常都是有状态的，已处理事件的信息会被记录下来来影响下一步的事件处理。在 Flink 中，这些被记录的信息，即状态，本地存储在我们配置的状态后端中。为了防止出现故障时数据丢失，状态后端会定期将其内容的快照保存到预先配置的持久存储中。RocksDB 状态后端（即 RocksDBStateBackend）是 Flink 三个内置状态后端中的一个。这篇博文将指导您了解使用 RocksDB">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/when-and-how-use-rocksdb-state-backend-in-apache-flink-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/when-and-how-use-rocksdb-state-backend-in-apache-flink.html"/>
+
+
+  <title>Flink 何时以及如何使用 RocksDB 状态后端 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/when-and-how-use-rocksdb-state-backend-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink 何时以及如何使用 RocksDB 状态后端</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-07-10T18:08:21+08:00">2021-07-10</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-07-11T20:50:42+08:00">2021-07-11</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/when-and-how-use-rocksdb-state-backend-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/when-and-how-use-rocksdb-state-backend-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/when-and-how-use-rocksdb-state-backend-in-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink 何时以及如何使用 RocksDB 状态后端">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>流处理应用程序通常都是有状态的，已处理事件的信息会被记录下来来影响下一步的事件处理。在 Flink 中，这些被记录的信息，即状态，本地存储在我们配置的状态后端中。为了防止出现故障时数据丢失，状态后端会定期将其内容的快照保存到预先配置的持久存储中。RocksDB 状态后端（即 RocksDBStateBackend）是 Flink 三个内置状态后端中的一个。这篇博文将指导您了解使用 RocksDB 管理应用程序状态的好处，解释何时以及如何使用它，并澄清一些常见的误解。话虽如此，这篇博文不是来解释 RocksDB 是如何深入工作、如何进行高级故障排除以及性能调优的。</p>
+<h3 id="1-状态"><a href="#1-状态" class="headerlink" title="1. 状态"></a>1. 状态</h3><p>为了更好地理解 Flink 中的状态以及状态后端，我们有有必要来区分一下运行中状态（In-flight state）和状态快照（state snapshots）。运行中状态，也称为工作状态，是 Flink 作业正在工作过程中的状态。它始终存储在本地内存中（可能会溢出到磁盘），并在作业失败时可能会丢失，但不影响作业的可恢复。状态快照，即检查点和保存点，存储在远程持久化存储中，用于作业失败时恢复本地状态。生产环境中如何选择适当的状态后端取决于可扩展性、吞吐量以及延迟要求。</p>
+<h3 id="2-RocksDB-是什么"><a href="#2-RocksDB-是什么" class="headerlink" title="2. RocksDB 是什么"></a>2. RocksDB 是什么</h3><p>我们有一种常见的误解就是将 RocksDB 认为是一种分布式数据库，需要在集群上运行并由专业管理员管理。实际上 RocksDB 是一个用于快速存储的可嵌入持久KV存储。它通过 Java Native Interface (JNI) 与 Flink 交互。下图显示了 RocksDB 在 Flink 集群节点中的位置。详细信息将在以下部分进行说明。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/when-and-how-use-rocksdb-state-backend-in-apache-flink-1.png?raw=true" alt=""></p>
+<h3 id="3-Flink-中的-RocksDB"><a href="#3-Flink-中的-RocksDB" class="headerlink" title="3. Flink 中的 RocksDB"></a>3. Flink 中的 RocksDB</h3><p>将 RocksDB 作为状态后端所需的一切都捆绑在 Apache Flink 发行版中，包括本机共享库：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ jar -tvf lib/flink-dist_2.12-1.12.0.jar| grep librocksdbjni-linux64</span><br><span class="line">8695334 Wed Nov 27 02:27:06 CET 2019 librocksdbjni-linux64.so</span><br></pre></td></tr></table></figure></p>
+<p>在运行时，RocksDB 会嵌入到 TaskManager 进程中。在本地线程中运行并处理本地文件。例如，如果我们在 Flink 集群中运行配置了 RocksDBStateBackend 状态后端的作业，我们将会看到类似以下内容，其中 32513 是 TaskManager 进程 ID：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ ps -T -p 32513 | grep -i rocksdb</span><br><span class="line">32513 32633 ?        00:00:00 rocksdb:low0</span><br><span class="line">32513 32634 ?        00:00:00 rocksdb:high0</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>该命令仅适用于 Linux 系统。对于其他操作系统，请参阅其文档。</p>
+</blockquote>
+<h3 id="4-何时使用-RocksDBStateBackend"><a href="#4-何时使用-RocksDBStateBackend" class="headerlink" title="4. 何时使用 RocksDBStateBackend"></a>4. 何时使用 RocksDBStateBackend</h3><p>除了 RocksDBStateBackend，Flink 还内置了两个状态后端：MemoryStateBackend 和 FsStateBackend。它们都是基于堆的，因为运行中状态存储在 JVM 堆中。目前，我们可以忽略 MemoryStateBackend，因为它仅用于本地开发和调试，不建议在生产环境使用。</p>
+<p>使用 RocksDBStateBackend，运行中状态首先写入堆外/本机内存，然后在达到配置的阈值时刷新到本地磁盘。这意味着 RocksDBStateBackend 可以支持大于总配置堆容量的状态。我们可以在 RocksDBStateBackend 中存储的状态量仅受整个集群中可用磁盘空间量的限制。此外，由于 RocksDBStateBackend 不使用 JVM 堆来存储运行中状态，因此它不受 JVM 垃圾收集的影响，因此具有可预测的延迟。</p>
+<p>除了完整的、自包含的状态快照之外，RocksDBStateBackend 还支持增量检查点进行性能调优。增量检查点仅存储自上一次检查点完成以来发生的更改。与执行完整快照相比，这大大减少了进行检查点的时间。RocksDBStateBackend 是目前唯一支持增量检查点的状态后端。</p>
+<p>在以下情况下，RocksDB 是一个不错的选择：</p>
+<ul>
+<li>作业的状态比本地内存大（例如，大窗口，大 Keyed State）；</li>
+<li>希望使用增量检查点，以减少检查点时间；</li>
+<li>希望有更可预测的延迟，而不受JVM垃圾回收的影响。</li>
+</ul>
+<p>如果应用程序状态比较小或者需要非常低的延迟，则应考虑 FsStateBackend。根据经验，RocksDBStateBackend 要比基于堆的状态后端慢几倍，因为它将键/值对存储为序列化字节。这意味着任何状态访问（读/写）都需要通过一个跨越 JNI 边界的反/序列化过程，这比直接使用堆上的状态代价更高。但好处是，对于相同数量的状态，与相应的堆状态相比，具有较低的内存占用。</p>
+<h3 id="5-如何使用-RocksDBStateBackend"><a href="#5-如何使用-RocksDBStateBackend" class="headerlink" title="5. 如何使用 RocksDBStateBackend"></a>5. 如何使用 RocksDBStateBackend</h3><p>RocksDB 完全嵌入 TaskManager 进程并由其完全管理。RocksDBStateBackend 可以在集群级别配置为整个集群的默认值，也可以在作业级为单个作业配置。作业级别配置优先于集群级别配置。</p>
+<p>(1) 集群级别</p>
+<p>在 conf/flink-conf.yaml 添加如下配置：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">state.backend: rocksdb</span><br><span class="line">state.backend.incremental: true</span><br><span class="line">state.checkpoints.dir: hdfs:///flink-checkpoints # location to store checkpoints</span><br></pre></td></tr></table></figure></p>
+<p>(2) 作业级别</p>
+<p>创建 StreamExecutionEnvironment 后，将以下内容添加到您的作业代码中：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">env.setStateBackend(<span class="keyword">new</span> RocksDBStateBackend(<span class="string">"hdfs:///fink-checkpoints"</span>, <span class="keyword">true</span>));</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>除了 HDFS，如果在 FLINK_HOME/plugins 下添加相应的依赖项，您还可以使用其他本地或基于云的对象存储。</p>
+</blockquote>
+<h3 id="6-最佳实践和高级配置"><a href="#6-最佳实践和高级配置" class="headerlink" title="6. 最佳实践和高级配置"></a>6. 最佳实践和高级配置</h3><p>我们希望这篇概述能帮助您更好地了解 RocksDB 在 Flink 中的作用以及如何使用 RocksDBStateBackend。最后，我们将探索一些最佳实践和一些参考点，以进一步进行故障排除和性能调整。</p>
+<h4 id="6-1-RocksDB-中的状态位置"><a href="#6-1-RocksDB-中的状态位置" class="headerlink" title="6.1 RocksDB 中的状态位置"></a>6.1 RocksDB 中的状态位置</h4><p>如前所述，RocksDBStateBackend 中的运行中状态会溢出到磁盘上的文件。这些文件位于 Flink 配置的 state.backend.rocksdb.localdir 指定目录下。因为磁盘性能直接影响到 RocksDB 的性能，所以建议将该目录放在本地磁盘上。不鼓励将其配置到基于远程网络的位置，如 NFS 或 HDFS，因为写入远程磁盘通常较慢。高可用性也不是运行中状态的要求。如果需要高磁盘吞吐量，则首选本地 SSD 磁盘。</p>
+<p>状态快照被持久化到远程持久化存储上。在生成状态快照期间，TaskManager 会对运行中状态生成快照并将其远程存储。将状态快照传输到远程存储完全由 TaskManager 本身处理，状态后端不参与。因此，state.checkpoints.dir 或者您在代码中为特定作业设置的参数可以是不同的位置，例如本地 HDFS 集群或基于云的对象存储，例如 Amazon S3、Azure Blob Storage、Google Cloud Storage、Alibaba OSS等。</p>
+<h4 id="6-2-RocksDB-故障排查"><a href="#6-2-RocksDB-故障排查" class="headerlink" title="6.2 RocksDB 故障排查"></a>6.2 RocksDB 故障排查</h4><p>要检查 RocksDB 在生产环境中的行为，我们应该查找名为 LOG 的 RocksDB 日志文件。默认情况下，此日志文件与我们的数据文件位于同一目录中，即 Flink 配置 state.backend.rocksdb.localdir 指定的目录。启用后，RocksDB 统计信息也会记录在那里以帮助诊断潜在的问题。如果您对 RocksDB 时间行为序列感兴趣，可以考虑为我们的 Flink 作业启用 RocksDB 原生指标。</p>
+<blockquote>
+<p>从Flink1.10开始，通过将日志级别设置为HEADER，RocksDB日志记录被有效地禁用。要启用它，请查看 <a href="https://ververica.zendesk.com/hc/en-us/articles/360015933320-How-to-get-RocksDB-s-LOG-file-back-for-advanced-troubleshooting" target="_blank" rel="noopener">How to get RocksDB’s LOG file back for advanced troubleshooting</a>。</p>
+<p>警告：在 Flink 中启用 RocksD B的原生指标可能会对我们的作业产生负面影响。</p>
+</blockquote>
+<h4 id="6-3-RocksDB-调优"><a href="#6-3-RocksDB-调优" class="headerlink" title="6.3 RocksDB 调优"></a>6.3 RocksDB 调优</h4><p>从 Flink 1.10 开始，Flink 默认将 RocksDB 的内存分配配置为每个任务槽的托管内存(managed memory)量。改善内存相关性能问题的主要机制是通过 Flink 配置 taskmanager.memory.managed.size 或 taskmanager.memory.managed.fraction 来增加 Flink 的托管内存。对于更细粒度的控制，你应该首先通过将 state.backend.rocksdb.memory.managed 设置为 false 来禁用自动内存管理，然后配置以下参数：</p>
+<ul>
+<li>state.backend.rocksdb.block.cache-size：RocksDB 中的 block_cache_size</li>
+<li>state.backend.rocksdb.writebuffer.size：RocksDB 中的 write_buffer_size</li>
+<li>state.backend.rocksdb.writebuffer.count：RocksDB 中的 max_write_buffer_number。</li>
+</ul>
+<blockquote>
+<p>有关更多详细信息，请查看<a href="https://www.ververica.com/blog/manage-rocksdb-memory-size-apache-flink" target="_blank" rel="noopener">如何在 Flink 中管理 RocksDB 内存</a>以及 <a href="https://github.com/facebook/rocksdb/wiki/Memory-usage-in-RocksDB" target="_blank" rel="noopener">RocksDB 内存使用</a> 博客文章。</p>
+</blockquote>
+<p>在 RocksDB 中写入或覆盖写入数据时，从内存刷新到本地磁盘以及数据压缩都是由 RocksDB 后台线程管理。在多核 CPU 的机器上，可以通过设置 Flink 配置 state.backend.rocksdb.thread.num（对应 RocksDB 中的 max_background_jobs）来增加后台刷新和压缩的并行度。对于生产设置，默认配置通常太小。如果我们的作业频繁从 RocksDB 读取数据，则应考虑启用布隆过滤器。</p>
+<p>对于其他 RocksDBStateBackend 配置，请查看Flink 文档<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.13/docs/deployment/config/#advanced-rocksdb-state-backends-options" target="_blank" rel="noopener">Advanced RocksDB State Backends Options</a>。</p>
+<h3 id="7-结论"><a href="#7-结论" class="headerlink" title="7. 结论"></a>7. 结论</h3><p>RocksDB 状态后端（即 RocksDBStateBackend）是 Flink 内置的三个状态后端之一，是配置流处理程序的一强大的选择。可以使可扩展应用程序能够保持高达数 TB 的状态，并保证 Exactly-Once 处理语义。如果我们的 Flink 作业的状态太大而无法放入 JVM 堆，我们对增量检查点感兴趣，或者希望具有可预测的延迟，则应该使用 RocksDBStateBackend。由于 RocksDB 作为本机线程嵌入到 TaskManager 进程中并处理本地磁盘上的文件，因此 RocksDBStateBackend 支持开箱即用，无需进一步设置和管理任何外部系统或进程。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://flink.apache.org/2021/01/18/rocksdb.html" target="_blank" rel="noopener">Using RocksDB State Backend in Apache Flink: When and How</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/when-and-how-use-rocksdb-state-backend-in-apache-flink.html" title="Flink 何时以及如何使用 RocksDB 状态后端">http://smartsi.club/when-and-how-use-rocksdb-state-backend-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/broadcast-state-pattern-flink-considerations.html" rel="next" title="Flink 使用 Broadcast State 的4个注意事项">
+                <i class="fa fa-chevron-left"></i> Flink 使用 Broadcast State 的4个注意事项
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">267</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-状态"><span class="nav-number">1.</span> <span class="nav-text">1. 状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-RocksDB-是什么"><span class="nav-number">2.</span> <span class="nav-text">2. RocksDB 是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Flink-中的-RocksDB"><span class="nav-number">3.</span> <span class="nav-text">3. Flink 中的 RocksDB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-何时使用-RocksDBStateBackend"><span class="nav-number">4.</span> <span class="nav-text">4. 何时使用 RocksDBStateBackend</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-如何使用-RocksDBStateBackend"><span class="nav-number">5.</span> <span class="nav-text">5. 如何使用 RocksDBStateBackend</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-最佳实践和高级配置"><span class="nav-number">6.</span> <span class="nav-text">6. 最佳实践和高级配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-RocksDB-中的状态位置"><span class="nav-number">6.1.</span> <span class="nav-text">6.1 RocksDB 中的状态位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-2-RocksDB-故障排查"><span class="nav-number">6.2.</span> <span class="nav-text">6.2 RocksDB 故障排查</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-3-RocksDB-调优"><span class="nav-number">6.3.</span> <span class="nav-text">6.3 RocksDB 调优</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-结论"><span class="nav-number">7.</span> <span class="nav-text">7. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
