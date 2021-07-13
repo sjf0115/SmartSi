@@ -108,13 +108,13 @@
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="这篇文章描述了一些配置选项，这些选项可以帮助我们有效地管理 Apache Flink 中 RocksDB 状态后端的内存大小。在前面的文章中，我们讲述了 Flink 中可支持的状态后端，本文将介绍跟 Flink 相关的一些 RocksDB 操作，并讨论一些提高资源利用率的重要配置。  从 Flink 1.10 开始，Flink 就开始自动管理 RocksDB 的内存，详细介绍请查阅 Memory">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://smartsi.club/![](https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2021-07-13T15:43:14.000Z">
+<meta property="og:updated_time" content="2021-07-13T15:45:23.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink 如何管理 RocksDB 内存大小">
 <meta name="twitter:description" content="这篇文章描述了一些配置选项，这些选项可以帮助我们有效地管理 Apache Flink 中 RocksDB 状态后端的内存大小。在前面的文章中，我们讲述了 Flink 中可支持的状态后端，本文将介绍跟 Flink 相关的一些 RocksDB 操作，并讨论一些提高资源利用率的重要配置。  从 Flink 1.10 开始，Flink 就开始自动管理 RocksDB 的内存，详细介绍请查阅 Memory">
-<meta name="twitter:image" content="http://smartsi.club/![](https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true">
 
 
 
@@ -348,7 +348,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2021-07-13T23:43:14+08:00">2021-07-13</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-07-13T23:45:23+08:00">2021-07-13</time>
             
           </span>
 
@@ -430,7 +430,7 @@
 <li>此外使用 RocksDB，状态大小仅受限于本地可用磁盘空间的大小，非常适合状态特别大的 Flink 应用程序。</li>
 </ul>
 <p>下面的图表将进一步阐明 RocksDB 的基本读写操作：</p>
-<p><img src="![](https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true" alt="">)</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/manage-rocksdb-memory-size-apache-flink-1.png?raw=true" alt=""></p>
 <p>RocksDB 的 WRITE 操作将把数据存储到当前活跃的 MemTable 中。当 MemTable 写满时，它将成为 READ ONLY MemTable，并被一个新的空的 MemTable 替换。READ ONLY MemTable 被后台线程周期性地刷新到磁盘上，生成按键排序的只读文件，这便是所谓的 SSTables。这些 SSTable 是不可变的，通过后台的多路归并实现进一步的整合。如前所述，对于 RocksDB，每个注册状态都对应一个列族，这意味着每个状态都包含一组 MemTables 和 SSTables。</p>
 <p>RocksDB 中的 READ 操作首先访问活跃的 MemTable 来反馈查询。如果找到待查询的 key，那么 READ 操作将从最新 READ ONLY MemTables 到最旧依次访问，直到找到待查询的 key 为止。如果在任何 MemTable 中都找不到该 key，那么 READ 操作将访问 SSTables，再次从最新的开始。SSTables 文件可以：</p>
 <ul>
