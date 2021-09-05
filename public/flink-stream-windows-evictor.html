@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="1. 简介除了 WindowAssigner 和 Trigger 之外，Flink 的窗口模型还允许指定一个可选的 Evictor。Evictor 提供了在使用 WindowFunction 之前或者之后从窗口中删除元素的能力。为此，Evictor 接口提供了两个方法：public interface Evictor&amp;lt;T, W extends Window&amp;gt; extends Seria">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 窗口剔除器 Evictor">
+<meta property="og:url" content="http://smartsi.club/flink-stream-windows-evictor.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 简介除了 WindowAssigner 和 Trigger 之外，Flink 的窗口模型还允许指定一个可选的 Evictor。Evictor 提供了在使用 WindowFunction 之前或者之后从窗口中删除元素的能力。为此，Evictor 接口提供了两个方法：public interface Evictor&amp;lt;T, W extends Window&amp;gt; extends Seria">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-09-05T12:11:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 窗口剔除器 Evictor">
+<meta name="twitter:description" content="1. 简介除了 WindowAssigner 和 Trigger 之外，Flink 的窗口模型还允许指定一个可选的 Evictor。Evictor 提供了在使用 WindowFunction 之前或者之后从窗口中删除元素的能力。为此，Evictor 接口提供了两个方法：public interface Evictor&amp;lt;T, W extends Window&amp;gt; extends Seria">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/flink-stream-windows-evictor.html"/>
+
+
+  <title>Flink 窗口剔除器 Evictor | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-stream-windows-evictor.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink 窗口剔除器 Evictor</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-05T19:30:17+08:00">2021-09-05</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-09-05T20:11:14+08:00">2021-09-05</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-stream-windows-evictor.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-stream-windows-evictor.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-stream-windows-evictor.html" class="leancloud_visitors" data-flag-title="Flink 窗口剔除器 Evictor">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h3><p>除了 <a href="">WindowAssigner</a> 和 <a href="">Trigger</a> 之外，Flink 的窗口模型还允许指定一个可选的 Evictor。Evictor 提供了在使用 <a href="">WindowFunction</a> 之前或者之后从窗口中删除元素的能力。为此，Evictor 接口提供了两个方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Evictor</span>&lt;<span class="title">T</span>, <span class="title">W</span> <span class="keyword">extends</span> <span class="title">Window</span>&gt; <span class="keyword">extends</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 可选的删除元素，在窗口函数之前调用</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">evictBefore</span><span class="params">(Iterable&lt;TimestampedValue&lt;T&gt;&gt; elements,</span></span></span><br><span class="line"><span class="function"><span class="params">      <span class="keyword">int</span> size, W window, EvictorContext evictorContext)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 可选的删除元素，在窗口函数之后调用</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">evictAfter</span><span class="params">(Iterable&lt;TimestampedValue&lt;T&gt;&gt; elements,</span></span></span><br><span class="line"><span class="function"><span class="params">      <span class="keyword">int</span> size, W window, EvictorContext evictorContext)</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="class"><span class="keyword">interface</span> <span class="title">EvictorContext</span> </span>&#123;</span><br><span class="line">      <span class="comment">// 当前处理时间</span></span><br><span class="line">      <span class="function"><span class="keyword">long</span> <span class="title">getCurrentProcessingTime</span><span class="params">()</span></span>;</span><br><span class="line">      <span class="function">MetricGroup <span class="title">getMetricGroup</span><span class="params">()</span></span>;</span><br><span class="line">      <span class="comment">// 当前Watermark</span></span><br><span class="line">      <span class="function"><span class="keyword">long</span> <span class="title">getCurrentWatermark</span><span class="params">()</span></span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>evictBefore() 用于在使用窗口函数之前从窗口中删除元素，而 evictAfter() 用于在使用窗口函数之后从窗口中删除元素。</p>
+<h3 id="2-内置-Evictor"><a href="#2-内置-Evictor" class="headerlink" title="2. 内置 Evictor"></a>2. 内置 Evictor</h3><p>Flink 本身内置实现了三种 Evictor，分别是 CountEvictor、DeltaEvictor 和 TimeEvictor。</p>
+<blockquote>
+<p>默认情况下，所有内置的 Evictors 都是在触发窗口函数之前使用。</p>
+</blockquote>
+<h4 id="2-1-CountEvictor"><a href="#2-1-CountEvictor" class="headerlink" title="2.1 CountEvictor"></a>2.1 CountEvictor</h4><p>CountEvictor 用于在窗口中保留用户指定数量的元素。如果窗口中的元素超过用户指定的阈值，会从窗口头部开始删除剩余元素。</p>
+<h5 id="2-1-1-内部实现"><a href="#2-1-1-内部实现" class="headerlink" title="2.1.1 内部实现"></a>2.1.1 内部实现</h5><p>CountEvictor 需要实现 Evictor 接口的 evictBefore 和 evictAfter 方法，以实现调用窗口函数之前和之后的窗口元素删除逻辑：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> doEvictAfter;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">evictBefore</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements, <span class="keyword">int</span> size, W window, EvictorContext ctx)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!doEvictAfter) &#123;</span><br><span class="line">        evict(elements, size, ctx);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">evictAfter</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">        Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements, <span class="keyword">int</span> size, W window, EvictorContext ctx)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (doEvictAfter) &#123;</span><br><span class="line">        evict(elements, size, ctx);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>doEvictAfter 是在构造 CountEvictor 时传入的一个变量，用以指定是否在使用窗口函数之后对元素进行删除操作。如果不指定，默认为 false，即在使用窗口函数之后不对元素进行删除。从上面代码中可以看出，不论是 evictBefore，还是 evictAfter，最后都会调用 evict() 方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">evict</span><span class="params">(Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements, <span class="keyword">int</span> size, EvictorContext ctx)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (size &lt;= maxCount) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> evictedCount = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (Iterator&lt;TimestampedValue&lt;Object&gt;&gt; iterator = elements.iterator();</span><br><span class="line">                iterator.hasNext(); ) &#123;</span><br><span class="line">            iterator.next();</span><br><span class="line">            evictedCount++;</span><br><span class="line">            <span class="keyword">if</span> (evictedCount &gt; size - maxCount) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                iterator.remove();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面可以看出，如果当前窗口元素个数小于等于用户指定的阈值则不做删除操作，否则会从窗口迭代器的头部开始删除多余的元素(size - maxCount)。</p>
+<h5 id="2-1-2-如何使用"><a href="#2-1-2-如何使用" class="headerlink" title="2.1.2 如何使用"></a>2.1.2 如何使用</h5><p>如下代码所示，在触发使用窗口函数之前保留2个元素：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Tuple2&lt;String, Long&gt;&gt; result = stream</span><br><span class="line">    <span class="comment">// 格式转换</span></span><br><span class="line">    .map(tuple -&gt; Tuple2.of(tuple.f0, tuple.f1)).returns(Types.TUPLE(Types.STRING, Types.LONG))</span><br><span class="line">    <span class="comment">// 根据key分组</span></span><br><span class="line">    .keyBy(<span class="keyword">new</span> KeySelector&lt;Tuple2&lt;String, Long&gt;, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple2&lt;String, Long&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> value.f0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 处理时间滚动窗口 滚动大小60s</span></span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.minutes(<span class="number">1</span>)))</span><br><span class="line">    <span class="comment">// 在触发使用窗口函数之前保留2个元素</span></span><br><span class="line">    .evictor(CountEvictor.of(<span class="number">2</span>))</span><br><span class="line">    <span class="comment">// 窗口函数</span></span><br><span class="line">    .process(<span class="keyword">new</span> ProcessWindowFunction&lt;Tuple2&lt;String, Long&gt;, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(String key, Context context, Iterable&lt;Tuple2&lt;String, Long&gt;&gt; elements, Collector&lt;Tuple2&lt;String, Long&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// Watermark</span></span><br><span class="line">            <span class="keyword">long</span> watermark = context.currentWatermark();</span><br><span class="line">            String watermarkTime = DateUtil.timeStamp2Date(watermark);</span><br><span class="line">            <span class="comment">// 窗口开始与结束时间</span></span><br><span class="line">            TimeWindow window = context.window();</span><br><span class="line">            String start = DateUtil.timeStamp2Date(window.getStart());</span><br><span class="line">            String end = DateUtil.timeStamp2Date(window.getEnd());</span><br><span class="line">            <span class="comment">// 窗口中元素</span></span><br><span class="line">            List&lt;Long&gt; values = Lists.newArrayList();</span><br><span class="line">            <span class="keyword">for</span> (Tuple2&lt;String, Long&gt; element : elements) &#123;</span><br><span class="line">                values.add(element.f1);</span><br><span class="line">            &#125;</span><br><span class="line">            LOG.info(<span class="string">"[Process] Key: &#123;&#125;, Watermark: [&#123;&#125;|&#123;&#125;], Window: [&#123;&#125;|&#123;&#125;, &#123;&#125;|&#123;&#125;], Values: &#123;&#125;"</span>,</span><br><span class="line">                    key, watermarkTime, watermark, start, window.getStart(), end, window.getEnd(), values</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/window/CountEvictorExample.java" target="_blank" rel="noopener">CountEvictorExample</a></p>
+</blockquote>
+<p>假如输入流如下所示，我们一起看看输出效果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">A,1,2021-08-30 12:07:20</span><br><span class="line">A,2,2021-08-30 12:07:22</span><br><span class="line">A,3,2021-08-30 12:07:33</span><br><span class="line">A,4,2021-08-30 12:07:44</span><br><span class="line">A,5,2021-08-30 12:07:55</span><br><span class="line">A,6,2021-08-30 12:08:34</span><br><span class="line">A,7,2021-08-30 12:08:45</span><br><span class="line">A,8,2021-08-30 12:08:56</span><br><span class="line">A,9,2021-08-30 12:09:30</span><br><span class="line">A,10,2021-08-30 12:09:35</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-1.png?raw=true" alt=""></p>
+<h4 id="2-2-DeltaEvictor"><a href="#2-2-DeltaEvictor" class="headerlink" title="2.2 DeltaEvictor"></a>2.2 DeltaEvictor</h4><p>根据用户自定的 DeltaFunction 函数来计算窗口中最后一个元素与其余每个元素之间的差值，如果差值大于等于用户指定的阈值就会删除该元素。</p>
+<h5 id="2-2-1-内部实现"><a href="#2-2-1-内部实现" class="headerlink" title="2.2.1 内部实现"></a>2.2.1 内部实现</h5><p>DeltaEvictor 与 CountEvictor 一样，都需要实现 Evictor 接口的 evictBefore 和 evictAfter 方法，只是最终调用的 evict() 函数的内部实现逻辑不一样：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">evict</span><span class="params">(Iterable&lt;TimestampedValue&lt;T&gt;&gt; elements, <span class="keyword">int</span> size, EvictorContext ctx)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 窗口最后一个元素</span></span><br><span class="line">    TimestampedValue&lt;T&gt; lastElement = Iterables.getLast(elements);</span><br><span class="line">    <span class="comment">// 遍历整个窗口，与每一个元素进行比较</span></span><br><span class="line">    <span class="keyword">for</span> (Iterator&lt;TimestampedValue&lt;T&gt;&gt; iterator = elements.iterator(); iterator.hasNext(); ) &#123;</span><br><span class="line">        TimestampedValue&lt;T&gt; element = iterator.next();</span><br><span class="line">        <span class="keyword">if</span> (deltaFunction.getDelta(element.getValue(), lastElement.getValue())</span><br><span class="line">                &gt;= <span class="keyword">this</span>.threshold) &#123;</span><br><span class="line">            iterator.remove();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>deltaFunction 函数以及 threshold 变量是在构造函数中传入的。</p>
+</blockquote>
+<p>首先获取窗口中的最后一个元素并遍历整个窗口，然后调用用户指定的 deltaFunction 计算与每一个元素的差值。如果差值大于等于用户自定的阈值就删除该元素。</p>
+<h5 id="2-2-2-如何使用"><a href="#2-2-2-如何使用" class="headerlink" title="2.2.2 如何使用"></a>2.2.2 如何使用</h5><p>如下代码所示，在触发窗口函数计算之前剔除与最后一个元素值差大于等于1的元素：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Tuple2&lt;String, Long&gt;&gt; result = stream</span><br><span class="line">    <span class="comment">// 格式转换</span></span><br><span class="line">    .map(tuple -&gt; Tuple2.of(tuple.f0, tuple.f1)).returns(Types.TUPLE(Types.STRING, Types.LONG))</span><br><span class="line">    <span class="comment">// 根据key分组</span></span><br><span class="line">    .keyBy(<span class="keyword">new</span> KeySelector&lt;Tuple2&lt;String, Long&gt;, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple2&lt;String, Long&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> value.f0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 处理时间滚动窗口 滚动大小60s</span></span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.minutes(<span class="number">1</span>)))</span><br><span class="line">    <span class="comment">// 剔除与最后一个元素值差大于1的元素</span></span><br><span class="line">    .evictor(DeltaEvictor.of(<span class="number">1</span>, <span class="keyword">new</span> DeltaFunction&lt;Tuple2&lt;String, Long&gt;&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">getDelta</span><span class="params">(Tuple2&lt;String, Long&gt; oldDataPoint, Tuple2&lt;String, Long&gt; newDataPoint)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> oldDataPoint.f1 - newDataPoint.f1;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;))</span><br><span class="line">    <span class="comment">// 窗口函数</span></span><br><span class="line">    .process(<span class="keyword">new</span> ProcessWindowFunction&lt;Tuple2&lt;String, Long&gt;, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(String key, Context context, Iterable&lt;Tuple2&lt;String, Long&gt;&gt; elements, Collector&lt;Tuple2&lt;String, Long&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// Watermark</span></span><br><span class="line">            <span class="keyword">long</span> watermark = context.currentWatermark();</span><br><span class="line">            String watermarkTime = DateUtil.timeStamp2Date(watermark);</span><br><span class="line">            <span class="comment">// 窗口开始与结束时间</span></span><br><span class="line">            TimeWindow window = context.window();</span><br><span class="line">            String start = DateUtil.timeStamp2Date(window.getStart());</span><br><span class="line">            String end = DateUtil.timeStamp2Date(window.getEnd());</span><br><span class="line">            <span class="comment">// 窗口中元素</span></span><br><span class="line">            List&lt;Long&gt; values = Lists.newArrayList();</span><br><span class="line">            <span class="keyword">for</span> (Tuple2&lt;String, Long&gt; element : elements) &#123;</span><br><span class="line">                values.add(element.f1);</span><br><span class="line">            &#125;</span><br><span class="line">            LOG.info(<span class="string">"[Process] Key: &#123;&#125;, Watermark: [&#123;&#125;|&#123;&#125;], Window: [&#123;&#125;|&#123;&#125;, &#123;&#125;|&#123;&#125;], Values: &#123;&#125;"</span>,</span><br><span class="line">                    key, watermarkTime, watermark, start, window.getStart(), end, window.getEnd(), values</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅 <a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/window/DeltaEvictorExample.java" target="_blank" rel="noopener">DeltaEvictorExample</a></p>
+</blockquote>
+<p>假如输入流如下所示，我们一起看看输出效果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">A,4,2021-08-30 12:07:20</span><br><span class="line">A,1,2021-08-30 12:07:22</span><br><span class="line">A,3,2021-08-30 12:07:33</span><br><span class="line">A,6,2021-08-30 12:07:44</span><br><span class="line">A,3,2021-08-30 12:07:55</span><br><span class="line">A,6,2021-08-30 12:08:34</span><br><span class="line">A,5,2021-08-30 12:08:45</span><br><span class="line">A,1,2021-08-30 12:08:56</span><br><span class="line">A,6,2021-08-30 12:09:30</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-2.png?raw=true" alt=""></p>
+<h4 id="2-3-TimeEvictor"><a href="#2-3-TimeEvictor" class="headerlink" title="2.3 TimeEvictor"></a>2.3 TimeEvictor</h4><p>以毫秒为单位的时间间隔 windowSize 作为参数，在窗口所有元素中找到最大时间戳 max_ts 并删除所有时间戳小于 max_ts - windowSize 的元素。我们可以理解为只保留最新 windowSize 毫秒内的元素。</p>
+<h5 id="2-3-1-内部实现"><a href="#2-3-1-内部实现" class="headerlink" title="2.3.1 内部实现"></a>2.3.1 内部实现</h5><p>TimeEvictor 与 DeltaEvictor、CountEvictor 一样，都需要实现 Evictor 接口的 evictBefore 和 evictAfter 方法，只是最终调用的 evict() 函数的内部实现逻辑不一样：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">evict</span><span class="params">(Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements, <span class="keyword">int</span> size, EvictorContext ctx)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!hasTimestamp(elements)) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 最大时间戳</span></span><br><span class="line">    <span class="keyword">long</span> currentTime = getMaxTimestamp(elements);</span><br><span class="line">    <span class="comment">// windowSize 保留元素的时间间隔</span></span><br><span class="line">    <span class="keyword">long</span> evictCutoff = currentTime - windowSize;</span><br><span class="line">    <span class="keyword">for</span> (Iterator&lt;TimestampedValue&lt;Object&gt;&gt; iterator = elements.iterator();</span><br><span class="line">            iterator.hasNext(); ) &#123;</span><br><span class="line">        TimestampedValue&lt;Object&gt; record = iterator.next();</span><br><span class="line">        <span class="keyword">if</span> (record.getTimestamp() &lt;= evictCutoff) &#123;</span><br><span class="line">            iterator.remove();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 第一个元素是否有时间戳</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">hasTimestamp</span><span class="params">(Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements)</span> </span>&#123;</span><br><span class="line">    Iterator&lt;TimestampedValue&lt;Object&gt;&gt; it = elements.iterator();</span><br><span class="line">    <span class="keyword">if</span> (it.hasNext()) &#123;</span><br><span class="line">        <span class="keyword">return</span> it.next().hasTimestamp();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 窗口中最大时间戳</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">long</span> <span class="title">getMaxTimestamp</span><span class="params">(Iterable&lt;TimestampedValue&lt;Object&gt;&gt; elements)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> currentTime = Long.MIN_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (Iterator&lt;TimestampedValue&lt;Object&gt;&gt; iterator = elements.iterator();</span><br><span class="line">            iterator.hasNext(); ) &#123;</span><br><span class="line">        TimestampedValue&lt;Object&gt; record = iterator.next();</span><br><span class="line">        currentTime = Math.max(currentTime, record.getTimestamp());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> currentTime;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>首先获取当前窗口中最大的时间戳，减去用户指定时间间隔 windowSize，得到一个 evictCutoff，然后遍历窗口全部元素，删除时间戳小于等于 evictCutoff 的元素。</p>
+<h5 id="2-3-2-如何使用"><a href="#2-3-2-如何使用" class="headerlink" title="2.3.2 如何使用"></a>2.3.2 如何使用</h5><p>如下代码所示，在触发窗口函数计算之前只保留最近10s内的元素：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">DataStream&lt;Tuple2&lt;String, Long&gt;&gt; result = stream</span><br><span class="line">    <span class="comment">// 格式转换</span></span><br><span class="line">    .map(tuple -&gt; Tuple2.of(tuple.f0, tuple.f1)).returns(Types.TUPLE(Types.STRING, Types.LONG))</span><br><span class="line">    <span class="comment">// 根据key分组</span></span><br><span class="line">    .keyBy(<span class="keyword">new</span> KeySelector&lt;Tuple2&lt;String, Long&gt;, String&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getKey</span><span class="params">(Tuple2&lt;String, Long&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> value.f0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="comment">// 处理时间滚动窗口 滚动大小60s</span></span><br><span class="line">    .window(TumblingEventTimeWindows.of(Time.minutes(<span class="number">1</span>)))</span><br><span class="line">    <span class="comment">// 保留窗口中最近10s内的元素</span></span><br><span class="line">    .evictor(TimeEvictor.of(Time.seconds(<span class="number">10</span>)))</span><br><span class="line">    <span class="comment">// 窗口函数</span></span><br><span class="line">    .process(<span class="keyword">new</span> ProcessWindowFunction&lt;Tuple2&lt;String, Long&gt;, Tuple2&lt;String, Long&gt;, String, TimeWindow&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(String key, Context context, Iterable&lt;Tuple2&lt;String, Long&gt;&gt; elements, Collector&lt;Tuple2&lt;String, Long&gt;&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">            <span class="comment">// Watermark</span></span><br><span class="line">            <span class="keyword">long</span> watermark = context.currentWatermark();</span><br><span class="line">            String watermarkTime = DateUtil.timeStamp2Date(watermark);</span><br><span class="line">            <span class="comment">// 窗口开始与结束时间</span></span><br><span class="line">            TimeWindow window = context.window();</span><br><span class="line">            String start = DateUtil.timeStamp2Date(window.getStart());</span><br><span class="line">            String end = DateUtil.timeStamp2Date(window.getEnd());</span><br><span class="line">            <span class="comment">// 窗口中元素</span></span><br><span class="line">            List&lt;Long&gt; values = Lists.newArrayList();</span><br><span class="line">            <span class="keyword">for</span> (Tuple2&lt;String, Long&gt; element : elements) &#123;</span><br><span class="line">                values.add(element.f1);</span><br><span class="line">            &#125;</span><br><span class="line">            LOG.info(<span class="string">"[Process] Key: &#123;&#125;, Watermark: [&#123;&#125;|&#123;&#125;], Window: [&#123;&#125;|&#123;&#125;, &#123;&#125;|&#123;&#125;], Values: &#123;&#125;"</span>,</span><br><span class="line">                    key, watermarkTime, watermark, start, window.getStart(), end, window.getEnd(), values</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>完整代码请查阅<a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/window/TimeEvictorExample.java" target="_blank" rel="noopener">TimeEvictorExample</a></p>
+</blockquote>
+<p>假如输入流如下所示，我们一起看看输出效果：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">A,1,2021-08-30 12:07:20</span><br><span class="line">A,2,2021-08-30 12:07:22</span><br><span class="line">A,3,2021-08-30 12:07:44</span><br><span class="line">A,4,2021-08-30 12:07:55</span><br><span class="line">A,5,2021-08-30 12:07:54</span><br><span class="line">A,6,2021-08-30 12:08:34</span><br><span class="line">A,7,2021-08-30 12:08:45</span><br><span class="line">A,8,2021-08-30 12:08:56</span><br><span class="line">A,9,2021-08-30 12:09:30</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/flink-stream-windows-evictor-3.png?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>相关推荐：</p>
+<ul>
+<li><a href="http://smartsi.club/introducing-stream-windows-in-apache-flink.html">Flink 窗口之Window机制</a></li>
+<li><a href="http://smartsi.club/flink-stream-windows-overall.html">Flink 窗口分配器 WindowAssigner</a></li>
+<li><a href="http://smartsi.club/flink-stream-windows-function.html">Flink 窗口处理函数 WindowFunction</a></li>
+<li><a href="http://smartsi.club/flink-stream-windows-trigger.html">Flink 窗口触发器 Trigger</a></li>
+</ul>
+<p>参考：</p>
+<ul>
+<li><a href="https://ci.apache.org/projects/flink/flink-docs-release-1.13/docs/dev/datastream/operators/windows/#evictors" target="_blank" rel="noopener">Evictors</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/flink-stream-windows-evictor.html" title="Flink 窗口剔除器 Evictor">http://smartsi.club/flink-stream-windows-evictor.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/flink-stream-windows-trigger.html" rel="next" title="Flink 窗口触发器 Trigger">
+                <i class="fa fa-chevron-left"></i> Flink 窗口触发器 Trigger
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">276</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-简介"><span class="nav-number">1.</span> <span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-内置-Evictor"><span class="nav-number">2.</span> <span class="nav-text">2. 内置 Evictor</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-CountEvictor"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 CountEvictor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-1-内部实现"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.1.1 内部实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-2-如何使用"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.1.2 如何使用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-DeltaEvictor"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 DeltaEvictor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-1-内部实现"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 内部实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-如何使用"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 如何使用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-TimeEvictor"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 TimeEvictor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-1-内部实现"><span class="nav-number">2.3.1.</span> <span class="nav-text">2.3.1 内部实现</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-如何使用"><span class="nav-number">2.3.2.</span> <span class="nav-text">2.3.2 如何使用</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
