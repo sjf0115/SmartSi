@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Kafka," />
+
+
+<meta name="description" content="从数据库获取数据到 Apache Kafka 无疑是 Kafka Connect 最流行的用例。Kafka Connect 提供了将数据导入和导出 Kafka 的可扩展且可靠的方式。由于只用到了 Connector 的特定 Plugin 以及一些配置（无需编写代码），因此这是一个比较简单的数据集成方案。下面我们会介绍如何使用 Kafka Connect 将 MySQL 中的数据流式导入到 Kafk">
+<meta name="keywords" content="Kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka Connect JDBC Source MySQL 全量同步">
+<meta property="og:url" content="http://smartsi.club/mysql-bulk-with-kafka-connect-jdbc-source.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="从数据库获取数据到 Apache Kafka 无疑是 Kafka Connect 最流行的用例。Kafka Connect 提供了将数据导入和导出 Kafka 的可扩展且可靠的方式。由于只用到了 Connector 的特定 Plugin 以及一些配置（无需编写代码），因此这是一个比较简单的数据集成方案。下面我们会介绍如何使用 Kafka Connect 将 MySQL 中的数据流式导入到 Kafk">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Kafka/mysql-bulk-with-kafka-connect-jdbc-source-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Kafka/mysql-bulk-with-kafka-connect-jdbc-source-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-09-25T04:20:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka Connect JDBC Source MySQL 全量同步">
+<meta name="twitter:description" content="从数据库获取数据到 Apache Kafka 无疑是 Kafka Connect 最流行的用例。Kafka Connect 提供了将数据导入和导出 Kafka 的可扩展且可靠的方式。由于只用到了 Connector 的特定 Plugin 以及一些配置（无需编写代码），因此这是一个比较简单的数据集成方案。下面我们会介绍如何使用 Kafka Connect 将 MySQL 中的数据流式导入到 Kafk">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Kafka/mysql-bulk-with-kafka-connect-jdbc-source-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/mysql-bulk-with-kafka-connect-jdbc-source.html"/>
+
+
+  <title>Kafka Connect JDBC Source MySQL 全量同步 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/mysql-bulk-with-kafka-connect-jdbc-source.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kafka Connect JDBC Source MySQL 全量同步</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-26T11:56:00+08:00">2021-09-26</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-09-25T12:20:00+08:00">2021-09-25</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/mysql-bulk-with-kafka-connect-jdbc-source.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/mysql-bulk-with-kafka-connect-jdbc-source.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/mysql-bulk-with-kafka-connect-jdbc-source.html" class="leancloud_visitors" data-flag-title="Kafka Connect JDBC Source MySQL 全量同步">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>从数据库获取数据到 Apache Kafka 无疑是 Kafka Connect 最流行的用例。Kafka Connect 提供了将数据导入和导出 Kafka 的可扩展且可靠的方式。由于只用到了 Connector 的特定 Plugin 以及一些配置（无需编写代码），因此这是一个比较简单的数据集成方案。下面我们会介绍如何使用 Kafka Connect 将 MySQL 中的数据流式导入到 Kafka Topic。</p>
+<blockquote>
+<p>如果想了解 Kafka Connect 是什么以及做什么的，可以阅读 <a href="http://smartsi.club/announcing-kafka-connect-building-large-scale-low-latency-data-pipelines.html">Kafka Connect 构建大规模低延迟的数据管道</a> 博文；如果想了解 Kafka Connect 是如何使用的，可以阅读 <a href="http://smartsi.club/how-to-build-a-pipeline-with-kafka-connect.html">Kafka Connect 如何构建实时数据管道</a> 博文。</p>
+</blockquote>
+<h3 id="1-安装-Connect-插件"><a href="#1-安装-Connect-插件" class="headerlink" title="1. 安装 Connect 插件"></a>1. 安装 Connect 插件</h3><p>从 Confluent hub 下载 <a href="https://www.confluent.io/hub/confluentinc/kafka-connect-jdbc" target="_blank" rel="noopener">Kafka Connect JDBC</a> 插件并将 zip 文件解压到 /opt/share/kafka/plugins 目录下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/opt/share/kafka/plugins</span><br><span class="line">└── confluentinc-kafka-connect-jdbc-10.2.2</span><br><span class="line">    ├── doc</span><br><span class="line">    │   ├── LICENSE</span><br><span class="line">    │   └── README.md</span><br><span class="line">    ├── etc</span><br><span class="line">        …</span><br><span class="line">    ├── lib</span><br><span class="line">        …</span><br><span class="line">    │   ├── kafka-connect-jdbc-10.2.2.jar</span><br><span class="line">    │   ├── sqlite-jdbc-3.25.2.jar</span><br><span class="line">    │   ├── postgresql-42.2.19.jar</span><br><span class="line">    │   ├── xmlparserv2-19.7.0.0.jar</span><br><span class="line">        …</span><br><span class="line">    └── manifest.json</span><br></pre></td></tr></table></figure></p>
+<p>在 Kafka Connect 配置文件 connect-standalone.properties（或 connect-distributed.properties）中，修改 plugin.path 配置参数指向我们存放插件的目录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">plugin.path=/opt/share/kafka/plugins</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>有关详安装 Connect 插件细信息，请查阅 <a href="http://smartsi.club/how-to-install-connector-plugins-in-kafka-connect">Kafka Connect 如何安装 Connect 插件</a></p>
+</blockquote>
+<h3 id="2-安装-JDBC-驱动"><a href="#2-安装-JDBC-驱动" class="headerlink" title="2. 安装 JDBC 驱动"></a>2. 安装 JDBC 驱动</h3><p>因为 Connector 需要与数据库进行通信，所以还需要 JDBC 驱动程序。JDBC Connector 插件也没有内置 MySQL 驱动程序，需要我们单独下载驱动程序。MySQL 为许多平台提供了 <a href="https://downloads.mysql.com/archives/c-j/" target="_blank" rel="noopener">JDBC 驱动程序</a>。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Kafka/mysql-bulk-with-kafka-connect-jdbc-source-1.png?raw=true" alt=""></p>
+<p>选择 Platform Independent 选项，然后下载压缩的 TAR 文件。该文件包含 JAR 文件和源代码。将此 tar.gz 文件的内容解压到一个临时目录。将 jar 文件（例如，mysql-connector-java-8.0.17.jar），并且仅将此 JAR 文件复制到与 kafka-connect-jdbc jar 文件相同的文件夹下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cp mysql-connector-java-8.0.17.jar /opt/share/kafka/plugins/confluentinc-kafka-connect-jdbc-10.2.2/lib/</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-运行-Connect"><a href="#3-运行-Connect" class="headerlink" title="3. 运行 Connect"></a>3. 运行 Connect</h3><p>我们可以使用位于 kafka bin 目录中的 connect-distributed.sh 脚本运行 Kafka Connect。我们需要在运行此脚本时提供一个 worker 配置文件：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bin/connect-distributed.sh config/connect-distributed.properties</span><br></pre></td></tr></table></figure></p>
+<p>我们使用 config 目录下的默认 connect-distributed.properties 配置文件来指定 worker 属性，但做一下修改，如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">bootstrap.servers=localhost:9092</span><br><span class="line">group.id=connect-cluster</span><br><span class="line">key.converter.schemas.enable=true</span><br><span class="line">value.converter.schemas.enable=true</span><br><span class="line">offset.storage.topic=connect-offsets</span><br><span class="line">offset.storage.replication.factor=1</span><br><span class="line">offset.storage.partitions=1</span><br><span class="line">config.storage.topic=connect-configs</span><br><span class="line">config.storage.replication.factor=1</span><br><span class="line">status.storage.topic=connect-status</span><br><span class="line">status.storage.replication.factor=1</span><br><span class="line">status.storage.partitions=1</span><br><span class="line">offset.flush.interval.ms=10000</span><br><span class="line"># 核心配置</span><br><span class="line">plugin.path=/opt/share/kafka/plugins</span><br></pre></td></tr></table></figure></p>
+<p>需要特别注意的是 plugin.path 参数是我们需要放置我们下载插件的路径。运行 Connect 后，我们可以通过调用 <a href="http://localhost:8083/connector-plugins" target="_blank" rel="noopener">http://localhost:8083/connector-plugins</a> REST API 来确认 JDBC 插件是否安装成功：<br><figure class="highlight json"><table><tr><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"io.confluent.connect.jdbc.JdbcSinkConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"sink"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"10.2.2"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"io.confluent.connect.jdbc.JdbcSourceConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"source"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"10.2.2"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"org.apache.kafka.connect.file.FileStreamSinkConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"sink"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"2.4.0"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"org.apache.kafka.connect.file.FileStreamSourceConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"source"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"2.4.0"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"org.apache.kafka.connect.mirror.MirrorCheckpointConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"source"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"org.apache.kafka.connect.mirror.MirrorHeartbeatConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"source"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">"class"</span>: <span class="string">"org.apache.kafka.connect.mirror.MirrorSourceConnector"</span>,</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"source"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"1"</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-创建-MySQL-表"><a href="#4-创建-MySQL-表" class="headerlink" title="4. 创建 MySQL 表"></a>4. 创建 MySQL 表</h3><p>准备测试数据，如下创建 kafka_connect_sample 数据库，并创建 student、address、course 三张表：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">DATABASE</span> kafka_connect_sample;</span><br><span class="line"><span class="keyword">USE</span> kafka_connect_sample;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="string">`student`</span>(</span><br><span class="line">   <span class="string">`id`</span> <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   <span class="string">`name`</span> <span class="built_in">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   <span class="string">`address_id`</span> <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span> )</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="string">`address`</span>(</span><br><span class="line">   <span class="string">`id`</span> <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   <span class="string">`prov`</span> <span class="built_in">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   <span class="string">`city`</span> <span class="built_in">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span> )</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8;</span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="string">`course`</span>(</span><br><span class="line">   <span class="string">`id`</span> <span class="built_in">INT</span> <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   <span class="string">`name`</span> <span class="built_in">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">   PRIMARY <span class="keyword">KEY</span> (<span class="string">`id`</span> )</span><br><span class="line">) <span class="keyword">ENGINE</span>=<span class="keyword">InnoDB</span> <span class="keyword">DEFAULT</span> <span class="keyword">CHARSET</span>=utf8;</span><br></pre></td></tr></table></figure></p>
+<p>每个表都插入一些测试数据：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> address <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'山东省'</span>, <span class="string">'青岛市'</span>),</span><br><span class="line">  (<span class="number">2</span>, <span class="string">'北京市'</span>, <span class="string">'朝阳区'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> student <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Bill'</span>, <span class="number">1</span>),</span><br><span class="line">  (<span class="number">2</span>, <span class="string">'Lucy'</span>, <span class="number">1</span>), (<span class="number">3</span>, <span class="string">'Tom'</span>, <span class="number">2</span>), (<span class="number">4</span>, <span class="string">'Lily'</span>, <span class="number">2</span>), (<span class="number">5</span>, <span class="string">'Rock'</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> course <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'语文'</span>),</span><br><span class="line">    (<span class="number">2</span>, <span class="string">'英文'</span>), (<span class="number">3</span>, <span class="string">'物理'</span>), (<span class="number">4</span>, <span class="string">'数学'</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="5-指定要获取的表"><a href="#5-指定要获取的表" class="headerlink" title="5. 指定要获取的表"></a>5. 指定要获取的表</h3><p>现在我们已经正确安装了 Connect JDBC 插件、驱动程序并成功运行了 Connect，我们可以配置 Kafka Connect 以从数据库中获取数据。如下是最少的配置：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">curl -X POST http://localhost:9083/connectors \</span><br><span class="line">-H "Content-Type: application/json" -d '&#123;</span><br><span class="line">    "name": "jdbc_source_connector_mysql_bulk",</span><br><span class="line">    "config": &#123;</span><br><span class="line">            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",</span><br><span class="line">            "connection.url": "jdbc:mysql://localhost:3306/kafka_connect_sample",</span><br><span class="line">            "connection.user": "root",</span><br><span class="line">            "connection.password": "root",</span><br><span class="line">            "topic.prefix": "connect-mysql-bulk-",</span><br><span class="line">            "mode":"bulk"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;'</span><br></pre></td></tr></table></figure></p>
+<p>mode 参数指定了工作模式，在这我们使用 bulk 批量模式来同步全量数据（mode 还可以指定 timestamp、incrementing 或者 timestamp+incrementing 模式来实现增量同步，后续系列文章会单独介绍如何使用 Connect 实现 MySQL 的增量同步）。除了 mode 参数之外其他都是我们经常用到最小集合配置参数：</p>
+<ul>
+<li>connector.class：Connector 对应的 Java 类</li>
+<li>connection.url：JDBC 连接 URL。</li>
+<li>connection.user：JDBC 连接账号。</li>
+<li>connection.password：JDBC 连接密码。</li>
+<li>topic.prefix：为每个表创建一个 kafka Topic。Topic 以 topic.prefix + <table_name> 的格式命名。</table_name></li>
+</ul>
+<blockquote>
+<p>当我们在分布式模式下运行时，我们需要使用 REST API 以及 JOSN 配置来创建 Connector。</p>
+</blockquote>
+<p>使用此配置，每个表（用户有权访问的）都将被完整复制到 Kafka 中。通过如下命令列出 Kafka 集群上的 Topic，我们可以很容易地看到这一点：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">localhost:kafka wy$ bin/kafka-topics.sh --bootstrap-server localhost:9092 --list --topic &quot;connect-mysql-bulk.*&quot;</span><br><span class="line">connect-mysql-bulk-address</span><br><span class="line">connect-mysql-bulk-course</span><br><span class="line">connect-mysql-bulk-student</span><br><span class="line">connect-mysql-bulk-test_table</span><br></pre></td></tr></table></figure></p>
+<p>请注意 onnect-mysql-bulk- 前缀。表内容的完整副本默认每 5 秒发生一次：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Kafka/mysql-bulk-with-kafka-connect-jdbc-source-2.png?raw=true" alt=""></p>
+<p>我们可以通过将 poll.interval.ms 设置为每 10s 一次：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">curl -X POST http://localhost:8083/connectors \</span><br><span class="line">-H "Content-Type: application/json" -d '&#123;</span><br><span class="line">    "name": "jdbc_source_connector_mysql_bulk",</span><br><span class="line">    "config": &#123;</span><br><span class="line">            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",</span><br><span class="line">            "connection.url": "jdbc:mysql://localhost:3306/kafka_connect_sample",</span><br><span class="line">            "connection.user": "root",</span><br><span class="line">            "connection.password": "root",</span><br><span class="line">            "topic.prefix": "connect-mysql-bulk-",</span><br><span class="line">            "mode":"bulk",</span><br><span class="line">            "poll.interval.ms" : 10000</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;'</span><br></pre></td></tr></table></figure></p>
+<p>上述配置获取了所有有权限的表，这可能不是我们想要的。也许我们只想包含来自特定模式的表，通过 catalog.pattern 配置从指定的数据库获取表：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">curl -X POST http://localhost:9083/connectors \</span><br><span class="line">-H "Content-Type: application/json" -d '&#123;</span><br><span class="line">    "name": "jdbc_source_connector_mysql_catalog",</span><br><span class="line">    "config": &#123;</span><br><span class="line">            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",</span><br><span class="line">            "connection.url": "jdbc:mysql://localhost:3306/kafka_connect_sample",</span><br><span class="line">            "connection.user": "root",</span><br><span class="line">            "connection.password": "root",</span><br><span class="line">            "topic.prefix": "connect-mysql-catalog-",</span><br><span class="line">            "mode":"bulk",</span><br><span class="line">            "poll.interval.ms" : 10000,</span><br><span class="line">            "catalog.pattern" : "kafka_connect_sample"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;'</span><br></pre></td></tr></table></figure></p>
+<p>现在我们只从 kafka_connect_sample 数据库中获取表：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">localhost:kafka wy$ bin/kafka-topics.sh --bootstrap-server localhost:9092 --list --topic &quot;connect-mysql-catalog.*&quot;</span><br><span class="line">connect-mysql-catalog-address</span><br><span class="line">connect-mysql-catalog-course</span><br><span class="line">connect-mysql-catalog-student</span><br></pre></td></tr></table></figure></p>
+<p>还可以使用 table.whitelist（白名单）或 table.blacklist（黑名单）配置来控制获取的表。如下所示只把 student 表导入到 Kafka：<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">curl -X POST http://localhost:9083/connectors \</span><br><span class="line">-H "Content-Type: application/json" -d '&#123;</span><br><span class="line">    "name": "jdbc_source_connector_mysql_whitelist",</span><br><span class="line">    "config": &#123;</span><br><span class="line">            "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",</span><br><span class="line">            "connection.url": "jdbc:mysql://localhost:3306/kafka_connect_sample",</span><br><span class="line">            "connection.user": "root",</span><br><span class="line">            "connection.password": "root",</span><br><span class="line">            "topic.prefix": "connect-mysql-whitelist-",</span><br><span class="line">            "mode":"bulk",</span><br><span class="line">            "poll.interval.ms" : 10000,</span><br><span class="line">            "catalog.pattern" : "kafka_connect_sample",</span><br><span class="line">            "table.whitelist" : "student"</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;'</span><br></pre></td></tr></table></figure></p>
+<p>正如预期的那样，现在只有 student 表从数据库流式传输到 Kafka：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">localhost:kafka wy$ bin/kafka-topics.sh --bootstrap-server localhost:9092 --list --topic &quot;connect-mysql-whitelist.*&quot;</span><br><span class="line">connect-mysql-whitelist-student</span><br></pre></td></tr></table></figure></p>
+<p>由于只是一张表，所以这个配置：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;catalog.pattern&quot; : &quot;kafka_connect_sample&quot;,</span><br><span class="line">&quot;table.whitelist&quot; : &quot;student&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>上述配置跟如下配置效果一样：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;table.whitelist&quot; : &quot;kafka_connect_sample.student&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>我们可以在单个 schema 中指定多个表，如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;catalog.pattern&quot; : &quot;kafka_connect_sample&quot;,</span><br><span class="line">&quot;table.whitelist&quot; : &quot;student, address&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>或跨多个数据库：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&quot;table.whitelist&quot; : &quot;kafka_connect_sample.student, test.test_db&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>相关推荐：</p>
+<ul>
+<li><a href="http://smartsi.club/announcing-kafka-connect-building-large-scale-low-latency-data-pipelines.html">Kafka Connect 构建大规模低延迟的数据管道</a></li>
+<li><a href="http://smartsi.club/how-to-build-a-pipeline-with-kafka-connect.html">Kafka Connect 如何构建实时数据管道</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/mysql-bulk-with-kafka-connect-jdbc-source.html" title="Kafka Connect JDBC Source MySQL 全量同步">http://smartsi.club/mysql-bulk-with-kafka-connect-jdbc-source.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-to-install-connector-plugins-in-kafka-connect.html" rel="next" title="Kafka Connect 如何安装 Connect 插件">
+                <i class="fa fa-chevron-left"></i> Kafka Connect 如何安装 Connect 插件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">282</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装-Connect-插件"><span class="nav-number">1.</span> <span class="nav-text">1. 安装 Connect 插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装-JDBC-驱动"><span class="nav-number">2.</span> <span class="nav-text">2. 安装 JDBC 驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-运行-Connect"><span class="nav-number">3.</span> <span class="nav-text">3. 运行 Connect</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-创建-MySQL-表"><span class="nav-number">4.</span> <span class="nav-text">4. 创建 MySQL 表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-指定要获取的表"><span class="nav-number">5.</span> <span class="nav-text">5. 指定要获取的表</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
