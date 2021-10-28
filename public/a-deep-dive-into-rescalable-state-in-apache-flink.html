@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="1. 有状态流从高层次上讲，我们可以将流处理中的状态视为算子中的内存，在内存中记录有关过去输入的信息，并可以作用于将来输入的处理。相反，无状态流处理中的算子仅关注当前输入，不关注上下文以及过去的输入。用一个简单的示例来说明这种差异：假设我们有一个数据流，事件格式为 {event_id：int，event_value：int}。我们的目标是提取每个事件的 event_value 并输出。我们可以通过">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入了解 Flink 的可扩展性状态">
+<meta property="og:url" content="http://smartsi.club/a-deep-dive-into-rescalable-state-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 有状态流从高层次上讲，我们可以将流处理中的状态视为算子中的内存，在内存中记录有关过去输入的信息，并可以作用于将来输入的处理。相反，无状态流处理中的算子仅关注当前输入，不关注上下文以及过去的输入。用一个简单的示例来说明这种差异：假设我们有一个数据流，事件格式为 {event_id：int，event_value：int}。我们的目标是提取每个事件的 event_value 并输出。我们可以通过">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-10-28T00:30:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入了解 Flink 的可扩展性状态">
+<meta name="twitter:description" content="1. 有状态流从高层次上讲，我们可以将流处理中的状态视为算子中的内存，在内存中记录有关过去输入的信息，并可以作用于将来输入的处理。相反，无状态流处理中的算子仅关注当前输入，不关注上下文以及过去的输入。用一个简单的示例来说明这种差异：假设我们有一个数据流，事件格式为 {event_id：int，event_value：int}。我们的目标是提取每个事件的 event_value 并输出。我们可以通过">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/a-deep-dive-into-rescalable-state-in-apache-flink.html"/>
+
+
+  <title>深入了解 Flink 的可扩展性状态 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/a-deep-dive-into-rescalable-state-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">深入了解 Flink 的可扩展性状态</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-27T11:44:01+08:00">2021-10-27</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-10-28T08:30:56+08:00">2021-10-28</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/a-deep-dive-into-rescalable-state-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/a-deep-dive-into-rescalable-state-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/a-deep-dive-into-rescalable-state-in-apache-flink.html" class="leancloud_visitors" data-flag-title="深入了解 Flink 的可扩展性状态">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-有状态流"><a href="#1-有状态流" class="headerlink" title="1. 有状态流"></a>1. 有状态流</h2><p>从高层次上讲，我们可以将流处理中的状态视为算子中的内存，在内存中记录有关过去输入的信息，并可以作用于将来输入的处理。相反，无状态流处理中的算子仅关注当前输入，不关注上下文以及过去的输入。用一个简单的示例来说明这种差异：假设我们有一个数据流，事件格式为 <code>{event_id：int，event_value：int}</code>。我们的目标是提取每个事件的 event_value 并输出。我们可以通过简单的 source-map-sink 管道轻松实现，其中 map 函数从事件中提取 event_value 并将其发送到下游的 Sink。这是一个无状态流处理的实例。如果我们仅在当前事件的 event_value 大于上一个事件时才输出，这该怎么办？在这种情况下，我们的 map 函数显然需要某种方式来记住上一个事件的 event_value，因此这是一个有状态流处理的实例。</p>
+<h2 id="2-状态"><a href="#2-状态" class="headerlink" title="2. 状态"></a>2. 状态</h2><p>Apache Flink 是一个大规模并行分布式处理系统，可以进行大规模的有状态流处理。为了实现扩展性，Flink 作业在逻辑上分解为算子图，并且每个算子在物理执行上分解为多个并行算子实例。从概念上讲，Flink 中的每个并行算子实例都是一个独立的任务，可以在自己的机器上进行调度（Shared-Nothing 架构有网络连接的集群中）。</p>
+<p>为了实现高吞吐量和低延迟，必须最小化任务之间的网络通信。在 Flink 中，用于流处理的网络通信仅发生在作业算子图中的相邻边（垂直方向），因此流数据可以从上游算子传输到下游算子。但是，在算子的并行实例之间（水平方向）不会进行通信。为了避免此类网络通信，数据本地性在 Flink 中至关重要，会影响状态的存储和访问方式。</p>
+<blockquote>
+<p>也就是上下游算子之间有网络通信，算子并行实例之间没有网络通信。</p>
+</blockquote>
+<p>出于数据本地性考虑，Flink 中的所有状态数据总是与运行相应并行算子实例的任务绑定，并且与该任务在同一台机器上。通过这种设计，所有状态数据对任务来说都是本地的，状态访问不需要任务之间的网络通信。避免这种流量对于像 Flink 这样的大规模并行分布式系统的可扩展性至关重要。</p>
+<p>对于 Flink 的状态流处理，我们区分两种不同类型的状态：Operator State 和 Keyed State。Operator State 的作用域是每个算子的并行实例（子任务），Keyed State 可以被认为是分区的 Operator State，每个 Key 具有一个状态分区。</p>
+<h2 id="3-有状态流处理作业的扩展性"><a href="#3-有状态流处理作业的扩展性" class="headerlink" title="3. 有状态流处理作业的扩展性"></a>3. 有状态流处理作业的扩展性</h2><p>在无状态数据流中更改并行度（即修改算子的并行子任务的数量）非常容易。只需要启动或停止无状态算子的并行实例，并与上游和下游算子断开或者连接即可，如下图所示。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-1.png?raw=true" alt=""></p>
+<p>相反，改变有状态算子的并行度涉及比较多，因为我们必须以一致，正确的方式重新分配先前的算子状态。在 Flink Shared-Nothing 架构中，所有状态对于运行并行算子实例的任务来说都是本地的，并且在作业运行时并行算子实例之间不会进行网络通信。但是，在 Flink 中存在一种机制可以允许在任务之间以一致、Exactly-Once 语义保证的方式交换算子状态，这就是 Flink 的 Checkpoint 机制。简而言之，当 Checkpoint 协调器将特殊事件（所谓的 Checkpoint Barrier）注入流中时，就会触发 Checkpoint。Checkpoint Barrier 跟随事件流从 Source 向下游 Sink 流动，并且每当算子实例收到 Barrier 时，算子实例都会立即将其当前状态快照到分布式存储系统（例如，HDFS）。在作业恢复时，作业的新任务（现在可能在不同的机器上运行）可以再次从分布式存储系统中获取状态数据。我们可以借助 Checkpoint 实现状态作业的扩缩容，如下图所示。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-2.png?raw=true" alt=""></p>
+<p>首先，触发 Checkpoint 并发送到分布式存储系统上。接下来，更改并行度重新启动作业，并从分布式存储上访问先前状态的一致性快照。虽然这解决了在机器之间重新分配一致性状态的问题，但仍然存在一个问题：如果先前状态与新的并行算子实例之间不是 1：1 关系，我们如何正确的分配状态？我们可以将先前 map_1 和 map_2 的状态再次分配给新的 map_1 和 map_2，但这样 map_3 就没有了状态。这种幼稚的方法可能造成低效或者错误的结果，具体取决于作业状态类型和具体的语义。</p>
+<p>在下一节中，我们将说明如何解决 Flink 中高效，正确的状态重新分配问题。Flink 有两种状态（Operator State和 Keyed State），需要不同的状态分配方法。</p>
+<h3 id="3-1-Operator-State"><a href="#3-1-Operator-State" class="headerlink" title="3.1 Operator State"></a>3.1 Operator State</h3><p>首先，我们讨论如何为 Operator State 重新分配状态。Operator State 的一个常用场景是在 Kafka Source 中维护 Kafka 分区的当前偏移量。每个 Kafka Source 实例都会维护一个 <code>&lt;PartitionID，Offset&gt;</code> 键值对，正在读取的每个 Kafka 分区都会有这么一个键值对。扩所容后，如何为 Operator State 重新分配状态呢？理想情况下，我们希望在重新调整后，以轮询的方式从 Checkpoint 中重新为所有并行算子实例分配所有的 <code>&lt;PartitionID，Offset&gt;</code> 键值对。</p>
+<p>作为使用者，我们知道 Kafka 分区偏移量的含义，并且可以作为独立的可再分配的状态单元。下图展示了 Flink 中对 Operator State 进行 Checkpoint 的旧接口。在生成快照时，每个 Operator 实例都会返回一个代表其完整状态的 Object。对于 Kafka Source 来说，此 Object 是分区偏移量的 List。然后将此快照 Object 写入分布式存储。恢复时，再从分布式存储中读取该 Object，并将其作为参数传递给 Operator 实例。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-3.png?raw=true" alt=""></p>
+<p>这种方法在扩所容时存在问题：Flink 如何正确的将 Operator State 拆分为可重新分配的分区呢？尽管 Kafka Source 上的状态确实时是分区偏移量的 List，但旧接口返回的状态 Object 对 Flink 来说是一个黑匣子，无法感知对象内的数据结构，所以也无法重新分配。为了解决这个黑盒问题，我们对 Checkpointing 接口进行了一些修改，称为 ListCheckpointed。下图展示了新的 Checkpoint 接口，该接口返回并接收状态分区 List。使用 List 来代替单个 Object 对象可以对状态进行正确的分区：虽然 List 中的每个子项对 Flink 来说仍然是一个黑匣子，但可以认为是 Operator State 独立可重分配的原子单元。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-4.png?raw=true" alt=""></p>
+<p>借助我们新的 Checkpoint 接口，Kafka Source 可以使各个分区偏移量更加一目了然，并且状态重新分配变得与拆分和合并 List 一样容易：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlinkKafkaConsumer</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">RichParallelSourceFunction</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">CheckpointedFunction</span> </span>&#123;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> ListState&lt;Tuple2&lt;KafkaTopicPartition, Long&gt;&gt; offsetsOperatorState;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initializeState</span><span class="params">(FunctionInitializationContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">      OperatorStateStore stateStore = context.getOperatorStateStore();</span><br><span class="line">      <span class="comment">// register the state with the backend</span></span><br><span class="line">      <span class="keyword">this</span>.offsetsOperatorState = stateStore.getSerializableListState(<span class="string">"kafka-offsets"</span>);</span><br><span class="line">      <span class="comment">// if the job was restarted, we set the restored offsets</span></span><br><span class="line">      <span class="keyword">if</span> (context.isRestored()) &#123;</span><br><span class="line">         <span class="keyword">for</span> (Tuple2&lt;KafkaTopicPartition, Long&gt; kafkaOffset : offsetsOperatorState.get()) &#123;</span><br><span class="line">            <span class="comment">// ... restore logic</span></span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">snapshotState</span><span class="params">(FunctionSnapshotContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">      <span class="keyword">this</span>.offsetsOperatorState.clear();</span><br><span class="line">      <span class="comment">// write the partition offsets to the list of operator states</span></span><br><span class="line">      <span class="keyword">for</span> (Map.Entry&lt;KafkaTopicPartition, Long&gt; partition : <span class="keyword">this</span>.subscribedPartitionOffsets.entrySet()) &#123;</span><br><span class="line">         <span class="keyword">this</span>.offsetsOperatorState.add(Tuple2.of(partition.getKey(), partition.getValue()));</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-Keyed-State"><a href="#3-2-Keyed-State" class="headerlink" title="3.2 Keyed State"></a>3.2 Keyed State</h3><p>Flink 中的第二种状态是 Keyed State。与 Operator State 相反，Keyed State 作用于每个 Key，其中 Key 从每个流事件中提取。为了说明 Keyed State 与 Operator State 的不同之处，我们使用以下示例。假设我们有一个事件流，每个事件都具有 <code>{customer_id：int，value：int}</code> 的格式。我们知道可以使用 Operator State 计算并输出所有顾客的连续总和。现在假设我们要稍微修改一下我们的目标需求，我们要为每个顾客计算一个连续总和。这可以使用 Keyed State 来实现，因为必须为流中的每个 Key 维护一个聚合状态。</p>
+<p>需要注意的是，Keyed State 仅适用于通过 keyBy() 算子创建的 Keyed Stream。keyBy() 算子指定了如何从每个事件中提取 Key，并且确保具有相同 Key 的事件始终由相同的并行算子实例处理。因为对于每个 Key 来说，确实只有一个并行算子实例来处理，因此，Keyed State 也会绑定到这一并行算子实例上。从 Key 到算子的映射是根据 Key 的哈希值计算的。</p>
+<p>我们可以看到，在扩缩容时，Keyed State 比 Operator State 有一个明显的优势：我们可以轻松地弄清楚如何在并行算子实例之间正确拆分和重新分配状态。扩缩容后，必须将每个 Key 的状态重新分配给现在负责该 Key 的算子实例上，到底分配到哪个实例由 Keyed Stream 的哈希分区确定。尽管这可以解决在扩缩容后状态与子任务逻辑映射的问题，但还有一个实际问题需要解决：如何高效地将状态转移到子任务的本地？毕竟在重新分配之后，会导致状态与算子实例不在同一台机器上。</p>
+<p>当我们没有扩缩容时，每个子任务都可以简单地一次性顺序读取前一个实例写入 Checkpoint 的整个完整状态。但是，当扩缩容时不能再这样。每个子任务的状态现在可能分散在其他所有子任务写入的文件中。如下图所示，我们展示了如何使用 identity 作为哈希函数将并行度从 3 扩容到 4，Key 范围从 0 到 20。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-5.png?raw=true" alt=""></p>
+<p>一个很自然的想法是从所有子任务的 Checkpoint 中读取先前实例的子任务状态，并过滤出每个子任务相匹配的 Key。尽管此方法实现了顺序读取，但是每个子任务可能读取大量不相关的状态数据，并且分布式文件系统接收了大量并行读取请求。另一种方法是建立一个索引，来跟踪 Checkpoint 中每个 Key 的状态位置。通过这种方法，所有子任务都可以非常准确地定位并读取匹配的 Key。这种方法可以避免读取无关的状态数据，但是有两个缺点：所有 Key 的物化索引（即 key 到读取偏移的映射）可能会非常大；此外，这种方法还会引入大量的随机 I/O（当为单个 Key 寻找数据时，请参见上图），这会给分布式文件系统中带来非常差的性能。</p>
+<p>Flink 的方法介于这两者之间，通过引入 KeyGroup 作为状态分配的基本单位。这是如何实现的呢？首先必须在作业开始之前确定 KeyGroup 的数量，并且之后不能更改。由于 KeyGroup 是状态分配的基本单位，因此这也意味着 KeyGroup 的数量是最大并行度。简而言之，KeyGroup 为我们提供了一种扩所容的灵活性（通过设置最大并行度）与索引以及还原状态最大开销之间进行权衡的方法。</p>
+<p>我们将连续的 KeyGroup 分配给子任务。这使得在恢复时不仅可以在 KeyGroup 中顺序读取，而且可以跨多个 KeyGroup 顺序读取。另一个好处是：KeyGroup 到子任务分配的元数据非常小。我们不需要维护 KeyGroup 的列表，因为跟踪范围边界就足够了。</p>
+<p>如下图所示，展示了并行度从 3 到 4 的过程（10 个 KeyGroup）。我们可以看到，通过引入 KeyGroup 以及范围重分配的方式极大的提升了访问效率。下图中的计算公式 2 和计算公式 3 还详细的说明了 KeyGroup 的计算和分配过程。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/a-deep-dive-into-rescalable-state-in-apache-flink-6.png?raw=true" alt=""></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://flink.apache.org/features/2017/07/04/flink-rescalable-state.html" target="_blank" rel="noopener">A Deep Dive into Rescalable State in Apache Flink</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/a-deep-dive-into-rescalable-state-in-apache-flink.html" title="深入了解 Flink 的可扩展性状态">http://smartsi.club/a-deep-dive-into-rescalable-state-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/hadooop-yarn-nodemanager-health-checker.html" rel="next" title="Hadoop Yarn 节点健康监测机制">
+                <i class="fa fa-chevron-left"></i> Hadoop Yarn 节点健康监测机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">291</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-有状态流"><span class="nav-number">1.</span> <span class="nav-text">1. 有状态流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-状态"><span class="nav-number">2.</span> <span class="nav-text">2. 状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-有状态流处理作业的扩展性"><span class="nav-number">3.</span> <span class="nav-text">3. 有状态流处理作业的扩展性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Operator-State"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Operator State</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Keyed-State"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 Keyed State</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>

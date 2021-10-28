@@ -301,6 +301,182 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/flink-distributed-runtime.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/flink-distributed-runtime.html" itemprop="url">Flink 内部原理之分布式运行环境</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T11:03:01+08:00">2018-01-03</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/flink-distributed-runtime.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/flink-distributed-runtime.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/flink-distributed-runtime.html" class="leancloud_visitors" data-flag-title="Flink 内部原理之分布式运行环境">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          1. 任务链与算子链在分布式运行中，Flink将算子(operator) SubTask 连接成 Task。每个 Task 都只由一个线程执行。将算子链接到 Task 是一个很有用处的优化：它降低了线程间切换和缓冲的开销，并增加了整体吞吐量，同时降低了延迟。链接行为可以在API中配置。
+下图中的示例
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/flink-distributed-runtime.html#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://smartsi.club/hadoop-mapreduce-working-process.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -423,7 +599,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapreduce-working-process.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapreduce-working-process.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -598,7 +774,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/MySQL/[MySQL]MySQL配置远程登录.html#espandi" rel="contents">
+            <a class="btn" href="/MySQL/[MySQL]MySQL配置远程登录.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -774,7 +950,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/how-install-and-startup-airflow.html#espandi" rel="contents">
+            <a class="btn" href="/how-install-and-startup-airflow.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -951,7 +1127,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/flink-programming-model.html#espandi" rel="contents">
+            <a class="btn" href="/flink-programming-model.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1126,7 +1302,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hive-tuning-fetch-task-conversion.html#espandi" rel="contents">
+            <a class="btn" href="/hive-tuning-fetch-task-conversion.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1301,7 +1477,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-2.x-hdfs-architecture.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-2.x-hdfs-architecture.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1476,7 +1652,7 @@
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapReduce1.x-secondary-nameNode.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapReduce1.x-secondary-nameNode.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1655,7 +1831,7 @@ Nam
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-illustrate-how-hdfs-works.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-illustrate-how-hdfs-works.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1830,7 +2006,7 @@ Nam
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapReduce2.x-working-principle.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapReduce2.x-working-principle.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2009,7 +2185,7 @@ TaskTracker，运行作业划分后的任务。T
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapReduce1.x-working-principle.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapReduce1.x-working-principle.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2185,7 +2361,7 @@ MapReduce 2.0(又名MRv2或YARN)。新的架构将JobTracker的两个主要
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapReduce2.0-architecture-detail.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapReduce2.0-architecture-detail.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2361,7 +2537,7 @@ MapReduce 2.0(又名MRv2或YARN)。新的架构将JobTracker的两个主要
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hive-managed-table-external-table.html#espandi" rel="contents">
+            <a class="btn" href="/hive-managed-table-external-table.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2537,7 +2713,7 @@ MRv2的基本思想是将JobTracker的两个主要功能，资源管理和作业
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapReduce-new-generation-architecture-mrv2.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapReduce-new-generation-architecture-mrv2.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2713,7 +2889,7 @@ MRv2的基本思想是将JobTracker的两个主要功能，资源管理和作业
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/speculative-execution-in-hadoop-mapreduce.html#espandi" rel="contents">
+            <a class="btn" href="/speculative-execution-in-hadoop-mapreduce.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2888,7 +3064,7 @@ MRv2的基本思想是将JobTracker的两个主要功能，资源管理和作业
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-hdfs-trash.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-hdfs-trash.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3068,7 +3244,7 @@ Hadoop的一个Block默认是128M(或者64M)，那么对于一条记录来说，
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapreduce-inputsplit.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapreduce-inputsplit.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3246,7 +3422,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-can-reducer-always-be-reused-for-combiner.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-can-reducer-always-be-reused-for-combiner.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3421,7 +3597,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-mapreduce-partitioner-usage.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-mapreduce-partitioner-usage.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3597,7 +3773,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/Python/[Python] 爬虫使用Requests获取网页文本内容中文乱码.html#espandi" rel="contents">
+            <a class="btn" href="/Python/[Python] 爬虫使用Requests获取网页文本内容中文乱码.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3776,7 +3952,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/algorithm-quick-sort.html#espandi" rel="contents">
+            <a class="btn" href="/algorithm-quick-sort.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -3935,7 +4111,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/Hexo/Hexo+Github搭建博客更换皮肤.html#espandi" rel="contents">
+            <a class="btn" href="/Hexo/Hexo+Github搭建博客更换皮肤.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4093,7 +4269,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能.html#espandi" rel="contents">
+            <a class="btn" href="/Hexo/[Hexo]Hexo+Github为NexT主题添加文章阅读量统计功能.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4251,7 +4427,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/Hexo/[Hexo]Hexo+Github配置与主题.html#espandi" rel="contents">
+            <a class="btn" href="/Hexo/[Hexo]Hexo+Github配置与主题.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4408,7 +4584,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hexo_generate_blog.html#espandi" rel="contents">
+            <a class="btn" href="/hexo_generate_blog.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4583,7 +4759,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hive-optimization-how-to-use-map-join.html#espandi" rel="contents">
+            <a class="btn" href="/hive-optimization-how-to-use-map-join.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4758,7 +4934,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-base-multiple-output-format.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-base-multiple-output-format.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -4933,7 +5109,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-ssh-password-free-login.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-ssh-password-free-login.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -5109,7 +5285,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/hadoop-setup-and-start.html#espandi" rel="contents">
+            <a class="btn" href="/hadoop-setup-and-start.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -5285,183 +5461,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/elasticsearch-base-near-real-time-search.html#espandi" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://smartsi.club/elasticsearch-base-making-changes-persistent.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="sjf0115">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/header.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="SmartSi">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/elasticsearch-base-making-changes-persistent.html" itemprop="url">ElasticSearch 持久化变更</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-11-08T20:01:23+08:00">2016-11-08</time>
-            
-
-            
-              <span class="post-meta-divider">|</span>
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-check-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">更新于&#58;</span>
-              
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/ElasticSearch/" itemprop="url" rel="index"><span itemprop="name">ElasticSearch</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/elasticsearch-base-making-changes-persistent.html#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/elasticsearch-base-making-changes-persistent.html" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/elasticsearch-base-making-changes-persistent.html" class="leancloud_visitors" data-flag-title="ElasticSearch 持久化变更">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          1. 持久化变更如果没有使用 fsync 将文件系统缓存中的数据刷（flush）到磁盘上，我们无法保证数据在断电后甚至在正常退出应用程序后仍然存在。为了使 Elasticsearch 具有可靠性，我们需要确保将更改持久化到磁盘上。
-在ElasticSearch 动态更新索引中，我们说过一次完整提交会
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/elasticsearch-base-making-changes-persistent.html#espandi" rel="contents">
+            <a class="btn" href="/elasticsearch-base-near-real-time-search.html#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -5550,7 +5550,7 @@ Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端�
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">290</span>
+                    <span class="site-state-item-count">291</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
