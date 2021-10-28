@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="1. Flink 1.13 state-backend 变化1.1 State 访问的性能监控首先，Flink 1.13 中引入了 State 访问的性能监控，即 Latency trackig state。  通过对每次访问前后的 System#nanoTime 求差，得到 state 访问延迟值(Latency)。此功能不局限于 State Backend 的类型，自定义实现的 State B">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 1.13 State Backend 优化与生产实践">
+<meta property="og:url" content="http://smartsi.club/state-backend-tuning-and-practice-in-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. Flink 1.13 state-backend 变化1.1 State 访问的性能监控首先，Flink 1.13 中引入了 State 访问的性能监控，即 Latency trackig state。  通过对每次访问前后的 System#nanoTime 求差，得到 state 访问延迟值(Latency)。此功能不局限于 State Backend 的类型，自定义实现的 State B">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-1.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-2.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-3.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-4.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-5.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-6.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-7.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-8.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-9.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-10.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-11.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-12.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-13.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-14.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-15.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-16.jpeg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-10-28T13:43:43.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 1.13 State Backend 优化与生产实践">
+<meta name="twitter:description" content="1. Flink 1.13 state-backend 变化1.1 State 访问的性能监控首先，Flink 1.13 中引入了 State 访问的性能监控，即 Latency trackig state。  通过对每次访问前后的 System#nanoTime 求差，得到 state 访问延迟值(Latency)。此功能不局限于 State Backend 的类型，自定义实现的 State B">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-1.jpeg?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/state-backend-tuning-and-practice-in-apache-flink.html"/>
+
+
+  <title>Flink 1.13 State Backend 优化与生产实践 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/state-backend-tuning-and-practice-in-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink 1.13 State Backend 优化与生产实践</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-30T11:44:01+08:00">2021-06-30</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-10-28T21:43:43+08:00">2021-10-28</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/state-backend-tuning-and-practice-in-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/state-backend-tuning-and-practice-in-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/state-backend-tuning-and-practice-in-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink 1.13 State Backend 优化与生产实践">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-Flink-1-13-state-backend-变化"><a href="#1-Flink-1-13-state-backend-变化" class="headerlink" title="1. Flink 1.13 state-backend 变化"></a>1. Flink 1.13 state-backend 变化</h2><h3 id="1-1-State-访问的性能监控"><a href="#1-1-State-访问的性能监控" class="headerlink" title="1.1 State 访问的性能监控"></a>1.1 State 访问的性能监控</h3><p>首先，Flink 1.13 中引入了 State 访问的性能监控，即 Latency trackig state。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-1.jpeg?raw=true" alt=""></p>
+<p>通过对每次访问前后的 System#nanoTime 求差，得到 state 访问延迟值(Latency)。此功能不局限于 State Backend 的类型，自定义实现的 State Backend 也可以复用此功能。State 访问的性能监控会产生一定的性能影响，所以，默认每 100 次做一次取样 (sample)。上图即监控结果展示。</p>
+<p>State 访问的性能监控开启后，对不同的 State Backend 性能损失影响不同：</p>
+<ul>
+<li>对于 RocksDB State Backend，性能损失大概在 1% 左右；</li>
+<li>对于 Heap State Backend，性能损失最多可达 10%。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-2.jpeg?raw=true" alt=""></p>
+<p>上图所示是三个相关的配置项，默认情况下此功能是关闭的，需通过指定参数 state.backend.latency-track.keyed-state-enabled=true 来手动开启。</p>
+<h3 id="1-2-统一的-Savepoint-格式"><a href="#1-2-统一的-Savepoint-格式" class="headerlink" title="1.2 统一的 Savepoint 格式"></a>1.2 统一的 Savepoint 格式</h3><p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-3.jpeg?raw=true" alt=""></p>
+<p>Flink 1.13 之后，Savepoint 支持切换 State Backend，极大提升了系统应用性。创建 Savepoint 后，可修改作业拓扑中 State Backend 的类型，如从 RocksDB 切换成 Heap，或从 Heap 切换成 RocksDB，但切换仅限于 Savepoint。Checkpoint 所存储的文件格式与 State Backend 类型相关，而非通用格式，Checkpoint 目前暂不支持该功能。</p>
+<h3 id="1-3-更清晰的-API"><a href="#1-3-更清晰的-API" class="headerlink" title="1.3 更清晰的 API"></a>1.3 更清晰的 API</h3><p>还有一个比较重要的改动，就是关于概念上的清晰化。Flink 1.13 中将状态和检查点两者区分开来。</p>
+<p>在 Flink 中，State Backend 有两个功能：</p>
+<ul>
+<li>提供状态的访问、查询；</li>
+<li>如果开启了 Checkpoint，会周期向远程的 Durable storage 上传数据和返回元数据 (meta) 给 Job Manager (以下简称 JM)。</li>
+</ul>
+<p>在之前的 Flink 版本中，以上两个功能是混在一起的，即把状态存储和检查点的创建概念笼统得混在一起，导致初学者对此部分感觉很混乱，很难理解。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-4.jpeg?raw=true" alt=""></p>
+<p>目前，State Backend 的种类如上图所示，由于概念的混乱，导致之前的写法中，RocksDB State Backend 中是可以嵌入 Memory State Backend 或 Heap State Backend 的。实际上，RocksDB 里面嵌入的 State Backend，描述的是其内部 Checkpoint 数据传输方向。</p>
+<p>对于 Memory State Backend，在原始构建下，未指定任何的 filepath。且在不开启 HA 的模式下，会将所有 Checkpoint 数据返回给 JM。当 Memory State Backend 指定 filepath，满足上传条件时，Checkpoint 数据直接上传到指定 filepath 下，数据内容不会返回给 JM。对于 Fs State Backend，数据会直接上传到所定义的 filepath 下。</p>
+<p>当然，大家线上用的最多的还是 RocksDB State Backend 搭配上一个远程 fs 地址，旧的写法对于使用 Flink 的用户来说，容易造成状态和检查点理解混乱。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-5.jpeg?raw=true" alt=""></p>
+<p>Flink 1.13 中两个概念被拆开：</p>
+<ul>
+<li>State Backend 的概念变窄，只描述状态访问和存储；</li>
+<li>另外一个概念是 Checkpoint storage，描述的是 Checkpoint 行为，如 Checkpoint 数据是发回给 JM 内存还是上传到远程。所以，相对应的配置项也被拆开。</li>
+</ul>
+<p>当前不仅需要指定 State Backend ，还需要指定 Checkpoint Storage。以下就是新老接口的对应关系：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-6.jpeg?raw=true" alt=""></p>
+<p>当然，虽然旧接口目前仍然保存，但还是推荐大家使用新接口，向新方式迁移，从概念上也更清晰一些。</p>
+<h3 id="1-4-RocksDB-partitioned-Index-amp-filter"><a href="#1-4-RocksDB-partitioned-Index-amp-filter" class="headerlink" title="1.4 RocksDB partitioned Index &amp; filter"></a>1.4 RocksDB partitioned Index &amp; filter</h3><p>下面要提的就是关于 RocksDB 的优化：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-7.jpeg?raw=true" alt=""></p>
+<p>Flink 1.13 中对 RocksDB 增加了分区索引功能。如上图所示，RocksDB Block Cache 中存储的数据包含三部分：</p>
+<ul>
+<li>Data Block (真实数据)</li>
+<li>Index Block (每条数据的索引)</li>
+<li>Filter Block (对文件的 Bloom Filter)</li>
+</ul>
+<p>可以通过方块大小明显看出块大小，Index 和 Filter 是明显大于 Data 的。以 256M SSD 文件为例，Index Block 大概是 0.5M，Filter Block 大概是 5M，Data Block 则默认是 4KB。当 Cache Block 是几百 MB 的时候，如果文件数特别多，Index 和 Filter 不断的替出换入，性能会非常差，尤其是在默认开启了内存管控后。比较明显的现象是，IO 特别频繁，性能始终上不去。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-8.jpeg?raw=true" alt=""></p>
+<p>Flink 1.13 中，复用了 RocksDB 的 partitioned Index &amp; filter 功能，简单来说就是对 RocksDB 的 partitioned Index 做了多级索引。也就是将内存中的最上层常驻，下层根据需要再 load 回来，这样就大大降低了数据 Swap 竞争。线上测试中，相对于内存比较小的场景中，性能提升 10 倍左右。所以，如果在内存管控下 Rocksdb 性能不如预期的话，这也能成为一个性能优化点。</p>
+<p>目前共有两个参数可控制这个功能：</p>
+<ul>
+<li>state.backend.rocksdb.memory.partitioned-index-filters:true (默认 false)</li>
+<li>state.backend.rocksdb.block.metadata-blocksize (多级索引内存配置)</li>
+</ul>
+<h3 id="1-5-默认行为变化"><a href="#1-5-默认行为变化" class="headerlink" title="1.5 默认行为变化"></a>1.5 默认行为变化</h3><p>Flink 1.13 中，默认行为发生如下所示的变化：</p>
+<ul>
+<li>不再支持 state.backend.async 配置项，所有的 Checkpoint 均是异步的 (同步 Checkpoint 场景很少，已去除)；</li>
+<li>state.backend.rocksdb.checkpoint.transfer.thread.num 默认值增大到 4 RocksDB 增量 Checkpoint 时，4 个线程多线程上传文件 RocksDB从增量 Checkpoint 恢复数据时，采用 4 个线程多线程下载。</li>
+</ul>
+<p>当然，性能提升的同时，对 HDFS 底层压力更大些，如果升级后 HDFS 不稳定，可考虑是否与此处相关。</p>
+<h2 id="2-RocksDB-state-backend-内存管控优化"><a href="#2-RocksDB-state-backend-内存管控优化" class="headerlink" title="2. RocksDB state-backend 内存管控优化"></a>2. RocksDB state-backend 内存管控优化</h2><p>Flink 1.10 开始做 state-backend 内存优化，在之后的每个版本中都有相关改进。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-9.jpeg?raw=true" alt=""></p>
+<p>对 RocksDB State Backend 做内存管控的最基本原因在于 Flink state 与 RocksDB 的 Column Family (独立内存) 一一对应。</p>
+<p>在 Flink 1.10 之前，如果声明两个 state，会各自享用自己的 Write Buffer 和 Cache 内存，Flink 并没有对一个 operator 中的 state 数量限制，理论上用户可以设置几千个、几万个 state，可能导致容器内存撑爆。另外，Flink 在 slot-sharing 机制下，一个 slot 内可以存在多个包含 keyed state 的 operator，也很难保证 state 个数不超。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-10.jpeg?raw=true" alt=""></p>
+<p>多个 RocksDB 会有多个 Write Buffer Manager 。如上图所示，以单个 Write Buffer Manager 为例，它将自己的内存 reserve 到 Block Cache 中，根据自己的内存管控逻辑来实现记账，Block Cache 内有 LRU Handle，超出预算时，会被踢出。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-11.jpeg?raw=true" alt=""></p>
+<p>上图提到的 arena block ，是 Write Buffer 最小内存分配单元，默认是 Write buffer 默认配置的 1/8，内存默认为 8MB。但在极端情况下，磁盘上会出现小文件过多的现象，导致性能非常差。如当整体内存分配过小时，Write Buffer 所管控的内存数量也就会比较少，刚开始申请内存时，默认申请 8MB 内存，当已用内存达到总内存的 7/8 时，会被置为 Immutable (置为不可变），之后这部分数据被替出到磁盘上。</p>
+<p>如果单个 arena block 内存占比过大，可能会出现临界 arena block 只写了几 KB，但触发了 Write Buffer 的内存行为管控，将 arena block 置为了 Immutable，之后的数据就会被刷出去，产生小文件，导致性能非常差。对于 LSM DB 来说，提前 flush，对读放大性能产生很大影响，Write Buffer 无法缓存更多读请求。</p>
+<p>我们引入对 arena block 大小有强校验，当 arena block 大小不合适时，会打印 Warning 级别日志，认为当前需要对 arena block 大小作出相应调整。即需要降低 arena block 大小，从而解决数据提前被 flush 的问题，进而提升性能。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-12.jpeg?raw=true" alt=""></p>
+<p>RocksDB Block Cache 为了提高并发性能，将 arena block 分成了若干个分片 (shards)。实质上是 Write Buffer Manager 在做 reserve 时，将 arena block 拆成了若干个 dummy entry，实际上只做了记账，会占据 block cache 的逻辑容量。目前 Flink 使用的 RocksDB 版本中，shards 默认是 1MB，可能会有 shards 的数据超过预算的风险。后来的 RocksDB 高版本中，将 1MB 调成了 256KB 来解决这个风险。由于 Flink 1.13 中没有对 RocksDB 版本升级，所以这个问题依然存在。此外，Flink 1.13 中，没有将 RocksDB Block Cache 内存管控设置成严格模式 (Strict Mode)。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-13.jpeg?raw=true" alt=""></p>
+<p>目前社区用的 RocksDB 的版本是 5.17.2，与 RocksDB 社区最新的 6.17+ 版本，相差大概一两千个 commit。社区在尝试升级 RocksDB 版本时，发现高版本有一些性能回退，即使尽力解决，也只是解决了其中一部分，在部分访问接口下，还是有大约不到 10% 的性能下降。所以，Flink 1.13 决定暂不升级 RocksDB 版本，社区预计会在 Flink 1.14 中做相应升级，引入 RocksDB 一些新的 future，借此弥补目前已知的 10% 性能回退的 Gap。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-14.jpeg?raw=true" alt=""></p>
+<p>综上各种问题，RocksDB 内存管控不完善，加上 Writer Buffer 对 Data Block 不严格的管控，在理论上还是存在一定小几率内存超用的。但就目前来看，整体还是比较稳定，超用的部分不会太多。如果想手动多分一部分内存给 RocksDB 来防止超用，预防在云原生的环境因 OOM 被 K8S kill，可手动将 JVM OverHead 内存调大，如上图所示。</p>
+<p>之所以不调大 Task Off-Heap，是由于目前 Task Off-Heap 是和 Direct Memeory 混在一起的，即使调大整体，也并不一定会分给 RocksDB 来做 Buffer，所以我们推荐通过调整 JVM OverHead 来解决内存超用的问题。同理，如果 Flink 中用到其他相关库，遇到相似问题，也可以尝试将 JVM OverHead 调大来解决。如果想查明内存泄漏原因，也可以结合相应 jemalloc + jeprof 等分析工具排查解决。</p>
+<h2 id="3-Flink-state-backend-模块发展规划"><a href="#3-Flink-state-backend-模块发展规划" class="headerlink" title="3. Flink state-backend 模块发展规划"></a>3. Flink state-backend 模块发展规划</h2><p>以下为 state-backend 模块在 Flink 1.14、1.15 中的发展规划：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-15.jpeg?raw=true" alt=""></p>
+<p>要说明的是，目前只有 RocksDB 支持增量 Checkpoint。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-backend-tuning-and-practice-in-apache-flink-16.jpeg?raw=true" alt=""></p>
+<p>对于 Changelog，在 Apache Kafka 和 Apache Pulsar 中都有这个概念。Changelog 的引入，是 Flink 作为流式计算系统，对传统消息中间件的借鉴。即在数据上传的同时，做一个 proxy，将数据定期写到外部的 log 里，每次做 Checkpoint 时不需要等数据上传，进而使 Checkpoint 的时间更加可控。</p>
+<p>Flink 1.13 已经实现了 proxy 代理层，实际的逻辑层还没有实现，在 Flink 1.14 中会做具体实现，包括相关 log 清理逻辑。希望在 Flink 1.14 中对状态和检查点性能有更好的提升，尤其是目前二阶段提交依赖于 Checkpoint commit，Changelog State Backend 的引入，预计在 Flink 1.14 可以尽快解决相关痛点。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://mp.weixin.qq.com/s/zXdOCqtVv_7iNFngLs44dA" target="_blank" rel="noopener">Flink 1.13，State Backend 优化及生产实践分享</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    唐云@阿里
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/state-backend-tuning-and-practice-in-apache-flink.html" title="Flink 1.13 State Backend 优化与生产实践">http://smartsi.club/state-backend-tuning-and-practice-in-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-install-and-startup-clickhouse.html" rel="next" title="ClickHouse 安装与部署">
+                <i class="fa fa-chevron-left"></i> ClickHouse 安装与部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/a-practical-guide-to-broadcast-state-in-apache-flink.html" rel="prev" title="Flink Broadcast State 实战指南">
+                Flink Broadcast State 实战指南 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">292</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Flink-1-13-state-backend-变化"><span class="nav-number">1.</span> <span class="nav-text">1. Flink 1.13 state-backend 变化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-State-访问的性能监控"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 State 访问的性能监控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-统一的-Savepoint-格式"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 统一的 Savepoint 格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-更清晰的-API"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 更清晰的 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-RocksDB-partitioned-Index-amp-filter"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 RocksDB partitioned Index &amp; filter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-默认行为变化"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 默认行为变化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-RocksDB-state-backend-内存管控优化"><span class="nav-number">2.</span> <span class="nav-text">2. RocksDB state-backend 内存管控优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Flink-state-backend-模块发展规划"><span class="nav-number">3.</span> <span class="nav-text">3. Flink state-backend 模块发展规划</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
