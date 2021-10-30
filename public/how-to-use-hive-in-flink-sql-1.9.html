@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="Apache Flink 从 1.9.0 版本开始增加了与 Hive 集成的功能，用户可以通过 Flink 来访问 Hive 的元数据，以及读写 Hive 中的表。本文将主要从项目的设计架构、最新进展、使用说明等方面来介绍这一功能。 1. Flink on Hive 介绍SQL 是大数据领域中的重要应用场景，为了完善 Flink 的生态，发掘 Flink 在批处理方面的潜力，我们决定增强 Flin">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink SQL 1.9 如何使用 Hive">
+<meta property="og:url" content="http://smartsi.club/how-to-use-hive-in-flink-sql-1.9.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Apache Flink 从 1.9.0 版本开始增加了与 Hive 集成的功能，用户可以通过 Flink 来访问 Hive 的元数据，以及读写 Hive 中的表。本文将主要从项目的设计架构、最新进展、使用说明等方面来介绍这一功能。 1. Flink on Hive 介绍SQL 是大数据领域中的重要应用场景，为了完善 Flink 的生态，发掘 Flink 在批处理方面的潜力，我们决定增强 Flin">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.9-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-10-30T13:31:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink SQL 1.9 如何使用 Hive">
+<meta name="twitter:description" content="Apache Flink 从 1.9.0 版本开始增加了与 Hive 集成的功能，用户可以通过 Flink 来访问 Hive 的元数据，以及读写 Hive 中的表。本文将主要从项目的设计架构、最新进展、使用说明等方面来介绍这一功能。 1. Flink on Hive 介绍SQL 是大数据领域中的重要应用场景，为了完善 Flink 的生态，发掘 Flink 在批处理方面的潜力，我们决定增强 Flin">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.9-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.9.html"/>
+
+
+  <title>Flink SQL 1.9 如何使用 Hive | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink SQL 1.9 如何使用 Hive</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-27T15:47:21+08:00">2019-08-27</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-10-30T21:31:59+08:00">2021-10-30</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/how-to-use-hive-in-flink-sql-1.9.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/how-to-use-hive-in-flink-sql-1.9.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/how-to-use-hive-in-flink-sql-1.9.html" class="leancloud_visitors" data-flag-title="Flink SQL 1.9 如何使用 Hive">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Apache Flink 从 1.9.0 版本开始增加了与 Hive 集成的功能，用户可以通过 Flink 来访问 Hive 的元数据，以及读写 Hive 中的表。本文将主要从项目的设计架构、最新进展、使用说明等方面来介绍这一功能。</p>
+<h2 id="1-Flink-on-Hive-介绍"><a href="#1-Flink-on-Hive-介绍" class="headerlink" title="1. Flink on Hive 介绍"></a>1. Flink on Hive 介绍</h2><p>SQL 是大数据领域中的重要应用场景，为了完善 Flink 的生态，发掘 Flink 在批处理方面的潜力，我们决定增强 FlinkSQL 的功能，从而让用户能够通过 Flink 完成更多的任务。</p>
+<p>Hive 是大数据领域最早出现的 SQL 引擎，发展至今有着丰富的功能和广泛的用户基础。之后出现的 SQL 引擎，如 Spark SQL、Impala 等，都在一定程度上提供了与 Hive 集成的功能，从而方便用户使用现有的数据仓库、进行作业迁移等。因此我们认为提供与 Hive 交互的能力对于 FlinkSQL 也是非常重要的。</p>
+<h2 id="2-设计架构"><a href="#2-设计架构" class="headerlink" title="2. 设计架构"></a>2. 设计架构</h2><p>与 Hive 集成主要包含了元数据和实际表数据的访问，因此我们会从这两方面介绍一下该项目的架构。</p>
+<h3 id="2-1-元数据"><a href="#2-1-元数据" class="headerlink" title="2.1 元数据"></a>2.1 元数据</h3><p>为了访问外部系统的元数据，Flink 提供了 ExternalCatalog 的概念。但是目前 ExternalCatalog 的定义非常不完整，基本处于不可用的状态。因此，我们提出了一套全新的 Catalog 接口来取代现有的 ExternalCatalog。新的 Catalog 能够支持数据库、表、分区等多种元数据对象；允许在一个用户 Session 中维护多个 Catalog 实例，从而同时访问多个外部系统；并且 Catalog 以可插拔的方式接入 Flink，允许用户提供自定义的实现。下图展示了新的 Catalog API 的总体架构。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.9-1.png?raw=true" alt=""></p>
+<p>创建 TableEnvironment 的时候会同时创建一个 CatalogManager，负责管理不同的 Catalog 实例。TableEnvironment 通过 Catalog 来为 Table API 和 SQL Client 用户提供元数据服务。</p>
+<p>目前 Catalog 有两个实现，GenericInMemoryCatalog 和 HiveCatalog。其中 GenericInMemoryCatalog 保持了原有的 Flink 元数据管理机制，将所有元数据保存在内存中。而 HiveCatalog 会与一个 Hive Metastore 的实例连接，提供元数据持久化的能力。要使用 Flink 与 Hive 进行交互，用户需要配置一个 HiveCatalog，并通过 HiveCatalog 访问 Hive 中的元数据。另一方面，HiveCatalog 也可以用来处理 Flink 自身的元数据，在这种场景下，HiveCatalog 仅将 Hive Metastore 作为持久化存储使用，写入 Hive Metastore 中的元数据并不一定是 Hive 所支持的格式。一个 HiveCatalog 实例可以同时支持这两种模式，用户无需为管理 Hive 和 Flink 的元数据创建不同的实例。</p>
+<p>另外，我们设计了 HiveShim 来支持不同版本的 Hive Metastore。目前支持的 Hive 版本包括 2.3.4 和 1.2.1。</p>
+<h3 id="2-2-表数据"><a href="#2-2-表数据" class="headerlink" title="2.2 表数据"></a>2.2 表数据</h3><p>我们提供了 Hive Data Connector 来读写 Hive 的表数据。Hive Data Connector 尽可能的复用了 Hive 本身的 Input/Output Format 和 SerDe 等类，这样做的好处一方面是减少了代码重复，更重要的是可以最大程度的保持与 Hive 的兼容，即 Flink 写入的数据 Hive 可以正常读取，并且反之亦然。</p>
+<p>与 HiveCatalog 类似的，Hive Data Connector 目前支持的 Hive 版本也是 2.3.4 和 1.2.1。</p>
+<h2 id="3-项目进展"><a href="#3-项目进展" class="headerlink" title="3. 项目进展"></a>3. 项目进展</h2><p>Flink 与 Hive 集成的功能会在 1.9.0 版本中作为试用功能发布，用户可以通过 Table API 或者 SQL Client 的模式与 Hive 进行交互。下面列出的是在 1.9.0 中已经支持的功能：</p>
+<ul>
+<li>提供简单的 DDL 来读取 Hive 元数据，比如 show databases、show tables、describe table 等。</li>
+<li>可通过 Catalog API 来修改 Hive 元数据，如 create table、drop table 等。</li>
+<li>读取 Hive 数据，支持分区表和非分区表。</li>
+<li>写 Hive 数据，支持非分区表。</li>
+<li>支持 Text、ORC、Parquet、SequenceFile 等文件格式。</li>
+<li>支持调用用户在 Hive 中创建的 UDF。</li>
+</ul>
+<p>由于是试用功能，因此还有一些方面不够完善，下面列出的是在 1.9.0 中缺失的功能：</p>
+<ul>
+<li>不支持 INSERT OVERWRITE。</li>
+<li>不支持写分区表。</li>
+<li>不支持 ACID 表。</li>
+<li>不支持 Bucket 表。</li>
+<li>不支持 View。</li>
+<li>部分数据类型不支持，包括 Decimal、Char、Varchar、Date、Time、Timestamp、Interval、Union等。</li>
+</ul>
+<h2 id="4-如何应用"><a href="#4-如何应用" class="headerlink" title="4. 如何应用"></a>4. 如何应用</h2><h3 id="4-1-添加依赖"><a href="#4-1-添加依赖" class="headerlink" title="4.1 添加依赖"></a>4.1 添加依赖</h3><p>使用 Flink 与 Hive 集成的功能，用户首先需要添加相应的依赖。如果是使用 SQL Client，则需要将依赖的 jar 添加到 Flink 的 lib 目录中；如果使用 Table API，则需要将相应的依赖添加到项目中（如pom.xml）。</p>
+<p>如上文所述，目前支持的 Hive 版本包括 2.3.4 和 1.2.1，下表列出的是针对不同版本所需的依赖。<br>| Hive版本 | 所需依赖 |<br>| :————- | :————- |<br>| 2.3.4 | flink-connector-hive_2.11、flink-hadoop-compatibility、flink-shaded-hadoop-2-uber-2.7.5、hive-exec |<br>| 1.2.1 | flink-connector-hive_2.11、flink-hadoop-compatibility、flink-shaded-hadoop-2-uber-2.6.5、hive-metastore、hive-exec、libfb303-0.9.3 |</p>
+<p>其中 flink-shaded-hadoop-2-uber 包含了 Hive 对于 Hadoop 的依赖。如果不用 Flink 提供的包，用户也可以将集群中使用的 Hadoop 包添加进来，不过需要保证添加的 Hadoop 版本与 Hive 所依赖的版本是兼容的（Hive 2.3.4 依赖的 Hadoop 版本是 2.7.2；Hive 1.2.1 依赖的 Hadoop 版本是 2.6.0）。</p>
+<p>依赖的 Hive 包（即 hive-exec 和 hive-metastore）也可以使用用户集群中 Hive 所提供的 jar 包，详情请见支持不同的 Hive 版本。</p>
+<h3 id="4-2-配置-HiveCatalog"><a href="#4-2-配置-HiveCatalog" class="headerlink" title="4.2 配置 HiveCatalog"></a>4.2 配置 HiveCatalog</h3><p>要与 Hive 交互，必须使用 HiveCatalog，下面介绍一下如何配置 HiveCatalog。</p>
+<h4 id="4-2-1-SQL-Client"><a href="#4-2-1-SQL-Client" class="headerlink" title="4.2.1 SQL Client"></a>4.2.1 SQL Client</h4><p>使用 SQL Client 时，用户需要在 sql-client-defaults.yaml 中指定自己所需的 Catalog，在 sql-client-defaults.yaml 的 ‘catalogs’ 列表中可以指定一个或多个 Catalog 实例。以下的示例展示了如何指定一个 HiveCatalog：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">catalogs:</span><br><span class="line"># A typical catalog definition looks like:</span><br><span class="line">  - name: myhive</span><br><span class="line">    type: hive</span><br><span class="line">hive-conf-dir: /path/to/hive_conf_dir</span><br><span class="line">hive-version: 2.3.4</span><br></pre></td></tr></table></figure></p>
+<p>其中 name 是用户给每个 Catalog 实例指定的名字，Catalog 名字和 DB 名字构成了 FlinkSQL 中元数据的命名空间，因此需要保证每个 Catalog 的名字是唯一的。type 表示 Catalog 的类型，对于 HiveCatalog 而言，type 应该指定为 hive。hive-conf-dir 用于读取 Hive 的配置文件，用户可以将其设定为集群中 Hive 的配置文件目录。hive-version 用于指定所使用的 Hive 版本，可以设定为 2.3.4 或者 1.2.1。</p>
+<p>指定了 HiveCatalog 以后，用户就可以启动 sql-client，并通过以下命令验证 HiveCatalog 已经正确加载。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; show catalogs;</span><br><span class="line">default_catalog</span><br><span class="line">myhive</span><br><span class="line"></span><br><span class="line">Flink SQL&gt; use catalog myhive;</span><br></pre></td></tr></table></figure></p>
+<p>其中 show catalogs 会列出加载的所有 Catalog 实例。需要注意的是，除了用户在 sql-client-defaults.yaml 文件中配置的 Catalog 以外，FlinkSQL 还会自动加载一个 GenericInMemoryCatalog 实例作为内置的 Catalog，该内置 Catalog 默认名字为 default_catalog。</p>
+<p>使用 use catalog 可以设定用户 Session 当前的 Catalog。用户在 SQL 语句中访问元数据对象（如 DB、Table 等）时，如果不指定 Catalog 名字，则 FlinkSQL 会在当前 Catalog 中进行查找。</p>
+<h3 id="4-2-2-Table-API"><a href="#4-2-2-Table-API" class="headerlink" title="4.2.2 Table API"></a>4.2.2 Table API</h3><p>下面的代码展示了如何通过 TableAPI 来创建 HiveCatalog，并注册到 TableEnvironment。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String name = <span class="string">"myhive"</span>;</span><br><span class="line">String defaultDatabase = <span class="string">"default"</span>;</span><br><span class="line">String hiveConfDir = <span class="string">"/path/to/hive_conf_dir"</span>;</span><br><span class="line">String version = <span class="string">"2.3.4"</span>;</span><br><span class="line"></span><br><span class="line">TableEnvironment tableEnv = …; <span class="comment">// create TableEnvironment</span></span><br><span class="line">HiveCatalog hiveCatalog = <span class="keyword">new</span> HiveCatalog(name, defaultDatabase, hiveConfDir, version);</span><br><span class="line">tableEnv.registerCatalog(name, hiveCatalog);</span><br><span class="line">tableEnv.useCatalog(name);</span><br></pre></td></tr></table></figure></p>
+<p>将 HiveCatalog 注册到 TableEnvironment 以后，就可以在通过 TableEnvironment 提交 SQL 的时候访问 HiveCatalog 中的元数据了。与 SQL Client 类似，TableEnvironment 也提供了 useCatalog 接口让用户设定当前 Catalog。</p>
+<h3 id="4-3-读写-Hive-表"><a href="#4-3-读写-Hive-表" class="headerlink" title="4.3 读写 Hive 表"></a>4.3 读写 Hive 表</h3><p>设置好 HiveCatalog 以后就可以通过 SQL Client 或者 Table API 来读写 Hive 中的表了。</p>
+<h4 id="4-3-1-SQL-Client"><a href="#4-3-1-SQL-Client" class="headerlink" title="4.3.1 SQL Client"></a>4.3.1 SQL Client</h4><p>假设 Hive 中已经有一张名为 src 的表，我们可以用以下的 SQL 语句来读写这张表。<br><figure class="highlight"><table><tr><td class="code"><pre><span class="line">Flink SQL&gt; describe src;</span><br><span class="line">root</span><br><span class="line"> |<span class="comment">-- key: STRING</span></span><br><span class="line"> |<span class="comment">-- value: STRING</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Flink SQL&gt; select * from src;</span><br><span class="line">    key                     value</span><br><span class="line">     100                   val_100</span><br><span class="line">     298                   val_298</span><br><span class="line">       9                     val_9</span><br><span class="line">     341                   val_341</span><br><span class="line">     498                   val_498</span><br><span class="line">     146                   val_146</span><br><span class="line">     458                   val_458</span><br><span class="line">     362                   val_362</span><br><span class="line">     186                   val_186</span><br><span class="line">     ……                   ……</span><br><span class="line">Flink SQL&gt; insert into src values ('newKey','newVal');</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-3-2-Table-API"><a href="#4-3-2-Table-API" class="headerlink" title="4.3.2 Table API"></a>4.3.2 Table API</h4><p>类似的，也可以通过 Table API 来读写上面提到的这张表。下面的代码展示了如何实现这一操作。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">TableEnvironment tableEnv = …; <span class="comment">// create TableEnvironment</span></span><br><span class="line">tableEnv.registerCatalog(<span class="string">"myhive"</span>, hiveCatalog);</span><br><span class="line"><span class="comment">// set myhive as current catalog</span></span><br><span class="line">tableEnv.useCatalog(<span class="string">"myhive"</span>);</span><br><span class="line"></span><br><span class="line">Table src = tableEnv.sqlQuery(<span class="string">"select * from src"</span>);</span><br><span class="line"><span class="comment">// write src into a sink or do further analysis</span></span><br><span class="line">……</span><br><span class="line"></span><br><span class="line">tableEnv.sqlUpdate(<span class="string">"insert into src values ('newKey', 'newVal')"</span>);</span><br><span class="line">tableEnv.execute(<span class="string">"insert into src"</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-4-支持不同的-Hive-版本"><a href="#4-4-支持不同的-Hive-版本" class="headerlink" title="4.4 支持不同的 Hive 版本"></a>4.4 支持不同的 Hive 版本</h3><p>Flink 1.9.0 中支持的 Hive 版本是 2.3.4 和 1.2.1，目前我们只针对这两个版本进行了测试。使用 SQL Client 时，如果用户没有在 sql-client-defaults.yaml 文件中指定 Hive 版本，我们会自动检测 classpath 中的 Hive 版本。如果检测到的 Hive 版本不是 2.3.4 或 1.2.1 就会报错。</p>
+<p>借助 Hive 兼容性的保证，其它不同的小版本也比较可能是可以正常工作的。因此，如果用户使用的 Hive 小版本与我们所支持的不同，可以指定一个支持的版本来试用与 Hive 集成的功能。比如用户使用的 Hive 版本是 2.3.3，可以在 sql-client-defaults.yaml 文件或者代码中将 Hive 版本指定为 2.3.4。</p>
+<h3 id="4-5-执行模式与-Planner-的选择"><a href="#4-5-执行模式与-Planner-的选择" class="headerlink" title="4.5 执行模式与 Planner 的选择"></a>4.5 执行模式与 Planner 的选择</h3><p>Flink 1.9.0 中 Hive 的 TableSink 只能在 batch 模式下工作，因此如果用户想要使用 Hive 的 TableSink，需要将执行模式设置为 batch。Flink 1.9.0 增加了新的 blink planner，由于 blink planner 相比于原来的 planner 功能更加全面，因此我们建议在使用 FlinkSQL 与 Hive 集成时使用 blink planner。后续新的功能也可能会只支持 blink planner。</p>
+<p>使用 SQL Client 时可以像这样在 sql-client-defaults.yaml 中指定执行模式和 planner：<br><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">execution:</span><br><span class="line">  # select the implementation responsible for planning table programs</span><br><span class="line">  # possible values are 'old' (used by default) or 'blink'</span><br><span class="line">  planner: blink</span><br><span class="line">  # 'batch' or 'streaming' execution</span><br><span class="line">  type: batch</span><br></pre></td></tr></table></figure></p>
+<p>对应的 Table API 的写法如下：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inBatchMode().build();</span><br><span class="line">TableEnvironment tableEnv = TableEnvironment.create(settings);</span><br></pre></td></tr></table></figure></p>
+<h2 id="5-后期规划"><a href="#5-后期规划" class="headerlink" title="5. 后期规划"></a>5. 后期规划</h2><p>我们会在 Flink 后续版本中进一步完善与 Hive 集成的功能，预计会在 1.10.0 版本中实现 Production-Ready。我们在后续版本中计划开展的工作包括：</p>
+<ul>
+<li>更完整的数据类型支持</li>
+<li>支持写分区表，包括静态和动态分区</li>
+<li>支持 INSERT OVERWRITE</li>
+<li>支持 View</li>
+<li>更完整的 DDL、DML 的支持</li>
+<li>支持 Hive 的 TableSink 在 streaming 模式下工作，以便用户将流式数据写入到 Hive 中</li>
+<li>测试并支持更多的 Hive 版本</li>
+<li>支持 Bucket 表</li>
+<li>性能测试与优化</li>
+</ul>
+<p>欢迎大家试用 Flink 1.9 中的 Hive 功能，如果遇到任何问题也欢迎大家通过钉钉、邮件列表等方式与我们联系。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://mp.weixin.qq.com/s/jIlodzuGZ9I0ABfzdtKoag" target="_blank" rel="noopener">如何在 Flink 1.9 中使用 Hive？</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.9.html" title="Flink SQL 1.9 如何使用 Hive">http://smartsi.club/how-to-use-hive-in-flink-sql-1.9.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-to-config-log-in-zookeeper.html" rel="next" title="ZooKeeper日志配置">
+                <i class="fa fa-chevron-left"></i> ZooKeeper日志配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/exclude-columns-from-select-query-in-hive.html" rel="prev" title="Hive中排除SELECT查询列">
+                Hive中排除SELECT查询列 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">293</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Flink-on-Hive-介绍"><span class="nav-number">1.</span> <span class="nav-text">1. Flink on Hive 介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-设计架构"><span class="nav-number">2.</span> <span class="nav-text">2. 设计架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-元数据"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 元数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-表数据"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 表数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-项目进展"><span class="nav-number">3.</span> <span class="nav-text">3. 项目进展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-如何应用"><span class="nav-number">4.</span> <span class="nav-text">4. 如何应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-添加依赖"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 添加依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-配置-HiveCatalog"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 配置 HiveCatalog</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-1-SQL-Client"><span class="nav-number">4.2.1.</span> <span class="nav-text">4.2.1 SQL Client</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-2-Table-API"><span class="nav-number">4.3.</span> <span class="nav-text">4.2.2 Table API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-读写-Hive-表"><span class="nav-number">4.4.</span> <span class="nav-text">4.3 读写 Hive 表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-1-SQL-Client"><span class="nav-number">4.4.1.</span> <span class="nav-text">4.3.1 SQL Client</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-2-Table-API"><span class="nav-number">4.4.2.</span> <span class="nav-text">4.3.2 Table API</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-支持不同的-Hive-版本"><span class="nav-number">4.5.</span> <span class="nav-text">4.4 支持不同的 Hive 版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-执行模式与-Planner-的选择"><span class="nav-number">4.6.</span> <span class="nav-text">4.5 执行模式与 Planner 的选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-后期规划"><span class="nav-number">5.</span> <span class="nav-text">5. 后期规划</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
