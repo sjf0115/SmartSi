@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="Flink 1.11 features 已经冻结，流批一体在新版中是浓墨重彩的一笔，在此提前对 Flink 1.11 中流批一体方面的改善进行深度解读，大家可期待正式版本的发布。 Flink 1.11 中流计算结合 Hive 批处理数仓，给离线数仓带来 Flink 流处理实时且 Exactly-once 的能力。另外，Flink 1.11 完善了 Flink 自身的 Filesystem conn">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink SQL 1.11 流批一体 Hive 数仓">
+<meta property="og:url" content="http://smartsi.club/how-to-use-hive-in-flink-sql-1.11.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Flink 1.11 features 已经冻结，流批一体在新版中是浓墨重彩的一笔，在此提前对 Flink 1.11 中流批一体方面的改善进行深度解读，大家可期待正式版本的发布。 Flink 1.11 中流计算结合 Hive 批处理数仓，给离线数仓带来 Flink 流处理实时且 Exactly-once 的能力。另外，Flink 1.11 完善了 Flink 自身的 Filesystem conn">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.11-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.11-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-10-31T03:46:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink SQL 1.11 流批一体 Hive 数仓">
+<meta name="twitter:description" content="Flink 1.11 features 已经冻结，流批一体在新版中是浓墨重彩的一笔，在此提前对 Flink 1.11 中流批一体方面的改善进行深度解读，大家可期待正式版本的发布。 Flink 1.11 中流计算结合 Hive 批处理数仓，给离线数仓带来 Flink 流处理实时且 Exactly-once 的能力。另外，Flink 1.11 完善了 Flink 自身的 Filesystem conn">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.11-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.11.html"/>
+
+
+  <title>Flink SQL 1.11 流批一体 Hive 数仓 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.11.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink SQL 1.11 流批一体 Hive 数仓</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-20T15:47:21+08:00">2020-05-20</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-10-31T11:46:10+08:00">2021-10-31</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/how-to-use-hive-in-flink-sql-1.11.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/how-to-use-hive-in-flink-sql-1.11.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/how-to-use-hive-in-flink-sql-1.11.html" class="leancloud_visitors" data-flag-title="Flink SQL 1.11 流批一体 Hive 数仓">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Flink 1.11 features 已经冻结，流批一体在新版中是浓墨重彩的一笔，在此提前对 Flink 1.11 中流批一体方面的改善进行深度解读，大家可期待正式版本的发布。</p>
+<p>Flink 1.11 中流计算结合 Hive 批处理数仓，给离线数仓带来 Flink 流处理实时且 Exactly-once 的能力。另外，Flink 1.11 完善了 Flink 自身的 Filesystem connector，大大提高了 Flink 的易用性。</p>
+<h2 id="1-数仓架构"><a href="#1-数仓架构" class="headerlink" title="1. 数仓架构"></a>1. 数仓架构</h2><h3 id="1-1-离线数仓"><a href="#1-1-离线数仓" class="headerlink" title="1.1 离线数仓"></a>1.1 离线数仓</h3><p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.11-1.png?raw=true" alt=""></p>
+<p>传统的离线数仓是由 Hive 加上 HDFS 的方案，Hive 数仓有着成熟和稳定的大数据分析能力，结合调度和上下游工具，构建一个完整的数据处理分析平台，流程如下：</p>
+<ul>
+<li>Flume 把数据导入 Hive 数仓</li>
+<li>调度工具，调度 ETL 作业进行数据处理</li>
+<li>在 Hive 数仓的表上，可以进行灵活的 Ad-hoc 查询</li>
+<li>调度工具，调度聚合作业输出到BI层的数据库中</li>
+</ul>
+<p>这个流程下的问题是：</p>
+<ul>
+<li>导入过程不够灵活，这应该是一个灵活 SQL 流计算的过程</li>
+<li>基于调度作业的级联计算，实时性太差</li>
+<li>ETL 不能有流式的增量计算</li>
+</ul>
+<h3 id="1-2-实时数仓"><a href="#1-2-实时数仓" class="headerlink" title="1.2 实时数仓"></a>1.2 实时数仓</h3><p>针对离线数仓的特点，随着实时计算的流行，越来越多的公司引入实时数仓，实时数仓基于 Kafka + Flink streaming，定义全流程的流计算作业，有着秒级甚至毫秒的实时性。</p>
+<p>但是，实时数仓的一个问题是历史数据只有 3-15 天，无法在其上做 Ad-hoc 的查询。如果搭建 Lambda 的离线+实时的架构，维护成本、计算存储成本、一致性保证、重复的开发会带来很大的负担。</p>
+<h2 id="2-Hive-实时化"><a href="#2-Hive-实时化" class="headerlink" title="2. Hive 实时化"></a>2. Hive 实时化</h2><p>Flink 1.11 为解决离线数仓的问题，给 Hive 数仓带来了实时化的能力，加强各环节的实时性的同时，又不会给架构造成太大的负担。</p>
+<h3 id="2-1-Hive-Streaming-Sink"><a href="#2-1-Hive-Streaming-Sink" class="headerlink" title="2.1 Hive Streaming Sink"></a>2.1 Hive Streaming Sink</h3><p>实时数据导入 Hive 数仓，你是怎么做的？Flume、Spark Streaming 还是 Flink Datastream？千呼万唤，Table / SQL 层的 Streaming File Sink 来啦，Flink 1.11 支持 <a href="https://cwiki.apache.org/confluence/display/FLINK/FLIP-115%3A+Filesystem+connector+in+Table" target="_blank" rel="noopener">Filesystem Connector</a> 和 Hive Connector 的 <a href="https://issues.apache.org/jira/browse/FLINK-14255" target="_blank" rel="noopener">Streaming Sink</a>。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-to-use-hive-in-flink-sql-1.11-2.png?raw=true" alt=""></p>
+<p>Table/SQL 层的 Streaming Sink 不仅：</p>
+<ul>
+<li>带来 Flink Streaming 的实时/准实时的能力</li>
+<li>支持 Filesystem Connector 的全部 Formats(csv,json,avro,parquet,orc)</li>
+<li>支持 Hive table 的所有 Formats</li>
+<li>继承 Datastream StreamingFileSink 的所有特性：Exactly-once、支持 HDFS, S3。</li>
+</ul>
+<p>而且引入了新的机制：Partition Commit。</p>
+<p>一个合理的数仓的数据导入，不仅包含数据文件的写入，也包含 Partition 的可见性提交。当某个 Partition 完成写入时，需要通知 Hive Metastore 或者在文件夹内添加 SUCCESS 文件。Flink 1.11 的 Partition Commit 机制可以让你：</p>
+<ul>
+<li>Trigger：控制 Partition 提交的时机，可以根据 Watermark 加上从 Partition 中提取的时间来判断，也可以通过 Processing Time 来判断。你可以控制：是想先尽快看到没写完的 Partition；还是保证写完 Partition 之后，再让下游看到它。</li>
+<li>Policy：提交策略，内置支持 SUCCESS 文件和 Metastore 的提交，你也可以扩展提交的实现，比如在提交阶段触发 Hive 的 analysis 来生成统计信息，或者进行小文件的合并等等。</li>
+</ul>
+<p>一个例子：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 结合Hive dialect使用Hive DDL语法</span></span><br><span class="line"><span class="keyword">SET</span> table.sql-dialect=hive;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> hive_table (</span><br><span class="line">  user_id <span class="keyword">STRING</span>,</span><br><span class="line">  order_amount <span class="keyword">DOUBLE</span></span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (</span><br><span class="line">  dt <span class="keyword">STRING</span>,</span><br><span class="line">  <span class="keyword">hour</span> <span class="keyword">STRING</span></span><br><span class="line">) <span class="keyword">STORED</span> <span class="keyword">AS</span> PARQUET TBLPROPERTIES (</span><br><span class="line">  <span class="comment">-- 使用partition中抽取时间，加上watermark决定partiton commit的时机</span></span><br><span class="line">  <span class="string">'sink.partition-commit.trigger'</span>=<span class="string">'partition-time'</span>,</span><br><span class="line">  <span class="comment">-- 配置hour级别的partition时间抽取策略，这个例子中dt字段是yyyy-MM-dd格式的天，hour是0-23的小时</span></span><br><span class="line">  <span class="comment">-- timestamp-pattern定义了如何从这两个partition字段推出完整的timestamp</span></span><br><span class="line">  <span class="string">'partition.time-extractor.timestamp-pattern'</span>=<span class="string">'$dt $hour:00:00'</span>,</span><br><span class="line">  <span class="comment">-- 配置dalay为小时级，当 watermark &gt; partition时间 + 1小时，会commit这个partition</span></span><br><span class="line">  <span class="string">'sink.partition-commit.delay'</span>=<span class="string">'1 h'</span>,</span><br><span class="line">  <span class="comment">-- partitiion commit的策略是：先更新metastore(addPartition)，再写SUCCESS文件</span></span><br><span class="line">  <span class="string">'sink.partition-commit.policy.kind'</span>=<span class="string">'metastore,success-file'</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">SET</span> table.sql-dialect=<span class="keyword">default</span>;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> kafka_table (</span><br><span class="line">  user_id <span class="keyword">STRING</span>,</span><br><span class="line">  order_amount <span class="keyword">DOUBLE</span>,</span><br><span class="line">  log_ts <span class="keyword">TIMESTAMP</span>(<span class="number">3</span>),</span><br><span class="line">  WATERMARK <span class="keyword">FOR</span> log_ts <span class="keyword">AS</span> log_ts - <span class="built_in">INTERVAL</span> <span class="string">'5'</span> <span class="keyword">SECOND</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 可以结合Table Hints动态指定table properties [3]</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">TABLE</span> hive_table</span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">  user_id, order_amount,</span><br><span class="line">  <span class="keyword">DATE_FORMAT</span>(log_ts, <span class="string">'yyyy-MM-dd'</span>),</span><br><span class="line">  <span class="keyword">DATE_FORMAT</span>(log_ts, <span class="string">'HH'</span>)</span><br><span class="line"><span class="keyword">FROM</span> kafka_table;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-Hive-Streaming-Source"><a href="#2-2-Hive-Streaming-Source" class="headerlink" title="2.2 Hive Streaming Source"></a>2.2 Hive Streaming Source</h3><p>Hive 数仓中存在大量的 ETL 任务，这些任务往往是通过调度工具来周期性的运行，这样做主要有两个问题：</p>
+<ul>
+<li>实时性不强，往往调度最小是小时级。</li>
+<li>流程复杂，组件多，容易出现问题。</li>
+</ul>
+<p>针对这些离线的 ETL 作业，Flink 1.11 为此开发了实时化的 Hive 流读，支持：</p>
+<ul>
+<li><a href="https://issues.apache.org/jira/browse/FLINK-17434" target="_blank" rel="noopener">Partition 表</a>，监控 Partition 的生成，增量读取新的 Partition。</li>
+<li><a href="https://issues.apache.org/jira/browse/FLINK-17435" target="_blank" rel="noopener">非 Partition 表</a>，监控文件夹内新文件的生成，增量读取新的文件。</li>
+</ul>
+<p>你甚至可以使用10分钟级别的分区策略，使用 Flink 的 Hive Streaming Source 和 Hive Streaming Sink 可以大大提高 Hive 数仓的实时性到准实时分钟级，在实时化的同时，也支持针对 Table 全量的 Ad-hoc 查询，提高灵活性。<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> hive_table</span><br><span class="line"><span class="comment">/*+ OPTIONS('streaming-source.enable'='true',</span></span><br><span class="line"><span class="comment">'streaming-source.consume-start-offset'='2020-05-20') */</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-3-实时数据关联-Hive-表"><a href="#2-3-实时数据关联-Hive-表" class="headerlink" title="2.3 实时数据关联 Hive 表"></a>2.3 实时数据关联 Hive 表</h3><p>在 Flink 与 Hive 集成的功能发布以后，我们收到最多的用户反馈之一就是希望能够将 Flink 的实时数据与离线的 Hive 表进行关联。因此，在 Flink 1.11 中，我们支持将实时表与 Hive 表进行 <a href="https://issues.apache.org/jira/browse/FLINK-17387" target="_blank" rel="noopener">Temporal Join</a>。沿用 Flink 官方文档中的例子，假定 Orders 是实时表，而 LatestRates 是一张 Hive 表，用户可以通过以下语句进行 Temporal Join：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">  o.amout, o.currency, r.rate, o.amount * r.rate</span><br><span class="line"><span class="keyword">FROM</span> Orders <span class="keyword">AS</span> o</span><br><span class="line"><span class="keyword">JOIN</span> LatestRates <span class="keyword">FOR</span> SYSTEM_TIME <span class="keyword">AS</span> <span class="keyword">OF</span> o.proctime <span class="keyword">AS</span> r</span><br><span class="line"><span class="keyword">ON</span> r.currency = o.currency</span><br></pre></td></tr></table></figure></p>
+<p>与 Hive 表进行 Temporal Join 目前只支持 Processing Time，我们会把 Hive 表的数据缓存到内存中，并按照固定的时间间隔去更新缓存的数据。用户可以通过参数 ‘lookup.join.cache.ttl’ 来控制缓存更新的间隔，默认间隔为一个小时。’lookup.join.cache.ttl’ 需要配置到 Hive 表的 property 当中，因此每张表可以有不同的配置。另外，由于需要将整张 Hive 表加载到内存中，因此目前只适用于 Hive 表较小的场景。</p>
+<h2 id="3-Hive-增强"><a href="#3-Hive-增强" class="headerlink" title="3. Hive 增强"></a>3. Hive 增强</h2><h3 id="3-1-Hive-Dialect-语法兼容"><a href="#3-1-Hive-Dialect-语法兼容" class="headerlink" title="3.1 Hive Dialect 语法兼容"></a>3.1 Hive Dialect 语法兼容</h3><p>Flink on Hive 用户并不能很好的使用 DDL，主要是因为：</p>
+<ul>
+<li>Flink 1.10 中进一步完善了 DDL，但由于 Flink 与 Hive 在元数据语义上的差异，通过 Flink DDL 来操作 Hive 元数据的可用性比较差，仅能覆盖很少的应用场景。</li>
+<li>使用 Flink 对接 Hive 的用户经常需要切换到 Hive CLI 来执行 DDL。</li>
+</ul>
+<p>针对上述两个问题，我们提出了 <a href="https://cwiki.apache.org/confluence/display/FLINK/FLIP-123%3A+DDL+and+DML+compatibility+for+Hive+connector" target="_blank" rel="noopener">FLIP-123</a>，通过 Hive Dialect 为用户提供 Hive 语法兼容。该功能的最终目标，是为用户提供近似 Hive CLI/Beeline 的使用体验，让用户无需在 Flink 和 Hive 的 CLI 之间进行切换，甚至可以直接迁移部分 Hive 脚本到 Flink 中执行。</p>
+<p>在 Flink 1.11 中，Hive Dialect 可以支持大部分常用的 DDL，比如 CREATE/ALTER TABLE、CHANGE/REPLACE COLUMN、ADD/DROP PARTITION 等等。为此，我们为 Hive Dialect 实现了一个独立的 parser，Flink 会根据用户指定的 Dialect 决定使用哪个 parser 来解析 SQL 语句。用户可以通过配置项 ‘ table.sql-dialect’ 来指定使用的 SQL Dialect，默认值为 ‘default’，即 Flink 原生的 Dialect。如果将其设置为 ‘hive’ 时就开启了 Hive Dialect。对于 SQL 用户，可以在 yaml 文件中设置 ‘table.sql-dialect’ 来指定 session 的初始 Dialect，也可以通过 set 命令来动态调整需要使用的 Dialect，而无需重启 session。</p>
+<p>Hive Dialect 目前所支持的具体功能可以参考 FLIP-123 或 Flink 的官方文档。另外，该功能的一些设计原则和使用注意事项如下：</p>
+<ul>
+<li>Hive Dialect 只能用于操作 Hive 表，而不是 Flink 原生的表（如 Kafka、ES 的表），这也意味着 Hive Dialect 需要配合 HiveCatalog 使用。</li>
+<li>使用 Hive Dialect 时，原有的 Flink 的一些语法可能会无法使用（例如 Flink 定义的类型别名），在需要使用 Flink 语法时可以动态切换到默认的 Dialect。</li>
+<li>Hive Dialect 的 DDL 语法定义基于 Hive 的官方文档，而不同 Hive 版本之间语法可能会有轻微的差异，需要用户进行一定的调整。</li>
+<li>Hive Dialect 的语法实现基于 Calcite，而 Calcite 与 Hive 有不同的保留关键字。因此，某些在 Hive 中可以直接作为标识符的关键字（如 ‘default’）,在 Hive Dialect 中可能需要进行转义。</li>
+</ul>
+<h3 id="3-2-向量化读取"><a href="#3-2-向量化读取" class="headerlink" title="3.2 向量化读取"></a>3.2 向量化读取</h3><p>Flink 1.10 中，Flink 已经支持了 ORC (Hive 2+) 的向量化读取支持，但是这很局限，为此，Flink 1.11 增加了更多的向量化支持：</p>
+<ul>
+<li>ORC for Hive 1.x [8]</li>
+<li>Parquet for Hive 1,2,3 [9]</li>
+</ul>
+<p>也就是说已经补全了所有版本的 Parquet 和 ORC 向量化支持，默认是开启的，提供开关。</p>
+<h3 id="3-3-简化-Hive-依赖"><a href="#3-3-简化-Hive-依赖" class="headerlink" title="3.3 简化 Hive 依赖"></a>3.3 简化 Hive 依赖</h3><p>Flink 1.10 中，Flink 文档中列出了所需的 Hive 相关依赖，推荐用户自行下载。但是这仍然稍显麻烦，所以在 1.11 中，Flink 提供了内置的<a href="https://issues.apache.org/jira/browse/FLINK-16455" target="_blank" rel="noopener">依赖支持</a>：</p>
+<ul>
+<li>flink-sql-connector-hive-1.2.2_2.11-1.11.jar：Hive 1 的依赖版本。</li>
+<li>flink-sql-connector-hive-2.2.0_2.11-1.11.jar：Hive 2.0 - 2.2 的依赖版本。</li>
+<li>flink-sql-connector-hive-2.3.6_2.11-1.11.jar：Hive 2.3 的依赖版本。</li>
+<li>flink-sql-connector-hive-3.1.2_2.11-1.11.jar：Hive 3 的依赖版本。</li>
+</ul>
+<p>现在，你只需要单独下一个包，再搞定 HADOOP_CLASSPATH，即可运行 Flink on Hive。</p>
+<h2 id="4-Flink-增强"><a href="#4-Flink-增强" class="headerlink" title="4. Flink 增强"></a>4. Flink 增强</h2><p>除了 Hive 相关的 features，Flink 1.11 也完成了大量其它关于流批一体的增强。</p>
+<h3 id="4-1-Flink-Filesystem-connector"><a href="#4-1-Flink-Filesystem-connector" class="headerlink" title="4.1 Flink Filesystem connector"></a>4.1 Flink Filesystem connector</h3><p>Flink table 在长久以来只支持一个 csv 的 file system table，而且它还不支持 Partition，行为上在某些方面也有些不符合大数据计算的直觉。在 Flink 1.11，重构了整个 Filesystem connector 的实现：</p>
+<ul>
+<li>结合 Partition，现在，Filesystem connector 支持 SQL 中 Partition 的所有语义，支持 Partition 的 DDL，支持 Partition Pruning，支持静态/动态 Partition 的插入，支持 overwrite 的插入。</li>
+<li>支持各种 Formats：<ul>
+<li>CSV</li>
+<li>JSON</li>
+<li>Aparch AVRO</li>
+<li>Apache Parquet</li>
+<li>Apache ORC.</li>
+</ul>
+</li>
+<li>支持 Batch 的读写。</li>
+<li>支持 Streaming sink，也支持上述 Hive 支持的 Partition commit，支持写 Success 文件。</li>
+</ul>
+<p>例子：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> fs_table (</span><br><span class="line">  user_id <span class="keyword">STRING</span>,</span><br><span class="line">  order_amount <span class="keyword">DOUBLE</span>,</span><br><span class="line">  dt <span class="keyword">STRING</span>,</span><br><span class="line">  <span class="keyword">hour</span> <span class="keyword">STRING</span></span><br><span class="line">) PARTITIONED <span class="keyword">BY</span> (dt, <span class="keyword">hour</span>) <span class="keyword">WITH</span> (</span><br><span class="line">  <span class="string">'connector'</span>=<span class="string">'filesystem'</span>,</span><br><span class="line">  <span class="string">'path'</span>=<span class="string">'...'</span>,</span><br><span class="line">  <span class="string">'format'</span>=<span class="string">'parquet'</span>,</span><br><span class="line">  <span class="string">'partition.time-extractor.timestamp-pattern'</span>=<span class="string">'$dt $hour:00:00'</span>,</span><br><span class="line">  <span class="string">'sink.partition-commit.delay'</span>=<span class="string">'1 h'</span>,</span><br><span class="line">  <span class="string">'sink.partition-commit.policy.kind'</span>=<span class="string">'success-file'</span>)</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- stream environment or batch environment</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">TABLE</span> fs_table</span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">  user_id, order_amount,</span><br><span class="line">  <span class="keyword">DATE_FORMAT</span>(log_ts, <span class="string">'yyyy-MM-dd'</span>),</span><br><span class="line">  <span class="keyword">DATE_FORMAT</span>(log_ts, <span class="string">'HH'</span>)</span><br><span class="line"><span class="keyword">FROM</span> kafka_table;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 通过 Partition 查询</span></span><br><span class="line"><span class="keyword">SELECT</span> *</span><br><span class="line"><span class="keyword">FROM</span> fs_table</span><br><span class="line"><span class="keyword">WHERE</span> dt=<span class="string">'2020-05-20'</span> <span class="keyword">and</span> <span class="keyword">hour</span>=<span class="string">'12'</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-2-引入-Max-Slot"><a href="#4-2-引入-Max-Slot" class="headerlink" title="4.2 引入 Max Slot"></a>4.2 引入 Max Slot</h3><p>Yarn perJob 或者 session 模式在 1.11 之前是无限扩张的，没有办法限制它的资源使用，只能用 Yarn queue 等方式来限制。但是传统的批作业其实都是大并发，运行在局限的资源上，一部分一部分阶段性的运行，为此，Flink 1.11 引入 Max Slot 的配置[11]，限制 Yarn application 的资源使用。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">slotmanager.number-of-slots.max</span><br></pre></td></tr></table></figure></p>
+<p>定义 Flink 集群分配的最大 Slot 数。此配置选项用于限制批处理工作负载的资源消耗。不建议为流作业配置此选项，如果没有足够的 Slot，则流作业可能会失败。</p>
+<h2 id="5-结语"><a href="#5-结语" class="headerlink" title="5. 结语"></a>5. 结语</h2><p>Flink 1.11 也是一个大版本，社区做了大量的 Features 和 Improvements，Flink 的大目标是帮助业务构建流批一体的数仓，提供完善、顺滑、高性能的一体式数仓。希望大家多多参与社区，积极反馈问题和想法，甚至参与社区的讨论和开发，一起把 Flink 做得越来越好！</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>原文:<a href="https://mp.weixin.qq.com/s/5GjZw0A0kMLEv2eLd6Dsag" target="_blank" rel="noopener">深度解读 Flink 1.11：流批一体 Hive 数仓</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Flink 中文社区
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/how-to-use-hive-in-flink-sql-1.11.html" title="Flink SQL 1.11 流批一体 Hive 数仓">http://smartsi.club/how-to-use-hive-in-flink-sql-1.11.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/how-to-use-hive-in-flink-sql-1.10.html" rel="next" title="Flink SQL 1.10 Hive 集成生产就绪">
+                <i class="fa fa-chevron-left"></i> Flink SQL 1.10 Hive 集成生产就绪
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/presto-web-ui.html" rel="prev" title="Presto Web UI">
+                Presto Web UI <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">295</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-数仓架构"><span class="nav-number">1.</span> <span class="nav-text">1. 数仓架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-离线数仓"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 离线数仓</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-实时数仓"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 实时数仓</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Hive-实时化"><span class="nav-number">2.</span> <span class="nav-text">2. Hive 实时化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Hive-Streaming-Sink"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Hive Streaming Sink</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Hive-Streaming-Source"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Hive Streaming Source</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-实时数据关联-Hive-表"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 实时数据关联 Hive 表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Hive-增强"><span class="nav-number">3.</span> <span class="nav-text">3. Hive 增强</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Hive-Dialect-语法兼容"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Hive Dialect 语法兼容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-向量化读取"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 向量化读取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-简化-Hive-依赖"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 简化 Hive 依赖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Flink-增强"><span class="nav-number">4.</span> <span class="nav-text">4. Flink 增强</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-Flink-Filesystem-connector"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 Flink Filesystem connector</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-引入-Max-Slot"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 引入 Max Slot</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-结语"><span class="nav-number">5.</span> <span class="nav-text">5. 结语</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
