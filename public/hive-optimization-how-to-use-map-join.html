@@ -97,25 +97,26 @@
 
 
   
-  <meta name="keywords" content="Hive,Hive 优化," />
+  <meta name="keywords" content="Hive," />
 
 
-<meta name="description" content="1. Join如何运行首先，让我们讨论一下 Join 如何在Hive中运行。Common Join 操作如图1所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从连接表中读取数据并将连接的 key 和连接的 value 键值对输出到中间文件中。Hadoop 在所谓的 shuffle 阶段对这些键值对进行排序和合并。Reduc">
-<meta name="keywords" content="Hive,Hive 优化">
+<meta name="description" content="1. Join 如何运行首先，让我们讨论一下 Join 如何在 Hive 中运行。Common Join 操作如下图所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从 Join 表中读取数据并将 Join 的 key 和 value 以键值对形式输出到中间文件中。Hadoop 在 Shuffle 阶段对这些键值对进行排序和">
+<meta name="keywords" content="Hive">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hive Map Join 原理">
+<meta property="og:title" content="Hive Join 优化之 Map Join">
 <meta property="og:url" content="http://smartsi.club/hive-optimization-how-to-use-map-join.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="1. Join如何运行首先，让我们讨论一下 Join 如何在Hive中运行。Common Join 操作如图1所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从连接表中读取数据并将连接的 key 和连接的 value 键值对输出到中间文件中。Hadoop 在所谓的 shuffle 阶段对这些键值对进行排序和合并。Reduc">
+<meta property="og:description" content="1. Join 如何运行首先，让我们讨论一下 Join 如何在 Hive 中运行。Common Join 操作如下图所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从 Join 表中读取数据并将 Join 的 key 和 value 以键值对形式输出到中间文件中。Hadoop 在 Shuffle 阶段对这些键值对进行排序和">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-2.jpg?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-3.jpg?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-2.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-3.jpg?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-11-07T05:54:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hive Map Join 原理">
-<meta name="twitter:description" content="1. Join如何运行首先，让我们讨论一下 Join 如何在Hive中运行。Common Join 操作如图1所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从连接表中读取数据并将连接的 key 和连接的 value 键值对输出到中间文件中。Hadoop 在所谓的 shuffle 阶段对这些键值对进行排序和合并。Reduc">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true">
+<meta name="twitter:title" content="Hive Join 优化之 Map Join">
+<meta name="twitter:description" content="1. Join 如何运行首先，让我们讨论一下 Join 如何在 Hive 中运行。Common Join 操作如下图所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从 Join 表中读取数据并将 Join 的 key 和 value 以键值对形式输出到中间文件中。Hadoop 在 Shuffle 阶段对这些键值对进行排序和">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true">
 
 
 
@@ -125,7 +126,7 @@
   <link rel="canonical" href="http://smartsi.club/hive-optimization-how-to-use-map-join.html"/>
 
 
-  <title>Hive Map Join 原理 | SmartSi</title>
+  <title>Hive Join 优化之 Map Join | SmartSi</title>
   
 
 
@@ -323,7 +324,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Hive Map Join 原理</h2>
+          <h2 class="post-title" itemprop="name headline">Hive Join 优化之 Map Join</h2>
         
 
         <div class="post-meta">
@@ -349,7 +350,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-11-07T13:54:06+08:00">2021-11-07</time>
             
           </span>
 
@@ -389,7 +390,7 @@
 
           
           
-             <span id="/hive-optimization-how-to-use-map-join.html" class="leancloud_visitors" data-flag-title="Hive Map Join 原理">
+             <span id="/hive-optimization-how-to-use-map-join.html" class="leancloud_visitors" data-flag-title="Hive Join 优化之 Map Join">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -420,21 +421,23 @@
       
 
       
-        <h3 id="1-Join如何运行"><a href="#1-Join如何运行" class="headerlink" title="1. Join如何运行"></a>1. Join如何运行</h3><p>首先，让我们讨论一下 Join 如何在Hive中运行。Common Join 操作如图1所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从连接表中读取数据并将连接的 key 和连接的 value 键值对输出到中间文件中。Hadoop 在所谓的 shuffle 阶段对这些键值对进行排序和合并。Reducer 将排序结果作为输入，并进行实Join。Shuffle 阶段代价非常昂贵，因为它需要排序和合并。减少 Shuffle 和 Reduce 阶段的代价可以提高任务性能。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true" alt=""></p>
-<p>Map Join 的目的是减少 Shuffle 和 Reducer 阶段的代价，并仅在 Map 阶段进行 Join。通过这样做，当其中一个连接表足够小可以装进内存时，所有 Mapper 都可以将数据保存在内存中并完成 Join。因此，所有 Join 操作都可以在 Mapper 阶段完成。但是，这种类型的 Map Join 存在一些扩展问题。当成千上万个 Mapper 同时从 HDFS 将小的连接表读入内存时，连接表很容易成为性能瓶颈，导致 Mapper 在读取操作期间超时。</p>
+        <h3 id="1-Join-如何运行"><a href="#1-Join-如何运行" class="headerlink" title="1. Join 如何运行"></a>1. Join 如何运行</h3><p>首先，让我们讨论一下 Join 如何在 Hive 中运行。Common Join 操作如下图所示被编译为 MapReduce 任务。Common Join 任务涉及 Map 阶段和 Reduce 阶段。Mapper 从 Join 表中读取数据并将 Join 的 key 和 value 以键值对形式输出到中间文件中。Hadoop 在 Shuffle 阶段对这些键值对进行排序和合并。Reducer 将排序结果作为输入，并进行 Join。因为在 Shuffle 阶段需要排序和合并，因此代价非常昂贵。减少 Shuffle 和 Reduce 阶段的代价可以提高任务性能。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-1.jpg?raw=true" alt=""></p>
+<p>Map Join 的目的是减少 Shuffle 和 Reducer 阶段的代价，并仅在 Map 阶段进行 Join。当其中一个 Join 表足够小可以装进内存时，所有 Mapper 都可以将数据保存在内存中并完成 Join。因此，所有 Join 操作都可以在 Mapper 阶段完成。但是，这种类型的 Map Join 存在一些扩展问题。当成千上万个 Mapper 同时从 HDFS 将小的 Join 表读入内存时，Join 表很容易成为性能瓶颈，导致 Mapper 在读取操作期间超时。</p>
 <h3 id="2-使用分布式缓存"><a href="#2-使用分布式缓存" class="headerlink" title="2. 使用分布式缓存"></a>2. 使用分布式缓存</h3><p><a href="https://issues.apache.org/jira/browse/HIVE-1641" target="_blank" rel="noopener">Hive-1641</a> 解决了这个扩展问题。优化的基本思想是在原始 Join 的 MapReduce 任务之前创建一个新的 MapReduce 本地任务。这个新任务是将小表数据从 HDFS 上读取到内存中的哈希表中。读完后，将内存中的哈希表序列化为哈希表文件。在下一阶段，当 MapReduce 任务启动时，会将这个哈希表文件上传到 Hadoop 分布式缓存中，该缓存会将这些文件发送到每个 Mapper 的本地磁盘上。因此，所有 Mapper 都可以将此持久化的哈希表文件加载回内存，并像之前一样进行 Join。优化的 Map Join 的执行流程如下图所示。优化后，小表只需要读取一次。此外，如果多个 Mapper 在同一台机器上运行，则分布式缓存只需将哈希表文件的一个副本发送到这台机器上。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-2.jpg?raw=true" alt=""></p>
-<p>由于 Map Join 比 Common Join 更快，因此最好尽可能运行 Map Join。以前，Hive用户需要在查询中给出提示来指定哪一个是小表。例如：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span>　<span class="comment">/*+MAPJOIN（a）*/</span> <span class="keyword">FROM</span> src1 x <span class="keyword">JOIN</span> src2 y <span class="keyword">ON</span> x.key = y.key;。</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-2.jpg?raw=true" alt=""></p>
+<p>由于 Map Join 比 Common Join 更快，因此最好尽可能运行 Map Join。以前，Hive用户需要在查询中给出提示来指定哪一个是小表。例如：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span>　<span class="comment">/*+MAPJOIN（a）*/</span></span><br><span class="line"><span class="keyword">FROM</span> src1 x</span><br><span class="line"><span class="keyword">JOIN</span> src2 y</span><br><span class="line"><span class="keyword">ON</span> x.key = y.key;。</span><br></pre></td></tr></table></figure></p>
 <p>这种方式用户体验不好，因为有时用户可能会提供错误的提示或者根本不提供任何提示。在没有用户提示的情况下将 Common Join 转换为 Map Join 用户体验会更好。</p>
-<h3 id="3-根据文件大小将Join转换为MapJoin"><a href="#3-根据文件大小将Join转换为MapJoin" class="headerlink" title="3. 根据文件大小将Join转换为MapJoin"></a>3. 根据文件大小将Join转换为MapJoin</h3><p><a href="https://issues.apache.org/jira/browse/HIVE-1642" target="_blank" rel="noopener">Hive-1642</a> 通过自动将 Common Join 转换为 Map Join 来解决此问题。对于 Map Join，查询处理器应该知道哪个输入表是大表。其他输入表在执行阶段被识别为小表，并将这些表保存在内存中。然而，查询处理器在编译时不知道输入文件大小，因为一些表可能是从子查询生成的中间表。因此查询处理器只能在执行期间计算出输入文件的大小。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Hive/hive-optimization-how-to-use-map-join-3.jpg?raw=true" alt=""></p>
-<p>如上图所示，左侧流程显示了先前的 Common Join 执行流程，这非常简单。另一方面，右侧流程是新的 Common Join 执行流程。在编译期间，查询处理器生成一个包含任务列表的 Conditional Task。在执行期间运行其中一个任务。首先，应将原始的 Common Join 任务放入任务列表中。然后，查询处理器通过假设每个输入表可能是大表来生成一系列的 Map Join 任务。例如，<code>select * from src1 x join src2 y on x.key=y.key</code>。因为表 src2 和 src1 都可以是大表，所以处理器生成两个 Map Join 任务，其中一个假设 src1 是大表，另一个假设 src2 是大表。</p>
-<p>在执行阶段，Conditional Task 知道每个输入表的确切文件大小，即使该表是中间表。如果所有表都太大而无法转换为 Map Join，那么只能像以前一样运行 Common Join 任务。如果其中一个表很大而其他表足够小可以运行 Map Join，则将 Conditional Task 选择相应 Map Join 本地任务来运行。通过这种机制，可以自动和动态地将 Common Join 转换为 Map Join。</p>
-<p>目前，如果小表的总大小大于25MB，Conditional Task 会选择原始 Common Join 来运行。25MB是一个非常保守的数字，你可以使用 <code>set hive.smalltable.filesize</code> 来修改。</p>
-<h3 id="4-Example"><a href="#4-Example" class="headerlink" title="4. Example"></a>4. Example</h3><p>我们具体看一个 Map Join:<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> active.md5KeyId, active.active_time, click.click_time</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">(</span><br><span class="line">  <span class="keyword">SELECT</span> md5KeyId, active_time</span><br><span class="line">  <span class="keyword">FROM</span> adv_push_active</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">month</span> = <span class="string">'201711'</span> <span class="keyword">AND</span> <span class="keyword">substr</span>(activeTime, <span class="number">1</span>, <span class="number">10</span>) = <span class="string">'2017-11-02'</span></span><br><span class="line">) active</span><br><span class="line"><span class="keyword">JOIN</span></span><br><span class="line">(</span><br><span class="line">  <span class="keyword">SELECT</span> md5KeyId, click_time</span><br><span class="line">  <span class="keyword">FROM</span> adv_push_click</span><br><span class="line">  <span class="keyword">WHERE</span> dt = <span class="string">'20171102'</span></span><br><span class="line">) click</span><br><span class="line"><span class="keyword">ON</span> <span class="keyword">upper</span>(active.md5KeyId) = <span class="keyword">upper</span>(click.md5KeyId);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-根据文件大小将-Join-转换为-MapJoin"><a href="#3-根据文件大小将-Join-转换为-MapJoin" class="headerlink" title="3. 根据文件大小将 Join 转换为 MapJoin"></a>3. 根据文件大小将 Join 转换为 MapJoin</h3><p><a href="https://issues.apache.org/jira/browse/HIVE-1642" target="_blank" rel="noopener">Hive-1642</a> 通过自动将 Common Join 转换为 Map Join 来解决此问题。对于 Map Join，查询处理器知道哪个输入表是大表，哪些是小表，并将这些小表保存在内存中。然而，查询处理器在编译时不知道输入文件大小，因为一些表可能是从子查询生成的中间表。因此查询处理器只能在执行期间计算出输入文件的大小。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-3.jpg?raw=true" alt=""></p>
+<p>如上图所示，左侧流程展示了之前 Common Join 的执行流程，这非常简单。右侧流程是新的 Common Join 执行流程。在编译期间，查询处理器生成一个包含任务列表的 Conditional Task。在执行期间运行其中一个任务。首先，应将原始的 Common Join 任务放入任务列表中。然后，查询处理器通过假设每个输入表可能是大表来生成一系列的 Map Join 任务。例如，<code>select * from src1 x join src2 y on x.key=y.key</code>。因为表 src2 和 src1 都可以是大表，所以处理器生成两个 Map Join 任务，其中一个假设 src1 是大表，另一个假设 src2 是大表。</p>
+<p>在执行阶段，Conditional Task 知道每个输入表的确切文件大小，即使该表是中间表。如果所有表都太大而无法转换为 Map Join，那么只能像以前一样运行 Common Join 任务。如果其中一个表很大，而其他表足够小可以运行 Map Join，则将 Conditional Task 选择相应 Map Join 本地任务来运行。通过这种机制，可以自动以及动态地将 Common Join 转换为 Map Join。</p>
+<p>目前，如果小表的总大小大于 25MB，Conditional Task 会选择原始 Common Join 来运行。25MB 是一个非常保守的数字，你可以使用 <code>set hive.smalltable.filesize</code> 来修改。</p>
+<h3 id="4-Example"><a href="#4-Example" class="headerlink" title="4. Example"></a>4. Example</h3><p>我们具体看一个 Map Join:<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">  active.md5KeyId, active.active_time, click.click_time</span><br><span class="line"><span class="keyword">FROM</span> (</span><br><span class="line">  <span class="keyword">SELECT</span> md5KeyId, active_time</span><br><span class="line">  <span class="keyword">FROM</span> adv_push_active</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">month</span> = <span class="string">'201711'</span> <span class="keyword">AND</span> <span class="keyword">substr</span>(activeTime, <span class="number">1</span>, <span class="number">10</span>) = <span class="string">'2017-11-02'</span></span><br><span class="line">) active</span><br><span class="line"><span class="keyword">JOIN</span> (</span><br><span class="line">  <span class="keyword">SELECT</span> md5KeyId, click_time</span><br><span class="line">  <span class="keyword">FROM</span> adv_push_click</span><br><span class="line">  <span class="keyword">WHERE</span> dt = <span class="string">'20171102'</span></span><br><span class="line">) click</span><br><span class="line"><span class="keyword">ON</span> <span class="keyword">upper</span>(active.md5KeyId) = <span class="keyword">upper</span>(click.md5KeyId);</span><br></pre></td></tr></table></figure></p>
 <p>输出信息如下：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">2017-11-02 17:32:55  Starting to launch local task to process map join; maximum memory = 514850816</span><br><span class="line">2017-11-02 17:33:01  Dump the side-table for tag: 0 with group count: 162 into file: file:/tmp/smartsi/xxx/hive_2017-11-02_17-32-16_498_230990327610539360-1/-local-10004/HashTable-Stage-3/MapJoin-mapfile70--.hashtable</span><br><span class="line">2017-11-02 17:33:01  Uploaded 1 File to: file:/tmp/smartsi/xxx/hive_2017-11-02_17-32-16_498_230990327610539360-1/-local-10004/HashTable-Stage-3/MapJoin-mapfile70--.hashtable (17191 bytes)</span><br><span class="line">2017-11-02 17:33:01  End of local task; Time Taken: 5.852 sec.</span><br><span class="line">Execution completed successfully</span><br><span class="line">MapredLocal task succeeded</span><br><span class="line">Launching Job 1 out of 1</span><br><span class="line">Number of reduce tasks is set to 0 since there no reduce operator</span><br><span class="line">...</span><br><span class="line">Hadoop job information for Stage-3: number of mappers: 789; number of reducers: 0</span><br><span class="line">2017-11-02 17:33:13,789 Stage-3 map = 0%,  reduce = 0%</span><br><span class="line">2017-11-02 17:34:14,076 Stage-3 map = 0%,  reduce = 0%, Cumulative CPU 3229.1 sec</span><br></pre></td></tr></table></figure></p>
 <p>我们可以看到在原始 Join 的 MapReduce 任务之前创建了一个 MapReduce Local Task。这个新任务是将小表数据从 HDFS 上读取到内存中的哈希表中，并列化为哈希表文件。后面会将这个哈希表文件上传到 Hadoop 分布式缓存中。该缓存会将这些文件发送到每个 Mapper 的本地磁盘上。这些完成之后才会启动一个只有 Map Task 的 MapReduce 作业来完成 Join。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
 <p>原文：<a href="https://www.facebook.com/note.php?note_id=470667928919" target="_blank" rel="noopener">https://www.facebook.com/note.php?note_id=470667928919</a></p>
 
       
@@ -485,7 +488,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/hive-optimization-how-to-use-map-join.html" title="Hive Map Join 原理">http://smartsi.club/hive-optimization-how-to-use-map-join.html</a>
+    <a href="http://smartsi.club/hive-optimization-how-to-use-map-join.html" title="Hive Join 优化之 Map Join">http://smartsi.club/hive-optimization-how-to-use-map-join.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -501,8 +504,6 @@
         <div class="post-tags">
           
             <a href="/tags/Hive/" rel="tag"># Hive</a>
-          
-            <a href="/tags/Hive-优化/" rel="tag"># Hive 优化</a>
           
         </div>
       
@@ -743,7 +744,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Join如何运行"><span class="nav-number">1.</span> <span class="nav-text">1. Join如何运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-使用分布式缓存"><span class="nav-number">2.</span> <span class="nav-text">2. 使用分布式缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-根据文件大小将Join转换为MapJoin"><span class="nav-number">3.</span> <span class="nav-text">3. 根据文件大小将Join转换为MapJoin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Example"><span class="nav-number">4.</span> <span class="nav-text">4. Example</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Join-如何运行"><span class="nav-number">1.</span> <span class="nav-text">1. Join 如何运行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-使用分布式缓存"><span class="nav-number">2.</span> <span class="nav-text">2. 使用分布式缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-根据文件大小将-Join-转换为-MapJoin"><span class="nav-number">3.</span> <span class="nav-text">3. 根据文件大小将 Join 转换为 MapJoin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Example"><span class="nav-number">4.</span> <span class="nav-text">4. Example</span></a></li></ol></div>
             
 
           </div>
