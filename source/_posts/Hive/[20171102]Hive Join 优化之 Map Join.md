@@ -24,7 +24,6 @@ Map Join 的目的是减少 Shuffle 和 Reducer 阶段的代价，并仅在 Map 
 
 ![](https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-optimization-how-to-use-map-join-2.jpg?raw=true)
 
-
 由于 Map Join 比 Common Join 更快，因此最好尽可能运行 Map Join。以前，Hive用户需要在查询中给出提示来指定哪一个是小表。例如：
 ```sql
 SELECT　/*+MAPJOIN（a）*/
