@@ -97,21 +97,23 @@
 
 
   
-  <meta name="keywords" content="Hadoop,Hadoop 基础," />
+  <meta name="keywords" content="Hadoop," />
 
 
-<meta name="description" content="Combiner函数是一个可选的中间函数，发生在Map阶段，Mapper执行完成后立即执行。使用Combiner有如下两个优势：  Combiner可以用来减少发送到Reducer的数据量，从而提高网络效率。 Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端的效率，因为每个reduce函数将处理相比于未使用Combiner之前更少的记录。  Combiner与Red">
-<meta name="keywords" content="Hadoop,Hadoop 基础">
+<meta name="description" content="Combiner 函数是一个可选的中间函数，发生在 Map 阶段，Mapper 执行完成后立即执行。使用 Combiner 有如下两个优势：  Combiner 可以用来减少发送到 Reducer 的数据量，从而提高网络效率。 Combiner 可以用于减少发送到 Reducer 的数据量，这将提高 Reduce 端的效率，因为每个 reduce 函数将处理相比于未使用 Combiner 之前更少">
+<meta name="keywords" content="Hadoop">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hadoop Reducer总是能复用为Combiner？">
+<meta property="og:title" content="Hadoop Reducer 能否复用为 Combiner">
 <meta property="og:url" content="http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html">
 <meta property="og:site_name" content="SmartSi">
-<meta property="og:description" content="Combiner函数是一个可选的中间函数，发生在Map阶段，Mapper执行完成后立即执行。使用Combiner有如下两个优势：  Combiner可以用来减少发送到Reducer的数据量，从而提高网络效率。 Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端的效率，因为每个reduce函数将处理相比于未使用Combiner之前更少的记录。  Combiner与Red">
+<meta property="og:description" content="Combiner 函数是一个可选的中间函数，发生在 Map 阶段，Mapper 执行完成后立即执行。使用 Combiner 有如下两个优势：  Combiner 可以用来减少发送到 Reducer 的数据量，从而提高网络效率。 Combiner 可以用于减少发送到 Reducer 的数据量，这将提高 Reduce 端的效率，因为每个 reduce 函数将处理相比于未使用 Combiner 之前更少">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-11-27T12:35:26.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hadoop Reducer总是能复用为Combiner？">
-<meta name="twitter:description" content="Combiner函数是一个可选的中间函数，发生在Map阶段，Mapper执行完成后立即执行。使用Combiner有如下两个优势：  Combiner可以用来减少发送到Reducer的数据量，从而提高网络效率。 Combiner可以用于减少发送到Reducer的数据量，这将提高Reduce端的效率，因为每个reduce函数将处理相比于未使用Combiner之前更少的记录。  Combiner与Red">
+<meta name="twitter:title" content="Hadoop Reducer 能否复用为 Combiner">
+<meta name="twitter:description" content="Combiner 函数是一个可选的中间函数，发生在 Map 阶段，Mapper 执行完成后立即执行。使用 Combiner 有如下两个优势：  Combiner 可以用来减少发送到 Reducer 的数据量，从而提高网络效率。 Combiner 可以用于减少发送到 Reducer 的数据量，这将提高 Reduce 端的效率，因为每个 reduce 函数将处理相比于未使用 Combiner 之前更少">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
 
 
 
@@ -121,7 +123,7 @@
   <link rel="canonical" href="http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html"/>
 
 
-  <title>Hadoop Reducer总是能复用为Combiner？ | SmartSi</title>
+  <title>Hadoop Reducer 能否复用为 Combiner | SmartSi</title>
   
 
 
@@ -319,7 +321,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">Hadoop Reducer总是能复用为Combiner？</h2>
+          <h2 class="post-title" itemprop="name headline">Hadoop Reducer 能否复用为 Combiner</h2>
         
 
         <div class="post-meta">
@@ -345,7 +347,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2021-11-27T20:35:26+08:00">2021-11-27</time>
             
           </span>
 
@@ -385,7 +387,7 @@
 
           
           
-             <span id="/hadoop-can-reducer-always-be-reused-for-combiner.html" class="leancloud_visitors" data-flag-title="Hadoop Reducer总是能复用为Combiner？">
+             <span id="/hadoop-can-reducer-always-be-reused-for-combiner.html" class="leancloud_visitors" data-flag-title="Hadoop Reducer 能否复用为 Combiner">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -416,25 +418,26 @@
       
 
       
-        <p><code>Combiner</code>函数是一个可选的中间函数，发生在<code>Map</code>阶段，<code>Mapper</code>执行完成后立即执行。使用<code>Combiner</code>有如下两个优势：</p>
+        <p>Combiner 函数是一个可选的中间函数，发生在 Map 阶段，Mapper 执行完成后立即执行。使用 Combiner 有如下两个优势：</p>
 <ul>
-<li><code>Combiner</code>可以用来减少发送到<code>Reducer</code>的数据量，从而提高网络效率。</li>
-<li><code>Combiner</code>可以用于减少发送到<code>Reducer</code>的数据量，这将提高<code>Reduce</code>端的效率，因为每个<code>reduce</code>函数将处理相比于未使用<code>Combiner</code>之前更少的记录。</li>
+<li>Combiner 可以用来减少发送到 Reducer 的数据量，从而提高网络效率。</li>
+<li>Combiner 可以用于减少发送到 Reducer 的数据量，这将提高 Reduce 端的效率，因为每个 reduce 函数将处理相比于未使用 Combiner 之前更少的记录。</li>
 </ul>
-<p><code>Combiner</code>与<code>Reducer</code>结构相同，因为<code>Combiner</code>和<code>Reducer</code>都对<code>Mapper</code>的输出进行处理。这给了我们一个复用<code>Reducer</code>作为<code>Combiner</code>的好机会。但问题是，复用<code>Reducer</code>作为<code>Combiner</code>总是可行的吗？</p>
-<h3 id="1-Reducer作为Combiner的适用场景"><a href="#1-Reducer作为Combiner的适用场景" class="headerlink" title="1. Reducer作为Combiner的适用场景"></a>1. Reducer作为Combiner的适用场景</h3><p>假设我们正在编写一个<code>MapReduce</code>程序来计算股票数据集中每个股票代码的最大收盘价。<code>Mapper</code>将数据集中每个股票记录的股票代码作为key和收盘价作为value。<code>Reducer</code>然后将循环遍历股票代码对应的所有收盘价，并从收盘价列表中计算最高收盘价。假设<code>Mapper 1</code>处理股票代码为<code>ABC</code>的3个记录，收盘价分别为50，60和111。让我们假设<code>Mapper 2</code>处理股票代码为ABC的2个记录，收盘价分别为100和31。那么<code>Reducer</code>将收到股票代码ABC五个收盘价—50，60，111，100和31。Reducer的工作非常简单，它将简单地循环遍历所有收盘价，并将计算最高收盘价为111。</p>
-<p>我们可以在每个<code>Mapper</code>之后使用相同的<code>Reducer</code>作为<code>Combiner</code>。<code>Mapper 1</code>上的<code>Combiner</code>将处理3个收盘价格–50，60和111，并且仅输出111，因为它是3个收盘价的最大值。<code>Mapper 2</code>上的<code>Combiner</code>将处理2个收盘价格–100和31，并且仅输出100，因为它是2个收盘价的最大值。现在使用<code>Combiner</code>之后，<code>Reducer</code>仅处理股票代码ABC的2个收盘价(原先需要处理5个收盘价)，即来自<code>Mapper 1</code>的111和来自<code>Mapper 2</code>的100，并且将从这两个值中计算出最大收盘价格为111。</p>
-<p> 正如我们看到的，使用<code>Combiner</code>情况下<code>Reducer</code>输出与没有使用<code>Combiner</code>的输出结果是相同的，因此在这种情况下复用<code>Reducer</code>作为<code>Combiner</code>是没有问题。</p>
-<h3 id="2-Reducer作为Combiner的不适用场景"><a href="#2-Reducer作为Combiner的不适用场景" class="headerlink" title="2. Reducer作为Combiner的不适用场景"></a>2. Reducer作为Combiner的不适用场景</h3><p>假设我们正在编写一个<code>MapReduce</code>程序来计算股票数据集中每个股票代码的平均交易量（average volume for each symbol）。<code>Mapper</code>将数据集中每个股票记录的股票代码作为key和交易量（volume）作为value。<code>Reducer</code>然后将循环遍历股票代码对应的所有交易量，并从交易量列表中计算出平均交易量（average volume from the list of volumes for that symbol）。假设<code>Mapper 1</code>处理股票代码为ABC的3个记录，收盘价分别为50，60和111。让我们假设<code>Mapper 2</code>处理股票代码为ABC的2个记录，收盘价分别为100和31。那么<code>Reducer</code>将收到股票代码ABC五个收盘价—50，60，111，100和31。Reducer的工作非常简单，它将简单地循环遍历所有交易量，并将计算出平均交易量为70.4。permalink: hadoop-setup-and-start<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">50 + 60 + 111 + 100 + 31 /  5 = 352 / 5 = 70.4</span><br></pre></td></tr></table></figure></p>
-<p>让我们看看如果我们在每个<code>Mapper</code>之后复用<code>Reducer</code>作为<code>Combiner</code>会发生什么。<code>Mapper 1</code>上的<code>Combiner</code>将处理3个交易量–50，60和111，并计算出三个交易量的平均交易量为73.66。<br><code>Mapper 2</code>上的<code>Combiner</code>将处理2个交易量–100和31，并计算出两个交易量的平均交易量为65.5。那么在复用<code>Reducer</code>作为<code>Combiner</code>的情况下，<code>Reducer</code>仅处理股票代码ABC的2个平均交易量，来自<code>Mapper1</code>的73.66和来自<code>Mapper2</code>的65.5，并计算股票代码ABC最终的平均交易量为69.58。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">73.66 + 65.5 /2  = 69.58</span><br></pre></td></tr></table></figure></p>
-<p>这与我们不复用<code>Reducer</code>作为<code>Combiner</code>得出的结果不一样，因此复用<code>Reducer</code>作为<code>Combiner</code>得出平均交易量是不正确的。</p>
-<p>所以我们可以看到<code>Reducer</code>不能总是被用于<code>Combiner</code>。所以，当你决定复用<code>Reducer</code>作为<code>Combiner</code>的时候，你需要问自己这样一个问题:使用<code>Combiner</code>与不使用<code>Combiner</code>的输出结果是否一样？</p>
-<h3 id="3-区别"><a href="#3-区别" class="headerlink" title="3. 区别"></a>3. 区别</h3><p><code>Combiner</code>需要实现<code>Reducer</code>接口。<code>Combiner</code>只能用于特定情况。</p>
+<p>Combiner 与 Reducer 结构相同，因为 Combiner 和 Reducer 都是对 Mapper 的输出进行处理。这给了我们一个复用 Reducer 作为 Combiner 的好机会。但问题是，复用 Reducer 作为 Combiner 总是可行的吗？</p>
+<h3 id="1-Reducer-作为-Combiner-的适用场景"><a href="#1-Reducer-作为-Combiner-的适用场景" class="headerlink" title="1. Reducer 作为 Combiner 的适用场景"></a>1. Reducer 作为 Combiner 的适用场景</h3><p>假设我们在编写一个 MapReduce 程序来计算股票数据集中每只股票的最大收盘价。Mapper 将数据集中每条股票记录的股票代码作为 key 以及收盘价作为 value。Reducer 然后将循环遍历股票代码对应的所有收盘价，并从收盘价列表中计算最高收盘价。假设 Mapper 1 处理股票代码为 ABC 的 3 条记录，收盘价分别为 50、60 以及 111。我们假设 Mapper 2 处理股票代码为 ABC 的 2 条记录，收盘价分别为 100 和 31。那么 Reducer 将收到股票代码 ABC 五个收盘价：50、60、111、100 以及 31。Reducer 的工作非常简单，简单循环遍历所有收盘价，计算最高收盘价为 111。</p>
+<p>我们可以在每个 Mapper 之后使用 Reducer 作为 Combiner。Mapper 1 上的 Combiner 会处理 3 个收盘价格：50、60 以及 111，并且仅输出 111，因为它是 3 个收盘价的最大值。Mapper 2 上的 Combiner 会处理 2 个收盘价格：100 和 31，并且仅输出 100，因为它是 2 个收盘价的最大值。现在使用 Combiner 之后，Reducer 仅处理股票代码 ABC 的 2 个收盘价(原先需要处理 5 个收盘价)，即来自 Mapper 1 的 111 和来自 Mapper 2 的 100，并且将从这两个值中计算出最大收盘价格为 111。</p>
+<p>正如我们看到的，使用 Combiner 情况下 Reducer 输出与没有使用 Combiner 的输出结果是相同的，因此在这种情况下复用 Reducer 作为 Combiner 是没有问题。</p>
+<h3 id="2-Reducer-作为-Combiner-的不适用场景"><a href="#2-Reducer-作为-Combiner-的不适用场景" class="headerlink" title="2. Reducer 作为 Combiner 的不适用场景"></a>2. Reducer 作为 Combiner 的不适用场景</h3><p>假设我们在编写一个 MapReduce 程序来计算股票数据集中每只股票的平均交易量。Mapper 将数据集中每条股票记录的股票代码作为 key 以及交易量作为 value。Reducer 然后将循环遍历股票代码对应的所有交易量，并从交易量列表中计算出平均交易量。假设 Mapper 1 处理股票代码为 ABC 的 3 条记录，收盘价分别为 50、60 以及 111。我们假设 Mapper 2 处理股票代码为 ABC 的 2 条记录，收盘价分别为 100 和 31。那么 Reducer 将收到股票代码 ABC 五个收盘价：50、60、111、100 以及 31。Reducer 的工作非常简单，简单循环遍历所有交易量，并将计算出平均交易量为 70.4：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(50 + 60 + 111 + 100 + 31) /  5 = 70.4</span><br></pre></td></tr></table></figure></p>
+<p>让我们看看如果我们在每个 Mapper 之后复用 Reducer 作为 Combiner 会发生什么。Mapper 1 上的 Combiner 会处理 3 个交易量：50、60 以及 111，并计算出三个交易量的平均交易量为 73.66。Mapper 2 上的 Combiner 会处理 2 个交易量：100 和 31，并计算出两个交易量的平均交易量为 65.5。那么在复用 Reducer 作为 Combiner 的情况下，Reducer 仅处理股票代码 ABC 的 2 个平均交易量，来自 Mapper 1 的 73.66 和来自 Mapper 2 的 65.5，并计算股票代码 ABC 最终的平均交易量为 69.58：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(73.66 + 65.5) / 2 = 69.58</span><br></pre></td></tr></table></figure></p>
+<p>这与我们不复用 Reducer 作为 Combiner 得出的结果不一样，因此复用 Reducer 作为 Combiner 得出平均交易量是不正确的。所以我们可以看到 Reducer 不能总是被用于 Combiner。所以，当你决定复用 Reducer 作为 Combiner 的时候，你需要问自己这样一个问题：使用 Combiner 与不使用 Combiner 的输出结果是否一样？</p>
+<h3 id="3-区别"><a href="#3-区别" class="headerlink" title="3. 区别"></a>3. 区别</h3><p>Combiner 需要实现 Reducer 接口。Combiner 只能用于特定情况：</p>
 <ul>
-<li>与<code>Reducer</code>不同，<code>Combiner</code>有一个约束，<code>Combiner</code>输入/输出键和值类型必须与<code>Mapper</code>的输出键和值类型相匹配。而<code>Reducer</code>只是输入键和值类型与<code>Mapper</code>的输出键和值类型相匹配。</li>
-<li><code>Combiner</code>只能用于满足交换律<code>（a.b = b.a）</code>和结合律<code>（a.(b.c)= (a.b).c）</code>的情况。这也意味着<code>Combiner</code>可能只能用于键和值的一个子集或者可能不能使用。</li>
-<li><code>Reducer</code>可以从多个<code>Mapper</code>获取数据。<code>Combiner</code>只能从一个<code>Mapper</code>获取其输入。</li>
+<li>与 Reducer 不同，Combiner 有一个约束，Combiner 输入/输出键和值类型必须与 Mapper 的输出键和值类型相匹配。而 Reducer 只是输入键和值类型与 Mapper 的输出键和值类型相匹配。</li>
+<li>Combiner 只能用于满足交换律（a.b = b.a）和结合律（a.(b.c)= (a.b).c）的情况。这也意味着 Combiner 可能只能用于键和值的一个子集或者可能不能使用。</li>
+<li>Reducer 可以从多个 Mapper 获取数据。Combiner 只能从一个 Mapper 获取其输入。</li>
 </ul>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
 <p>原文：<a href="http://hadoopinrealworld.com/can-reducer-always-be-reused-for-combiner/" target="_blank" rel="noopener">http://hadoopinrealworld.com/can-reducer-always-be-reused-for-combiner/</a></p>
 
       
@@ -485,7 +488,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html" title="Hadoop Reducer总是能复用为Combiner？">http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html</a>
+    <a href="http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html" title="Hadoop Reducer 能否复用为 Combiner">http://smartsi.club/hadoop-can-reducer-always-be-reused-for-combiner.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -501,8 +504,6 @@
         <div class="post-tags">
           
             <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
-          
-            <a href="/tags/Hadoop-基础/" rel="tag"># Hadoop 基础</a>
           
         </div>
       
@@ -743,7 +744,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Reducer作为Combiner的适用场景"><span class="nav-number">1.</span> <span class="nav-text">1. Reducer作为Combiner的适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Reducer作为Combiner的不适用场景"><span class="nav-number">2.</span> <span class="nav-text">2. Reducer作为Combiner的不适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-区别"><span class="nav-number">3.</span> <span class="nav-text">3. 区别</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Reducer-作为-Combiner-的适用场景"><span class="nav-number">1.</span> <span class="nav-text">1. Reducer 作为 Combiner 的适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Reducer-作为-Combiner-的不适用场景"><span class="nav-number">2.</span> <span class="nav-text">2. Reducer 作为 Combiner 的不适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-区别"><span class="nav-number">3.</span> <span class="nav-text">3. 区别</span></a></li></ol></div>
             
 
           </div>
