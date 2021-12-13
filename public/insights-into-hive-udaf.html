@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hive," />
+
+
+<meta name="description" content="1. 概述用户自定义聚合函数(UDAF)支持用户自行开发聚合函数完成业务逻辑。从实现上来看 Hive 有两种创建 UDAF 的方式，第一种是 Simple 方式，第二种是 Generic 方式。 1.1 简单 UDAF第一种方式是 Simple(简单) 方式，即继承 org.apache.hadoop.hive.ql.exec.UDAF 类，并在派生类中以静态内部类的方式实现 org.apache">
+<meta name="keywords" content="Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解 Hive UDAF">
+<meta property="og:url" content="http://smartsi.club/insights-into-hive-udaf.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="1. 概述用户自定义聚合函数(UDAF)支持用户自行开发聚合函数完成业务逻辑。从实现上来看 Hive 有两种创建 UDAF 的方式，第一种是 Simple 方式，第二种是 Generic 方式。 1.1 简单 UDAF第一种方式是 Simple(简单) 方式，即继承 org.apache.hadoop.hive.ql.exec.UDAF 类，并在派生类中以静态内部类的方式实现 org.apache">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-12-13T15:42:45.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解 Hive UDAF">
+<meta name="twitter:description" content="1. 概述用户自定义聚合函数(UDAF)支持用户自行开发聚合函数完成业务逻辑。从实现上来看 Hive 有两种创建 UDAF 的方式，第一种是 Simple 方式，第二种是 Generic 方式。 1.1 简单 UDAF第一种方式是 Simple(简单) 方式，即继承 org.apache.hadoop.hive.ql.exec.UDAF 类，并在派生类中以静态内部类的方式实现 org.apache">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/insights-into-hive-udaf.html"/>
+
+
+  <title>深入理解 Hive UDAF | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/insights-into-hive-udaf.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">深入理解 Hive UDAF</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-12T13:25:01+08:00">2021-12-12</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-12-13T23:42:45+08:00">2021-12-13</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Hive/" itemprop="url" rel="index"><span itemprop="name">Hive</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/insights-into-hive-udaf.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/insights-into-hive-udaf.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/insights-into-hive-udaf.html" class="leancloud_visitors" data-flag-title="深入理解 Hive UDAF">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>用户自定义聚合函数(UDAF)支持用户自行开发聚合函数完成业务逻辑。从实现上来看 Hive 有两种创建 UDAF 的方式，第一种是 Simple 方式，第二种是 Generic 方式。</p>
+<h3 id="1-1-简单-UDAF"><a href="#1-1-简单-UDAF" class="headerlink" title="1.1 简单 UDAF"></a>1.1 简单 UDAF</h3><p>第一种方式是 Simple(简单) 方式，即继承 org.apache.hadoop.hive.ql.exec.UDAF 类，并在派生类中以静态内部类的方式实现 org.apache.hadoop.hive.ql.exec.UDAFEvaluator 接口：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-1.png?raw=true" alt=""></p>
+<p>这种方式简单直接，但是在使用过程中需要依赖 Java 反射机制，因此性能相对较低。在 Hive 源码包 org.apache.hadoop.hive.contrib.udaf.example 中包含几个示例，可以直接参阅。但是这种方式已经被标注为 Deprecated，建议不要使用这种方式开发新的 UDAF 函数。</p>
+<h2 id="1-2-通用-UDAF"><a href="#1-2-通用-UDAF" class="headerlink" title="1.2 通用 UDAF"></a>1.2 通用 UDAF</h2><p>简单 UDAF 编写起来比较简单，但是由于使用了 Java 反射机制导致性能下降，并且不允许使用变长参数等特性。通用 UDAF 允许所有这些特性，但编写起来可能不如简单 UDAF 那么直观。通用(Generic) UDAF 是 Hive 社区推荐的新写法，推荐用新的抽象类 org.apache.hadoop.hive.ql.udf.generic.AbstractGenericUDAFResolver 替代老的 UDAF 接口，用新的抽象类 org.apache.hadoop.hive.ql.udf.generic.GenericUDAFEvaluator 替代老的 UDAFEvaluator 接口。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-2.png?raw=true" alt=""></p>
+<h2 id="2-结构"><a href="#2-结构" class="headerlink" title="2. 结构"></a>2. 结构</h2><blockquote>
+<p>由于简单（Simple）UDAF 性能相对较低，已经废弃，因此我们后面重点关注通用（Generic）UDAF。</p>
+</blockquote>
+<p>从高层次上来看通用 UDAF 需要实现两个部分：</p>
+<ul>
+<li>第一部分是创建一个 Resolver 类，用于实现类型检查以及操作符重载(如果需要的话)，并为给定的一组输入参数类型指定正确的 Evaluator 类。</li>
+<li>第二部分是创建一个 Evaluator 类，用于实现 UDAF 的具体逻辑。一般实现为一个静态内部类。</li>
+</ul>
+<h3 id="2-1-Resolver"><a href="#2-1-Resolver" class="headerlink" title="2.1 Resolver"></a>2.1 Resolver</h3><p>简单 UDAF Resolver 的 UDAF 接口被废弃后，通用 UDAF Resolver 有三种实现方式：</p>
+<ul>
+<li>实现 GenericUDAFResolver 接口</li>
+<li>实现 GenericUDAFResolver2 接口</li>
+<li>继承 AbstractGenericUDAFResolver 类</li>
+</ul>
+<p>现在新问题来了：上述三种方式，在开发 UDAF 的时候该用哪一种呢？</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-3.png?raw=true" alt=""></p>
+<h4 id="2-1-1-GenericUDAFResolver"><a href="#2-1-1-GenericUDAFResolver" class="headerlink" title="2.1.1 GenericUDAFResolver"></a>2.1.1 GenericUDAFResolver</h4><p>用户定义聚合函数(GenericUDAF)编译时使用 GenericUDAFResolver 来查找参数类型对应的 GenericUDAFEvaluator：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Deprecated</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GenericUDAFResolver</span> </span>&#123;</span><br><span class="line">  <span class="function">GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(TypeInfo[] parameters)</span> <span class="keyword">throws</span> SemanticException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>getEvaluator 方法返回参数类型对应的 Evaluator。</p>
+<blockquote>
+<p>GenericUDAFResolver 已经被弃用。</p>
+</blockquote>
+<h4 id="2-1-2-GenericUDAFResolver2"><a href="#2-1-2-GenericUDAFResolver2" class="headerlink" title="2.1.2 GenericUDAFResolver2"></a>2.1.2 GenericUDAFResolver2</h4><p>如上图所示，GenericUDAFResolver2 接口继承了 GenericUDAFResolver 接口，此外还提供了另外一个 GenericUDAFParameterInfo 为参数的 getEvaluator 方法：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Deprecated</span></span><br><span class="line"><span class="meta">@SuppressWarnings</span>(<span class="string">"deprecation"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GenericUDAFResolver2</span> <span class="keyword">extends</span> <span class="title">GenericUDAFResolver</span> </span>&#123;</span><br><span class="line">  <span class="function">GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(GenericUDAFParameterInfo info)</span> <span class="keyword">throws</span> SemanticException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>相比 GenericUDAFResolver 接口，该接口在参数类型方面提供了更大的灵活性。如下所示 GenericUDAFResolver2 接口提供的 GenericUDAFParameterInfo 参数信息：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GenericUDAFParameterInfo</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Deprecated</span></span><br><span class="line">  TypeInfo[] getParameters();</span><br><span class="line">  ObjectInspector[] getParameterObjectInspectors();</span><br><span class="line">  <span class="comment">// 是否使用了 DISTINCT 限定符</span></span><br><span class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">isDistinct</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="comment">// 是否在窗口函数中调用</span></span><br><span class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">isWindowing</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="comment">// 是否使用通配符语法</span></span><br><span class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">isAllColumns</span><span class="params">()</span></span>;</span><br><span class="line">  <span class="function"><span class="keyword">boolean</span> <span class="title">respectNulls</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>GenericUDAFResolver2 可以允许 Evaluator 的实现访问关于函数调用的额外信息，比如，是否使用了 DISTINCT 限定符或者使用特殊通配符(function(<em>))。实现 GenericUDAFResolver 接口的 UDAF 则无法分辨调用 FUNCTION()和 FUNCTION(</em>) 的区别，因为无法获得有关通配符的信息。类似地，也不能区分 FUNCTION(EXPR) 和 FUNCTION(DISTINCT EXPR) 的区别，因为也无法获取有关 DISTINCT 限定符的信息。</p>
+<p>UDAF 函数的实现不用对 DISTINCT 限定符或者通配符做特殊处理。DISTINCT 计算实际上是由 Hive 的核心查询处理器完成，不是由 Resolver 或 Evaluator 完成的，只是向 Resolver 提供信息仅用来做验证的。</p>
+<blockquote>
+<p>虽然实现 GenericUDAFResolver2 接口的 Resolver 提供了关于 DISTINCT 限定符或者通配符的额外信息，但如果对我们没有任何意义，我们可以选择忽略这些信息。</p>
+</blockquote>
+<h4 id="2-1-3-AbstractGenericUDAFResolver"><a href="#2-1-3-AbstractGenericUDAFResolver" class="headerlink" title="2.1.3 AbstractGenericUDAFResolver"></a>2.1.3 AbstractGenericUDAFResolver</h4><p>如上图所示，AbstractGenericUDAFResolver 类是 GenericUDAFResolver2 接口的实现类：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractGenericUDAFResolver</span> <span class="keyword">implements</span> <span class="title">GenericUDAFResolver2</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SuppressWarnings</span>(<span class="string">"deprecation"</span>)</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(GenericUDAFParameterInfo info)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (info.isAllColumns()) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> SemanticException(<span class="string">"The specified syntax for UDAF invocation is invalid."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> getEvaluator(info.getParameters());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(TypeInfo[] info)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> SemanticException(<span class="string">"This UDAF does not support the deprecated getEvaluator() method."</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>AbstractGenericUDAFResolver 提供了一种简单的方法将以前实现 GenericUDAFResolver 接口的 UDAF 迁移到 GenericUDAFResolver2 接口上。这个类提供了新 API 的默认实现，然后通过忽略 GenericUDAFParameterInfo 接口获得的额外参数信息来调用 GenericUDAFResolver#getEvaluator(TypeInfo[]) API。在使用 Resolver 类时，推荐使用 AbstractGenericUDAFResolver 抽象类。</p>
+<h3 id="2-2-Evaluator"><a href="#2-2-Evaluator" class="headerlink" title="2.2 Evaluator"></a>2.2 Evaluator</h3><p>所有 Evaluator 都必须继承基类 org.apache.hadoop.hive.ql.udf.generic.GenericUDAFEvaluator。该类提供了一些必须由扩展类实现的抽象方法。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-4.png?raw=true" alt=""></p>
+<p>这些方法建立了 UDAF 之后的处理语义。下面是 Evaluator 类的架构：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">AverageUDAFEvaluator</span> <span class="keyword">extends</span> <span class="title">GenericUDAFEvaluator</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ObjectInspector <span class="title">init</span><span class="params">(Mode mode, ObjectInspector[] parameters)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 初始化输入和输出参数</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> AggregationBuffer <span class="title">getNewAggregationBuffer</span><span class="params">()</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 创建中间结果Buffer</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reset</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 重置中间结果Buffer</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">iterate</span><span class="params">(AggregationBuffer agg, Object[] parameters)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 迭代输入原始数据</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">terminatePartial</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 输出部分聚合结果</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(AggregationBuffer agg, Object partial)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 合并部分聚合结果</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">terminate</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">        <span class="comment">// 输出最终聚合结果</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>下面我们对每个函数进行一下说明：</p>
+<ul>
+<li>init：用来初始化 Evaluator 实例。</li>
+<li>getNewAggregationBuffer：返回一个用于存储临时聚合结果的对象。</li>
+<li>iterate：处理一行新数据到 AggregationBuffer 临时聚合结果中。iterate 方法在 Map 阶段开始被调用。</li>
+<li>terminatePartial：以可持久化的方式返回当前聚合结果。可持久化意味着返回值只能通过 Java 原生类型、数组、原生包装器(例如，Double)、Hadoop Writables、Lists 或者 Map 来构建。不能使用我们自定义的类(即使实现了 java.io.Serializable)，否则可能会得到奇怪的错误或(可能更糟)错误的结果。terminatePartial 方法一般在 Map 或者 Combine 阶段结束时调用。</li>
+<li>merge：将 terminatePartial 返回的部分聚合结果合并到当前聚合结果中。merge 方法一般在 Reduce 阶段被调用，用来合并 Map 或者 Combine 输入的数据。</li>
+<li>terminate：将最终聚合结果返回给 Hive。</li>
+</ul>
+<h2 id="3-运行流程"><a href="#3-运行流程" class="headerlink" title="3. 运行流程"></a>3. 运行流程</h2><p>抽象类 GenericUDAFEvaluator 中包含一个静态内部枚举类 Mode。这个枚举类表示不同的运行阶段，按照时间先后顺序，分别有：</p>
+<ul>
+<li>PARTIAL1：从原始数据到部分聚合数据的过程，会调用 iterate() 和 terminatePartial() 方法。iterate() 函数负责解析输入数据，terminatePartial() 负责输出当前临时聚合结果。该阶段可以理解为对应 MapReduce 过程中的 Map 阶段。</li>
+<li>PARTIAL2：从部分聚合数据到部分聚合数据的过程（多次聚合），会调用 merge() 和 terminatePartial() 方法。merge() 函数负责聚合 Map 阶段 terminatePartial() 函数输出的部分聚合结果，terminatePartial() 负责输出当前临时聚合结果。阶段可以理解为对应 MapReduce 过程中的 Combine 阶段。</li>
+<li>FINAL: 从部分聚合数据到全部聚合数据的过程，会调用 merge() 和 terminate() 方法。merge() 函数负责聚合 Map 阶段或者 Combine 阶段 terminatePartial() 函数输出的部分聚合结果。terminate() 方法负责输出 Reduce 阶段最终的聚合结果。该阶段可以理解为对应 MapReduce 过程中的 Reduce 阶段。</li>
+<li>COMPLETE: 从原始数据直接到全部聚合数据的过程，会调用 iterate() 和 terminate() 方法。可以理解为 MapReduce 过程中的直接 Map 输出阶段，没有 Reduce 阶段。</li>
+</ul>
+<blockquote>
+<p>每个阶段都会执行 Init() 初始化操作。</p>
+</blockquote>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-5.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/insights-into-hive-udaf-6.png?raw=true" alt=""></p>
+<p>所以，完整的 UDAF 逻辑是一个 MapReduce 过程，如果有 Mapper 和 Reducer，就会经历 PARTIAL1(对应 Map 阶段)，FINAL(对应 Reduce 阶段)，如果还有 Combiner，那就会经历 PARTIAL1、PARTIAL2(对应 Combine 阶段) 以及 FINAL。此外还有一种情况下只有 Mapper，没有 Reducer，在这种情况下就只有 COMPLETE 阶段。</p>
+<h2 id="4-开发"><a href="#4-开发" class="headerlink" title="4. 开发"></a>4. 开发</h2><h3 id="4-1-开发-Resolver"><a href="#4-1-开发-Resolver" class="headerlink" title="4.1 开发 Resolver"></a>4.1 开发 Resolver</h3><p>Resolver 处理 UDAF 查询的类型检查与运算符重载。类型检查确保用户没有在需要整数的地方传递 Double 表达式，运算符重载允许对不同类型的参数使用不同的 UDAF 逻辑。如上面提到的推荐 Resolver 继承 AbstractGenericUDAFResolver 类：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractGenericAverageUDAF</span> <span class="keyword">extends</span> <span class="title">AbstractGenericUDAFResolver</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> Log LOG = LogFactory.getLog(AbstractGenericAverageUDAF.class.getName());</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(GenericUDAFParameterInfo info)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getEvaluator(info.getParameters());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(TypeInfo[] parameters)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="comment">// 在这做类型检查以及选择指定的 Evaluator</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> AverageUDAFEvaluator();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">AverageUDAFEvaluator</span> <span class="keyword">extends</span> <span class="title">GenericUDAFEvaluator</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 在这实现 UDAF 逻辑</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的代码展示了 UDAF 的基本框架。第一行设置了一个 Log 对象，可以将 Warn 和 Error 写入到 Hive 日志中。AbstractGenericUDAFResolver 类有两个覆盖方法: getEvaluator，用来接收关于如何调用 UDAF 的信息。info.getParameters() 即 parameters，提供了与调用参数的 SQL 类型相对应的类型信息对象数组。info 除此之外还可以获取关于函数调用的额外信息，比如，是否使用了 DISTINCT 限定符或者使用特殊通配符。</p>
+<p>对于平均值 UDAF，我们只需要一个参数：用于计算平均值的数值列。首先要做的是检查我们是否恰好只有一个参数。然后，我们检查第一个参数是否是基本类型，并根据基本类型选择正确的 Evaluator。如果是 BYTE、SHORT、INT、LONG、TIMESTAMP、FLOAT、DOUBLE、STRING、VARCHAR、CHAR 类型，选择 AverageUDAFEvaluator，否则抛出异常：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(GenericUDAFParameterInfo info)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> getEvaluator(info.getParameters());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> GenericUDAFEvaluator <span class="title">getEvaluator</span><span class="params">(TypeInfo[] parameters)</span> <span class="keyword">throws</span> SemanticException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (parameters.length != <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UDFArgumentTypeException(parameters.length - <span class="number">1</span>,</span><br><span class="line">                <span class="string">"Exactly one argument is expected."</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (parameters[<span class="number">0</span>].getCategory() != ObjectInspector.Category.PRIMITIVE) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UDFArgumentTypeException(<span class="number">0</span>,</span><br><span class="line">                <span class="string">"Only primitive type arguments are accepted but "</span></span><br><span class="line">                        + parameters[<span class="number">0</span>].getTypeName() + <span class="string">" is passed."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">switch</span> (((PrimitiveTypeInfo) parameters[<span class="number">0</span>]).getPrimitiveCategory()) &#123;</span><br><span class="line">        <span class="keyword">case</span> BYTE:</span><br><span class="line">        <span class="keyword">case</span> SHORT:</span><br><span class="line">        <span class="keyword">case</span> INT:</span><br><span class="line">        <span class="keyword">case</span> LONG:</span><br><span class="line">        <span class="keyword">case</span> FLOAT:</span><br><span class="line">        <span class="keyword">case</span> DOUBLE:</span><br><span class="line">        <span class="keyword">case</span> STRING:</span><br><span class="line">        <span class="keyword">case</span> VARCHAR:</span><br><span class="line">        <span class="keyword">case</span> CHAR:</span><br><span class="line">        <span class="keyword">case</span> TIMESTAMP:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> AverageUDAFEvaluator();</span><br><span class="line">        <span class="keyword">case</span> DECIMAL:</span><br><span class="line">        <span class="keyword">case</span> BOOLEAN:</span><br><span class="line">        <span class="keyword">case</span> DATE:</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UDFArgumentTypeException(<span class="number">0</span>,</span><br><span class="line">                    <span class="string">"Only numeric or string type arguments are accepted but "</span></span><br><span class="line">                            + parameters[<span class="number">0</span>].getTypeName() + <span class="string">" is passed."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面可以看出根据不同的类型可以选择不同的 Evaluator 类，我们来分析下 AverageUDAFEvaluator 的实现。</p>
+<blockquote>
+<p>在这我们只实现了一个 Evaluator 类：AverageUDAFEvaluator</p>
+</blockquote>
+<h3 id="4-2-开发-Evaluator"><a href="#4-2-开发-Evaluator" class="headerlink" title="4.2 开发 Evaluator"></a>4.2 开发 Evaluator</h3><p>AverageUDAFEvaluator 是用来对 BYTE、SHORT、INT、LONG、TIMESTAMP、FLOAT、DOUBLE、STRING、VARCHAR、CHAR 类型求平均值的 UDAF，其中有几个变量，inputOI 是输入的数据，partialResult 是部分聚合结果（对应 ObjectInspector 为 StructObjectInspector），result 是最终聚合结果，初始化是对这几个参数的初始化，另外定义了 AverageAggBuffer 来存储中间结果，里面包含了 count 值和 sum 值。</p>
+<h4 id="4-2-1-init"><a href="#4-2-1-init" class="headerlink" title="4.2.1 init"></a>4.2.1 init</h4><p>首先 init 方法用来初始化 Evaluator 实例：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Iterate 输入</span></span><br><span class="line"><span class="keyword">private</span> PrimitiveObjectInspector inputOI;</span><br><span class="line"><span class="comment">// Merge 输入</span></span><br><span class="line"><span class="keyword">private</span> StructObjectInspector structOI;</span><br><span class="line"><span class="keyword">private</span> LongObjectInspector countFieldOI;</span><br><span class="line"><span class="keyword">private</span> DoubleObjectInspector sumFieldOI;</span><br><span class="line"><span class="keyword">private</span> StructField countField;</span><br><span class="line"><span class="keyword">private</span> StructField sumField;</span><br><span class="line"></span><br><span class="line"><span class="comment">// TerminatePartial 输出</span></span><br><span class="line"><span class="keyword">private</span> Object[] partialResult;</span><br><span class="line"><span class="comment">// Terminate 输出</span></span><br><span class="line"><span class="keyword">private</span> DoubleWritable result;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> ObjectInspector <span class="title">init</span><span class="params">(Mode mode, ObjectInspector[] parameters)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    <span class="keyword">assert</span> (parameters.length == <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">super</span>.init(mode, parameters);</span><br><span class="line">    <span class="comment">// 初始化输入参数</span></span><br><span class="line">    <span class="keyword">if</span> (mode == Mode.PARTIAL1 || mode == Mode.COMPLETE) &#123;</span><br><span class="line">        <span class="comment">// 原始数据</span></span><br><span class="line">        inputOI = (PrimitiveObjectInspector) parameters[<span class="number">0</span>];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 部分聚合数据</span></span><br><span class="line">        structOI = (StructObjectInspector) parameters[<span class="number">0</span>];</span><br><span class="line">        countField = structOI.getStructFieldRef(<span class="string">"count"</span>);</span><br><span class="line">        sumField = structOI.getStructFieldRef(<span class="string">"sum"</span>);</span><br><span class="line">        countFieldOI = (LongObjectInspector) countField.getFieldObjectInspector();</span><br><span class="line">        sumFieldOI = (DoubleObjectInspector) sumField.getFieldObjectInspector();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 初始化输出</span></span><br><span class="line">    <span class="keyword">if</span> (mode == Mode.PARTIAL1 || mode == Mode.PARTIAL2) &#123;</span><br><span class="line">        <span class="comment">// 最终结果</span></span><br><span class="line">        partialResult = <span class="keyword">new</span> Object[<span class="number">2</span>];</span><br><span class="line">        partialResult[<span class="number">0</span>] = <span class="keyword">new</span> LongWritable(<span class="number">0</span>);</span><br><span class="line">        partialResult[<span class="number">1</span>] = <span class="keyword">new</span> DoubleWritable(<span class="number">0</span>);</span><br><span class="line">        <span class="comment">// 部分聚合结果</span></span><br><span class="line">        <span class="comment">// 字段类型</span></span><br><span class="line">        ArrayList&lt;ObjectInspector&gt; structFieldOIs = <span class="keyword">new</span> ArrayList&lt;ObjectInspector&gt;();</span><br><span class="line">        structFieldOIs.add(PrimitiveObjectInspectorFactory.writableLongObjectInspector);</span><br><span class="line">        structFieldOIs.add(PrimitiveObjectInspectorFactory.writableDoubleObjectInspector);</span><br><span class="line">        <span class="comment">// 字段名称</span></span><br><span class="line">        ArrayList&lt;String&gt; structFieldNames = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">        structFieldNames.add(<span class="string">"count"</span>);</span><br><span class="line">        structFieldNames.add(<span class="string">"sum"</span>);</span><br><span class="line">        <span class="keyword">return</span> ObjectInspectorFactory.getStandardStructObjectInspector(structFieldNames, structFieldOIs);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        result = <span class="keyword">new</span> DoubleWritable(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> PrimitiveObjectInspectorFactory.writableDoubleObjectInspector;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在 PARTIAL1 和 COMPLETE 模式下，输入参数均是原始数据。在 PARTIAL2 和 FINAL 模式中，输入参数是部分聚合结果，部分聚合结果使用 Object 数组(第一个元素为 LongWritable 类型，第二个元素为 DoubleWritable)在不同阶段进行传输，ObjectInspector 为 StructObjectInspector。在 PARTIAL1 和 PARTIAL2 模式下，terminatePartial() 返回值的 ObjectInspector 为 StandardStructObjectInspector。在 FINAL 和 COMPLETE 模式下，terminate() 返回值的 ObjectInspector 为 WritableDoubleObjectInspector。</p>
+<blockquote>
+<p>ObjectInspector 作用主要是解耦实际数据与数据格式，使得数据流在输入输出端切换不同的输入输出格式，不同的 Operator 上使用不同的格式，可以通过这个抽象类知道上游传递过来的参数类型，从而解耦。一个 ObjectInspector 对象本身并不包含任何数据，它只是提供对数据类型的说明以及对数据对象操作的统一管理或者是代理。</p>
+</blockquote>
+<h4 id="4-2-2-getNewAggregationBuffer"><a href="#4-2-2-getNewAggregationBuffer" class="headerlink" title="4.2.2 getNewAggregationBuffer"></a>4.2.2 getNewAggregationBuffer</h4><p>getNewAggregationBuffer 方法返回一个用于存储临时聚合结果的对象 AggregationBuffer，其中 count 字段表示存储聚合的记录个数，sum 字段表示存储聚合的总和：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 存储临时聚合结果对象</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">AverageAggBuffer</span> <span class="keyword">implements</span> <span class="title">AggregationBuffer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> count;</span><br><span class="line">    <span class="keyword">double</span> sum;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 返回一个新的聚合对象</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> AggregationBuffer <span class="title">getNewAggregationBuffer</span><span class="params">()</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    AverageAggBuffer buffer = <span class="keyword">new</span> AverageAggBuffer();</span><br><span class="line">    reset(buffer);</span><br><span class="line">    <span class="keyword">return</span> buffer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-2-3-reset"><a href="#4-2-3-reset" class="headerlink" title="4.2.3 reset"></a>4.2.3 reset</h4><p>reset 方法重置存储临时聚合结果的对象 AggregationBuffer：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reset</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    AverageAggBuffer buffer = (AverageAggBuffer) agg;</span><br><span class="line">    buffer.count = <span class="number">0L</span>;</span><br><span class="line">    buffer.sum = <span class="number">0.0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-2-4-iterate"><a href="#4-2-4-iterate" class="headerlink" title="4.2.4 iterate"></a>4.2.4 iterate</h4><p>iterate() 函数解析出实际的输入数据(一个数字)，然后合并到临时聚合结果 AggregationBuffer 中：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">iterate</span><span class="params">(AggregationBuffer agg, Object[] parameters)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    <span class="keyword">assert</span> (parameters.length == <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (parameters[<span class="number">0</span>] != <span class="keyword">null</span>) &#123;</span><br><span class="line">            AverageAggBuffer buffer = (AverageAggBuffer) agg;</span><br><span class="line">            buffer.count ++;</span><br><span class="line">            buffer.sum += PrimitiveObjectInspectorUtils.getDouble(parameters[<span class="number">0</span>], inputOI);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NumberFormatException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> HiveException(<span class="string">"iterate exception"</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该方法一般在 Map 阶段调用，用来读取原始数据。</p>
+<h4 id="4-2-5-terminatePartial"><a href="#4-2-5-terminatePartial" class="headerlink" title="4.2.5 terminatePartial"></a>4.2.5 terminatePartial</h4><p>terminatePartial 以 Object 数组的方式返回当前聚合结果，第一个值存储的是 LongWritable 类型的输入元素个数，第二个值存储的是 DoubleWritable 类型的输入元素总和：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">terminatePartial</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    AverageAggBuffer buffer = (AverageAggBuffer) agg;</span><br><span class="line">    ((LongWritable) partialResult[<span class="number">0</span>]).set(buffer.count);</span><br><span class="line">    ((DoubleWritable) partialResult[<span class="number">1</span>]).set(buffer.sum);</span><br><span class="line">    <span class="keyword">return</span> partialResult;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>terminatePartial 方法一般在 Map 或者 Combine 阶段结束时调用，得到部分数据聚集结果，将数据以持久化方式传输到 Reduce 进行处理。只支持 Java 原始数据类型、数组、原生包装器(例如，Double)、Hadoop Writables、Lists 或者 Map 类型。不能使用我们自己自定义类(即使实现了 java.io.Serializable)，否则可能会得到奇怪的错误或(可能更糟)错误的结果。</p>
+<h4 id="4-2-6-merge"><a href="#4-2-6-merge" class="headerlink" title="4.2.6 merge"></a>4.2.6 merge</h4><p>merge 方法将 terminatePartial 返回的聚合结果 partial 合并到当前聚合结果 agg 中。一般在 Combine 或者 Reduce 阶段调用，Combiner 合并 Mapper 返回的结果，Reducer 合并 Mapper 或者 Combiner 返回的结果。我们通过 terminatePartial 方法知道传输到 merge 方法的是一个 Object 数组，因此我们需要通过 StructObjectInspector 解析出 partial 数组元素值：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(AggregationBuffer agg, Object partial)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (partial == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    AverageAggBuffer buffer = (AverageAggBuffer) agg;</span><br><span class="line">    Object partialCount = structOI.getStructFieldData(partial, countField);</span><br><span class="line">    Object partialSum = structOI.getStructFieldData(partial, sumField);</span><br><span class="line">    buffer.count += countFieldOI.get(partialCount);</span><br><span class="line">    buffer.sum += sumFieldOI.get(partialSum);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-2-7-terminate"><a href="#4-2-7-terminate" class="headerlink" title="4.2.7 terminate"></a>4.2.7 terminate</h4><p>terminate 方法根据 AggregationBuffer 中临时存储的值计算生成 DoubleWritable 类型的平均值 Object 返回。对应在 Reducer 阶段，输出最终结果：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> DoubleWritable result;</span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">terminate</span><span class="params">(AggregationBuffer agg)</span> <span class="keyword">throws</span> HiveException </span>&#123;</span><br><span class="line">    AverageAggBuffer buffer = (AverageAggBuffer) agg;</span><br><span class="line">    <span class="keyword">if</span> (buffer.count == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    result.set(buffer.sum / buffer.count);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>完整代码请参阅：<a href="https://github.com/sjf0115/data-example/blob/master/hive-example/src/main/java/com/hive/example/udf/AbstractGenericAverageUDAF.java" target="_blank" rel="noopener">AbstractGenericAverageUDAF</a></p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>参考资料：</p>
+<ul>
+<li><a href="https://blog.csdn.net/lidongmeng0213/article/details/110869457" target="_blank" rel="noopener">https://blog.csdn.net/lidongmeng0213/article/details/110869457</a></li>
+<li><a href="https://www.cnblogs.com/itboys/p/13396774.html" target="_blank" rel="noopener">https://www.cnblogs.com/itboys/p/13396774.html</a></li>
+<li><a href="https://cwiki.apache.org/confluence/display/Hive/GenericUDAFCaseStudy" target="_blank" rel="noopener">https://cwiki.apache.org/confluence/display/Hive/GenericUDAFCaseStudy</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/insights-into-hive-udaf.html" title="深入理解 Hive UDAF">http://smartsi.club/insights-into-hive-udaf.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/a-deep-dive-into-key-ttl-in-redis.html" rel="next" title="Redis 深入了解键的过期时间">
+                <i class="fa fa-chevron-left"></i> Redis 深入了解键的过期时间
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">298</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概述"><span class="nav-number">1.</span> <span class="nav-text">1. 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-简单-UDAF"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 简单 UDAF</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-通用-UDAF"><span class="nav-number">2.</span> <span class="nav-text">1.2 通用 UDAF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-结构"><span class="nav-number">3.</span> <span class="nav-text">2. 结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Resolver"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 Resolver</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1-GenericUDAFResolver"><span class="nav-number">3.1.1.</span> <span class="nav-text">2.1.1 GenericUDAFResolver</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2-GenericUDAFResolver2"><span class="nav-number">3.1.2.</span> <span class="nav-text">2.1.2 GenericUDAFResolver2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-3-AbstractGenericUDAFResolver"><span class="nav-number">3.1.3.</span> <span class="nav-text">2.1.3 AbstractGenericUDAFResolver</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Evaluator"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 Evaluator</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-运行流程"><span class="nav-number">4.</span> <span class="nav-text">3. 运行流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-开发"><span class="nav-number">5.</span> <span class="nav-text">4. 开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-开发-Resolver"><span class="nav-number">5.1.</span> <span class="nav-text">4.1 开发 Resolver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-开发-Evaluator"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 开发 Evaluator</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-1-init"><span class="nav-number">5.2.1.</span> <span class="nav-text">4.2.1 init</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-2-getNewAggregationBuffer"><span class="nav-number">5.2.2.</span> <span class="nav-text">4.2.2 getNewAggregationBuffer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-3-reset"><span class="nav-number">5.2.3.</span> <span class="nav-text">4.2.3 reset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-4-iterate"><span class="nav-number">5.2.4.</span> <span class="nav-text">4.2.4 iterate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-5-terminatePartial"><span class="nav-number">5.2.5.</span> <span class="nav-text">4.2.5 terminatePartial</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-6-merge"><span class="nav-number">5.2.6.</span> <span class="nav-text">4.2.6 merge</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-7-terminate"><span class="nav-number">5.2.7.</span> <span class="nav-text">4.2.7 terminate</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
