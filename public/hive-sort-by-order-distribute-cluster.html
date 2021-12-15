@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Hive," />
+
+
+<meta name="description" content="在这篇文章中，我们主要来了解一下 SORT BY，ORDER BY，DISTRIBUTE BY 和 CLUSTER BY 在 Hive 中的表现。 首先准备一下测试数据：CREATE TABLE IF NOT EXISTS tmp_sport_user_step_1d(  dt STRING COMMENT &apos;dt&apos;,  uid STRING COMMENT &apos;uid&apos;,  step INT CO">
+<meta name="keywords" content="Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY">
+<meta property="og:url" content="http://smartsi.club/hive-sort-by-order-distribute-cluster.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="在这篇文章中，我们主要来了解一下 SORT BY，ORDER BY，DISTRIBUTE BY 和 CLUSTER BY 在 Hive 中的表现。 首先准备一下测试数据：CREATE TABLE IF NOT EXISTS tmp_sport_user_step_1d(  dt STRING COMMENT &apos;dt&apos;,  uid STRING COMMENT &apos;uid&apos;,  step INT CO">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-5.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-6.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-7.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-8.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-9.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
+<meta property="og:updated_time" content="2021-12-15T15:00:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY">
+<meta name="twitter:description" content="在这篇文章中，我们主要来了解一下 SORT BY，ORDER BY，DISTRIBUTE BY 和 CLUSTER BY 在 Hive 中的表现。 首先准备一下测试数据：CREATE TABLE IF NOT EXISTS tmp_sport_user_step_1d(  dt STRING COMMENT &apos;dt&apos;,  uid STRING COMMENT &apos;uid&apos;,  step INT CO">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/hive-sort-by-order-distribute-cluster.html"/>
+
+
+  <title>Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/hive-sort-by-order-distribute-cluster.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-15T21:56:01+08:00">2021-12-15</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-12-15T23:00:19+08:00">2021-12-15</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Hive/" itemprop="url" rel="index"><span itemprop="name">Hive</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/hive-sort-by-order-distribute-cluster.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/hive-sort-by-order-distribute-cluster.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/hive-sort-by-order-distribute-cluster.html" class="leancloud_visitors" data-flag-title="Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在这篇文章中，我们主要来了解一下 SORT BY，ORDER BY，DISTRIBUTE BY 和 CLUSTER BY 在 Hive 中的表现。</p>
+<p>首先准备一下测试数据：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> tmp_sport_user_step_1d(</span><br><span class="line">  dt <span class="keyword">STRING</span> <span class="keyword">COMMENT</span> <span class="string">'dt'</span>,</span><br><span class="line">  uid <span class="keyword">STRING</span> <span class="keyword">COMMENT</span> <span class="string">'uid'</span>,</span><br><span class="line">  step <span class="built_in">INT</span> <span class="keyword">COMMENT</span> <span class="string">'sport step'</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> <span class="keyword">DELIMITED</span></span><br><span class="line"><span class="keyword">FIELDS</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">','</span></span><br><span class="line"><span class="keyword">LINES</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">'\n'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> <span class="keyword">TABLE</span> tmp_sport_user_step_1d (dt, uid, step) <span class="keyword">VALUES</span></span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a1'</span>, <span class="number">100</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a2'</span>, <span class="number">200</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a3'</span>, <span class="number">300</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a4'</span>, <span class="number">400</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a5'</span>, <span class="number">500</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a6'</span>, <span class="number">600</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a7'</span>, <span class="number">700</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a8'</span>, <span class="number">800</span>),</span><br><span class="line">    (<span class="string">'20211123'</span>, <span class="string">'a9'</span>, <span class="number">900</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a1'</span>, <span class="number">900</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a2'</span>, <span class="number">800</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a3'</span>, <span class="number">700</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a4'</span>, <span class="number">600</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a5'</span>, <span class="number">500</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a6'</span>, <span class="number">400</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a7'</span>, <span class="number">300</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a8'</span>, <span class="number">200</span>),</span><br><span class="line">    (<span class="string">'20211124'</span>, <span class="string">'a9'</span>, <span class="number">100</span>);</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-Order-By"><a href="#1-Order-By" class="headerlink" title="1. Order By"></a>1. Order By</h3><p>在 Hive 中，ORDER BY 保证数据的全局有序，为此将所有的数据发送到一个 Reducer 中。因为只有一个 Reducer，所以当输入规模较大时，需要较长的计算时间。Hive 中的 ORDER BY 语法与 SQL 中 ORDER BY 的语法相似，按照某一项或者几项排序输出，可以指定是升序或者是降序排序：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> step <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-1.png?raw=true" alt=""></p>
+<p>ORDER BY 子句有一些限制：<br>在严格模式下，即 hive.mapred.mode = strict，ORDER BY 子句后面必须跟一个 LIMIT 子句。如果将 hive.mapred.mode 设置为 nonstrict，可以不用 LIMIT 子句。原因是为了实现所有数据的全局有序，只能使用一个 reducer 来对最终输出进行排序。如果输出中的行数太大，单个 Reducer 可能需要很长时间才能完成。如果在严格模式不指定 LIMIT 子句，会报如下错误：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">hive&gt; set hive.mapred.mode=strict;</span><br><span class="line">hive&gt; select * from adv_push_click order by click_time;</span><br><span class="line">FAILED: SemanticException 1:47 order by-s without limit are disabled for safety reasons.</span><br><span class="line">If you know what you are doing, please make sure that hive.strict.checks.large.query is set to false</span><br><span class="line">and that hive.mapred.mode is not set to &apos;strict&apos; to enable them.. Error encountered near token &apos;click_time&apos;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>hive.mapred.mode 在 Hive 0.3.0 版本加入，默认值如下:</p>
+<ul>
+<li>Hive 0.x: nonstrict</li>
+<li>Hive 1.x: nonstrict</li>
+<li>Hive 2.x: strict (HIVE-12413)</li>
+</ul>
+</blockquote>
+<p>请注意，列是按名称指定的，而不是按位置编号指定的。在 Hive 0.11.0 以及更高版本中，实现如下配置时，可以按位置指定列：</p>
+<ul>
+<li>对于 Hive 0.11.0 到 2.1.x，将 hive.groupby.orderby.position.alias 设置为 true（默认值为false）。</li>
+<li>对于 Hive 2.2.0 以及更高版本，hive.orderby.position.alias 默认为 true。</li>
+</ul>
+<h3 id="2-Sort-By"><a href="#2-Sort-By" class="headerlink" title="2. Sort By"></a>2. Sort By</h3><p>如果输出中的行数太多，单个 Reducer 可能需要很长时间才能完成。Hive 增加了一个可供选择的方式，也就是 SORT BY，只会在每个 Reducer 中对数据进行排序，也就是执行一个局部排序。这可以保证每个 Reducer 的输出数据是有序的（但全局并不有序）。这样可以提高后面进行的全局排序的效率。</p>
+<p>SORT BY 语法与 ORDER BY 语法类似，区别仅仅是，一个关键字是 ORDER，另一个关键字是 SORT。用户可以指定任意字段进行排序，并可以在字段后面加上 ASC 关键字（默认的），表示按升序排序，或加 DESC 关键字，表示按降序排序：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">SELECT</span> uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">SORT</span> <span class="keyword">BY</span> step;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>排序顺序将取决于列类型，如果该列是数字类型的，则排序顺序也是数字顺序；如果该列是字符串类型，那么排序顺序是字典顺序。</p>
+</blockquote>
+<p>如上所示，我们设置了三个 Reducer，根据运动步数 step 进行 SORT BY（如果只有 1 个 Reducer，作用与 ORDER BY 一样实现全局排序）。运行结果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-2.png?raw=true" alt=""></p>
+<p>从上面输出中可以看到整体输出是无序的，无法判断单个 Reducer 内是否有序，为此我们将数据输出到文件中：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">INSERT</span> OVERWRITE <span class="keyword">DIRECTORY</span> <span class="string">'/user/hadoop/temp/study/tmp_sport_user_step_1d_sort_by'</span></span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> <span class="keyword">DELIMITED</span> <span class="keyword">FIELDS</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">'\t'</span></span><br><span class="line"><span class="keyword">SELECT</span> uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">SORT</span> <span class="keyword">BY</span> step;</span><br></pre></td></tr></table></figure></p>
+<p>因为我们设置了三个 Reducer，因此会有三个文件输出：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-3.png?raw=true" alt=""></p>
+<p>从上面可以看到每个 Reducer 的输出是有序的，但是全局并没有序。</p>
+<h3 id="3-Distribute-By"><a href="#3-Distribute-By" class="headerlink" title="3. Distribute By"></a>3. Distribute By</h3><p>Distribute By 可以控制 Map 端如何分发数据给 Reduce 端，类似于 MapReduce 中分区 partationer 对数据进行分区。Hive 会根据 Distribute By 后面的列，将数据分发给对应的 Reducer。默认情况下，MapReduce 计算框架会依据 Map 输入的键计算相应的哈希值，然后按照得到的哈希值将键-值对均匀分发到多个 Reducer 中去。如下所示，我们设置了三个 Reducer，根据日期 dt 进行 DISTRIBUTE BY：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">DISTRIBUTE</span> <span class="keyword">BY</span> dt;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-4.png?raw=true" alt=""></p>
+<p>从上面输出中我们无法判断相同日期的数据是否分发到同一个 Reducer 内，为此我们将数据输出到文件中：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">INSERT</span> OVERWRITE <span class="keyword">DIRECTORY</span> <span class="string">'/user/hadoop/temp/study/tmp_sport_user_step_1d_distribute_by'</span></span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> <span class="keyword">DELIMITED</span> <span class="keyword">FIELDS</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">'\t'</span></span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">DISTRIBUTE</span> <span class="keyword">BY</span> dt;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-5.png?raw=true" alt=""></p>
+<p>从上面可以看到相同日期的数据分发到同一个 Reducer 内。那我们如何实现相同日期内的数据按照运动步数 step 降序排序呢？如下所示根据日期 dt 进行 DISTRIBUTE BY，运动步数 step 进行 SORT BY：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">DISTRIBUTE</span> <span class="keyword">BY</span> dt <span class="keyword">SORT</span> <span class="keyword">BY</span> step <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-6.png?raw=true" alt=""></p>
+<p>我们还是将数据输出到文件中，来查看数据是如何分布的：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">INSERT</span> OVERWRITE <span class="keyword">DIRECTORY</span> <span class="string">'/user/hadoop/temp/study/tmp_sport_user_step_1d_distribute_by_sort_by'</span></span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> <span class="keyword">DELIMITED</span> <span class="keyword">FIELDS</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">'\t'</span></span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line"><span class="keyword">DISTRIBUTE</span> <span class="keyword">BY</span> dt <span class="keyword">SORT</span> <span class="keyword">BY</span> step <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-7.png?raw=true" alt=""></p>
+<p>从上面可以看到相同日期的数据分发到同一个 Reducer 内，并按照运动步数 step 降序排序。</p>
+<h3 id="4-Cluster-By"><a href="#4-Cluster-By" class="headerlink" title="4. Cluster By"></a>4. Cluster By</h3><p>在前面的例子中，dt 列被用在了 DISTRIBUTE BY 语句中，而 step 列位于 SORT BY 语句中。如果这 2 个语句中涉及到的列完全相同，而且采用的是升序排序方式（也就是默认的排序方式），那么在这种情况下，CLUSTER BY 就等价于前面的 2 个语句，相当于是前面 2 个句子的一个简写方式。如下所示，我们只对 step 字段使用 CLUSTER BY 语句：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line">CLUSTER <span class="keyword">BY</span> step;</span><br></pre></td></tr></table></figure></p>
+<p>运行结果如下所示：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-8.png?raw=true" alt=""></p>
+<p>我们还是将数据输出到文件中，来查看数据是如何分布的：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SET</span> mapreduce.job.reduces = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">INSERT</span> OVERWRITE <span class="keyword">DIRECTORY</span> <span class="string">'/user/hadoop/temp/study/tmp_sport_user_step_1d_cluster_by'</span></span><br><span class="line"><span class="keyword">ROW</span> <span class="keyword">FORMAT</span> <span class="keyword">DELIMITED</span> <span class="keyword">FIELDS</span> <span class="keyword">TERMINATED</span> <span class="keyword">BY</span> <span class="string">'\t'</span></span><br><span class="line"><span class="keyword">SELECT</span> dt, uid, step</span><br><span class="line"><span class="keyword">FROM</span> tmp_sport_user_step_1d</span><br><span class="line">CLUSTER <span class="keyword">BY</span> step;</span><br></pre></td></tr></table></figure></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Hive/hive-sort-by-order-distribute-cluster-9.png?raw=true" alt=""></p>
+<p>从上面可以看到相同运动步数 step 的数据分发到同一个 Reducer 内，并按照其升序排序。</p>
+<p>欢迎关注我的公众号和博客：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true" alt=""></p>
+<p>参考：</p>
+<ul>
+<li><a href="https://cwiki.apache.org/confluence/display/Hive/LanguageManual+SortBy#LanguageManualSortBy-SyntaxofOrderBy" target="_blank" rel="noopener">https://cwiki.apache.org/confluence/display/Hive/LanguageManual+SortBy#LanguageManualSortBy-SyntaxofOrderBy</a></li>
+<li>《Hive 编程指南》</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/hive-sort-by-order-distribute-cluster.html" title="Hive SORT BY vs ORDER BY vs DISTRIBUTE BY vs CLUSTER BY">http://smartsi.club/hive-sort-by-order-distribute-cluster.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/insights-into-hive-udaf.html" rel="next" title="深入理解 Hive UDAF">
+                <i class="fa fa-chevron-left"></i> 深入理解 Hive UDAF
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">299</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">61</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Order-By"><span class="nav-number">1.</span> <span class="nav-text">1. Order By</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Sort-By"><span class="nav-number">2.</span> <span class="nav-text">2. Sort By</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Distribute-By"><span class="nav-number">3.</span> <span class="nav-text">3. Distribute By</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Cluster-By"><span class="nav-number">4.</span> <span class="nav-text">4. Cluster By</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
