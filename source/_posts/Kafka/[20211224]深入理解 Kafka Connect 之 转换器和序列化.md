@@ -1,7 +1,7 @@
 ---
 layout: post
 author: smartsi
-title: 深入理解 Kafka Connect: 转换器和序列化
+title: 深入理解 Kafka Connect 之 转换器和序列化
 date: 2021-12-24 13:55:00
 tags:
   - Kafka
