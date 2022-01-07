@@ -109,7 +109,7 @@
 <meta property="og:description" content="目前，Apache Kafka 使用 Apache ZooKeeper 来存储元数据，分区位置和主题配置之类的数据存储在 Kafka 之外一个单独的 ZooKeeper 集群中。2019 年，为了打破这种依赖关系并将元数据管理交由 Kafka，为此引入这个KIP-500 计划[1]。 那么 ZooKeeper 有什么问题吗？其实，问题不在于 ZooKeeper，而在于外部元数据管理的理念。 拥有两">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2022-01-07T14:24:56.000Z">
+<meta property="og:updated_time" content="2022-01-07T14:28:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kafka 删除 Apache ZooKeeper 的依赖">
 <meta name="twitter:description" content="目前，Apache Kafka 使用 Apache ZooKeeper 来存储元数据，分区位置和主题配置之类的数据存储在 Kafka 之外一个单独的 ZooKeeper 集群中。2019 年，为了打破这种依赖关系并将元数据管理交由 Kafka，为此引入这个KIP-500 计划[1]。 那么 ZooKeeper 有什么问题吗？其实，问题不在于 ZooKeeper，而在于外部元数据管理的理念。 拥有两">
@@ -347,7 +347,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2022-01-07T22:24:56+08:00">2022-01-07</time>
+              <time title="更新于" itemprop="dateModified" datetime="2022-01-07T22:28:06+08:00">2022-01-07</time>
             
           </span>
 
@@ -428,7 +428,7 @@
 <p>元数据的扩展性是未来扩展 Kafka 的关键部分。我们预计单个 Kafka 集群最终能够支持一百万个或更多的分区。</p>
 <h2 id="2-Roadmap"><a href="#2-Roadmap" class="headerlink" title="2. Roadmap"></a>2. Roadmap</h2><h3 id="2-1-从-Kafka-管理工具中删除-ZooKeeper"><a href="#2-1-从-Kafka-管理工具中删除-ZooKeeper" class="headerlink" title="2.1 从 Kafka 管理工具中删除 ZooKeeper"></a>2.1 从 Kafka 管理工具中删除 ZooKeeper</h3><p>Kafka 的一些管理工具（作为 Kafka 发行版本中一部分）仍然允许与 ZooKeeper 直接通信。更糟糕的是，仍然有一两个操作必须经过 ZooKeeper 这种直接通信才能完成。我们一直在努力缩小这些差距。在不久之后，之前需要直接访问 ZooKeeper 的每个操作都会提供一个公共的 Kafka API。我们还将在 Kafka 的下一个主版本中禁用或删除不必要的 –zookeeper 标志。</p>
 <h3 id="2-2-自我管理的元数据仲裁"><a href="#2-2-自我管理的元数据仲裁" class="headerlink" title="2.2 自我管理的元数据仲裁"></a>2.2 自我管理的元数据仲裁</h3><p>在 KIP-500 提出的方法中，Kafka 控制器将元数据存储在 Kafka 分区，而不是存储在 ZooKeeper 中。但是，因为控制器依赖于这个分区，所以分区本身不能再依赖控制器来进行领导者选举这种事情。取而代之的方法是管理这个分区的节点必须实现自我管理的 Raft 仲裁。</p>
-<p>在 <a href="https://cwiki.apache.org/confluence/x/Li7cC" target="_blank" rel="noopener">KIP-595：元数据仲裁的 Raft 协议</a> [2]中讲述了如何将 Raft 协议适配到 Kafka 中，使其真正与 Kafka 融合来更好的工作。这涉及将 Raft <a href="https://raft.github.io/raft.pdf" target="_blank" rel="noopener">论文</a>中描述的基于推送的模型更改为基于拉取的模型，这与传统的 Kafka 复制是一致的。其他节点将连接到这些节点，而不是将数据推送到其他节点。同样，我们保持与 Kafka 一致的术语 epochs 而不是使用原始 Raft 论文中的 terms 等等。</p>
+<p>在 <a href="https://cwiki.apache.org/confluence/x/Li7cC" target="_blank" rel="noopener">KIP-595：元数据仲裁的 Raft 协议</a> [2]中讲述了如何将 Raft 协议适配到 Kafka 中，使其真正与 Kafka 融合来更好的工作。这涉及将 Raft <a href="https://raft.github.io/raft.pdf" target="_blank" rel="noopener">论文</a> [3]中描述的基于推送的模型更改为基于拉取的模型，这与传统的 Kafka 复制是一致的。其他节点将连接到这些节点，而不是将数据推送到其他节点。同样，我们保持与 Kafka 一致的术语 epochs 而不是使用原始 Raft 论文中的 terms 等等。</p>
 <p>最初的实现侧重于支持元数据分区。不支持将常规分区转换为 Raft 所需的全部操作。但是，这是我们将来可能会谈到的话题。</p>
 <h3 id="2-3-KIP-500-模式"><a href="#2-3-KIP-500-模式" class="headerlink" title="2.3 KIP-500 模式"></a>2.3 KIP-500 模式</h3><p>当然，这个项目最令人兴奋的部分是能够以 KIP-500 模式在没有 ZooKeeper 的情况下运行 Kafka。当 Kafka 在此模式下运行时，我们将使用 Raft 仲裁来存储我们的元数据，而不是 ZooKeeper。刚开始的时候，KIP-500 模式还处于实验阶段。大多数用户还是继续使用 ‘传统模式’，还在使用 ZooKeeper。部分原因是 KIP-500 模式一开始不支持所有可能的功能。另一个原因是因为我们希望在有足够的信心将 KIP-500 模式设为默认模式之后使用。最后，我们需要时间来完善从传统模式到 KIP-500 模式的升级过程。</p>
 <p>启用 KIP-500 模式的大部分工作会在控制器中进行。我们必须将控制器中与 ZooKeeper 交互的部分与实现更通用逻辑部分(副本集管理等)分离开。我们需要定义和实现更多的控制器 API 来替换当前与 ZooKeeper 的通信机制。这方面的一个例子是新的 AlterIsr API。此 API 允许副本在不使用 ZooKeeper 的情况下将同步副本集的更改通知控制器。</p>
