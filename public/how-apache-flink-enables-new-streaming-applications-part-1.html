@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="流数据处理正处于蓬勃发展中，可以提供更实时的数据以实现更好的数据洞察，同时从数据中进行分析的流程更加简化。在现实世界中数据生产是一个连续不断的过程(例如，Web服务器日志，移动应用程序中的用户活跃，数据库事务或者传感器读取的数据)。正如其他人所指出的，到目前为止，大部分数据架构都是建立在数据是有限的、静态的这样的基本假设之上。为了缩减连续数据生产和旧”批处理”系统局限性之间的这一根本差距，引入了复">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink 如何现实新的流处理应用第一部分:事件时间与无序处理">
+<meta property="og:url" content="http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-1.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="流数据处理正处于蓬勃发展中，可以提供更实时的数据以实现更好的数据洞察，同时从数据中进行分析的流程更加简化。在现实世界中数据生产是一个连续不断的过程(例如，Web服务器日志，移动应用程序中的用户活跃，数据库事务或者传感器读取的数据)。正如其他人所指出的，到目前为止，大部分数据架构都是建立在数据是有限的、静态的这样的基本假设之上。为了缩减连续数据生产和旧”批处理”系统局限性之间的这一根本差距，引入了复">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-4.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-1.png?raw=true">
+<meta property="og:updated_time" content="2022-01-15T09:27:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink 如何现实新的流处理应用第一部分:事件时间与无序处理">
+<meta name="twitter:description" content="流数据处理正处于蓬勃发展中，可以提供更实时的数据以实现更好的数据洞察，同时从数据中进行分析的流程更加简化。在现实世界中数据生产是一个连续不断的过程(例如，Web服务器日志，移动应用程序中的用户活跃，数据库事务或者传感器读取的数据)。正如其他人所指出的，到目前为止，大部分数据架构都是建立在数据是有限的、静态的这样的基本假设之上。为了缩减连续数据生产和旧”批处理”系统局限性之间的这一根本差距，引入了复">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-3.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-1.html"/>
+
+
+  <title>Flink 如何现实新的流处理应用第一部分:事件时间与无序处理 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink 如何现实新的流处理应用第一部分:事件时间与无序处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-13T23:35:17+08:00">2022-01-13</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2022-01-15T17:27:18+08:00">2022-01-15</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/how-apache-flink-enables-new-streaming-applications-part-1.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/how-apache-flink-enables-new-streaming-applications-part-1.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/how-apache-flink-enables-new-streaming-applications-part-1.html" class="leancloud_visitors" data-flag-title="Flink 如何现实新的流处理应用第一部分:事件时间与无序处理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>流数据处理正处于蓬勃发展中，可以提供更实时的数据以实现更好的数据洞察，同时从数据中进行分析的流程更加简化。在现实世界中数据生产是一个连续不断的过程(例如，Web服务器日志，移动应用程序中的用户活跃，数据库事务或者传感器读取的数据)。正如其他人所指出的，到目前为止，大部分数据架构都是建立在数据是有限的、静态的这样的基本假设之上。为了缩减连续数据生产和旧”批处理”系统局限性之间的这一根本差距，引入了复杂而脆弱(fragile)的端到端管道。现代流处理技术通过以现实世界事件产生的形式对数据进行建模和处理，从而减轻了对复杂解决方案的依赖。</p>
+<p>以流的方式对数据建模并处理的想法并不新鲜。但是，新的流处理系统(包括 Apache Flink)与旧的流处理系统(包括开源和专有的)有本质的区别。使用 Flink 进行数据流处理比传统概念上快速(实时)分析要应用广泛得多，包括对历史数据的分析，以及支持新一类的应用程序（使用以前的旧技术很难或根本不能实现这些应用程序）。我们将详细研究一些应用程序，并展示 Flink 是如何以及为何能够有效地支持这些应用程序：</p>
+<ul>
+<li>乱序数据上的准确结果。在大多数流处理场景中，事件的顺序非常重要，通常事件到达数据处理集群的顺序与它在现实世界中实际发生的时间不同。Flink 是第一个可以让开发人员可以控制事件时间（事情实际发生的时间）的开源系统，并可以在乱序流上获得准确的结果。</li>
+<li>会话和非对齐窗口：对 Web 日志、机器日志以及其他数据进行分析需要能够在会话中将事件进行分组。会话是非对齐窗口的一个典型例子，例如，每个 key 的窗口开始和结束都不一样，这需要 Flink 提供的窗口和检查点之间的分离。</li>
+<li>应用程序状态版本控制：在纯数据流体系结构（通常称为 Kappa 体系结构）中，流是事件的持久记录，应用程序使用从流中计算出的状态进行工作。在这样的体系结构中，Flink 的分布式快照可用于’版本化’应用程序状态：可以升级应用程序而不会丢失瞬态状态，应用程序状态可以回滚到以前的版本（例如，发现并纠正错误）或者应用程序的不同变体可以被分离出某个状态（例如，用于 A/B 测试）。</li>
+</ul>
+<h3 id="1-乱序数据流和事件时间窗口"><a href="#1-乱序数据流和事件时间窗口" class="headerlink" title="1. 乱序数据流和事件时间窗口"></a>1. 乱序数据流和事件时间窗口</h3><p>在讨论乱序数据流处理之前，我们需要定义顺序以及时间。流处理有两种时间概念：</p>
+<ul>
+<li>事件时间是事件在现实世界中发生的时间，通常由事件发出的数据记录上的时间戳表示。在几乎所有的数据流中，事件都带有表示事件产生时间的时间戳：Web服务器日志，来自监视代理的事件，移动应用日志，传感器数据等。</li>
+<li>处理时间是处理事件的算子所在机器上的本地时钟时间。</li>
+</ul>
+<p>在许多流处理中，在应用程序(服务器日志，传感器，监视代理等)产生事件的时间与其到达消息队列中进行处理的时间有一定延迟。原因有很多：</p>
+<ul>
+<li>在不同的网络路径上有不同的延迟</li>
+<li>来自消费者的排队和背压影响</li>
+<li>数据峰值速率</li>
+<li>一些事件的生产者并不总是处于连接状态中(移动设备，传感器等)</li>
+<li>一些发送爆发性事件的生产者</li>
+</ul>
+<p>这样产生的影响是事件在队列中相对于事件时间通常是无序的。此外，事件产生的时间戳与其到达队列或流处理器时间的差异随着时间而发生变化。这通常被称为事件时间偏差，并被定义为 ‘处理时间 - 事件时间’。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-3.png?raw=true" alt=""></p>
+<p>Flink 允许用户定义基于事件时间的窗口，而不是处理时间。这样的窗口不会轻易被乱序事件和不同事件时间偏差而影响。Flink 使用事件时间时钟来追踪事件时间，并通过 Watermark 来实现。Watermark 是 Flink 数据源生成的一种特殊事件，可以粗略地评估事件时间。时间为 T 的 Watermark 表示事件时间在该流(或分区)上已经处理到时间 T，这意味着不会再有时间戳小于 T 的事件到达了。Flink 算子可以根据这个时钟跟踪事件时间。下图展示了 Flink 如何基于事件时间来计算窗口。观察到的会有多个窗口在同时运行（当出现乱序时），并根据事件时间戳把事件分配给对应的窗口。在 Watermark 到达时会触发窗口计算并更新事件时钟。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-2.png?raw=true" alt=""></p>
+<p>基于事件时间的管道会尽可能快的产生精确的结果(一旦事件时间到达指定时间)，但必要的时候尽可能的延迟(把相关事件尽可能的都包含进来)。与使用批处理器周期性计算聚合相比，流式事件时间管道可以提前产生结果并且更精确(因为批处理管道不能正确处理跨批次的乱序事件)。最后，流式作业简单而明确地描述了如何根据时间(窗口)对元素进行分组，如何及时评估必要的进度（Watermark），而不是像批处理其通过滚动接收文件、批量作业以及定期作业调度程序实现。</p>
+<h3 id="2-整合事件时间和实时管道"><a href="#2-整合事件时间和实时管道" class="headerlink" title="2. 整合事件时间和实时管道"></a>2. 整合事件时间和实时管道</h3><p>事件时间管道会产生一定的延迟，因为需要等待所需的事件全部到达。在某些情况下，上述延迟太大以至于无法产生准确的实时结果。因为 Flink 是一个合适的流处理器，可以在几毫秒内处理完事件，所以很容易就可以在同一个程序中将低延迟的实时管道与事件时间管道结合起来。下面的例子展示了一个生产程序：</p>
+<ul>
+<li>基于单个事件实现低延迟警报。如果发现某种类型的事件，则发送警报消息。</li>
+<li>基于处理时间窗口的实时仪表板，每隔几秒就对事件进行聚合和计数。</li>
+<li>根据事件时间准确统计。</li>
+</ul>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-4.png?raw=true" alt=""></p>
+<p>整合事件时间和处理时间的另一种方式是定义具有提前输出结果以及最大延迟的事件时间窗口：</p>
+<ul>
+<li>事件时间窗口可以自定义一个滞后于处理时间的最大延迟。例如，一个事件时间窗口将在事件时间 10：15h 关闭，可以自定义在处理时间内不晚于 10：20h 关闭。</li>
+<li>事件时间窗口可以提前输出结果。例如，计算 15 分钟事件时间滑动窗口中的事件数量的程序，可以在按处理时间每分钟输出当前每个未触发窗口的计数。</li>
+</ul>
+<h3 id="3-Flink-如何度量时间"><a href="#3-Flink-如何度量时间" class="headerlink" title="3. Flink 如何度量时间"></a>3. Flink 如何度量时间</h3><p>现在，我们深入了解 Flink 时间处理的机制，以及这些机制与旧式流式处理系统有什么不同之处。一般来说，时间使用时钟度量的。流式作业集群机器的内部时钟是最简单的时钟(称为挂钟)，时钟可以记录处理时间。为了追踪事件时间，我们需要一个时钟来度量不同机器上的同一时间。这可以通过 Flink 的 Watermark 机制来完成。Watermark 是一种特殊事件，表示指事件流中的时间(即事件流中的真实世界时间戳)到达了一个特定时间点(例如，10am)，并且从现在起不会有早于上午 10 点时间戳的事件到达。这些 Watermark 作为数据流的一部分与常规事件一起流转，Flink 算子一旦从所有上游算子/数据源接收到 10am 的 Watermark，就将其事件时间提至上午10点。需要注意的是，基于事件时钟追踪时间比挂钟粒度更粗，但更为正确，因为它在机器间保持一致。第三种类型的时钟(我们称之为系统时钟)被流处理系统用于内部记账，最重要的是能保证一致的语义(“精确一次处理”)。Flink 通过向数据流注入栅栏 Barriers 并生成一致性快照来跟踪作业的进度。Barriers 类似于 Watermark，都是流经数据流的事件。不同之处在于 Barriers 不是由真实世界的数据源产生的，而是根据 Flink Master 的挂钟度量的。类似地，Spark Streaming 基于 Spark 的接收器的挂钟调度微批次。Flink 的快照机制和 Spark 的微批处理机制都是系统时钟的例子，这是一种追踪计算时间(以及进度)的方法。如下展示了假设我们”冻结”计算下不同时钟度量的不同的时间:</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/how-apache-flink-enables-new-streaming-applications-part-1-1.png?raw=true" alt=""></p>
+<p>从上面可以看出，作业由一个数据源和一个窗口算子组成，在两台机器上(worker 1 和 worker 2)上并行执行。事件中的数字表示时间戳，框的颜色表示进入不同的窗口中(灰色事件进入窗口1，紫色事件进入窗口2)。数据源从消息队列中读取事件，根据 key 进行分区，并将它们分发到正确的窗口算子实例中。这里的窗口是基于事件时间的时间窗口。我们看到，由于机器间时间不同步，不同机器(worker 1，worker 2 和 master)上在同一时刻的挂钟度量成了不同的时间(分别为 10、8 以及 7，假设时间从 0 开始)。</p>
+<p>数据源发出 Watermark，目前时间戳为 4 的 Watermark 都已到达窗口算子。这意味着事件时间时钟度量为 4，而且该时间在并行计算中是一致的。最后，Master（JobManager）当前正在数据源注入 Barrier 来获取计算快照。这意味着系统时间度量为 7（这可能是第 7 个检查点，也可以是基于 Master 处理时间注入的时间戳）。所以，我们已经看到流处理场景中存在三个时钟：</p>
+<ul>
+<li>事件时钟（粗略）度量事件流中的时间</li>
+<li>系统时钟度量计算的进度，并在系统内部使用以在发生故障时提供一致的结果。这个时钟实际上是基于协调机器的挂钟。</li>
+<li>机器的挂钟度量处理时间。</li>
+</ul>
+<p>旧流式系统的一个常见缺陷是三个时钟都是相同的。用相同的时钟来度量现实世界中的时间，以及跟踪计算的进度。这会导致两个问题：</p>
+<ul>
+<li>计算结果不正确：由于事件在现实世界中发生的顺序与其被摄取或处理的顺序不同，因此系统可能会将事件分组到错误的时间窗口中。</li>
+<li>计算结果取决于当前时间，例如，流处理作业实际开始的那一天，以及机器度量的时间。</li>
+<li>系统配置参数会影响程序的语义：当增加检查点间隔时，例如，为了增加吞吐量，windows 会缓冲更多元素。</li>
+</ul>
+<p>旧流式系统的这些缺点使得它们很难用于需要准确（或至少可控准确）结果的应用程序以及需要处理历史和实时数据的应用程序。再加上早期流式系统的吞吐量相对较低，这给流技术带来了’不好的声誉’：人们认为只有批处理才能实现重量级而准确的处理，而流系统只能实现一些快速的近似结果，例如，作为 Lambda 架构的一部分。Flink 的一个新功能是完全分离了这三个时钟：</p>
+<ul>
+<li>基于 Watermark 的事件时钟跟踪事件流时间，并允许用户根据事件时间定义窗口。当系统知道该窗口没有进一步的事件会到达时，这些窗口会关闭。例如，当系统知道流中的事件时间已经进展到至少 10:15h 时，从 10:00h 到 10:15h 的时间窗口将会关闭。</li>
+<li>与事件时间时钟完全分离的系统时钟跟踪计算进度并为全局快照计时。此时钟不向用户 API 显示，但用于协调分布式一致性。</li>
+<li>机器的挂钟（处理时间）向用户暴露，以支持处理时间窗口以及实现提早近似结果的事件时间窗口。</li>
+</ul>
+<p>这种时钟和时间进度的分离使得 Flink 比旧的’实时’流系统具有更多的能力。</p>
+<h3 id="4-结论"><a href="#4-结论" class="headerlink" title="4. 结论"></a>4. 结论</h3><p>通过这篇文章，我们可以了解到：</p>
+<ul>
+<li>Flink 提供了基于事件时间触发的窗口算子，而不是基于机器的挂钟时间触发，所以即使在无序流或事件延迟时也能产生准确的结果。</li>
+<li>Flink 将事件时间算子与触发器结合起来可以获得提早结果和低延迟报警。</li>
+<li>Flink 将跟踪检查点进度的内部系统时钟与跟踪事件时间的时钟区分开。</li>
+</ul>
+<p>原文:<a href="https://www.ververica.com/blog/how-apache-flink-enables-new-streaming-applications-part-1" target="_blank" rel="noopener">How Apache Flink™ Enables New Streaming Applications, Part 1</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    sjf0115
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-1.html" title="Flink 如何现实新的流处理应用第一部分:事件时间与无序处理">http://smartsi.club/how-apache-flink-enables-new-streaming-applications-part-1.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/removing-zookeeper-dependency-in-kafka.html" rel="next" title="Kafka 删除 Apache ZooKeeper 的依赖">
+                <i class="fa fa-chevron-left"></i> Kafka 删除 Apache ZooKeeper 的依赖
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">304</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">62</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-乱序数据流和事件时间窗口"><span class="nav-number">1.</span> <span class="nav-text">1. 乱序数据流和事件时间窗口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-整合事件时间和实时管道"><span class="nav-number">2.</span> <span class="nav-text">2. 整合事件时间和实时管道</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Flink-如何度量时间"><span class="nav-number">3.</span> <span class="nav-text">3. Flink 如何度量时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-结论"><span class="nav-number">4.</span> <span class="nav-text">4. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
