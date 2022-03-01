@@ -111,7 +111,7 @@
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-1.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-2.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-3.png?raw=true">
-<meta property="og:updated_time" content="2022-03-01T14:45:28.000Z">
+<meta property="og:updated_time" content="2022-03-01T14:49:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flink State TTL 详解">
 <meta name="twitter:description" content="Flink 1.13 版本  在某些场景下 Flink 用户状态一直在无限增长，一些用例需要能够自动清理旧的状态。例如，作业中定义了超长的时间窗口，或者在动态表上应用了无限范围的 GROUP BY 语句。此外，目前开发人员需要自己完成 TTL 的临时实现，例如使用可能不节省存储空间的计时器服务。还有一个比较重要的点是一些法律法规也要求必须在有限时间内访问数据。 对于这些情况，旧版本的 Flink">
@@ -349,7 +349,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2022-03-01T22:45:28+08:00">2022-03-01</time>
+              <time title="更新于" itemprop="dateModified" datetime="2022-03-01T22:49:46+08:00">2022-03-01</time>
             
           </span>
 
@@ -444,7 +444,7 @@
 <p>可以通过如下方法显示设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 等价于 returnExpiredIfNotCleanedUp()</span></span><br><span class="line">setStateVisibility(StateTtlConfig.StateVisibility.ReturnExpiredIfNotCleanedUp)</span><br><span class="line"><span class="comment">// 等价于 neverReturnExpired()</span></span><br><span class="line">setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)</span><br></pre></td></tr></table></figure></p>
 <h2 id="3-过期清理策略"><a href="#3-过期清理策略" class="headerlink" title="3. 过期清理策略"></a>3. 过期清理策略</h2><p>从 Flink 1.6.0 版本开始，当生成 Checkpoint 或者 Savepoint 全量快照时会自动删除过期状态。但是，过期状态删除不适用于增量 Checkpoint，必须明确启用全量快照才能删除过期状态。全量快照的大小会减小，但本地状态存储大小并不会减少。只有当用户从快照重新加载其状态到本地时，才会清除用户的本地状态。由于上述这些限制，为了改善用户体验，Flink 1.8.0 引入了两种逐步触发状态清理的策略，分别是针对 Heap StateBackend 的增量清理策略以及针对 RocksDB StateBackend 的压缩清理策略。到目前为止，一共有三种过期清理策略：</p>
 <ul>
-<li>全量快照清理策略()</li>
+<li>全量快照清理策略</li>
 <li>增量清理策略</li>
 <li>RocksDB 压缩清理策略</li>
 </ul>
