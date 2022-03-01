@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.1" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.1" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+
+  
+  <meta name="keywords" content="Flink," />
+
+
+<meta name="description" content="Flink 1.13 版本  在某些场景下 Flink 用户状态一直在无限增长，一些用例需要能够自动清理旧的状态。例如，作业中定义了超长的时间窗口，或者在动态表上应用了无限范围的 GROUP BY 语句。此外，目前开发人员需要自己完成 TTL 的临时实现，例如使用可能不节省存储空间的计时器服务。还有一个比较重要的点是一些法律法规也要求必须在有限时间内访问数据。 对于这些情况，旧版本的 Flink">
+<meta name="keywords" content="Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink State TTL 详解">
+<meta property="og:url" content="http://smartsi.club/state-ttl-for-apache-flink.html">
+<meta property="og:site_name" content="SmartSi">
+<meta property="og:description" content="Flink 1.13 版本  在某些场景下 Flink 用户状态一直在无限增长，一些用例需要能够自动清理旧的状态。例如，作业中定义了超长的时间窗口，或者在动态表上应用了无限范围的 GROUP BY 语句。此外，目前开发人员需要自己完成 TTL 的临时实现，例如使用可能不节省存储空间的计时器服务。还有一个比较重要的点是一些法律法规也要求必须在有限时间内访问数据。 对于这些情况，旧版本的 Flink">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-3.png?raw=true">
+<meta property="og:updated_time" content="2022-03-01T14:45:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink State TTL 详解">
+<meta name="twitter:description" content="Flink 1.13 版本  在某些场景下 Flink 用户状态一直在无限增长，一些用例需要能够自动清理旧的状态。例如，作业中定义了超长的时间窗口，或者在动态表上应用了无限范围的 GROUP BY 语句。此外，目前开发人员需要自己完成 TTL 的临时实现，例如使用可能不节省存储空间的计时器服务。还有一个比较重要的点是一些法律法规也要求必须在有限时间内访问数据。 对于这些情况，旧版本的 Flink">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-1.png?raw=true">
+
+
+
+
+
+
+  <link rel="canonical" href="http://smartsi.club/state-ttl-for-apache-flink.html"/>
+
+
+  <title>Flink State TTL 详解 | SmartSi</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">SmartSi</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">专注大数据领域的小白</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://smartsi.club/state-ttl-for-apache-flink.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="sjf0115">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/header.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SmartSi">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink State TTL 详解</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-02-27T14:56:01+08:00">2022-02-27</time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2022-03-01T22:45:28+08:00">2022-03-01</time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/state-ttl-for-apache-flink.html#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/state-ttl-for-apache-flink.html" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/state-ttl-for-apache-flink.html" class="leancloud_visitors" data-flag-title="Flink State TTL 详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>Flink 1.13 版本</p>
+</blockquote>
+<p>在某些场景下 Flink 用户状态一直在无限增长，一些用例需要能够自动清理旧的状态。例如，作业中定义了超长的时间窗口，或者在动态表上应用了无限范围的 GROUP BY 语句。此外，目前开发人员需要自己完成 TTL 的临时实现，例如使用可能不节省存储空间的计时器服务。还有一个比较重要的点是一些法律法规也要求必须在有限时间内访问数据。</p>
+<p>对于这些情况，旧版本的 Flink 并不能很好解决，因此 Apache Flink 1.6.0 版本引入了状态 TTL 特性。该特性可以让 Keyed 状态在一定时间内没有被使用下自动过期。如果配置了 TTL 并且状态已过期，那么会尽最大努力来清理过期状态。</p>
+<h2 id="1-用法"><a href="#1-用法" class="headerlink" title="1. 用法"></a>1. 用法</h2><p>可以在 <a href="https://nightlies.apache.org/flink/flink-docs-release-1.14/docs/dev/datastream/fault-tolerance/state/#state-time-to-live-ttl" target="_blank" rel="noopener">Flink 官方文档</a>中看到 State TTL 如下使用方式：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.state.StateTtlConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.state.ValueStateDescriptor;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.time.Time;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 状态描述符</span></span><br><span class="line">ValueStateDescriptor&lt;Long&gt; stateDescriptor = <span class="keyword">new</span> ValueStateDescriptor&lt;&gt;(<span class="string">"LastLoginState"</span>, Long.class);</span><br><span class="line"><span class="comment">// 设置 TTL</span></span><br><span class="line">StateTtlConfig ttlConfig = StateTtlConfig</span><br><span class="line">        .newBuilder(Time.minutes(<span class="number">1</span>))</span><br><span class="line">        .setTtlTimeCharacteristic(StateTtlConfig.TtlTimeCharacteristic.ProcessingTime)</span><br><span class="line">        .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)</span><br><span class="line">        .setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)</span><br><span class="line">        .cleanupFullSnapshot()</span><br><span class="line">        .build();</span><br><span class="line">stateDescriptor.enableTimeToLive(ttlConfig);</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，要使用 State TTL 功能，首先要定义一个 StateTtlConfig 对象。StateTtlConfig 对象可以通过构造器模式来创建，典型地用法是传入一个 Time 对象作为 TTL 时间，然后可以设置时间处理语义(TtlTimeCharacteristic)、更新类型(UpdateType)以及状态可见性(StateVisibility)。当创建完 StateTtlConfig 对象，可以在状态描述符中启用 State TTL 功能。</p>
+<blockquote>
+<p><a href="https://github.com/sjf0115/data-example/blob/master/flink-example/src/main/java/com/flink/example/stream/state/state/StateTTLExample.java" target="_blank" rel="noopener">完整代码</a></p>
+</blockquote>
+<p>如下所示设置1分钟的过期时间：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-1.png?raw=true" alt=""></p>
+<h2 id="2-参数说明"><a href="#2-参数说明" class="headerlink" title="2. 参数说明"></a>2. 参数说明</h2><h3 id="2-1-过期时间"><a href="#2-1-过期时间" class="headerlink" title="2.1 过期时间"></a>2.1 过期时间</h3><p>newBuilder 方法的参数是必需的，表示状态的过期时间，是一个 org.apache.flink.api.common.time.Time 对象。可以简单的认为一旦设置了 TTL，那么如果上次访问的时间戳 + TTL 超过了当前时间，那么表明状态过期了（实际上更复杂一些）。</p>
+<h3 id="2-2-时间处理语义"><a href="#2-2-时间处理语义" class="headerlink" title="2.2 时间处理语义"></a>2.2 时间处理语义</h3><p>TtlTimeCharacteristic 表示 State TTL 功能可以使用的时间处理语义：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> TtlTimeCharacteristic &#123;</span><br><span class="line">    ProcessingTime</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>截止到目前 Flink 1.14，只支持 ProcessingTime 时间处理语义。EventTime 处理语义还在开发中，具体可以追踪<a href="https://issues.apache.org/jira/browse/FLINK-12005" target="_blank" rel="noopener">FLINK-12005</a>。</p>
+<p>可以通过如下方法显示设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">setTtlTimeCharacteristic(StateTtlConfig.TtlTimeCharacteristic.ProcessingTime)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-3-更新类型"><a href="#2-3-更新类型" class="headerlink" title="2.3 更新类型"></a>2.3 更新类型</h3><p>UpdateType 表示状态时间戳(上次访问时间戳)的更新时机：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> UpdateType &#123;</span><br><span class="line">    Disabled,</span><br><span class="line">    OnCreateAndWrite,</span><br><span class="line">    OnReadAndWrite</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果设置为 Disabled，则表示禁用 TTL 功能，状态不会过期；如果设置为 OnCreateAndWrite，那么表示在状态创建或者每次写入时都会更新时间戳；如果设置为 OnReadAndWrite，那么除了在状态创建和每次写入时更新时间戳外，读取状态也会更新状态的时间戳。如果不配置默认为 OnCreateAndWrite。</p>
+<p>可以通过如下方法显示设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 等价于 updateTtlOnCreateAndWrite()</span></span><br><span class="line">setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)</span><br><span class="line"><span class="comment">// 等价于 updateTtlOnReadAndWrite()</span></span><br><span class="line">setUpdateType(StateTtlConfig.UpdateType.OnReadAndWrite)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-4-状态可见性"><a href="#2-4-状态可见性" class="headerlink" title="2.4 状态可见性"></a>2.4 状态可见性</h3><p>StateVisibility 表示状态可见性，在读取状态时是否返回过期值：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> StateVisibility &#123;</span><br><span class="line">    ReturnExpiredIfNotCleanedUp,</span><br><span class="line">    NeverReturnExpired</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果设置为 ReturnExpiredIfNotCleanedUp，那么当状态值已经过期，但还未被真正清理掉，就会返回给调用方；如果设置为 NeverReturnExpired，那么一旦状态值过期了，就永远不会返回给调用方，只会返回空状态。</p>
+<p>可以通过如下方法显示设置：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 等价于 returnExpiredIfNotCleanedUp()</span></span><br><span class="line">setStateVisibility(StateTtlConfig.StateVisibility.ReturnExpiredIfNotCleanedUp)</span><br><span class="line"><span class="comment">// 等价于 neverReturnExpired()</span></span><br><span class="line">setStateVisibility(StateTtlConfig.StateVisibility.NeverReturnExpired)</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-过期清理策略"><a href="#3-过期清理策略" class="headerlink" title="3. 过期清理策略"></a>3. 过期清理策略</h2><p>从 Flink 1.6.0 版本开始，当生成 Checkpoint 或者 Savepoint 全量快照时会自动删除过期状态。但是，过期状态删除不适用于增量 Checkpoint，必须明确启用全量快照才能删除过期状态。全量快照的大小会减小，但本地状态存储大小并不会减少。只有当用户从快照重新加载其状态到本地时，才会清除用户的本地状态。由于上述这些限制，为了改善用户体验，Flink 1.8.0 引入了两种逐步触发状态清理的策略，分别是针对 Heap StateBackend 的增量清理策略以及针对 RocksDB StateBackend 的压缩清理策略。到目前为止，一共有三种过期清理策略：</p>
+<ul>
+<li>全量快照清理策略()</li>
+<li>增量清理策略</li>
+<li>RocksDB 压缩清理策略</li>
+</ul>
+<h3 id="3-1-全量快照清理策略"><a href="#3-1-全量快照清理策略" class="headerlink" title="3.1 全量快照清理策略"></a>3.1 全量快照清理策略</h3><p>我们先看一下全量快照清理策略，这种策略可以在生成全量快照(Snapshot/Checkpoint)时清理过期状态，这样可以大大减小快照存储，但需要注意的是本地状态中过期数据并不会被清理。唯有当作业重启并从上一个快照恢复后，本地状态才会实际减小。如果要在 DataStream 中使用该过期请策略，请参考如下所示代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.state.StateTtlConfig;</span><br><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.time.Time;</span><br><span class="line"></span><br><span class="line">StateTtlConfig ttlConfig = StateTtlConfig</span><br><span class="line">    .newBuilder(Time.seconds(<span class="number">1</span>))</span><br><span class="line">    .cleanupFullSnapshot()</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure></p>
+<p>这种过期清理策略对开启了增量检查点的 RocksDB 状态后端无效。</p>
+<p>全量快照清理策略(FULL_STATE_SCAN_SNAPSHOT)对应的实现是 EmptyCleanupStrategy：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> CleanupStrategy EMPTY_STRATEGY = <span class="keyword">new</span> EmptyCleanupStrategy();</span><br><span class="line"><span class="function"><span class="keyword">public</span> Builder <span class="title">cleanupFullSnapshot</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    strategies.put(CleanupStrategies.Strategies.FULL_STATE_SCAN_SNAPSHOT, EMPTY_STRATEGY);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">EmptyCleanupStrategy</span> <span class="keyword">implements</span> <span class="title">CleanupStrategy</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1373998465131443873L</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-2-增量清理策略"><a href="#3-2-增量清理策略" class="headerlink" title="3.2 增量清理策略"></a>3.2 增量清理策略</h3><p>我们再来看一下针对 Heap StateBackend 的增量清理策略。这种策略下存储后端会为所有状态条目维护一个惰性全局迭代器。每次触发增量清理时，迭代器都会向前迭代删除已遍历的过期数据。如果要在 DataStream 中使用该过期请策略，请参考如下所示代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.state.StateTtlConfig;</span><br><span class="line">StateTtlConfig ttlConfig = StateTtlConfig</span><br><span class="line">    .newBuilder(Time.seconds(<span class="number">1</span>))</span><br><span class="line">    .cleanupIncrementally(<span class="number">5</span>, <span class="keyword">false</span>)</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure></p>
+<p>该策略有两个参数：第一个参数表示每次触发清理时需要检查的状态条目数，总是在状态访问时触发。第二个参数定义了在每次处理记录时是否额外触发清理。堆状态后端的默认后台清理每次触发检查 5 个条目，处理记录时不会额外进行过期数据清理。</p>
+<p>增量清理策略(INCREMENTAL_CLEANUP)对应的实现是 IncrementalCleanupStrategy：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Builder <span class="title">cleanupIncrementally</span><span class="params">(@Nonnegative <span class="keyword">int</span> cleanupSize, <span class="keyword">boolean</span> runCleanupForEveryRecord)</span> </span>&#123;</span><br><span class="line">    strategies.put(</span><br><span class="line">        CleanupStrategies.Strategies.INCREMENTAL_CLEANUP,</span><br><span class="line">        <span class="keyword">new</span> IncrementalCleanupStrategy(cleanupSize, runCleanupForEveryRecord)</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">IncrementalCleanupStrategy</span> <span class="keyword">implements</span> <span class="title">CleanupStrategies</span>.<span class="title">CleanupStrategy</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> IncrementalCleanupStrategy DEFAULT_INCREMENTAL_CLEANUP_STRATEGY =</span><br><span class="line">            <span class="keyword">new</span> IncrementalCleanupStrategy(<span class="number">5</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> cleanupSize;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> runCleanupForEveryRecord;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">IncrementalCleanupStrategy</span><span class="params">(<span class="keyword">int</span> cleanupSize, <span class="keyword">boolean</span> runCleanupForEveryRecord)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.cleanupSize = cleanupSize;</span><br><span class="line">        <span class="keyword">this</span>.runCleanupForEveryRecord = runCleanupForEveryRecord;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是：</p>
+<ul>
+<li>如果该状态没有被访问或者没有记录需要处理，那么过期状态会一直存在。</li>
+<li>增量清理所花费的时间会增加记录处理延迟。</li>
+<li>目前仅堆状态后端实现了增量清理。为 RocksDB 状态后端设置增量清理不会有任何效果。</li>
+<li>如果堆状态后端与同步快照一起使用，全局迭代器在迭代时保留所有 Key 的副本，因为它的特定实现不支持并发修改。启用此功能将增加内存消耗。异步快照没有这个问题。</li>
+<li>对于现有作业，可以随时在 StateTtlConfig 中启用或者停用此清理策略。</li>
+</ul>
+<h3 id="3-3-RocksDB-压缩清理策略"><a href="#3-3-RocksDB-压缩清理策略" class="headerlink" title="3.3 RocksDB 压缩清理策略"></a>3.3 RocksDB 压缩清理策略</h3><p>我们最后再来看一下 RocksDB 压缩清理策略。如果使用 RocksDB StateBackend，则会调用 Flink 指定的压缩过滤器进行后台清理。RocksDB 周期性运行异步压缩来合并状态更新并减少存储。Flink 压缩过滤器使用 TTL 检查状态条目的过期时间戳并删除过期状态值。如果要在 DataStream 中使用该过期请策略，请参考如下所示代码：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.flink.api.common.state.StateTtlConfig;</span><br><span class="line"></span><br><span class="line">StateTtlConfig ttlConfig = StateTtlConfig</span><br><span class="line">    .newBuilder(Time.seconds(<span class="number">1</span>))</span><br><span class="line">    .cleanupInRocksdbCompactFilter(<span class="number">1000</span>)</span><br><span class="line">    .build();</span><br></pre></td></tr></table></figure></p>
+<p>RocksDB 压缩过滤器在每次处理一定状态条目后，查询当前的时间戳并检查是否过期。频繁地更新时间戳可以提高清理速度，但同样也会降低压缩性能。RocksDB 状态后端的默认每处理 1000 个条目就查询当前时间戳。</p>
+<p>RocksDB 压缩清理策略(ROCKSDB_COMPACTION_FILTER)对应的实现是 RocksdbCompactFilterCleanupStrategy：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Builder <span class="title">cleanupInRocksdbCompactFilter</span><span class="params">(<span class="keyword">long</span> queryTimeAfterNumEntries)</span> </span>&#123;</span><br><span class="line">    strategies.put(</span><br><span class="line">        CleanupStrategies.Strategies.ROCKSDB_COMPACTION_FILTER,</span><br><span class="line">        <span class="keyword">new</span> RocksdbCompactFilterCleanupStrategy(queryTimeAfterNumEntries)</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RocksdbCompactFilterCleanupStrategy</span> <span class="keyword">implements</span> <span class="title">CleanupStrategies</span>.<span class="title">CleanupStrategy</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">3109278796506988980L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> RocksdbCompactFilterCleanupStrategy DEFAULT_ROCKSDB_COMPACT_FILTER_CLEANUP_STRATEGY =</span><br><span class="line">                    <span class="keyword">new</span> RocksdbCompactFilterCleanupStrategy(<span class="number">1000L</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">long</span> queryTimeAfterNumEntries;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">RocksdbCompactFilterCleanupStrategy</span><span class="params">(<span class="keyword">long</span> queryTimeAfterNumEntries)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.queryTimeAfterNumEntries = queryTimeAfterNumEntries;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>在压缩期间调用 TTL 过滤器会降低压缩速度。TTL 过滤器必须解析上次访问的时间戳，并检查正在压缩 Key 的每个存储状态条目的到期时间。在集合状态类型（List或 Map）的情况下，还会为每个存储的元素调用检查。</p>
+</blockquote>
+<h2 id="4-注意事项"><a href="#4-注意事项" class="headerlink" title="4. 注意事项"></a>4. 注意事项</h2><p>当从状态中恢复时，之前设置的 TTL 过期时间不会丢失，还会继续生效。如下所示为登录用户设置5分钟的过期时间：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-2.png?raw=true" alt=""></p>
+<p>在状态过期之前取消作业并触发 Savepoint，如下所示：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">flink cancel -s hdfs://localhost:9000/flink/savepoints/ 3b37dece248dafc7330b854c38bf526d</span><br></pre></td></tr></table></figure></p>
+<p>然后再从 Savepoint 中恢复作业：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">flink run -s hdfs://localhost:9000/flink/savepoints/savepoint-c82ee3-e7ca58626e3b -c com.flink.example.stream.state.state.StateTTLExample flink-example-1.0.jar</span><br></pre></td></tr></table></figure></p>
+<p>如果用户在首次登录后5分钟内再次登录，用户的上一次登录时间保持不变，超过5分钟则重新记录首次登录时间：</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Flink/state-ttl-for-apache-flink-3.png?raw=true" alt=""></p>
+<p>当从 Checkpoint/Savepoint 恢复时，TTL 的状态（是否开启）必须和之前保持一致，否则会遇到如下兼容性问题：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2022</span>-<span class="number">03</span>-<span class="number">01</span> <span class="number">22</span>:<span class="number">34</span>:<span class="number">33</span></span><br><span class="line">java.lang.RuntimeException: Error <span class="keyword">while</span> getting state</span><br><span class="line">	at org.apache.flink.runtime.state.DefaultKeyedStateStore.getState(DefaultKeyedStateStore.java:<span class="number">62</span>)</span><br><span class="line">	at org.apache.flink.streaming.api.operators.StreamingRuntimeContext.getState(StreamingRuntimeContext.java:<span class="number">203</span>)</span><br><span class="line">	at com.flink.example.stream.state.state.StateTTLExample$<span class="number">1</span>.open(StateTTLExample.java:<span class="number">82</span>)</span><br><span class="line">	at org.apache.flink.api.common.functions.util.FunctionUtils.openFunction(FunctionUtils.java:<span class="number">34</span>)</span><br><span class="line">	at org.apache.flink.streaming.api.operators.AbstractUdfStreamOperator.open(AbstractUdfStreamOperator.java:<span class="number">102</span>)</span><br><span class="line">	at org.apache.flink.streaming.runtime.tasks.OperatorChain.initializeStateAndOpenOperators(OperatorChain.java:<span class="number">437</span>)</span><br><span class="line">	at org.apache.flink.streaming.runtime.tasks.StreamTask.restoreGates(StreamTask.java:<span class="number">574</span>)</span><br><span class="line">	at org.apache.flink.streaming.runtime.tasks.StreamTaskActionExecutor$<span class="number">1</span>.call(StreamTaskActionExecutor.java:<span class="number">55</span>)</span><br><span class="line">	at org.apache.flink.streaming.runtime.tasks.StreamTask.restore(StreamTask.java:<span class="number">554</span>)</span><br><span class="line">	at org.apache.flink.runtime.taskmanager.Task.doRun(Task.java:<span class="number">756</span>)</span><br><span class="line">	at org.apache.flink.runtime.taskmanager.Task.run(Task.java:<span class="number">563</span>)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:<span class="number">748</span>)</span><br><span class="line">Caused by: org.apache.flink.util.StateMigrationException: For heap backends, the .new <span class="function">state <span class="title">serializer</span> <span class="params">(org.apache.flink.runtime.state.ttl.TtlStateFactory$TtlSerializer@<span class="number">724383</span>d2)</span> must not be incompatible with the old state <span class="title">serializer</span> <span class="params">(org.apache.flink.api.common.typeutils.base.LongSerializer@<span class="number">13921758</span>)</span>.</span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.heap.HeapKeyedStateBackend.<span class="title">tryRegisterStateTable</span><span class="params">(HeapKeyedStateBackend.java:<span class="number">214</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.heap.HeapKeyedStateBackend.<span class="title">createInternalState</span><span class="params">(HeapKeyedStateBackend.java:<span class="number">279</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.ttl.TtlStateFactory.<span class="title">createTtlStateContext</span><span class="params">(TtlStateFactory.java:<span class="number">211</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.ttl.TtlStateFactory.<span class="title">createValueState</span><span class="params">(TtlStateFactory.java:<span class="number">146</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.ttl.TtlStateFactory.<span class="title">createState</span><span class="params">(TtlStateFactory.java:<span class="number">133</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.ttl.TtlStateFactory.<span class="title">createStateAndWrapWithTtlIfEnabled</span><span class="params">(TtlStateFactory.java:<span class="number">70</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.AbstractKeyedStateBackend.<span class="title">getOrCreateKeyedState</span><span class="params">(AbstractKeyedStateBackend.java:<span class="number">301</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.AbstractKeyedStateBackend.<span class="title">getPartitionedState</span><span class="params">(AbstractKeyedStateBackend.java:<span class="number">352</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.DefaultKeyedStateStore.<span class="title">getPartitionedState</span><span class="params">(DefaultKeyedStateStore.java:<span class="number">115</span>)</span></span></span><br><span class="line"><span class="function">  	at org.apache.flink.runtime.state.DefaultKeyedStateStore.<span class="title">getState</span><span class="params">(DefaultKeyedStateStore.java:<span class="number">60</span>)</span></span></span><br><span class="line"><span class="function">  	... 11 more</span></span><br></pre></td></tr></table></figure></p>
+<p>建议使用状态的时候最好就先加上 StateTtlConfig，如果不需要过期清理，可以先设置为 StateTtlConfig.disableCleanupInBackground()，如果后续需要过期清理，再配置过期时间以及清理策略。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>赏几毛白！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="sjf0115 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.png" alt="sjf0115 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    smartsi
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://smartsi.club/state-ttl-for-apache-flink.html" title="Flink State TTL 详解">http://smartsi.club/state-ttl-for-apache-flink.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/disentangle-statebackends-from-checkpointing.html" rel="next" title="Flink 1.13 StateBackend 与 CheckpointStorage 拆分">
+                <i class="fa fa-chevron-left"></i> Flink 1.13 StateBackend 与 CheckpointStorage 拆分
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjQ2MS85MDIy"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/header.png"
+                alt="sjf0115" />
+            
+              <p class="site-author-name" itemprop="name">sjf0115</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">311</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/sjf0115" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:1203745031@qq.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/sunnyyoona" title="CSDN" target="_blank">CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com" title="NexT主题" target="_blank">NexT主题</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-用法"><span class="nav-number">1.</span> <span class="nav-text">1. 用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-参数说明"><span class="nav-number">2.</span> <span class="nav-text">2. 参数说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-过期时间"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 过期时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-时间处理语义"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 时间处理语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-更新类型"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 更新类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-状态可见性"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 状态可见性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-过期清理策略"><span class="nav-number">3.</span> <span class="nav-text">3. 过期清理策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-全量快照清理策略"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 全量快照清理策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-增量清理策略"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 增量清理策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-RocksDB-压缩清理策略"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 RocksDB 压缩清理策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-注意事项"><span class="nav-number">4.</span> <span class="nav-text">4. 注意事项</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 &mdash; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">sjf0115</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.0.1</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-eye"></i> 本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.1"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz',
+        appKey: 'MsfAHet79NrOIrFB82biqYDx',
+        placeholder: '有什么问题，欢迎留言指正与交流...',
+        avatar:'robohash',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("TU3U2HXdoBxlVVD4YGMbe6Ye-gzGzoHsz", "MsfAHet79NrOIrFB82biqYDx");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+
+  
+
+  
+
+</body>
+</html>
