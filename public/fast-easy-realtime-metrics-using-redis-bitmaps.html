@@ -103,20 +103,20 @@
 <meta name="description" content="传统上，度量指标一般由批处理作业执行（每小时运行，每天运行等）。Redis 中的 Bitmap 可以允许我们实时计算指标，并且非常节省空间。在1.28亿用户场景中，经典度量指标（如’日活’）在 MacBook Pro上只需不到50毫秒，而且只需要16 MB内存。 1. Bitmap 又可以称之为 Bitset。  Bitmap 或 Bitset 是一个由 0 和 1 构成的数组。在 Bitmap">
 <meta name="keywords" content="Redis">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用Redis Bitmap简单快速实时计算指标">
+<meta property="og:title" content="Redis 使用 Bitamp 简单快速实时计算指标">
 <meta property="og:url" content="http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html">
 <meta property="og:site_name" content="SmartSi">
 <meta property="og:description" content="传统上，度量指标一般由批处理作业执行（每小时运行，每天运行等）。Redis 中的 Bitmap 可以允许我们实时计算指标，并且非常节省空间。在1.28亿用户场景中，经典度量指标（如’日活’）在 MacBook Pro上只需不到50毫秒，而且只需要16 MB内存。 1. Bitmap 又可以称之为 Bitset。  Bitmap 或 Bitset 是一个由 0 和 1 构成的数组。在 Bitmap">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-2.png?raw=true">
-<meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-3.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-2.png?raw=true">
+<meta property="og:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-3.png?raw=true">
 <meta property="og:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Other/smartsi.jpg?raw=true">
-<meta property="og:updated_time" content="2019-10-26T03:57:13.000Z">
+<meta property="og:updated_time" content="2022-05-14T13:44:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="使用Redis Bitmap简单快速实时计算指标">
+<meta name="twitter:title" content="Redis 使用 Bitamp 简单快速实时计算指标">
 <meta name="twitter:description" content="传统上，度量指标一般由批处理作业执行（每小时运行，每天运行等）。Redis 中的 Bitmap 可以允许我们实时计算指标，并且非常节省空间。在1.28亿用户场景中，经典度量指标（如’日活’）在 MacBook Pro上只需不到50毫秒，而且只需要16 MB内存。 1. Bitmap 又可以称之为 Bitset。  Bitmap 或 Bitset 是一个由 0 和 1 构成的数组。在 Bitmap">
-<meta name="twitter:image" content="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true">
+<meta name="twitter:image" content="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true">
 
 
 
@@ -126,7 +126,7 @@
   <link rel="canonical" href="http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html"/>
 
 
-  <title>使用Redis Bitmap简单快速实时计算指标 | SmartSi</title>
+  <title>Redis 使用 Bitamp 简单快速实时计算指标 | SmartSi</title>
   
 
 
@@ -324,7 +324,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">使用Redis Bitmap简单快速实时计算指标</h2>
+          <h2 class="post-title" itemprop="name headline">Redis 使用 Bitamp 简单快速实时计算指标</h2>
         
 
         <div class="post-meta">
@@ -350,7 +350,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-10-26T11:57:13+08:00">2019-10-26</time>
+              <time title="更新于" itemprop="dateModified" datetime="2022-05-14T21:44:54+08:00">2022-05-14</time>
             
           </span>
 
@@ -390,7 +390,7 @@
 
           
           
-             <span id="/fast-easy-realtime-metrics-using-redis-bitmaps.html" class="leancloud_visitors" data-flag-title="使用Redis Bitmap简单快速实时计算指标">
+             <span id="/fast-easy-realtime-metrics-using-redis-bitmaps.html" class="leancloud_visitors" data-flag-title="Redis 使用 Bitamp 简单快速实时计算指标">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -427,17 +427,17 @@
 </blockquote>
 <p>Bitmap 或 Bitset 是一个由 0 和 1 构成的数组。在 Bitmap 中每一个 bit 被设置为 0 或 1，数组中的每个位置被称为 offset。AND，OR，XOR等操作符，以及其他位操作都是 Bitmaps 的常用操作。</p>
 <h3 id="2-基数"><a href="#2-基数" class="headerlink" title="2. 基数"></a>2. 基数</h3><p>Bitmap 中 1 的个数称之为基数。我们有一种有效算法来计算基数，例如，在 MacBook Pro 上，在包含10亿位填充90％的 Bitmap 上计算基数耗时 21.1 ms。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true" alt=""></p>
-<h3 id="3-Redis中的Bitmap"><a href="#3-Redis中的Bitmap" class="headerlink" title="3. Redis中的Bitmap"></a>3. Redis中的Bitmap</h3><p>Redis 允许二进制键和二进制值。Bitmap 也是二进制值。将键指定 offset 设置为 0 或 1，<code>setbit（key，offset，value）</code> 操作需要用 <code>O(1)</code> 时间复杂度。</p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-1.png?raw=true" alt=""></p>
+<h3 id="3-Redis-中的-Bitmap"><a href="#3-Redis-中的-Bitmap" class="headerlink" title="3. Redis 中的 Bitmap"></a>3. Redis 中的 Bitmap</h3><p>Redis 允许二进制键和二进制值。Bitmap 也是二进制值。将键指定 offset 设置为 0 或 1，<code>setbit（key，offset，value）</code> 操作需要用 <code>O(1)</code> 时间复杂度。</p>
 <h3 id="4-一个简单的例子：每日活跃用户"><a href="#4-一个简单的例子：每日活跃用户" class="headerlink" title="4. 一个简单的例子：每日活跃用户"></a>4. 一个简单的例子：每日活跃用户</h3><p>为了统计今天登录的不同用户，我们创建了一个 Bitmap，其中每个用户都由一个 offset 标识。当用户访问页面或执行操作时，会将表示用户ID的 offset 设置为 1。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-2.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-2.png?raw=true" alt=""></p>
 <p>在这个简单的例子中，每次用户登录时，我们都会执行：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">redis.setbit(daily_active_users，user_id，<span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
 <p>这会将 daily_active_users Bitmap 键对应 offset 设置为1。这是一个 O(1) 时间复杂度操作。对此 Bitmap 进行基数统计会统计出今天一共登录了 9 个用户。键是 daily_active_users，值为 1011110100100101。</p>
 <p>当然，由于每天活跃用户每天都会在改变，我们需要一种方法每天创建一个新的 Bitmap。我们只需在 Bitmap 键后面追加一个日期即可。例如，如果我们想要计算某天在音乐应用中播放至少1首歌曲的不同用户，我们可以将键名称设置为 <code>play:yyyy-mm-dd</code>。如果我们想要计算每小时播放至少一首歌曲的用户数量，我们可以将键名称设置为 <code>play:yyyy-mm-dd-hh</code>。为了计算每日指标，只要用户播放歌曲，我们就会在 <code>play：yyyy-mm-dd</code> 键中将用户对应的 bit 设置为1。<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">redis.setbit(play:yyyy-mm-dd, user_id, <span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
 <p>今天播放歌曲的不同用户是存储以 <code>play:yyyy-mm-dd</code> 为键的值。要计算每周或每月度量指标，我们可以简单地计算一周或一个月中所有每日 Bitmap 的并集，然后计算结果 Bitmap 的总体基数。</p>
-<p><img src="https://github.com/sjf0115/PubLearnNotes/blob/master/image/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-3.png?raw=true" alt=""></p>
+<p><img src="https://github.com/sjf0115/ImageBucket/blob/main/Redis/fast-easy-realtime-metrics-using-redis-bitmaps-3.png?raw=true" alt=""></p>
 <p>你还可以非常轻松地提取更复杂的指标。例如，11月播放歌曲的会员用户为：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">(play:2011-11-01 ∪ play:2011-11-02 ∪...∪play:2011-11-30) ∩ premium:2011-11</span><br></pre></td></tr></table></figure></p>
-<h3 id="5-使用1-28亿用户进行性能比较"><a href="#5-使用1-28亿用户进行性能比较" class="headerlink" title="5. 使用1.28亿用户进行性能比较"></a>5. 使用1.28亿用户进行性能比较</h3><p>下表显示了针对1.28亿用户在1天，7天和30天计算的比较。通过组合每日 Bitmap 计算7日和30日指标：</p>
+<h3 id="5-使用-1-28-亿用户进行性能比较"><a href="#5-使用-1-28-亿用户进行性能比较" class="headerlink" title="5. 使用 1.28 亿用户进行性能比较"></a>5. 使用 1.28 亿用户进行性能比较</h3><p>下表显示了针对1.28亿用户在1天，7天和30天计算的比较。通过组合每日 Bitmap 计算7日和30日指标：</p>
 <table>
 <thead>
 <tr>
@@ -520,7 +520,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html" title="使用Redis Bitmap简单快速实时计算指标">http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html</a>
+    <a href="http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html" title="Redis 使用 Bitamp 简单快速实时计算指标">http://smartsi.club/fast-easy-realtime-metrics-using-redis-bitmaps.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -776,7 +776,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Bitmap"><span class="nav-number">1.</span> <span class="nav-text">1. Bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基数"><span class="nav-number">2.</span> <span class="nav-text">2. 基数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Redis中的Bitmap"><span class="nav-number">3.</span> <span class="nav-text">3. Redis中的Bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-一个简单的例子：每日活跃用户"><span class="nav-number">4.</span> <span class="nav-text">4. 一个简单的例子：每日活跃用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-使用1-28亿用户进行性能比较"><span class="nav-number">5.</span> <span class="nav-text">5. 使用1.28亿用户进行性能比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-优化"><span class="nav-number">6.</span> <span class="nav-text">6. 优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-示例代码"><span class="nav-number">7.</span> <span class="nav-text">7. 示例代码</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Bitmap"><span class="nav-number">1.</span> <span class="nav-text">1. Bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-基数"><span class="nav-number">2.</span> <span class="nav-text">2. 基数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Redis-中的-Bitmap"><span class="nav-number">3.</span> <span class="nav-text">3. Redis 中的 Bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-一个简单的例子：每日活跃用户"><span class="nav-number">4.</span> <span class="nav-text">4. 一个简单的例子：每日活跃用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-使用-1-28-亿用户进行性能比较"><span class="nav-number">5.</span> <span class="nav-text">5. 使用 1.28 亿用户进行性能比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-优化"><span class="nav-number">6.</span> <span class="nav-text">6. 优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-示例代码"><span class="nav-number">7.</span> <span class="nav-text">7. 示例代码</span></a></li></ol></div>
             
 
           </div>
